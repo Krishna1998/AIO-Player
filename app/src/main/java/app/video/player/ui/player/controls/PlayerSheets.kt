@@ -131,13 +131,6 @@ fun PlayerSheets(
     Sheets.SleepTimer -> {
       val sleepTimerTimeRemaining by viewModel.remainingTime.composeCollectAsState()
       val sleepTimerFadeOut by viewModel.sleepTimerFadeOut.composeCollectAsState()
-      val durationLong by PlaybackSession.propLong["duration"].composeCollectAsState()
-      val positionLong by PlaybackSession.propLong["time-pos"].composeCollectAsState()
-      val remainingTrackSeconds = remember(durationLong, positionLong) {
-        val d = durationLong ?: 0L
-        val p = positionLong ?: 0L
-        ((d - p).coerceAtLeast(0L)).toInt()
-      }
 
       TimePickerDialog(
         remainingTime = sleepTimerTimeRemaining,
@@ -147,7 +140,7 @@ fun PlayerSheets(
         onToggleFadeOut = viewModel::setSleepTimerFadeOut,
         onCancelTimer = viewModel::cancelSleepTimer,
         onExtendTimer = viewModel::extendSleepTimer,
-        remainingTrackSeconds = remainingTrackSeconds,
+        remainingTrackSeconds = viewModel.remainingTrackSeconds(),
       )
     }
     Sheets.AudiobookRewind,
