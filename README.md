@@ -2,7 +2,7 @@
 
 <img src="app/src/main/assets/branding/videoplayer_crimson_sonic_neon.svg" width="140" height="140" alt="V&M Player Icon" /><br>
 
-# ⚡ V&M PLAYER
+# ⚡ V&M PLAYER ⚡
 ### *Next-Generation, Ultra-Lightweight Video & Audio Engine for Android*
 
 [![Release](https://img.shields.io/badge/Release-v1.0.2-00F5FF?style=for-the-badge&logo=android&logoColor=black)](https://github.com/Krishna1998/Video-Music-Player/releases)
