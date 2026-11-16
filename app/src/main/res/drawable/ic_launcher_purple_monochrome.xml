@@ -1,43 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Material You Monochrome icon for Android 13+ themed icons -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="512"
-    android:viewportHeight="512">
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="512" android:viewportHeight="512">
 
-    <group
-        android:name="launcher_bounds"
-        android:pivotX="256"
-        android:pivotY="256"
-        android:scaleX="0.74"
-        android:scaleY="0.74">
+    <group android:name="launcher_bounds" android:pivotX="256" android:pivotY="256" android:scaleX="0.74" android:scaleY="0.74">
 
         <!-- Outer Play Frame -->
-        <path
-            android:pathData="M 148,116 C 148,94 172,80 192,91 L 416,226 C 435,238 435,266 416,278 L 192,413 C 172,424 148,410 148,388 Z"
-            android:strokeWidth="16"
-            android:strokeColor="#FFFFFFFF"
-            android:strokeLineJoin="round"
-            android:strokeLineCap="round" />
+        <path android:pathData="M 148,116 C 148,94 172,80 192,91 L 416,226 C 435,238 435,266 416,278 L 192,413 C 172,424 148,410 148,388 Z" android:strokeWidth="16" android:strokeColor="#FFFFFFFF" android:strokeLineJoin="round" android:strokeLineCap="round" />
 
         <!-- Audio Frequency Bars -->
-        <path
-            android:fillColor="#FFFFFFFF"
-            android:pathData="M 200,218 C 206.63,218 212,223.37 212,230 L 212,282 C 212,288.63 206.63,294 200,294 C 193.37,294 188,288.63 188,282 L 188,230 C 188,223.37 193.37,218 200,218 Z" />
-        <path
-            android:fillColor="#FFFFFFFF"
-            android:pathData="M 236,174 C 242.63,174 248,179.37 248,186 L 248,326 C 248,332.63 242.63,338 236,338 C 229.37,338 224,332.63 224,326 L 224,186 C 224,179.37 229.37,174 236,174 Z" />
-        <path
-            android:fillColor="#FFFFFFFF"
-            android:pathData="M 344,196 C 350.63,196 356,201.37 356,208 L 356,304 C 356,310.63 350.63,316 344,316 C 337.37,316 332,310.63 332,304 L 332,208 C 332,201.37 337.37,196 344,196 Z" />
-        <path
-            android:fillColor="#FFFFFFFF"
-            android:pathData="M 380,238 C 386.63,238 392,243.37 392,250 L 392,262 C 392,268.63 386.63,274 380,274 C 373.37,274 368,268.63 368,262 L 368,250 C 368,243.37 373.37,238 380,238 Z" />
+        <path android:fillColor="#FFFFFFFF" android:pathData="M 200,218 C 206.63,218 212,223.37 212,230 L 212,282 C 212,288.63 206.63,294 200,294 C 193.37,294 188,288.63 188,282 L 188,230 C 188,223.37 193.37,218 200,218 Z" />
+        <path android:fillColor="#FFFFFFFF" android:pathData="M 236,174 C 242.63,174 248,179.37 248,186 L 248,326 C 248,332.63 242.63,338 236,338 C 229.37,338 224,332.63 224,326 L 224,186 C 224,179.37 229.37,174 236,174 Z" />
+        <path android:fillColor="#FFFFFFFF" android:pathData="M 344,196 C 350.63,196 356,201.37 356,208 L 356,304 C 356,310.63 350.63,316 344,316 C 337.37,316 332,310.63 332,304 L 332,208 C 332,201.37 337.37,196 344,196 Z" />
+        <path android:fillColor="#FFFFFFFF" android:pathData="M 380,238 C 386.63,238 392,243.37 392,250 L 392,262 C 392,268.63 386.63,274 380,274 C 373.37,274 368,268.63 368,262 L 368,250 C 368,243.37 373.37,238 380,238 Z" />
 
         <!-- Center Core Playhead -->
-        <path
-            android:fillColor="#FFFFFFFF"
-            android:pathData="M 256,196 C 256,182 272,173 284,180 L 334,212 C 344,218 344,234 334,240 L 284,272 C 272,279 256,270 256,256 Z" />
+        <path android:fillColor="#FFFFFFFF" android:pathData="M 256,196 C 256,182 272,173 284,180 L 334,212 C 344,218 344,234 334,240 L 284,272 C 272,279 256,270 256,256 Z" />
     </group>
 </vector>
