@@ -6,9 +6,13 @@ package app.video.player.ui.browser.music
 
 import android.net.Uri
 import android.text.format.DateUtils
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -136,6 +140,11 @@ fun SharedMusicTrackListItem(
       .fillMaxWidth()
       .tvFocusHighlight(cardShape, focusedScale = 1.03f)
       .clip(cardShape)
+      .then(
+        if (isPlaying && !isSelected) {
+          Modifier.border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), cardShape)
+        } else Modifier
+      )
       .tvContextMenu(onLongClick)
       .semantics { selected = isSelected }
       .mediaCardClickable(onClick = onClick, onLongClick = onLongClick),
@@ -221,21 +230,79 @@ fun SharedMusicTrackListItem(
       Spacer(modifier = Modifier.width(14.dp))
 
       Column(modifier = Modifier.weight(1f)) {
-        Text(
-          text = title,
-          style = if (isPlaying) MaterialTheme.typography.bodyLargeEmphasized else MaterialTheme.typography.bodyLarge,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-          color = if (isPlaying) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-        )
-        if (!subtitle.isNullOrBlank()) {
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
           Text(
-            text = subtitle,
-            style = MaterialTheme.typography.bodySmall,
+            text = title,
+            style = if (isPlaying) MaterialTheme.typography.bodyLargeEmphasized else MaterialTheme.typography.bodyLarge,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            color = if (isPlaying) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
+            color = if (isPlaying) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.weight(1f, fill = false),
           )
+          if (isPlaying) {
+            Surface(
+              shape = RoundedCornerShape(4.dp),
+              color = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
+            ) {
+              Text(
+                text = "PLAYING",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+              )
+            }
+          }
+        }
+        val audioFormatBadge = remember(audioSong?.path) {
+          val ext = audioSong?.path?.substringAfterLast('.', "")?.uppercase().orEmpty()
+          when (ext) {
+            "FLAC", "WAV", "ALAC" -> "FLAC"
+            "OPUS", "OGG" -> "OPUS"
+            "M4A", "AAC" -> "AAC"
+            "MP3" -> "320K"
+            else -> ext.takeIf { it.length in 2..4 }
+          }
+        }
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+          if (!subtitle.isNullOrBlank()) {
+            Text(
+              text = subtitle,
+              style = MaterialTheme.typography.bodySmall,
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
+              color = if (isPlaying) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant,
+              modifier = Modifier.weight(1f, fill = false),
+            )
+          }
+          if (audioFormatBadge != null) {
+            Surface(
+              shape = RoundedCornerShape(4.dp),
+              color = if (audioFormatBadge == "FLAC" || audioFormatBadge == "WAV" || audioFormatBadge == "ALAC") {
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)
+              } else {
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
+              },
+            ) {
+              Text(
+                text = audioFormatBadge,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.SemiBold,
+                color = if (audioFormatBadge == "FLAC" || audioFormatBadge == "WAV" || audioFormatBadge == "ALAC") {
+                  MaterialTheme.colorScheme.primary
+                } else {
+                  MaterialTheme.colorScheme.onSurfaceVariant
+                },
+                modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+              )
+            }
+          }
         }
       }
 

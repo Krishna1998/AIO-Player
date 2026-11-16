@@ -4,6 +4,12 @@ These notes are written in plain English and focus on what changed for real use.
 
 ## 1.0.2
 
+- **Music Tab Visual & UX Overhaul:**
+  - **Liquid Glass Navigation Pills:** Replaced the legacy tab row with modern horizontal-scrolling liquid glass capsules featuring category icons (Songs, Albums, Artists, Playlists, Folders, Favorites) and real-time item count badges.
+  - **"Jump Back In" Hero Carousel:** Added a sleek horizontal hero carousel at the top of the Songs tab featuring top rotation tracks, high-res audio tags, rounded bento cards, and instant one-tap floating play buttons.
+  - **Modern Quick Actions Bar:** Introduced prominent "Shuffle All" and "Play All" action buttons at the top of the track list in both List and Grid views for effortless queue startup.
+  - **High-Res Audio Format & Status Badges:** Track items in both list and grid views now display crystal-clear audio fidelity badges (`FLAC`, `WAV`, `ALAC`, `OPUS`, `AAC`, `320K`) and animated glowing `PLAYING` indicators.
+  - **Enhanced Bento Album Cards:** Added specular borders and bottom-right track count badges (`X tracks`) to album grid cards for rich visual hierarchy.
 - **Online Lyrics Providers & Settings Control:**
   - Surfaced all 17 available online lyrics providers (`lrc.red`, `BiniLyrics`, `BetterLyrics`, `BetterLyrics Portato`, `PaxSenix`, `PaxSenix: Spotify`, `PaxSenix: Musixmatch`, `LyricsPlus`, `SimpMusic`, `Unison`, `YouTube captions`, `YouTube Music`, `Megalobiz`, `KuGou`, `LRCLIB`, `Musixmatch`, `Genius`) directly inside Settings > Audio.
   - Added an interactive expandable card with live provider status, timing capability badges (Word-synced vs Line-synced), descriptions, and individual toggle switches.
