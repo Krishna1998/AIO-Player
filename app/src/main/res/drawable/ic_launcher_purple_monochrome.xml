@@ -1,56 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- V&M Player Material You Monochrome: Concept 4 Acoustic Turbine at 95% Geometric Scale -->
+<!-- V&M Player Material You Monochrome: Play Triangle & Musical Eighth Note on Pure Black Canvas -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="512"
     android:viewportHeight="512">
 
-    <!-- 95% Geometric Size Scaling -->
+    <!-- Centered & Scaled to 95% -->
     <group
         android:name="launcher_bounds"
         android:pivotX="256"
         android:pivotY="256"
         android:scaleX="0.95"
-        android:scaleY="0.95">
+        android:scaleY="0.95"
+        android:translateX="-8"
+        android:translateY="0">
 
-        <!-- Outer Subwoofer Stator Ring Base -->
+        <!-- Video Playhead Triangle (Rounded Outline) -->
         <path
-            android:pathData="M 256,114 A 142,142 0 1,0 256.1,114"
-            android:strokeColor="#33FFFFFF"
-            android:strokeWidth="18" />
-
-        <!-- Acoustic Turbine Blade Arc 1 -->
-        <path
-            android:pathData="M 304.6,122.5 A 142,142 0 0,1 304.6,389.5"
+            android:pathData="M 184,168 L 298,244 C 314,254 314,258 298,268 L 184,344 C 168,354 156,346 156,328 L 156,184 C 156,166 168,158 184,168 Z"
             android:strokeColor="#FFFFFFFF"
-            android:strokeWidth="18"
+            android:strokeWidth="26"
+            android:strokeLineJoin="round"
             android:strokeLineCap="round" />
 
-        <!-- Acoustic Turbine Blade Arc 2 -->
+        <!-- Musical Eighth Note: Circular Notehead -->
         <path
-            android:pathData="M 207.4,389.5 A 142,142 0 0,1 116.2,280.7"
+            android:pathData="M 320,324 A 28,28 0 1,0 320.1,324"
             android:strokeColor="#FFFFFFFF"
-            android:strokeWidth="18"
+            android:strokeWidth="26"
             android:strokeLineCap="round" />
 
-        <!-- Acoustic Turbine Blade Arc 3 -->
+        <!-- Musical Eighth Note: Vertical Stem & Elegant Flag -->
         <path
-            android:pathData="M 116.2,231.3 A 142,142 0 0,1 207.4,122.5"
+            android:pathData="M 348,324 L 348,176 C 348,160 358,156 370,166 C 386,180 400,202 392,246"
             android:strokeColor="#FFFFFFFF"
-            android:strokeWidth="18"
-            android:strokeLineCap="round" />
-
-        <!-- Aperture Calibration Tick Marks -->
-        <path
-            android:pathData="M 256,86 L 256,104 M 256,408 L 256,426 M 86,256 L 104,256"
-            android:strokeColor="#FFFFFFFF"
-            android:strokeWidth="4"
-            android:strokeLineCap="round" />
-
-        <!-- Optical Diamond Playhead -->
-        <path
-            android:pathData="M 220,188 L 332,250 C 342,256 342,260 332,266 L 220,328 C 206,336 196,328 196,314 L 196,202 C 196,188 206,180 220,188 Z"
-            android:fillColor="#FFFFFFFF" />
+            android:strokeWidth="26"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round" />
     </group>
 </vector>
