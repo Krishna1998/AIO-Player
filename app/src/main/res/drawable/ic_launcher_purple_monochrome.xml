@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- V&M Player Material You Monochrome: Harmonic Duet (95% Geometric Scale) -->
+<!-- V&M Player Material You Monochrome: Concept 4 Acoustic Turbine at 95% Geometric Scale -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
@@ -14,26 +14,43 @@
         android:scaleX="0.95"
         android:scaleY="0.95">
 
-        <!-- Video Playhead (Left) -->
+        <!-- Outer Subwoofer Stator Ring Base -->
         <path
-            android:pathData="M 182,170 L 296,244 C 310,253 310,259 296,268 L 182,342 C 168,351 156,344 156,328 L 156,184 C 156,168 168,161 182,170 Z"
-            android:strokeWidth="26"
-            android:strokeColor="#FFFFFFFF"
-            android:strokeLineCap="round"
-            android:strokeLineJoin="round" />
+            android:pathData="M 256,114 A 142,142 0 1,0 256.1,114"
+            android:strokeColor="#33FFFFFF"
+            android:strokeWidth="18" />
 
-        <!-- Music Note Head (Hollow Ring) -->
+        <!-- Acoustic Turbine Blade Arc 1 -->
         <path
-            android:pathData="M 320,288 A 28,28 0 1,0 320.1,288 Z"
-            android:strokeWidth="26"
-            android:strokeColor="#FFFFFFFF" />
-
-        <!-- Music Note Stem & Curved Hook -->
-        <path
-            android:pathData="M 348,316 L 348,180 C 348,166 358,164 368,172 C 382,184 394,204 388,244"
-            android:strokeWidth="26"
+            android:pathData="M 304.6,122.5 A 142,142 0 0,1 304.6,389.5"
             android:strokeColor="#FFFFFFFF"
-            android:strokeLineCap="round"
-            android:strokeLineJoin="round" />
+            android:strokeWidth="18"
+            android:strokeLineCap="round" />
+
+        <!-- Acoustic Turbine Blade Arc 2 -->
+        <path
+            android:pathData="M 207.4,389.5 A 142,142 0 0,1 116.2,280.7"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="18"
+            android:strokeLineCap="round" />
+
+        <!-- Acoustic Turbine Blade Arc 3 -->
+        <path
+            android:pathData="M 116.2,231.3 A 142,142 0 0,1 207.4,122.5"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="18"
+            android:strokeLineCap="round" />
+
+        <!-- Aperture Calibration Tick Marks -->
+        <path
+            android:pathData="M 256,86 L 256,104 M 256,408 L 256,426 M 86,256 L 104,256"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="4"
+            android:strokeLineCap="round" />
+
+        <!-- Optical Diamond Playhead -->
+        <path
+            android:pathData="M 220,188 L 332,250 C 342,256 342,260 332,266 L 220,328 C 206,336 196,328 196,314 L 196,202 C 196,188 206,180 220,188 Z"
+            android:fillColor="#FFFFFFFF" />
     </group>
 </vector>

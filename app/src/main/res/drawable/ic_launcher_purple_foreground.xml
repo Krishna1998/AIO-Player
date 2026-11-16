@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- V&M Player Flagship Icon: Harmonic Duet (Playhead & Musical Note) at 95% Geometric Scale -->
+<!-- V&M Player Flagship Icon: Concept 4 Acoustic Turbine (Icy Cyan & Cobalt Blue) at 95% Geometric Scale -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
@@ -15,66 +15,112 @@
         android:scaleX="0.95"
         android:scaleY="0.95">
 
-        <!-- Video Playhead (Left) -->
+        <!-- Outer Subwoofer Stator Ring (Dark Track) -->
         <path
-            android:pathData="M 182,170 L 296,244 C 310,253 310,259 296,268 L 182,342 C 168,351 156,344 156,328 L 156,184 C 156,168 168,161 182,170 Z"
-            android:strokeWidth="26"
-            android:strokeLineCap="round"
-            android:strokeLineJoin="round">
+            android:pathData="M 256,114 A 142,142 0 1,0 256.1,114"
+            android:strokeColor="#FF151926"
+            android:strokeWidth="18" />
+
+        <!-- Acoustic Turbine Blade Arc 1: Primary Forward Power Arc (Top-Right to Bottom-Right) -->
+        <path
+            android:pathData="M 304.6,122.5 A 142,142 0 0,1 304.6,389.5"
+            android:strokeWidth="18"
+            android:strokeLineCap="round">
             <aapt:attr name="android:strokeColor">
                 <gradient
-                    android:startX="92"
-                    android:startY="102"
-                    android:endX="450"
-                    android:endY="420"
+                    android:startX="120"
+                    android:startY="120"
+                    android:endX="400"
+                    android:endY="400"
                     android:type="linear">
-                    <item android:offset="0.0" android:color="#FF8B5CF6"/>
-                    <item android:offset="0.3" android:color="#FFA855F7"/>
-                    <item android:offset="0.55" android:color="#FFEC4899"/>
-                    <item android:offset="0.78" android:color="#FFF43F5E"/>
-                    <item android:offset="1.0" android:color="#FFFB923C"/>
+                    <item android:offset="0.0" android:color="#FF00F5FF"/>
+                    <item android:offset="0.5" android:color="#FF3B82F6"/>
+                    <item android:offset="1.0" android:color="#FF1D4ED8"/>
                 </gradient>
             </aapt:attr>
         </path>
 
-        <!-- Music Note Head (Hollow Ring) -->
+        <!-- Acoustic Turbine Blade Arc 2: Lower Resonance Arc -->
         <path
-            android:pathData="M 320,288 A 28,28 0 1,0 320.1,288 Z"
-            android:strokeWidth="26">
+            android:pathData="M 207.4,389.5 A 142,142 0 0,1 116.2,280.7"
+            android:strokeWidth="18"
+            android:strokeLineCap="round">
             <aapt:attr name="android:strokeColor">
                 <gradient
-                    android:startX="92"
-                    android:startY="102"
-                    android:endX="450"
-                    android:endY="420"
+                    android:startX="120"
+                    android:startY="120"
+                    android:endX="400"
+                    android:endY="400"
                     android:type="linear">
-                    <item android:offset="0.0" android:color="#FF8B5CF6"/>
-                    <item android:offset="0.3" android:color="#FFA855F7"/>
-                    <item android:offset="0.55" android:color="#FFEC4899"/>
-                    <item android:offset="0.78" android:color="#FFF43F5E"/>
-                    <item android:offset="1.0" android:color="#FFFB923C"/>
+                    <item android:offset="0.0" android:color="#FF00F5FF"/>
+                    <item android:offset="0.5" android:color="#FF3B82F6"/>
+                    <item android:offset="1.0" android:color="#FF1D4ED8"/>
                 </gradient>
             </aapt:attr>
         </path>
 
-        <!-- Music Note Stem & Curved Hook -->
+        <!-- Acoustic Turbine Blade Arc 3: Upper Resonance Arc -->
         <path
-            android:pathData="M 348,316 L 348,180 C 348,166 358,164 368,172 C 382,184 394,204 388,244"
-            android:strokeWidth="26"
-            android:strokeLineCap="round"
-            android:strokeLineJoin="round">
+            android:pathData="M 116.2,231.3 A 142,142 0 0,1 207.4,122.5"
+            android:strokeWidth="18"
+            android:strokeLineCap="round">
             <aapt:attr name="android:strokeColor">
                 <gradient
-                    android:startX="92"
-                    android:startY="102"
-                    android:endX="450"
-                    android:endY="420"
+                    android:startX="120"
+                    android:startY="120"
+                    android:endX="400"
+                    android:endY="400"
                     android:type="linear">
-                    <item android:offset="0.0" android:color="#FF8B5CF6"/>
-                    <item android:offset="0.3" android:color="#FFA855F7"/>
-                    <item android:offset="0.55" android:color="#FFEC4899"/>
-                    <item android:offset="0.78" android:color="#FFF43F5E"/>
-                    <item android:offset="1.0" android:color="#FFFB923C"/>
+                    <item android:offset="0.0" android:color="#FF00F5FF"/>
+                    <item android:offset="0.5" android:color="#FF3B82F6"/>
+                    <item android:offset="1.0" android:color="#FF1D4ED8"/>
+                </gradient>
+            </aapt:attr>
+        </path>
+
+        <!-- Aperture Calibration Tick Marks -->
+        <!-- North Tick -->
+        <path
+            android:pathData="M 256,86 L 256,104"
+            android:strokeColor="#FF00F5FF"
+            android:strokeWidth="4"
+            android:strokeLineCap="round" />
+        <!-- South Tick -->
+        <path
+            android:pathData="M 256,408 L 256,426"
+            android:strokeColor="#FF00F5FF"
+            android:strokeWidth="4"
+            android:strokeLineCap="round" />
+        <!-- West Tick -->
+        <path
+            android:pathData="M 86,256 L 104,256"
+            android:strokeColor="#FF00F5FF"
+            android:strokeWidth="4"
+            android:strokeLineCap="round" />
+
+        <!-- Optical Diamond Playhead: Deep Black Shadow Base -->
+        <path
+            android:pathData="M 220,188 L 332,250 C 342,256 342,260 332,266 L 220,328 C 206,336 196,328 196,314 L 196,202 C 196,188 206,180 220,188 Z"
+            android:strokeColor="#FF000000"
+            android:strokeWidth="10"
+            android:strokeLineJoin="round" />
+
+        <!-- Optical Diamond Playhead: Solid Icy Cyan & Cobalt Blue Gradient Core -->
+        <path
+            android:pathData="M 220,188 L 332,250 C 342,256 342,260 332,266 L 220,328 C 206,336 196,328 196,314 L 196,202 C 196,188 206,180 220,188 Z"
+            android:strokeColor="#80FFFFFF"
+            android:strokeWidth="2"
+            android:strokeLineJoin="round">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:startX="196"
+                    android:startY="188"
+                    android:endX="342"
+                    android:endY="328"
+                    android:type="linear">
+                    <item android:offset="0.0" android:color="#FF00F5FF"/>
+                    <item android:offset="0.45" android:color="#FF3B82F6"/>
+                    <item android:offset="1.0" android:color="#FF1D4ED8"/>
                 </gradient>
             </aapt:attr>
         </path>
