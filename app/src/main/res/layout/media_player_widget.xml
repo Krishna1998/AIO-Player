@@ -54,7 +54,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
-                android:fontFamily="@font/gflex_variable"
+                android:fontFamily="sans-serif"
                 android:gravity="center_horizontal"
                 android:includeFontPadding="false"
                 android:maxLines="1"
