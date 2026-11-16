@@ -7,11 +7,13 @@
     android:viewportWidth="512"
     android:viewportHeight="512">
 
-    <!-- Scaled safely at 100% full-scale edge-to-edge geometry -->
+    <!-- Scaled safely at 95% geometry -->
     <group
         android:name="launcher_bounds"
         android:pivotX="256"
-        android:pivotY="256">
+        android:pivotY="256"
+        android:scaleX="0.95"
+        android:scaleY="0.95">
 
         <!-- Outer Alignment Notches -->
         <path

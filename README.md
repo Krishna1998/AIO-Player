@@ -51,7 +51,7 @@ Whether decoding 4K HDR10+ anime with complex ASS karaoke subtitles or driving a
 | **Dynamic Range Compression** | 🟢 **ACTIVE** | Tames explosive volume spikes in movies while boosting subtle whispers |
 | **Volume Boost Cap** | 🟢 **ACTIVE** | Clean digital pre-amplification boost up to +30 dB |
 | **Configurable Volume Step** | 🟢 **ACTIVE** | Discrete volume step multiplier (1 to 10 steps per hardware key press) with proportional boost scaling |
-| **Smart Sleep Timer** | 🟢 **ACTIVE** | **NEW:** Integrated into both Audio & Video player controls with gentle 30s audio fade-out, live countdown badge, "End of track" mode, and quick extensions |
+| **Smart Sleep Timer** | 🟢 **ACTIVE** | **NEW:** Integrated into both Audio & Video player controls with active playback sync (ticks down only while music runs, auto-pausing when player is paused), gentle 30s audio fade-out, live countdown badge, "End of track" mode, and quick extensions |
 | **Online Lyrics Providers** | 🟢 **ACTIVE** | 17 online lyrics databases (Apple Music TTML, Musixmatch, LRCLIB, KuGou, PaxSenix, YouTube, etc.) with word/line sync badges, individual provider toggles, and translation controls |
 | **Pitch Correction** | 🟢 **ACTIVE** | Maintains natural harmonic pitch when speeding up or slowing down audio |
 
@@ -67,7 +67,7 @@ Whether decoding 4K HDR10+ anime with complex ASS karaoke subtitles or driving a
 | Feature | State | Description |
 | :--- | :---: | :--- |
 | **Material 3 Expressive** | 🟢 **ACTIVE** | Full dynamic color integration, OLED pure black theme, and expressive typography |
-| **Solar Amber Gold Cyber Prism Icon** | 🟢 **ACTIVE** | **NEW:** 100% full-scale geometric Cyber Prism with metallic specular bevels, dark chamfer shadows, solid equalizer bars, and liquid amber gold crystal playhead |
+| **Solar Amber Gold Cyber Prism Icon** | 🟢 **ACTIVE** | **NEW:** 95% scale geometric Cyber Prism with metallic specular bevels, dark chamfer shadows, solid equalizer bars, and liquid amber gold crystal playhead |
 | **Material You Themed Icons** | 🟢 **ACTIVE** | Full monochrome silhouette vector layer matching Android 13+ dynamic system color palettes |
 | **Seamless FAB Alignment** | 🟢 **ACTIVE** | **NEW:** Perfect 12dp floating clearance above active mini player in video folders, playlists, and file browsers |
 | **Crimson Sonic Theme** | 🟢 **ACTIVE** | Dedicated built-in neon ruby pink & electric cyan color scheme |

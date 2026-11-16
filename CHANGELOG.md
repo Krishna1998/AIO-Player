@@ -4,14 +4,15 @@ These notes are written in plain English and focus on what changed for real use.
 
 ## 1.0.3
 
-- **Default App Icon: "Solar Amber Gold" Cyber Prism:**
-  - Upgraded the default launcher icon to the futuristic **Cyber Prism** design at 100% full-scale geometry.
+- **Default App Icon: "Solar Amber Gold" Cyber Prism (95% Scale):**
+  - Upgraded the default launcher icon to the futuristic **Cyber Prism** design at a balanced 95% scale for ideal home-screen visual presence.
   - Eliminated blurry diffuse neon glow in favor of a clean, razor-sharp vector aesthetic with metallic specular bevels, dark chamfer shadows, and solid crimson equalizer bars.
   - Introduced the **Solar Amber Gold** palette: a liquid gold (`#FFD700`) and deep amber (`#FF9100`) 3D crystal prism playhead with diamond white facet lines.
   - Fully synchronized the Android 13+ Material You monochrome themed icon asset.
-- **Audio Player Sleep Timer Integration:**
+- **Audio Player Sleep Timer Integration & Active Playback Sync:**
   - Added dedicated Sleep Timer controls to the Audio Player controls row and top header bar.
   - Active countdown badge displayed directly in the top header bar with live elapsed time pill (e.g. `14:32`).
+  - **Playback-Aware Timer:** The countdown timer now ticks exclusively while music is actively running. If playback is paused, the timer automatically pauses, preserving remaining time without draining down while the player is idle.
   - Integrated `Sheets.SleepTimer` unified player sheet with 30-second gentle audio fade-out, stop time estimation, quick extension chips (+5m, +15m), and presets (15m, 30m, 45m, 60m, End of Track).
 - **Video Folder & Media Browser FAB Alignment Fix:**
   - Fixed an issue where activating the music mini-player pushed the Floating Action Button (FAB) high up into the middle of the screen when browsing video folders (`VideoListScreen`), playlists, or filesystem directories.

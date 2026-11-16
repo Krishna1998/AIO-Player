@@ -9,7 +9,9 @@
     <group
         android:name="launcher_bounds"
         android:pivotX="256"
-        android:pivotY="256">
+        android:pivotY="256"
+        android:scaleX="0.95"
+        android:scaleY="0.95">
 
         <!-- Outer Play Frame -->
         <path

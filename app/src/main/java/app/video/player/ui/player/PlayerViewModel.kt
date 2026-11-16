@@ -3481,15 +3481,25 @@ fun restartFromBeginning() {
         while (currentLeft > 0) {
           _remainingTime.value = currentLeft
 
-          // Gentle Audio Fade-out over the last 30 seconds
-          if (fadeOut && currentLeft <= fadeDuration) {
-            val fadeRatio = (currentLeft.toFloat() / fadeDuration).coerceIn(0f, 1f)
-            val fadedVolume = (initialVolume * fadeRatio).roundToInt().coerceIn(0, initialVolume)
-            changeMPVVolumeTo(fadedVolume)
+          val phase = PlaybackSession.state.value.phase
+          if (phase in setOf(PlaybackPhase.STOPPING, PlaybackPhase.ERROR)) {
+            cancelSleepTimer()
+            return@launch
+          }
+
+          // Timer only ticks down when music/playback is actively running (not paused)
+          val isPaused = paused == true || (PlaybackSession.getPropertyBoolean("pause") ?: false)
+          if (!isPaused) {
+            // Gentle Audio Fade-out over the last 30 seconds
+            if (fadeOut && currentLeft <= fadeDuration) {
+              val fadeRatio = (currentLeft.toFloat() / fadeDuration).coerceIn(0f, 1f)
+              val fadedVolume = (initialVolume * fadeRatio).roundToInt().coerceIn(0, initialVolume)
+              changeMPVVolumeTo(fadedVolume)
+            }
+            currentLeft--
           }
 
           delay(1000)
-          currentLeft--
         }
 
         _remainingTime.value = 0
