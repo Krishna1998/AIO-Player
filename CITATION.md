@@ -1,17 +1,17 @@
 # Credits and citation information
 
-VideoPlayer is part of an open-source media ecosystem. This page preserves the project's acknowledgments and links to the people and projects being credited.
+V&M Player is part of an open-source media ecosystem. This page preserves the project's acknowledgments and links to the people and projects being credited.
 
-## Citing VideoPlayer
+## Citing V&M Player
 
-When mentioning, reviewing, or building on VideoPlayer, link to the [project repository](https://github.com/DARKNIGHT7473/VideoPlayer). Include the release tag or commit you used so others can identify the same version.
+When mentioning, reviewing, or building on V&M Player, link to the [project repository](https://github.com/Krishna1998/Video-Music-Player). Include the release tag or commit you used so others can identify the same version.
 
 Suggested plain-text reference:
 
 ```text
-Video Player — Android video player.
-https://github.com/DARKNIGHT7473/VideoPlayer
-Version: <release tag or commit hash>
+V&M Player — Modern Android Video & Music Player powered by libmpv.
+https://github.com/Krishna1998/Video-Music-Player
+Version: 1.0.2
 ```
 
 ## Open-source acknowledgments
@@ -56,6 +56,6 @@ The groups below organize the existing credits by project type; they are not an 
 
 Preserve upstream copyright and license notices when adapting code or assets. These acknowledgments supplement, rather than replace, the [project license](LICENSE) and notices accompanying third-party work.
 
-If a credit is missing or incorrect, [open an issue](https://github.com/DARKNIGHT7473/VideoPlayer/issues/new) or a pull request with the relevant source link and the attribution to add or correct.
+If a credit is missing or incorrect, [open an issue](https://github.com/Krishna1998/Video-Music-Player/issues/new) or a pull request with the relevant source link and the attribution to add or correct.
 
 [Back to the README](README.md#acknowledgments)
