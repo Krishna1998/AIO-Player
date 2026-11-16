@@ -6133,7 +6133,12 @@ private suspend fun restorePlaybackPosition(state: PlaybackStateEntity?, loadGen
           val resolvedOriginalUri = requestedSource
           val resolvedFileName = requestedFileName
           val resolvedMediaIdentifier = requestedMediaIdentifier
-          val resolvedMimeType = sourceIntent.type ?: "audio/*".takeIf { isKnownAudioLaunch(sourceIntent) }
+          val isAudioLaunch = isKnownAudioLaunch(sourceIntent) || sourceIntent.getBooleanExtra("is_audio", false)
+          val resolvedMimeType = if (isAudioLaunch) {
+            sourceIntent.type?.takeIf { it.startsWith("audio/") } ?: "audio/*"
+          } else {
+            sourceIntent.type
+          }
 
           val networkPath = sourceIntent.getStringExtra("network_file_path")
           val networkConnectionId = sourceIntent.getLongExtra("network_connection_id", -1L)

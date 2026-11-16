@@ -308,8 +308,10 @@ object MediaUtils {
     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     intent.putExtra("internal_launch", true)
     localPath?.let { intent.putExtra("local_media_path", it) }
+    if (isAudioMedia || videoSource?.isAudio == true) {
+      intent.putExtra("is_audio", true)
+    }
     if (videoSource != null) {
-      intent.putExtra("is_audio", videoSource.isAudio)
       intent.putExtra(PlayerActivity.EXTRA_VIDEO_WIDTH, videoSource.width)
       intent.putExtra(PlayerActivity.EXTRA_VIDEO_HEIGHT, videoSource.height)
       intent.putExtra(PlayerActivity.EXTRA_VIDEO_ROTATION, videoSource.rotation)

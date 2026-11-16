@@ -63,6 +63,9 @@ import app.video.player.presentation.components.RemoteImage
 import app.video.player.repository.WatchMediaStats
 import app.video.player.repository.WatchStatsRepository
 import app.video.player.repository.WatchStatsSnapshot
+import app.video.player.utils.media.HttpUtils
+import app.video.player.utils.media.fileExtension
+import app.video.player.utils.storage.FileTypeUtils
 import app.video.player.ui.icons.Icon
 import app.video.player.ui.icons.Icons
 import app.video.player.ui.theme.AppConnectedShapeTokens
@@ -133,7 +136,7 @@ internal fun ProfileWatchStatistics() {
     val topVideos =
       remember(stats.media) {
         stats.media.entries
-          .filter { it.value.seconds > 0 && !it.value.isAudio }
+          .filter { it.value.seconds > 0 && !isWatchMediaAudio(it.key, it.value) }
           .sortedByDescending { it.value.seconds }
           .take(8)
           .map { it.value }
@@ -142,10 +145,10 @@ internal fun ProfileWatchStatistics() {
     val topAudios =
       remember(stats.media) {
         stats.media.entries
-          .filter { it.value.seconds > 0 && it.value.isAudio }
+          .filter { it.value.seconds > 0 && isWatchMediaAudio(it.key, it.value) }
           .sortedByDescending { it.value.seconds }
           .take(8)
-          .map { it.value }
+          .map { it.value.copy(isAudio = true) }
       }
 
     TopMediaLeaderboardBentoCard(
@@ -752,15 +755,29 @@ private fun resolveWatchStatsVideo(
     sizeFormatted = "",
     dateModified = 0L,
     dateAdded = 0L,
-    mimeType = "video/*",
+    mimeType = if (media.isAudio) "audio/*" else "video/*",
     bucketId = "",
     bucketDisplayName = "",
     width = 0,
     height = 0,
     fps = 0f,
     resolution = "",
-    isAudio = false,
+    isAudio = media.isAudio,
   )
+}
+
+internal fun isWatchMediaAudio(key: String, media: WatchMediaStats): Boolean {
+  if (media.isAudio) return true
+  val candidates = sequenceOf(media.sourceUri, key, media.title).filterNotNull()
+  if (candidates.any { s ->
+      val ext = s.fileExtension()
+      ext in FileTypeUtils.AUDIO_EXTENSIONS ||
+        s.contains("/audio/", ignoreCase = true) ||
+        s.contains("audio%3A", ignoreCase = true) ||
+        s.contains("includeItemTypes=Audio", ignoreCase = true) ||
+        HttpUtils.isMusicStreamingUrl(s)
+    }) return true
+  return false
 }
 
 /**

@@ -4,6 +4,10 @@ import android.content.Context
 import android.util.AtomicFile
 import android.util.Log
 import app.video.player.ui.player.PlaybackItem
+import app.video.player.ui.player.isDefinitelyAudioOnly
+import app.video.player.utils.media.HttpUtils
+import app.video.player.utils.media.fileExtension
+import app.video.player.utils.storage.FileTypeUtils
 import java.io.File
 import java.time.Instant
 import java.time.ZoneId
@@ -56,10 +60,12 @@ class WatchStatsRepository(context: Context) {
   suspend fun recordSession(item: PlaybackItem) = update { current ->
     val key = item.stableId.ifBlank { item.originalUri }
     val existing = current.media[key]
+    val isAudio = isAudioItem(item) || existing?.isAudio == true
     current.copy(
       sessions = current.sessions + 1,
       media = current.media + (key to existingStats(item, existing).copy(
         sessions = (existing?.sessions ?: 0) + 1,
+        isAudio = isAudio,
         lastWatchedAt = System.currentTimeMillis(),
       )),
     )
@@ -67,16 +73,20 @@ class WatchStatsRepository(context: Context) {
 
   suspend fun recordPlayback(item: PlaybackItem, seconds: Long) {
     if (seconds <= 0) return
+    val isAudio = isAudioItem(item)
     update { current ->
       val key = item.stableId.ifBlank { item.originalUri }
       val existing = current.media[key]
+      val mediaIsAudio = isAudio || existing?.isAudio == true
       val day = Instant.now().atZone(ZoneId.systemDefault()).toLocalDate().toString()
       current.copy(
         totalSeconds = current.totalSeconds + seconds,
-        videoSeconds = current.videoSeconds + seconds,
+        audioSeconds = if (mediaIsAudio) current.audioSeconds + seconds else current.audioSeconds,
+        videoSeconds = if (!mediaIsAudio) current.videoSeconds + seconds else current.videoSeconds,
         days = (current.days + (day to ((current.days[day] ?: 0) + seconds))).trimDays(),
         media = (current.media + (key to existingStats(item, existing).copy(
           seconds = (existing?.seconds ?: 0) + seconds,
+          isAudio = mediaIsAudio,
           lastWatchedAt = System.currentTimeMillis(),
         ))).trimMedia(),
       )
@@ -124,16 +134,34 @@ class WatchStatsRepository(context: Context) {
         .getOrDefault(WatchStatsSnapshot())
     }
 
-  private fun existingStats(item: PlaybackItem, existing: WatchMediaStats?): WatchMediaStats =
-    WatchMediaStats(
+  private fun existingStats(item: PlaybackItem, existing: WatchMediaStats?): WatchMediaStats {
+    val isAudio = isAudioItem(item) || existing?.isAudio == true
+    return WatchMediaStats(
       title = item.title?.takeIf(String::isNotBlank) ?: existing?.title ?: item.originalUri.substringAfterLast('/'),
       artworkUri = item.artworkUri ?: existing?.artworkUri,
       sourceUri = item.originalUri.takeIf(String::isNotBlank) ?: existing?.sourceUri,
       seconds = existing?.seconds ?: 0,
       sessions = existing?.sessions ?: 0,
-      isAudio = false,
+      isAudio = isAudio,
       lastWatchedAt = existing?.lastWatchedAt ?: 0,
     )
+  }
+
+  private fun isAudioItem(item: PlaybackItem): Boolean {
+    if (item.audiobook != null) return true
+    if (item.isDefinitelyAudioOnly()) return true
+    if (item.mimeType?.startsWith("audio/", ignoreCase = true) == true) return true
+    val candidates = sequenceOf(item.originalUri, item.playableUri, item.title, item.stableId).filterNotNull()
+    if (candidates.any { s ->
+        val ext = s.fileExtension()
+        ext in FileTypeUtils.AUDIO_EXTENSIONS ||
+          s.contains("/audio/", ignoreCase = true) ||
+          s.contains("audio%3A", ignoreCase = true) ||
+          s.contains("includeItemTypes=Audio", ignoreCase = true) ||
+          HttpUtils.isMusicStreamingUrl(s)
+      }) return true
+    return false
+  }
 
   private fun Long?.orZero(): Long = this ?: 0
   private fun Map<String, Long>.trimDays(): Map<String, Long> = entries.sortedByDescending { it.key }.take(90).associate { it.toPair() }
