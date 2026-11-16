@@ -153,6 +153,7 @@
   <string name="player_battery_saver_off">Battery Saver: OFF</string>
   <!-- Theme names -->
   <string name="theme_default">Default</string>
+  <string name="theme_crimson_sonic">Crimson Sonic</string>
   <string name="theme_dynamic">Dynamic</string>
   <string name="theme_aurora">Aurora</string>
   <string name="theme_cloudflare">Cloudflare</string>

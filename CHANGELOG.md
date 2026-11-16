@@ -4,6 +4,9 @@ These notes are written in plain English and focus on what changed for real use.
 
 ## 1.0.2
 
+- **Official "Crimson Sonic" App Theme Preset:**
+  - Added a dedicated built-in theme preset matching the Crimson Sonic Neon launcher icon.
+  - Combines Radiant Neon Crimson Pink (`#FF2A6D`) accents with Electric Cyan (`#00F5FF`) secondary highlights and deep Obsidian Black (`#0D0B12`) / soft pastel lavender backgrounds.
 - **Smart Sleep Timer with Gentle Audio Fade-Out:**
   - Added smart sleep timer controls accessible from player sheets with custom hours/minutes input and quick presets (15m, 30m, 45m, 60m, and End of Track).
   - Implemented 30-second gentle audio fade-out so volume gradually and smoothly decreases before pausing playback, preventing sudden waking.

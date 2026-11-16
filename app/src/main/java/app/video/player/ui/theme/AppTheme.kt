@@ -190,6 +190,17 @@ enum class AppTheme(
     backgroundLight = Color(0xFFF7F5F8),
     backgroundDark = Color(0xFF161217),
   ),
+  CrimsonSonic(
+    titleRes = R.string.theme_crimson_sonic,
+    primaryLight = Color(0xFFD81B60),
+    primaryDark = Color(0xFFFF2A6D),
+    secondaryLight = Color(0xFF0097A7),
+    secondaryDark = Color(0xFF00F5FF),
+    tertiaryLight = Color(0xFFBE123C),
+    tertiaryDark = Color(0xFFFF3366),
+    backgroundLight = Color(0xFFF7F2FA),
+    backgroundDark = Color(0xFF0D0B12),
+  ),
   Dynamic(
     titleRes = R.string.theme_dynamic,
     primaryLight = Color(0xFF6750A4),

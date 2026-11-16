@@ -66,6 +66,7 @@ Whether decoding 4K HDR10+ anime with complex ASS karaoke subtitles or driving a
 | Feature | State | Description |
 | :--- | :---: | :--- |
 | **Material 3 Expressive** | 🟢 **ACTIVE** | Full dynamic color integration, OLED pure black theme, and expressive typography |
+| **Crimson Sonic Theme** | 🟢 **ACTIVE** | **NEW:** Dedicated built-in neon ruby pink & electric cyan color scheme perfectly matching the app icon |
 | **System-Wide Liquid Glass** | 🟢 **ACTIVE** | **NEW:** Frosted translucent surfaces with specular rim highlights across dialogs, app bars, and bento cards |
 | **Neon Crimson Sonic Icon** | 🟢 **ACTIVE** | **NEW:** High-contrast neon ruby frame on solid obsidian black with bold center-core electric cyan playhead |
 | **Material You Themed Icons** | 🟢 **ACTIVE** | **NEW:** Full monochrome silhouette vector layer matching Android 13+ dynamic system color palettes |
