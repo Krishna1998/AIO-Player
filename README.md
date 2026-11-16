@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="app/src/main/assets/branding/videoplayer_crimson_sonic_neon.svg" width="128" height="128" alt="V&M Player Icon" /><br>
+<img src="app/src/main/assets/branding/videoplayer_crimson_sonic_neon.svg" width="140" height="140" alt="V&M Player Icon" /><br>
 
 # ⚡ V&M PLAYER
 ### *Next-Generation, Ultra-Lightweight Video & Audio Engine for Android*
@@ -64,6 +64,8 @@ Whether decoding 4K HDR10+ anime with complex ASS karaoke subtitles or driving a
 | Feature | State | Description |
 | :--- | :---: | :--- |
 | **Material 3 Expressive** | 🟢 **ACTIVE** | Full dynamic color integration, OLED pure black theme, and expressive typography |
+| **Neon Crimson Sonic Icon** | 🟢 **ACTIVE** | **NEW:** High-contrast neon ruby video frame + acoustic audio waveform with center-core electric cyan playhead |
+| **Material You Themed Icons** | 🟢 **ACTIVE** | **NEW:** Full monochrome silhouette vector layer matching Android 13+ dynamic system color palettes |
 | **Connected Shape Morphing** | 🟢 **ACTIVE** | Animated corner morphing (`rememberConnectedShape`) across button presses |
 | **HUD Customization** | 🟢 **ACTIVE** | Adjustable button opacity (0–100%), seekbar opacity, and borderless player modes |
 | **Dynamic Speed Pill** | 🟢 **ACTIVE** | Seamless live-resizing pill when cycling through playback speeds |
