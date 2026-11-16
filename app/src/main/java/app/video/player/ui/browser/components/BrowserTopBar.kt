@@ -350,13 +350,6 @@ private fun NormalTopBar(
   val glassActive = liquidGlassActive()
 
   TopAppBar(
-    modifier = if (glassActive && !wallpaperActive) {
-      Modifier.appGlassSurface(
-        shape = RectangleShape,
-        containerColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.82f),
-        enabled = true,
-      )
-    } else Modifier,
     colors =
       colors ?: TopAppBarDefaults.topAppBarColors(
         containerColor =
@@ -539,7 +532,15 @@ private fun NormalTopBar(
         }
       }
     },
-    modifier = modifier,
+    modifier = modifier.then(
+      if (glassActive && !wallpaperActive) {
+        Modifier.appGlassSurface(
+          shape = RectangleShape,
+          containerColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.82f),
+          enabled = true,
+        )
+      } else Modifier,
+    ),
   )
 }
 
@@ -579,13 +580,6 @@ private fun SelectionTopBar(
   val glassActive = liquidGlassActive()
 
   TopAppBar(
-    modifier = if (glassActive && !wallpaperActive) {
-      Modifier.appGlassSurface(
-        shape = RectangleShape,
-        containerColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.82f),
-        enabled = true,
-      )
-    } else Modifier,
     colors =
       colors ?: TopAppBarDefaults.topAppBarColors(
         containerColor =
@@ -837,8 +831,18 @@ private fun SelectionTopBar(
       }
     },
     modifier =
-      modifier.clip(
-        RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 28.dp, bottomEnd = 28.dp),
-      ),
+      modifier
+        .clip(
+          RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 28.dp, bottomEnd = 28.dp),
+        )
+        .then(
+          if (glassActive && !wallpaperActive) {
+            Modifier.appGlassSurface(
+              shape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 28.dp, bottomEnd = 28.dp),
+              containerColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.82f),
+              enabled = true,
+            )
+          } else Modifier,
+        ),
   )
 }
