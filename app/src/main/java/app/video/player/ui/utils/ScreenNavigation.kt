@@ -167,9 +167,15 @@ internal fun ScreenNavDisplay(
           }
         val entryColor =
           if (entryOpaque) MaterialTheme.colorScheme.background else wallpaperAwareBackgroundColor()
-        // The Preferences list handles its own bottom scroll clearance. Insetting its
-        // whole NavEntry instead leaves a large blank strip above the mini-player.
-        val scrollHandlesOverlay = route == app.video.player.ui.preferences.PreferencesScreen
+        // Browser lists and preferences handle their own bottom scroll clearance. Insetting their
+        // whole NavEntry instead leaves a large blank strip above the mini-player and pushes
+        // floating action buttons into the middle of the screen.
+        val scrollHandlesOverlay = route == app.video.player.ui.preferences.PreferencesScreen ||
+          route is app.video.player.ui.browser.videolist.VideoListScreen ||
+          route is app.video.player.ui.browser.filesystem.FileSystemDirectoryScreen ||
+          route is app.video.player.ui.browser.playlist.PlaylistDetailScreen ||
+          route is app.video.player.ui.browser.networkstreaming.NetworkBrowserScreen ||
+          route is app.video.player.ui.framecapture.SnapshotFolderScreen
         val insetByHost = bottomOverlayExempt != null && route != bottomOverlayExempt &&
           !NavigationBarState.isInSelectionMode && !scrollHandlesOverlay
         val inheritedClearance = LocalNavigationBarHeight.current

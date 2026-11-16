@@ -130,6 +130,7 @@ import app.video.player.ui.player.controls.components.withTabularDigits
 import app.video.player.ui.player.controls.components.rememberSmoothedPositionMs
 import app.video.player.ui.player.controls.components.AnimatedLyricWord
 import app.video.player.ui.player.controls.components.hasRtlDirection
+import android.text.format.DateUtils
 import app.video.player.ui.player.controls.components.sheets.PlaylistItem
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem
@@ -577,6 +578,9 @@ fun AudioPlayerControls(
   val activeBook by app.video.player.ui.player.AudiobookPlayback.book.collectAsStateWithLifecycle()
   val audiobook = activeBook?.takeIf { it.book.id == currentItem?.audiobook?.bookId }
   val isAudiobook = currentItem?.audiobook != null
+  val sleepTimerRemaining by viewModel.remainingTime.collectAsStateWithLifecycle()
+  val audiobookTimer by app.video.player.ui.player.AudiobookPlayback.timer.collectAsStateWithLifecycle()
+  val activeSleepTimerSeconds = if (isAudiobook) (audiobookTimer?.remainingSeconds ?: 0) else sleepTimerRemaining
   val filePosition = viewModel.precisePosition.collectAsStateWithLifecycle()
   val playlistItems by viewModel.playlistItems.collectAsState()
   val isAudioOnly by viewModel.isAudioOnly.collectAsState()
@@ -1138,7 +1142,42 @@ fun AudioPlayerControls(
         Row(
           modifier = Modifier.align(Alignment.CenterEnd),
           verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
+          if (activeSleepTimerSeconds > 0) {
+            Surface(
+              onClick = { onOpenSheet(if (isAudiobook) Sheets.AudiobookSleepTimer else Sheets.SleepTimer) },
+              shape = CircleShape,
+              color = MaterialTheme.colorScheme.primaryContainer,
+              contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            ) {
+              Row(
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+              ) {
+                Icon(
+                  imageVector = Icons.RoundedFilled.Timer,
+                  contentDescription = stringResource(R.string.timer_title),
+                  modifier = Modifier.size(16.dp),
+                )
+                Text(
+                  text = DateUtils.formatElapsedTime(activeSleepTimerSeconds.toLong()),
+                  style = MaterialTheme.typography.labelSmall,
+                  fontWeight = FontWeight.Bold,
+                )
+              }
+            }
+          } else {
+            ReactiveIconButton(onClick = { onOpenSheet(if (isAudiobook) Sheets.AudiobookSleepTimer else Sheets.SleepTimer) }) {
+              Icon(
+                imageVector = Icons.RoundedFilled.Timer,
+                contentDescription = stringResource(R.string.timer_title),
+                tint = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.size(26.dp),
+              )
+            }
+          }
           ReactiveIconButton(onClick = { onOpenSheet(Sheets.AudioProperties) }) {
             Icon(
               imageVector = Icons.RoundedFilled.Info,
@@ -2114,6 +2153,16 @@ fun AudioPlayerControls(
             RepeatMode.ALL -> Icons.RoundedFilled.RepeatOn
           }, null, tint = if (repeatMode != RepeatMode.OFF) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             reduceMotion = AppMotion.playerReducedMotion())
+        }
+        ReactiveIconButton(
+          onClick = { onOpenSheet(Sheets.SleepTimer) },
+          modifier = Modifier.size(40.dp),
+        ) {
+          Icon(
+            imageVector = Icons.RoundedFilled.Timer,
+            contentDescription = stringResource(R.string.timer_title),
+            tint = if (sleepTimerRemaining > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+          )
         }
       }
     }

@@ -57,6 +57,7 @@ import app.video.player.ui.player.controls.components.sheets.PlaybackSpeedSheet
 import app.video.player.ui.player.controls.components.sheets.PlaylistSheet
 import app.video.player.ui.player.controls.components.sheets.ScopesSheet
 import app.video.player.ui.player.controls.components.sheets.SubtitlesSheet
+import app.video.player.ui.player.controls.components.sheets.TimePickerDialog
 import app.video.player.ui.player.controls.components.sheets.VideoZoomSheet
 import app.video.player.ui.player.controls.components.sheets.VideoQualitySheet
 import app.video.player.ui.player.setTrackSelectionId
@@ -127,6 +128,28 @@ fun PlayerSheets(
   when (sheetShown) {
     Sheets.None -> {}
     Sheets.BookmarkEditor -> PlaybackBookmarkEditor(viewModel, { onShowSheet(Sheets.Chapters) }, onDismissRequest)
+    Sheets.SleepTimer -> {
+      val sleepTimerTimeRemaining by viewModel.remainingTime.composeCollectAsState()
+      val sleepTimerFadeOut by viewModel.sleepTimerFadeOut.composeCollectAsState()
+      val durationLong by PlaybackSession.propLong["duration"].composeCollectAsState()
+      val positionLong by PlaybackSession.propLong["time-pos"].composeCollectAsState()
+      val remainingTrackSeconds = remember(durationLong, positionLong) {
+        val d = durationLong ?: 0L
+        val p = positionLong ?: 0L
+        ((d - p).coerceAtLeast(0L)).toInt()
+      }
+
+      TimePickerDialog(
+        remainingTime = sleepTimerTimeRemaining,
+        onDismissRequest = onDismissRequest,
+        onTimeSelect = onStartSleepTimer,
+        fadeOutEnabled = sleepTimerFadeOut,
+        onToggleFadeOut = viewModel::setSleepTimerFadeOut,
+        onCancelTimer = viewModel::cancelSleepTimer,
+        onExtendTimer = viewModel::extendSleepTimer,
+        remainingTrackSeconds = remainingTrackSeconds,
+      )
+    }
     Sheets.AudiobookRewind,
     Sheets.AudiobookSleepTimer,
     -> app.video.player.ui.player.controls.components.sheets.AudiobookSheet(
