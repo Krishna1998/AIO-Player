@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="app/src/main/assets/branding/videoplayer_crimson_sonic_neon.svg" width="128" height="128" alt="V&M Player Icon" /><br>
+
 # ⚡ V&M PLAYER
 ### *Next-Generation, Ultra-Lightweight Video & Audio Engine for Android*
 
