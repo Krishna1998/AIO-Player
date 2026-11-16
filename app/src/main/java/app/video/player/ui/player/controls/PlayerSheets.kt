@@ -415,9 +415,15 @@ fun PlayerSheets(
       // Read here: an active sleep timer ticks every second, and collecting it in PlayerControls
       // re-ran the entire controls tree on each tick even while this sheet was closed.
       val sleepTimerTimeRemaining by viewModel.remainingTime.composeCollectAsState()
+      val sleepTimerFadeOut by viewModel.sleepTimerFadeOut.composeCollectAsState()
       MoreSheet(
         remainingTime = sleepTimerTimeRemaining,
         onStartTimer = onStartSleepTimer,
+        fadeOutEnabled = sleepTimerFadeOut,
+        onToggleFadeOut = viewModel::setSleepTimerFadeOut,
+        onCancelTimer = viewModel::cancelSleepTimer,
+        onExtendTimer = viewModel::extendSleepTimer,
+        remainingTrackSeconds = viewModel.remainingTrackSeconds(),
         onDismissRequest = onDismissRequest,
         onEnterFiltersPanel = { onOpenPanel(Panels.VideoFilters) },
         onEnterLuaScriptsPanel = { onOpenPanel(Panels.LuaScripts) },

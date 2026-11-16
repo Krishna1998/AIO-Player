@@ -4,6 +4,11 @@ These notes are written in plain English and focus on what changed for real use.
 
 ## 1.0.2
 
+- **Smart Sleep Timer with Gentle Audio Fade-Out:**
+  - Added smart sleep timer controls accessible from player sheets with custom hours/minutes input and quick presets (15m, 30m, 45m, 60m, and End of Track).
+  - Implemented 30-second gentle audio fade-out so volume gradually and smoothly decreases before pausing playback, preventing sudden waking.
+  - Added active timer banner showing exact countdown, estimated stop time (e.g. "Stops at 11:45 PM"), and quick extension chips (+5m, +15m).
+  - Volume is automatically restored upon completion or cancellation so future playback is never left muted.
 - **Configurable Volume Step (1 to 10 Steps):**
   - Added a "Volume step" preference under Settings > Audio (and in-player settings sheet) with a 1 to 10 discrete slider.
   - Controls how much volume changes per hardware button press, scaling volume boost proportionally.

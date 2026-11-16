@@ -28,6 +28,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -78,6 +85,11 @@ fun MoreSheet(
   filtersEnabled: Boolean = true,
   equalizerEnabled: Boolean = true,
   anime4KEnabled: Boolean = true,
+  fadeOutEnabled: Boolean = true,
+  onToggleFadeOut: (Boolean) -> Unit = {},
+  onCancelTimer: () -> Unit = { onStartTimer(0) },
+  onExtendTimer: (Int) -> Unit = {},
+  remainingTrackSeconds: Int = 0,
   modifier: Modifier = Modifier,
 ) {
   val advancedPreferences = koinInject<AdvancedPreferences>()
@@ -125,6 +137,7 @@ fun MoreSheet(
               Icon(
                 imageVector = Icons.RoundedFilled.Timer,
                 contentDescription = stringResource(R.string.timer_title),
+                tint = if (remainingTime > 0) MaterialTheme.colorScheme.primary else LocalContentColor.current,
               )
               if (showActionLabels) {
                 Text(
@@ -137,6 +150,7 @@ fun MoreSheet(
                         DateUtils.formatElapsedTime(remainingTime.toLong()),
                       )
                     },
+                  color = if (remainingTime > 0) MaterialTheme.colorScheme.primary else LocalContentColor.current,
                 )
               }
               if (isSleepTimerDialogShown) {
@@ -144,6 +158,11 @@ fun MoreSheet(
                   remainingTime = remainingTime,
                   onDismissRequest = { isSleepTimerDialogShown = false },
                   onTimeSelect = onStartTimer,
+                  fadeOutEnabled = fadeOutEnabled,
+                  onToggleFadeOut = onToggleFadeOut,
+                  onCancelTimer = onCancelTimer,
+                  onExtendTimer = onExtendTimer,
+                  remainingTrackSeconds = remainingTrackSeconds,
                 )
               }
             }
@@ -312,6 +331,11 @@ fun TimePickerDialog(
   onTimeSelect: (Int) -> Unit,
   modifier: Modifier = Modifier,
   remainingTime: Int = 0,
+  fadeOutEnabled: Boolean = true,
+  onToggleFadeOut: (Boolean) -> Unit = {},
+  onCancelTimer: () -> Unit = { onTimeSelect(0) },
+  onExtendTimer: (Int) -> Unit = {},
+  remainingTrackSeconds: Int = 0,
 ) {
   val state = rememberTimePickerState(
     remainingTime / 3600,
@@ -319,26 +343,42 @@ fun TimePickerDialog(
     is24Hour = true,
   )
 
+  val stopTimeString = remember(remainingTime) {
+    if (remainingTime > 0) {
+      val stopMillis = System.currentTimeMillis() + (remainingTime * 1000L)
+      val timeFormat = SimpleDateFormat.getTimeInstance(SimpleDateFormat.SHORT, Locale.getDefault())
+      timeFormat.format(Date(stopMillis))
+    } else null
+  }
+
   AppAlertDialog(
     onDismissRequest = onDismissRequest,
-    modifier = modifier.widthIn(max = 360.dp),
+    modifier = modifier.widthIn(max = 380.dp),
     properties = DialogProperties(usePlatformDefaultWidth = false),
     title = {
       Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth(),
       ) {
-        Text(
-          text = stringResource(R.string.timer_title), // "Sleep Timer"
-          style = MaterialTheme.typography.labelMedium,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
+        Icon(
+          imageVector = Icons.RoundedFilled.Timer,
+          contentDescription = null,
+          tint = if (remainingTime > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+          modifier = Modifier.size(28.dp),
         )
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(4.dp))
         Text(
-          text = stringResource(R.string.timer_picker_enter_timer),
+          text = stringResource(R.string.timer_title),
           style = MaterialTheme.typography.headlineSmall,
           color = MaterialTheme.colorScheme.onSurface,
         )
+        if (stopTimeString != null) {
+          Text(
+            text = stringResource(R.string.sleep_timer_stops_at, stopTimeString),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.primary,
+          )
+        }
       }
     },
     text = {
@@ -346,7 +386,56 @@ fun TimePickerDialog(
         modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp),
       ) {
-        TimeInput(state = state)
+        // Active Timer Banner (if running)
+        if (remainingTime > 0) {
+          Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+            modifier = Modifier.fillMaxWidth(),
+          ) {
+            Column(
+              modifier = Modifier.padding(14.dp),
+              horizontalAlignment = Alignment.CenterHorizontally,
+              verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+              Text(
+                text = stringResource(
+                  R.string.timer_remaining,
+                  DateUtils.formatElapsedTime(remainingTime.toLong()),
+                ),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+              )
+              Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+              ) {
+                FilterChip(
+                  selected = false,
+                  onClick = { onExtendTimer(300) },
+                  label = { Text(stringResource(R.string.sleep_timer_extend_5)) },
+                )
+                FilterChip(
+                  selected = false,
+                  onClick = { onExtendTimer(900) },
+                  label = { Text(stringResource(R.string.sleep_timer_extend_15)) },
+                )
+                FilterChip(
+                  selected = false,
+                  onClick = {
+                    onCancelTimer()
+                    onDismissRequest()
+                  },
+                  label = { Text(stringResource(R.string.sleep_timer_turn_off)) },
+                  colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f),
+                    labelColor = MaterialTheme.colorScheme.error,
+                  ),
+                )
+              }
+            }
+          }
+        }
 
         // Quick Presets
         Column(
@@ -354,8 +443,7 @@ fun TimePickerDialog(
           modifier = Modifier.fillMaxWidth(),
         ) {
           Text(
-            androidx.compose.ui.res
-              .stringResource(app.video.player.R.string.ui_quick_presets),
+            text = stringResource(R.string.ui_quick_presets),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(bottom = 8.dp),
@@ -380,16 +468,74 @@ fun TimePickerDialog(
                 ),
               )
             }
+            if (remainingTrackSeconds > 10) {
+              FilterChip(
+                selected = false,
+                onClick = {
+                  onTimeSelect(remainingTrackSeconds)
+                  onDismissRequest()
+                },
+                label = {
+                  Text(
+                    stringResource(
+                      R.string.sleep_timer_end_of_track
+                    ) + " (${DateUtils.formatElapsedTime(remainingTrackSeconds.toLong())})"
+                  )
+                },
+                colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
+                  containerColor = playerSheetSelectionColor(false),
+                  selectedContainerColor = playerSheetSelectionColor(true),
+                  selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                ),
+              )
+            }
+          }
+        }
+
+        // Time Input
+        TimeInput(state = state)
+
+        // Gentle Audio Fade-out Toggle
+        Surface(
+          shape = RoundedCornerShape(12.dp),
+          color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.4f),
+          modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onToggleFadeOut(!fadeOutEnabled) },
+        ) {
+          Row(
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+          ) {
+            Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
+              Text(
+                text = stringResource(R.string.sleep_timer_fade_out),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+              )
+              Text(
+                text = stringResource(R.string.sleep_timer_fade_out_summary),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+            }
+            Switch(
+              checked = fadeOutEnabled,
+              onCheckedChange = onToggleFadeOut,
+            )
           }
         }
       }
     },
     dismissButton = {
-      TextButton(onClick = {
-        onTimeSelect(0)
-        onDismissRequest()
-      }) {
-        Text(stringResource(id = R.string.generic_reset))
+      if (remainingTime > 0) {
+        TextButton(onClick = {
+          onCancelTimer()
+          onDismissRequest()
+        }) {
+          Text(stringResource(id = R.string.sleep_timer_turn_off))
+        }
       }
       TextButton(onClick = onDismissRequest) {
         Text(stringResource(id = R.string.generic_cancel))
@@ -398,7 +544,10 @@ fun TimePickerDialog(
     confirmButton = {
       TextButton(
         onClick = {
-          onTimeSelect(state.hour * 3600 + state.minute * 60)
+          val customSeconds = state.hour * 3600 + state.minute * 60
+          if (customSeconds > 0) {
+            onTimeSelect(customSeconds)
+          }
           onDismissRequest()
         },
       ) {

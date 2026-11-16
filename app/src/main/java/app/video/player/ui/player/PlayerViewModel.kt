@@ -2046,6 +2046,11 @@ fun restartFromBeginning() {
   private var timerJob: Job? = null
   private val _remainingTime = MutableStateFlow(0)
   val remainingTime: StateFlow<Int> = _remainingTime.asStateFlow()
+  private val _sleepTimerFadeOut = MutableStateFlow(true)
+  val sleepTimerFadeOut: StateFlow<Boolean> = _sleepTimerFadeOut.asStateFlow()
+  private val _sleepTimerEndOfTrack = MutableStateFlow(false)
+  val sleepTimerEndOfTrack: StateFlow<Boolean> = _sleepTimerEndOfTrack.asStateFlow()
+  private var preTimerVolume: Int? = null
 
   // Media title for subtitle association
   var currentMediaTitle: String = ""
@@ -3422,18 +3427,77 @@ fun restartFromBeginning() {
 
   // ==================== Timer ====================
 
-  fun startTimer(seconds: Int) {
+  fun setSleepTimerFadeOut(enabled: Boolean) {
+    _sleepTimerFadeOut.value = enabled
+  }
+
+  fun remainingTrackSeconds(): Int {
+    val dur = duration ?: PlaybackSession.getPropertyDouble("duration")?.toInt() ?: 0
+    val pos = PlaybackSession.getPropertyDouble("time-pos")?.toInt() ?: 0
+    return (dur - pos).coerceAtLeast(0)
+  }
+
+  fun cancelSleepTimer() {
     timerJob?.cancel()
+    timerJob = null
+    _remainingTime.value = 0
+    _sleepTimerEndOfTrack.value = false
+    preTimerVolume?.let { restoredVolume ->
+      changeMPVVolumeTo(restoredVolume)
+      preTimerVolume = null
+    }
+  }
+
+  fun extendSleepTimer(additionalSeconds: Int) {
+    val current = _remainingTime.value
+    if (current > 0) {
+      startTimer(current + additionalSeconds, fadeOut = _sleepTimerFadeOut.value, endOfTrack = false)
+    }
+  }
+
+  fun startTimer(
+    seconds: Int,
+    fadeOut: Boolean = _sleepTimerFadeOut.value,
+    endOfTrack: Boolean = false,
+  ) {
+    timerJob?.cancel()
+    preTimerVolume?.let {
+      changeMPVVolumeTo(it)
+      preTimerVolume = null
+    }
+
     _remainingTime.value = seconds
+    _sleepTimerFadeOut.value = fadeOut
+    _sleepTimerEndOfTrack.value = endOfTrack
     if (seconds < 1) return
+
+    val initialVolume = PlaybackSession.getPropertyInt("volume") ?: 100
+    preTimerVolume = initialVolume
+    val fadeDuration = 30 // seconds of gentle fade-out
 
     timerJob =
       viewModelScope.launch {
-        for (time in seconds downTo 0) {
-          _remainingTime.value = time
+        var currentLeft = seconds
+        while (currentLeft > 0) {
+          _remainingTime.value = currentLeft
+
+          // Gentle Audio Fade-out over the last 30 seconds
+          if (fadeOut && currentLeft <= fadeDuration) {
+            val fadeRatio = (currentLeft.toFloat() / fadeDuration).coerceIn(0f, 1f)
+            val fadedVolume = (initialVolume * fadeRatio).roundToInt().coerceIn(0, initialVolume)
+            changeMPVVolumeTo(fadedVolume)
+          }
+
           delay(1000)
+          currentLeft--
         }
+
+        _remainingTime.value = 0
         PlaybackSession.setPropertyBoolean("pause", true)
+        // Reset volume back to original so subsequent playback is unmuted
+        changeMPVVolumeTo(initialVolume)
+        preTimerVolume = null
+        _sleepTimerEndOfTrack.value = false
         showToast(appContext.getString(R.string.toast_sleep_timer_ended))
       }
   }
