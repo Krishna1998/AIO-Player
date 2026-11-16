@@ -1,2 +1,157 @@
-# V&M Player
+<div align="center">
 
+# ⚡ V&M PLAYER
+### *Next-Generation, Ultra-Lightweight Video & Audio Engine for Android*
+
+[![Release](https://img.shields.io/badge/Release-v1.0.1-00F5FF?style=for-the-badge&logo=android&logoColor=black)](https://github.com/Krishna1998/Video-Music-Player/releases)
+[![Android](https://img.shields.io/badge/Android-8.0%2B%20(API%2026%2B)-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com)
+[![Architecture](https://img.shields.io/badge/Arch-arm64--v8a-FF0055?style=for-the-badge&logo=arm&logoColor=white)](https://arm.com)
+[![Engine](https://img.shields.io/badge/Core-mpv%20%2B%20FFmpeg-9D4EDD?style=for-the-badge&logo=cplusplus&logoColor=white)](https://mpv.io)
+[![UI](https://img.shields.io/badge/UI-Jetpack%20Compose%20M3-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
+[![Privacy](https://img.shields.io/badge/Telemetry-ZERO%20%2F%20100%25%20Offline-00E676?style=for-the-badge&logo=shield&logoColor=black)](https://github.com)
+
+<p align="center">
+  <b>Sleek. Minimalist. Uncompromisingly Fast.</b><br>
+  Engineered with libmpv hardware-accelerated decoding, Vulkan shader pipelines, and a futuristic Jetpack Compose interface.
+</p>
+
+---
+
+</div>
+
+## 🌌 Overview
+
+**V&M Player** is a next-generation media powerhouse built for pure playback performance. Stripped of bloatware, tracking telemetries, and heavy legacy libraries, it pairs the raw rendering muscle of **mpv** with an expressive **Material 3 / Fluid Shape** interface.
+
+Whether decoding 4K HDR10+ anime with complex ASS karaoke subtitles or driving a 10-band spatial audio equalizer, V&M Player delivers ultra-low latency, featherweight RAM footprint, and battery-sipping efficiency.
+
+---
+
+## 🎛️ Active Feature Matrix
+
+### 🎬 Visual & Playback Engine
+| Feature | State | Description |
+| :--- | :---: | :--- |
+| **libmpv 1.1.8 Core** | 🟢 **ACTIVE** | Native FFmpeg/mpv decoding stack with full demuxer & codec coverage |
+| **Hardware Acceleration** | 🟢 **ACTIVE** | `mediacodec` and `mediacodec-copy` with automated GPU recovery |
+| **Vulkan Video Pipeline** | 🟢 **ACTIVE** | High-throughput Vulkan rasterizer with OpenGL ES fallback |
+| **High-Precision Scalers** | 🟢 **ACTIVE** | Bilinear, Bicubic, Spline36, Lanczos, and EWA Lanczos shaders |
+| **Dynamic Ambient Glow** | 🟢 **ACTIVE** | Real-time letterbox background glow sampled dynamically from video frames |
+| **Battery Saver Mode** | 🟢 **ACTIVE** | Auto-drops to energy-efficient bilinear passes, limits CPU wakeups, and cuts GPU load when battery &le; 20% |
+| **Aspect-Preserving PiP** | 🟢 **ACTIVE** | True Picture-in-Picture with locked landscape ratio across queue advancements |
+
+### 🎚️ Sound, Speed & Acoustics
+| Feature | State | Description |
+| :--- | :---: | :--- |
+| **Graphic Equalizer** | 🟢 **ACTIVE** | Dual-mode tone controls (Bass / Treble) & multi-band graphical EQ |
+| **Spatializer & Stereo Widening** | 🟢 **ACTIVE** | Low-latency algorithmic stereo expansion for headphones |
+| **Playback Speed Persistence** | 🟢 **ACTIVE** | Granular speed control (0.25x – 4.0x) with state memory across tracks |
+| **Dynamic Range Compression** | 🟢 **ACTIVE** | Tames explosive volume spikes in movies while boosting subtle whispers |
+| **Volume Boost Cap** | 🟢 **ACTIVE** | Clean digital pre-amplification boost up to +30 dB |
+| **Pitch Correction** | 🟢 **ACTIVE** | Maintains natural harmonic pitch when speeding up or slowing down audio |
+
+### 📊 Modern Bento Watch Analytics
+| Feature | State | Description |
+| :--- | :---: | :--- |
+| **Interactive 7-Day Chart** | 🟢 **ACTIVE** | **NEW:** Click any weekday bar to reveal exact hours/minutes with animated morphing indicators |
+| **Video vs Audio Split** | 🟢 **ACTIVE** | **NEW:** Independent tracking and leaderboards for watched videos and music listening |
+| **Playback Session Counter** | 🟢 **ACTIVE** | Atomic session tracking with zero background telemetry leakage |
+| **Privacy Reset** | 🟢 **ACTIVE** | Instant one-tap wipe of all historical playtime data |
+
+### 🎨 Interface & Fluid Aesthetics
+| Feature | State | Description |
+| :--- | :---: | :--- |
+| **Material 3 Expressive** | 🟢 **ACTIVE** | Full dynamic color integration, OLED pure black theme, and expressive typography |
+| **Connected Shape Morphing** | 🟢 **ACTIVE** | Animated corner morphing (`rememberConnectedShape`) across button presses |
+| **HUD Customization** | 🟢 **ACTIVE** | Adjustable button opacity (0–100%), seekbar opacity, and borderless player modes |
+| **Dynamic Speed Pill** | 🟢 **ACTIVE** | Seamless live-resizing pill when cycling through playback speeds |
+| **File Name Conceal** | 🟢 **ACTIVE** | Hide video title and status pills for an ultra-immersive cinema canvas |
+
+---
+
+## 🛡️ Streamlined for Zero Bloat
+
+To maximize battery life and deliver instant startup speeds, the architecture was ruthlessly audited:
+
+```
+[ Legacy 80MB+ Players ] ───▶ [ V&M Player Engine ~25MB ]
+```
+
+* 🚫 **ZERO Analytics & Tracking:** Removed all `sh.measure` telemetry, OkHttp trackers, and tracking daemons.
+* 🚫 **ZERO Google Play Services:** Completely eliminated Cast SDK and Google Play Service dependencies.
+* 🚫 **ZERO Heavy Protocol Bloats:** Discarded legacy SMB/SFTP/FTP protocol stacks for modern, lightweight direct playback.
+* 🚫 **Native Subtitle Engine:** Uses Android's built-in `ZipInputStream` and pure Java streams instead of heavy native archive binaries (`libarchive.so`, `libmediainfo.so`).
+
+---
+
+## 🔮 Architecture Stack
+
+```mermaid
+flowchart TD
+    subgraph UI ["🎨 Modern UI Layer (100% Jetpack Compose)"]
+        A["Material 3 Expressive"] --- B["AppMotion Fluid Springs"]
+        B --- C["Connected Shape Morphing"]
+        C --- D["Interactive Bento Statistics"]
+    end
+
+    subgraph State ["🧠 Architecture & State Management"]
+        E["Koin Dependency Injection"]
+        F["Kotlinx Coroutines & Flow"]
+        G["Room Database (Persistent Cache)"]
+    end
+
+    subgraph Native ["⚡ Low-Latency Media Core"]
+        H["mpvlib 1.1.8"]
+        I["FFmpeg Native Pipeline"]
+        J["Vulkan / GLES Rendering"]
+    end
+
+    UI --> State
+    State --> Native
+```
+
+---
+
+## 🚀 Building from Source
+
+### Prerequisites
+* **Android Studio Ladybug / Meerkat** or **IntelliJ IDEA**
+* **JDK 17** (Temurin / OpenJDK)
+* **Android SDK** (API 26 to 37) + **NDK 27.3.13750724**
+* **CMake 3.22.1**
+
+### Build Commands
+
+```powershell
+# Clone the repository
+git clone https://github.com/Krishna1998/Video-Music-Player.git
+cd "Video-Music-Player"
+
+# Build Debug APK
+./gradlew assembleStandardDebug
+
+# Build Preview APK (Debug-signed release package)
+./gradlew assembleStandardPreview
+
+# Build Production Release APK (Requires keystore configured)
+./gradlew assembleStandardRelease
+```
+
+---
+
+## 📦 Package Distribution
+
+| Variant | Package Identity | Purpose |
+| :--- | :--- | :--- |
+| **Release Build** | `video.music.player` | Official production release signed with production key |
+| **CI / Beta Build** | `video.music.playerbeta` | Bleeding-edge continuous deployment builds |
+| **Debug Build** | `video.music.player.debug` | Local developer inspection with live profiling |
+
+---
+
+<div align="center">
+
+<sub>Crafted with passion for high-performance Android media playback.</sub><br>
+<sub>Licensed under <b>AGPL-3.0</b>.</sub>
+
+</div>
