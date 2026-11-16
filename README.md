@@ -50,7 +50,8 @@ Whether decoding 4K HDR10+ anime with complex ASS karaoke subtitles or driving a
 | **Playback Speed Persistence** | 🟢 **ACTIVE** | Granular speed control (0.25x – 4.0x) with state memory across tracks |
 | **Dynamic Range Compression** | 🟢 **ACTIVE** | Tames explosive volume spikes in movies while boosting subtle whispers |
 | **Volume Boost Cap** | 🟢 **ACTIVE** | Clean digital pre-amplification boost up to +30 dB |
-| **Configurable Volume Step** | 🟢 **ACTIVE** | **NEW:** Discrete volume step multiplier (1 to 5 steps per hardware key press) with proportional boost scaling |
+| **Configurable Volume Step** | 🟢 **ACTIVE** | **NEW:** Discrete volume step multiplier (1 to 10 steps per hardware key press) with proportional boost scaling |
+| **Smart Sleep Timer** | 🟢 **ACTIVE** | **NEW:** Gentle 30-second audio fade-out, live countdown banner, "End of track" mode, and quick extensions |
 | **Pitch Correction** | 🟢 **ACTIVE** | Maintains natural harmonic pitch when speeding up or slowing down audio |
 
 ### 📊 Modern Bento Watch Analytics
@@ -65,9 +66,11 @@ Whether decoding 4K HDR10+ anime with complex ASS karaoke subtitles or driving a
 | Feature | State | Description |
 | :--- | :---: | :--- |
 | **Material 3 Expressive** | 🟢 **ACTIVE** | Full dynamic color integration, OLED pure black theme, and expressive typography |
+| **System-Wide Liquid Glass** | 🟢 **ACTIVE** | **NEW:** Frosted translucent surfaces with specular rim highlights across dialogs, app bars, and bento cards |
 | **Neon Crimson Sonic Icon** | 🟢 **ACTIVE** | **NEW:** High-contrast neon ruby frame on solid obsidian black with bold center-core electric cyan playhead |
 | **Material You Themed Icons** | 🟢 **ACTIVE** | **NEW:** Full monochrome silhouette vector layer matching Android 13+ dynamic system color palettes |
 | **Connected Shape Morphing** | 🟢 **ACTIVE** | Animated corner morphing (`rememberConnectedShape`) across button presses |
+| **Glass Specular Badges** | 🟢 **ACTIVE** | **NEW:** Media duration and 4K/HDR badges enhanced with top-lit specular glass borders |
 | **HUD Customization** | 🟢 **ACTIVE** | Adjustable button opacity (0–100%), seekbar opacity, and borderless player modes |
 | **Dynamic Speed Pill** | 🟢 **ACTIVE** | Seamless live-resizing pill when cycling through playback speeds |
 | **File Name Conceal** | 🟢 **ACTIVE** | Hide video title and status pills for an ultra-immersive cinema canvas |
@@ -96,7 +99,7 @@ To maximize battery life and deliver instant startup speeds, the architecture wa
 ```mermaid
 flowchart TD
     subgraph UI ["🎨 Modern UI Layer (100% Jetpack Compose)"]
-        A["Material 3 Expressive"] --- B["AppMotion Fluid Springs"]
+        A["Material 3 Expressive"] --- B["Liquid Glass Surfaces & AppMotion"]
         B --- C["Connected Shape Morphing"]
         C --- D["Interactive Bento Statistics"]
     end
