@@ -2,6 +2,23 @@
 
 These notes are written in plain English and focus on what changed for real use.
 
+## 1.0.3
+
+- **Default App Icon: "Solar Amber Gold" Cyber Prism:**
+  - Upgraded the default launcher icon to the futuristic **Cyber Prism** design at 100% full-scale geometry.
+  - Eliminated blurry diffuse neon glow in favor of a clean, razor-sharp vector aesthetic with metallic specular bevels, dark chamfer shadows, and solid crimson equalizer bars.
+  - Introduced the **Solar Amber Gold** palette: a liquid gold (`#FFD700`) and deep amber (`#FF9100`) 3D crystal prism playhead with diamond white facet lines.
+  - Fully synchronized the Android 13+ Material You monochrome themed icon asset.
+- **Audio Player Sleep Timer Integration:**
+  - Added dedicated Sleep Timer controls to the Audio Player controls row and top header bar.
+  - Active countdown badge displayed directly in the top header bar with live elapsed time pill (e.g. `14:32`).
+  - Integrated `Sheets.SleepTimer` unified player sheet with 30-second gentle audio fade-out, stop time estimation, quick extension chips (+5m, +15m), and presets (15m, 30m, 45m, 60m, End of Track).
+- **Video Folder & Media Browser FAB Alignment Fix:**
+  - Fixed an issue where activating the music mini-player pushed the Floating Action Button (FAB) high up into the middle of the screen when browsing video folders (`VideoListScreen`), playlists, or filesystem directories.
+  - Exempted full-height media browser screens from redundant host container insets, allowing video lists to scroll smoothly behind the translucent mini player while anchoring the FAB at its clean resting position 12dp above the mini player.
+- **Tab-Specific Quick Play FAB:**
+  - Separated Floating Action Button playback logic so tapping "Play All" or "Shuffle" on the Favorites tab plays only favorited tracks ("Play All Favorites" / "Shuffle Favorites") rather than entire library songs.
+
 ## 1.0.2
 
 - **Music Tab Visual & UX Overhaul:**
@@ -10,7 +27,6 @@ These notes are written in plain English and focus on what changed for real use.
   - **Modern Quick Actions Bar:** Introduced prominent "Shuffle All" and "Play All" action buttons at the top of the track list in both List and Grid views for effortless queue startup.
   - **High-Res Audio Format & Status Badges:** Track items in both list and grid views now display crystal-clear audio fidelity badges (`FLAC`, `WAV`, `ALAC`, `OPUS`, `AAC`, `320K`) and animated glowing `PLAYING` indicators.
   - **Enhanced Bento Album Cards:** Added specular borders and bottom-right track count badges (`X tracks`) to album grid cards for rich visual hierarchy.
-  - **Tab-Specific Quick Play FAB:** Separated Floating Action Button playback logic so tapping "Play All" or "Shuffle" on the Favorites tab plays only favorited tracks ("Play All Favorites" / "Shuffle Favorites") rather than entire library songs.
 - **Online Lyrics Providers & Settings Control:**
   - Surfaced all 17 available online lyrics providers (`lrc.red`, `BiniLyrics`, `BetterLyrics`, `BetterLyrics Portato`, `PaxSenix`, `PaxSenix: Spotify`, `PaxSenix: Musixmatch`, `LyricsPlus`, `SimpMusic`, `Unison`, `YouTube captions`, `YouTube Music`, `Megalobiz`, `KuGou`, `LRCLIB`, `Musixmatch`, `Genius`) directly inside Settings > Audio.
   - Added an interactive expandable card with live provider status, timing capability badges (Word-synced vs Line-synced), descriptions, and individual toggle switches.
@@ -20,15 +36,11 @@ These notes are written in plain English and focus on what changed for real use.
 - **Official "Crimson Sonic" App Theme Preset:**
   - Added a dedicated built-in theme preset matching the Crimson Sonic Neon launcher icon.
   - Combines Radiant Neon Crimson Pink (`#FF2A6D`) accents with Electric Cyan (`#00F5FF`) secondary highlights and deep Obsidian Black (`#0D0B12`) / soft pastel lavender backgrounds.
-- **Smart Sleep Timer with Gentle Audio Fade-Out & Audio Player Integration:**
+- **Smart Sleep Timer with Gentle Audio Fade-Out:**
   - Added smart sleep timer controls accessible from player sheets with custom hours/minutes input and quick presets (15m, 30m, 45m, 60m, and End of Track).
-  - Integrated Sleep Timer directly into the Audio Player: added a quick-access timer button in the playback controls row and a live countdown pill in the top header bar showing exact time remaining.
   - Implemented 30-second gentle audio fade-out so volume gradually and smoothly decreases before pausing playback, preventing sudden waking.
   - Added active timer banner showing exact countdown, estimated stop time (e.g. "Stops at 11:45 PM"), and quick extension chips (+5m, +15m).
   - Volume is automatically restored upon completion or cancellation so future playback is never left muted.
-- **Video Folder & Media Browser FAB Positioning Fix:**
-  - Fixed an issue where activating the music mini-player pushed the Floating Action Button (FAB) high up into the middle of the screen when browsing video folders (`VideoListScreen`), playlists, or filesystem directories.
-  - Exempted full-height media browser screens from redundant host container insets so they handle their own scroll clearance, allowing video lists to scroll smoothly behind the translucent mini player while anchoring the FAB at its clean resting position right above the mini player.
 - **Configurable Volume Step (1 to 10 Steps):**
   - Added a "Volume step" preference under Settings > Audio (and in-player settings sheet) with a 1 to 10 discrete slider.
   - Controls how much volume changes per hardware button press, scaling volume boost proportionally.
@@ -38,12 +50,6 @@ These notes are written in plain English and focus on what changed for real use.
   - Added frosted translucent glass styling to top app bars (`BrowserTopBar`, `SettingsTopAppBar`) so scrolling content blurs beneath them.
   - Converted Bento analytics dashboard cards (`WatchStatsScreen`) to liquid glass containers.
   - Added specular top-lit glass borders to thumbnail duration and media badges (`cardOverlay`).
-- **New "Solar Amber Gold" Cyber Prism App Icon:**
-  - Upgraded the default launcher icon to the futuristic **Cyber Prism** design at 100% full-scale geometry.
-  - Removed all blurry diffuse neon glow in favor of a clean, razor-sharp vector aesthetic with metallic specular bevels, dark chamfer shadows, and solid equalizer bars.
-  - Introduced the **Solar Amber Gold** palette: a liquid gold (`#FFD700`) and deep amber (`#FF9100`) crystal prism playhead with diamond white facet lines, contrasting against a rich ruby crimson laser frame.
-  - Retained solid pitch-black (`#000000`) background canvas to prevent OEM launcher wallpaper pastel tinting.
-  - Fully synchronized the Android 13+ Material You monochrome themed icon asset.
 - **Homescreen Widget Font Fix:**
   - Replaced legacy `@font/gflex_variable` layout references with system `sans-serif` typography, resolving resource linking errors.
 
