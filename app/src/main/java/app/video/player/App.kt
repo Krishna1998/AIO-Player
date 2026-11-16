@@ -117,6 +117,15 @@ class App :
 
     fun closeAppCompletely(context: android.content.Context? = null) {
       Log.i(TAG, "Closing app completely...")
+      val targetContext = context ?: synchronized(activeActivities) { activeActivities.firstOrNull()?.applicationContext }
+      targetContext?.let { ctx ->
+        try {
+          CrashMonitor.markIntentionalShutdown(ctx)
+        } catch (e: Exception) {
+          Log.w(TAG, "Error marking intentional shutdown", e)
+        }
+      }
+
       try {
         PlaybackSession.stop()
         PlaybackSession.destroy()
@@ -124,7 +133,7 @@ class App :
         Log.w(TAG, "Error stopping playback session during app close", e)
       }
 
-      context?.let { ctx ->
+      targetContext?.let { ctx ->
         try {
           val intent = android.content.Intent(ctx, app.video.player.ui.player.MediaPlaybackService::class.java)
           ctx.stopService(intent)
@@ -147,8 +156,10 @@ class App :
       }
 
       CoroutineScope(Dispatchers.Main).launch {
-        delay(400)
-        android.os.Process.killProcess(android.os.Process.myPid())
+        delay(300)
+        // Never call Process.killProcess(Process.myPid()), which sends SIGKILL (status 9)
+        // causing Android to record an abnormal REASON_SIGNALED exit report on next startup.
+        // System.exit(0) cleanly stops the JVM with normal status 0 (REASON_EXIT_SELF).
         System.exit(0)
       }
     }

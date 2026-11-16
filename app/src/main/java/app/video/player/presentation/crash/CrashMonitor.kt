@@ -40,6 +40,7 @@ internal object CrashMonitor {
   private const val TAG = "CrashMonitor"
   private const val STATE = "crash_monitor"
   private const val KEY_EXITS_CHECKED_AT = "exits_checked_at"
+  private const val KEY_INTENTIONAL_EXIT_PID = "intentional_exit_pid"
   private const val MAX_TRACE_BYTES = 512 * 1024
   private const val MAX_TOMBSTONE_TEXT = 96 * 1024
   private const val MAX_EXITS = 16
@@ -148,6 +149,17 @@ internal object CrashMonitor {
     runCatching { sessionMarker(context).delete() }
   }
 
+  /** Marks that this process is intentionally shutting down (e.g. sleep timer or quit action). */
+  fun markIntentionalShutdown(context: Context) {
+    runCatching {
+      clearSessionMarker(context)
+      context.getSharedPreferences(STATE, Context.MODE_PRIVATE)
+        .edit()
+        .putInt(KEY_INTENTIONAL_EXIT_PID, Process.myPid())
+        .commit()
+    }
+  }
+
   // Android 10 and older keep no exit history. This marker exists only while the app is on screen,
   // so finding one from another process means it died in use without a Java exception: a native
   // crash (decoder, renderer, libmpv) or an app-not-responding kill. The boot count rules out
@@ -219,11 +231,14 @@ internal object CrashMonitor {
     context: Context,
     since: Long,
   ): Boolean {
+    val state = context.getSharedPreferences(STATE, Context.MODE_PRIVATE)
+    val intentionalExitPid = state.getInt(KEY_INTENTIONAL_EXIT_PID, -1)
     val activityManager = context.getSystemService(ActivityManager::class.java) ?: return false
     val crashProcess = "${context.packageName}:crash"
     return activityManager.getHistoricalProcessExitReasons(context.packageName, 0, MAX_EXITS).any { exit ->
       exit.timestamp >= since &&
         exit.pid != Process.myPid() &&
+        exit.pid != intentionalExitPid &&
         exit.processName != crashProcess &&
         when (exit.reason) {
           ApplicationExitInfo.REASON_CRASH,
@@ -272,9 +287,10 @@ internal object CrashMonitor {
     if (checkedAt < 0L) return
 
     val crashProcess = "${context.packageName}:crash"
+    val intentionalExitPid = state.getInt(KEY_INTENTIONAL_EXIT_PID, -1)
     val abnormal =
       exits
-        .filter { it.timestamp > checkedAt && it.pid != Process.myPid() && it.processName != crashProcess }
+        .filter { it.timestamp > checkedAt && it.pid != Process.myPid() && it.processName != crashProcess && it.pid != intentionalExitPid }
         .filter(::isAbnormal)
         .sortedBy(ApplicationExitInfo::getTimestamp)
     if (abnormal.isEmpty()) return
