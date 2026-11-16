@@ -8,7 +8,9 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.foundation.Image
@@ -278,8 +280,12 @@ private fun WeeklyActivityBentoCard(days: Map<String, Long>) {
   val dates = remember(today) { (6 downTo 0).map { today.minusDays(it.toLong()) } }
   val values = dates.map { days[it.toString()] ?: 0L }
   val max = values.maxOrNull() ?: 0L
-  val todayWatchTime = values.lastOrNull() ?: 0L
   val chartMax = max.coerceAtLeast(1L)
+
+  var selectedDateIndex by rememberSaveable { mutableStateOf(6) }
+  val safeIndex = selectedDateIndex.coerceIn(0, dates.lastIndex)
+  val selectedDate = dates[safeIndex]
+  val selectedWatchTime = values[safeIndex]
 
   val primaryColor = MaterialTheme.colorScheme.primary
   val trackColor = MaterialTheme.colorScheme.surfaceContainerHighest
@@ -319,16 +325,25 @@ private fun WeeklyActivityBentoCard(days: Map<String, Long>) {
           )
         }
 
+        val durationText = formatHumanDuration(selectedWatchTime)
+        val headerLabel = when (safeIndex) {
+          6 -> stringResource(R.string.watch_stats_today, durationText)
+          5 -> "Yesterday: $durationText"
+          else -> "${selectedDate.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())}: $durationText"
+        }
+
         Surface(
           shape = MaterialTheme.shapes.medium,
-          color = MaterialTheme.colorScheme.primaryContainer,
-          contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+          color = if (safeIndex == 6) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.secondaryContainer,
+          contentColor = if (safeIndex == 6) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondaryContainer,
+          modifier = Modifier
+            .clip(MaterialTheme.shapes.medium)
+            .clickable { selectedDateIndex = 6 },
         ) {
-          val todayText = formatHumanDuration(todayWatchTime)
           Text(
-            text = stringResource(R.string.watch_stats_today, todayText),
+            text = headerLabel,
             style = MaterialTheme.typography.labelLargeEmphasized,
-            fontFamily = expressiveDisplayFontForText(todayText),
+            fontFamily = expressiveDisplayFontForText(durationText),
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
           )
         }
@@ -338,13 +353,14 @@ private fun WeeklyActivityBentoCard(days: Map<String, Long>) {
       Row(
         modifier = Modifier
           .fillMaxWidth()
-          .height(130.dp),
+          .height(134.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Bottom,
       ) {
         dates.forEachIndexed { index, date ->
           val value = values[index]
           val isToday = index == 6
+          val isSelected = index == safeIndex
           val fraction = if (max > 0L) (value.toFloat() / chartMax.toFloat()).coerceIn(0f, 1f) else 0f
           val animatedFraction by animateFloatAsState(
             targetValue = fraction,
@@ -352,18 +368,41 @@ private fun WeeklyActivityBentoCard(days: Map<String, Long>) {
             label = "weeklyWatchBar$index",
           )
 
+          val animatedBarWidth by animateDpAsState(
+            targetValue = if (isSelected) 22.dp else 18.dp,
+            animationSpec = if (AppMotion.shouldReduceMotion()) snap() else AppMotion.Spatial.Expressive,
+            label = "weeklyBarWidth$index",
+          )
+
           Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.weight(1f),
+            modifier = Modifier
+              .weight(1f)
+              .clip(RoundedCornerShape(8.dp))
+              .clickable { selectedDateIndex = index }
+              .padding(vertical = 2.dp),
           ) {
             // Track & Fill bar
             Box(
               modifier = Modifier
-                .width(18.dp)
+                .width(animatedBarWidth)
                 .height(96.dp)
                 .clip(CircleShape)
-                .background(trackColor),
+                .background(
+                  if (isSelected) trackColor.copy(alpha = 0.95f) else trackColor,
+                )
+                .then(
+                  if (isSelected) {
+                    Modifier.border(
+                      1.5.dp,
+                      MaterialTheme.colorScheme.primary,
+                      CircleShape,
+                    )
+                  } else {
+                    Modifier
+                  }
+                ),
               contentAlignment = Alignment.BottomCenter,
             ) {
               if (value > 0L) {
@@ -373,7 +412,7 @@ private fun WeeklyActivityBentoCard(days: Map<String, Long>) {
                     .fillMaxHeight(animatedFraction.coerceAtLeast(0.12f))
                     .clip(CircleShape)
                     .background(
-                      if (isToday) {
+                      if (isSelected || isToday) {
                         Brush.verticalGradient(
                           listOf(
                             MaterialTheme.colorScheme.tertiary,
@@ -394,32 +433,51 @@ private fun WeeklyActivityBentoCard(days: Map<String, Long>) {
             }
 
             // Day label
-            if (isToday) {
-              Surface(
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary,
-                modifier = Modifier.size(20.dp),
-              ) {
-                Box(contentAlignment = Alignment.Center) {
+            when {
+              isSelected -> {
+                Surface(
+                  shape = CircleShape,
+                  color = MaterialTheme.colorScheme.primary,
+                  contentColor = MaterialTheme.colorScheme.onPrimary,
+                  modifier = Modifier.size(22.dp),
+                ) {
+                  Box(contentAlignment = Alignment.Center) {
+                    Text(
+                      text = date.dayOfWeek.getDisplayName(TextStyle.NARROW, Locale.getDefault()),
+                      style = MaterialTheme.typography.labelSmall,
+                      fontWeight = FontWeight.Bold,
+                    )
+                  }
+                }
+              }
+              isToday -> {
+                Surface(
+                  shape = CircleShape,
+                  color = MaterialTheme.colorScheme.primaryContainer,
+                  contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                  modifier = Modifier.size(20.dp),
+                ) {
+                  Box(contentAlignment = Alignment.Center) {
+                    Text(
+                      text = date.dayOfWeek.getDisplayName(TextStyle.NARROW, Locale.getDefault()),
+                      style = MaterialTheme.typography.labelSmall,
+                      fontWeight = FontWeight.Bold,
+                    )
+                  }
+                }
+              }
+              else -> {
+                Box(
+                  modifier = Modifier.size(20.dp),
+                  contentAlignment = Alignment.Center,
+                ) {
                   Text(
                     text = date.dayOfWeek.getDisplayName(TextStyle.NARROW, Locale.getDefault()),
                     style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                   )
                 }
-              }
-            } else {
-              Box(
-                modifier = Modifier.size(20.dp),
-                contentAlignment = Alignment.Center,
-              ) {
-                Text(
-                  text = date.dayOfWeek.getDisplayName(TextStyle.NARROW, Locale.getDefault()),
-                  style = MaterialTheme.typography.labelSmall,
-                  fontWeight = FontWeight.Medium,
-                  color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
               }
             }
           }
