@@ -34,10 +34,12 @@ These notes are written in plain English and focus on what changed for real use.
   - Added frosted translucent glass styling to top app bars (`BrowserTopBar`, `SettingsTopAppBar`) so scrolling content blurs beneath them.
   - Converted Bento analytics dashboard cards (`WatchStatsScreen`) to liquid glass containers.
   - Added specular top-lit glass borders to thumbnail duration and media badges (`cardOverlay`).
-- **Launcher Icon Perfection & OEM Fix:**
-  - Switched launcher icon canvas to solid jet-black (`#FF000000`), completely resolving Material You wallpaper pastel tinting issues on OEM launchers.
-  - Enlarged center-core electric cyan playhead by 25% with balanced 18px lateral margins for high contrast at small display sizes.
-  - Synchronized native Android splash screen assets and vector branding.
+- **New "Solar Amber Gold" Cyber Prism App Icon:**
+  - Upgraded the default launcher icon to the futuristic **Cyber Prism** design at 100% full-scale geometry.
+  - Removed all blurry diffuse neon glow in favor of a clean, razor-sharp vector aesthetic with metallic specular bevels, dark chamfer shadows, and solid equalizer bars.
+  - Introduced the **Solar Amber Gold** palette: a liquid gold (`#FFD700`) and deep amber (`#FF9100`) crystal prism playhead with diamond white facet lines, contrasting against a rich ruby crimson laser frame.
+  - Retained solid pitch-black (`#000000`) background canvas to prevent OEM launcher wallpaper pastel tinting.
+  - Fully synchronized the Android 13+ Material You monochrome themed icon asset.
 - **Homescreen Widget Font Fix:**
   - Replaced legacy `@font/gflex_variable` layout references with system `sans-serif` typography, resolving resource linking errors.
 
