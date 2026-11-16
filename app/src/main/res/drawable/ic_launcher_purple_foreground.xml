@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Neon Crimson Sonic (Audio + Video) with Center-Core Electric Cyan/Blue Playhead -->
+<!-- Neon Crimson Sonic (Audio + Video) with High-Contrast Center-Core Electric Cyan Playhead -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
@@ -7,15 +7,15 @@
     android:viewportWidth="512"
     android:viewportHeight="512">
 
-    <!-- Scaled to stay safely within Android adaptive launcher safe area (center circle) -->
+    <!-- Scaled safely inside Android adaptive launcher circular safe-zone -->
     <group
         android:name="launcher_bounds"
         android:pivotX="256"
         android:pivotY="256"
-        android:scaleX="0.74"
-        android:scaleY="0.74">
+        android:scaleX="0.75"
+        android:scaleY="0.75">
 
-        <!-- Outer Crimson Play Frame (Video) & Audio Frequency Bars -->
+        <!-- Outer Crimson Play Frame & Audio Equalizer Bars -->
         <group
             android:name="logo_main"
             android:pivotX="256"
@@ -24,7 +24,7 @@
             <!-- Outer Play Frame: Wide Ambient Neon Bloom -->
             <path
                 android:pathData="M 148,116 C 148,94 172,80 192,91 L 416,226 C 435,238 435,266 416,278 L 192,413 C 172,424 148,410 148,388 Z"
-                android:strokeWidth="36"
+                android:strokeWidth="38"
                 android:strokeColor="#25ff2a6d"
                 android:strokeLineJoin="round"
                 android:strokeLineCap="round" />
@@ -33,28 +33,11 @@
             <path
                 android:pathData="M 148,116 C 148,94 172,80 192,91 L 416,226 C 435,238 435,266 416,278 L 192,413 C 172,424 148,410 148,388 Z"
                 android:strokeWidth="24"
-                android:strokeColor="#50ff2a6d"
+                android:strokeColor="#55ff2a6d"
                 android:strokeLineJoin="round"
                 android:strokeLineCap="round" />
 
-            <!-- Outer Play Frame: Soft Luminous Crimson Fill -->
-            <path
-                android:pathData="M 148,116 C 148,94 172,80 192,91 L 416,226 C 435,238 435,266 416,278 L 192,413 C 172,424 148,410 148,388 Z">
-                <aapt:attr name="android:fillColor">
-                    <gradient
-                        android:type="linear"
-                        android:startX="120"
-                        android:startY="90"
-                        android:endX="400"
-                        android:endY="400">
-                        <item android:offset="0.0" android:color="#28ff2a6d" />
-                        <item android:offset="0.5" android:color="#1ce11d48" />
-                        <item android:offset="1.0" android:color="#10881337" />
-                    </gradient>
-                </aapt:attr>
-            </path>
-
-            <!-- Outer Play Frame: Radiant Neon Crimson Stroke -->
+            <!-- Outer Play Frame: Core Radiant Neon Stroke -->
             <path
                 android:pathData="M 148,116 C 148,94 172,80 192,91 L 416,226 C 435,238 435,266 416,278 L 192,413 C 172,424 148,410 148,388 Z"
                 android:strokeWidth="16"
@@ -85,77 +68,77 @@
             <!-- Audio Frequency Bars (Music Equalizer) -->
             <!-- Bar 1 -->
             <path
-                android:pathData="M 200,218 C 206.63,218 212,223.37 212,230 L 212,282 C 212,288.63 206.63,294 200,294 C 193.37,294 188,288.63 188,282 L 188,230 C 188,223.37 193.37,218 200,218 Z"
+                android:pathData="M 203,221 C 209.07,221 214,225.93 214,232 L 214,280 C 214,286.07 209.07,291 203,291 C 196.93,291 192,286.07 192,280 L 192,232 C 192,225.93 196.93,221 203,221 Z"
                 android:strokeWidth="8"
                 android:strokeColor="#30ff2a6d"
                 android:strokeLineJoin="round" />
             <path
-                android:pathData="M 200,218 C 206.63,218 212,223.37 212,230 L 212,282 C 212,288.63 206.63,294 200,294 C 193.37,294 188,288.63 188,282 L 188,230 C 188,223.37 193.37,218 200,218 Z"
+                android:pathData="M 203,221 C 209.07,221 214,225.93 214,232 L 214,280 C 214,286.07 209.07,291 203,291 C 196.93,291 192,286.07 192,280 L 192,232 C 192,225.93 196.93,221 203,221 Z"
                 android:fillColor="#a6ff2a6d" />
 
             <!-- Bar 2 -->
             <path
-                android:pathData="M 236,174 C 242.63,174 248,179.37 248,186 L 248,326 C 248,332.63 242.63,338 236,338 C 229.37,338 224,332.63 224,326 L 224,186 C 224,179.37 229.37,174 236,174 Z"
+                android:pathData="M 239,181 C 245.07,181 250,185.93 250,192 L 250,320 C 250,326.07 245.07,331 239,331 C 232.93,331 228,326.07 228,320 L 228,192 C 228,185.93 232.93,181 239,181 Z"
                 android:strokeWidth="10"
                 android:strokeColor="#38ff2a6d"
                 android:strokeLineJoin="round" />
             <path
-                android:pathData="M 236,174 C 242.63,174 248,179.37 248,186 L 248,326 C 248,332.63 242.63,338 236,338 C 229.37,338 224,332.63 224,326 L 224,186 C 224,179.37 229.37,174 236,174 Z"
+                android:pathData="M 239,181 C 245.07,181 250,185.93 250,192 L 250,320 C 250,326.07 245.07,331 239,331 C 232.93,331 228,326.07 228,320 L 228,192 C 228,185.93 232.93,181 239,181 Z"
                 android:fillColor="#c8ff2a6d" />
 
             <!-- Bar 3 -->
             <path
-                android:pathData="M 344,196 C 350.63,196 356,201.37 356,208 L 356,304 C 356,310.63 350.63,316 344,316 C 337.37,316 332,310.63 332,304 L 332,208 C 332,201.37 337.37,196 344,196 Z"
+                android:pathData="M 356,206 C 362.07,206 367,210.93 367,217 L 367,295 C 367,301.07 362.07,306 356,306 C 349.93,306 345,301.07 345,295 L 345,217 C 345,210.93 349.93,206 356,206 Z"
                 android:strokeWidth="10"
                 android:strokeColor="#38ff2a6d"
                 android:strokeLineJoin="round" />
             <path
-                android:pathData="M 344,196 C 350.63,196 356,201.37 356,208 L 356,304 C 356,310.63 350.63,316 344,316 C 337.37,316 332,310.63 332,304 L 332,208 C 332,201.37 337.37,196 344,196 Z"
+                android:pathData="M 356,206 C 362.07,206 367,210.93 367,217 L 367,295 C 367,301.07 362.07,306 356,306 C 349.93,306 345,301.07 345,295 L 345,217 C 345,210.93 349.93,206 356,206 Z"
                 android:fillColor="#c8ff2a6d" />
 
             <!-- Bar 4 -->
             <path
-                android:pathData="M 380,238 C 386.63,238 392,243.37 392,250 L 392,262 C 392,268.63 386.63,274 380,274 C 373.37,274 368,268.63 368,262 L 368,250 C 368,243.37 373.37,238 380,238 Z"
+                android:pathData="M 392,236 C 398.07,236 403,240.93 403,247 L 403,265 C 403,271.07 398.07,276 392,276 C 385.93,276 381,271.07 381,265 L 381,247 C 381,240.93 385.93,236 392,236 Z"
                 android:strokeWidth="8"
                 android:strokeColor="#30ff2a6d"
                 android:strokeLineJoin="round" />
             <path
-                android:pathData="M 380,238 C 386.63,238 392,243.37 392,250 L 392,262 C 392,268.63 386.63,274 380,274 C 373.37,274 368,268.63 368,262 L 368,250 C 368,243.37 373.37,238 380,238 Z"
+                android:pathData="M 392,236 C 398.07,236 403,240.93 403,247 L 403,265 C 403,271.07 398.07,276 392,276 C 385.93,276 381,271.07 381,265 L 381,247 C 381,240.93 385.93,236 392,236 Z"
                 android:fillColor="#a6ff2a6d" />
         </group>
 
-        <!-- Center-Core Electric Cyan / Blue Playhead Icon: Centered at (290, 256) -->
+        <!-- Bold Center-Core Electric Cyan / Blue Playhead Icon: Scaled & Centered at (295, 256) -->
         <group
             android:name="logo_tip"
-            android:pivotX="290"
+            android:pivotX="295"
             android:pivotY="256">
 
             <!-- Cyan Neon Glow Aura: Wide -->
             <path
-                android:pathData="M 266,235 C 266,227 275,222 282,226 L 310,247 C 317,251 317,261 310,265 L 282,286 C 275,290 266,285 266,277 Z"
-                android:strokeWidth="24"
+                android:pathData="M 265,231 C 265,221 276,215 284,220 L 322,245 C 330,250 330,262 322,267 L 284,292 C 276,297 265,291 265,281 Z"
+                android:strokeWidth="28"
                 android:strokeColor="#3000f5ff"
                 android:strokeLineJoin="round"
                 android:strokeLineCap="round" />
 
             <!-- Cyan Neon Glow Aura: Medium -->
             <path
-                android:pathData="M 266,235 C 266,227 275,222 282,226 L 310,247 C 317,251 317,261 310,265 L 282,286 C 275,290 266,285 266,277 Z"
-                android:strokeWidth="14"
+                android:pathData="M 265,231 C 265,221 276,215 284,220 L 322,245 C 330,250 330,262 322,267 L 284,292 C 276,297 265,291 265,281 Z"
+                android:strokeWidth="16"
                 android:strokeColor="#6500f5ff"
                 android:strokeLineJoin="round"
                 android:strokeLineCap="round" />
 
             <!-- Center Core Gradient Fill -->
             <path
-                android:pathData="M 266,235 C 266,227 275,222 282,226 L 310,247 C 317,251 317,261 310,265 L 282,286 C 275,290 266,285 266,277 Z">
+                android:pathData="M 265,231 C 265,221 276,215 284,220 L 322,245 C 330,250 330,262 322,267 L 284,292 C 276,297 265,291 265,281 Z">
                 <aapt:attr name="android:fillColor">
                     <gradient
                         android:type="linear"
-                        android:startX="266"
-                        android:startY="226"
-                        android:endX="314"
-                        android:endY="286">
+                        android:startX="265"
+                        android:startY="220"
+                        android:endX="325"
+                        android:endY="290">
                         <item android:offset="0.0" android:color="#ff38bdf8" />
                         <item android:offset="0.45" android:color="#ff00f5ff" />
                         <item android:offset="1.0" android:color="#ff2563eb" />
@@ -165,9 +148,9 @@
 
             <!-- Crisp Specular Rim -->
             <path
-                android:pathData="M 266,235 C 266,227 275,222 282,226 L 310,247 C 317,251 317,261 310,265 L 282,286 C 275,290 266,285 266,277 Z"
-                android:strokeWidth="2.5"
-                android:strokeColor="#e0f2fe"
+                android:pathData="M 265,231 C 265,221 276,215 284,220 L 322,245 C 330,250 330,262 322,267 L 284,292 C 276,297 265,291 265,281 Z"
+                android:strokeWidth="3"
+                android:strokeColor="#f0f9ff"
                 android:strokeLineJoin="round"
                 android:strokeLineCap="round" />
         </group>
