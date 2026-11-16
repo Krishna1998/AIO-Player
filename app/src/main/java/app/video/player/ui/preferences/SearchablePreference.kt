@@ -1520,17 +1520,6 @@ object SearchablePreferences {
       )
       addSearchEntries(
         category = "Appearance",
-        screen = AppIconPreferencesScreen,
-        anchorItemIndex = 0,
-        SearchEntrySpec(R.string.pref_app_icon_title, listOf("app", "launcher", "icon", "logo", "purple")),
-        SearchEntrySpec(R.string.app_icon_section_logo, listOf("app", "icon", "logo", "mark"), R.string.pref_app_icon_title),
-        SearchEntrySpec(R.string.app_icon_custom_background, listOf("app", "icon", "custom", "color", "background"), R.string.pref_app_icon_title),
-        SearchEntrySpec(R.string.app_icon_use_wallpaper_colors, listOf("app", "icon", "wallpaper", "colors"), R.string.pref_app_icon_title),
-        SearchEntrySpec(R.string.app_icon_create_custom_shortcut, listOf("app", "icon", "custom", "home", "shortcut"), R.string.pref_app_icon_title),
-      )
-
-      addSearchEntries(
-        category = "Appearance",
         screen = PlayerControlsPreferencesScreen,
         anchorItemIndex = 7,
         SearchEntrySpec(R.string.pref_custom_time_label, listOf("custom", "time", "controls", "timeout"), R.string.pref_player_display_hide_player_control_time),

@@ -279,7 +279,6 @@ object PreferencesScreen : Screen {
                 ).joinToString(", "),
               icon = Icons.RoundedFilled.BlurOn,
               screen = LiquidGlassPreferencesScreen,
-              experimental = true,
             ),
           ),
       ),
