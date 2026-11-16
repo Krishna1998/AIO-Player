@@ -2,6 +2,19 @@
 
 These notes are written in plain English and focus on what changed for real use.
 
+## 1.0.1
+
+- **Interactive Weekly Activity Chart:**
+  - Made every day in the "Last 7 days" activity chart clickable to inspect individual watch times.
+  - Added dynamic status pill showing exact watch time for the selected weekday, yesterday, or today.
+  - Added smooth highlight animation and expanding bar indicators with accent borders on selection.
+  - Added quick tap-to-reset back to Today.
+- **Separate Video & Audio Statistics:**
+  - Added dedicated Video and Audio tabs to the Most Watched leaderboard in Watch Stats.
+  - Accurately tracks audio-only playback versus video watch time in `WatchStatsRepository`.
+- **Playback Speed Improvements:**
+  - Added audio playback speed persistence and configurable speed presets.
+
 ## 1.0.0
 
 - Release version 1.0.0 (initial release).
