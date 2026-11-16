@@ -1,63 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Material You Monochrome icon for Android 13+ themed icons (100% Cyber Prism) -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="512"
-    android:viewportHeight="512">
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="512" android:viewportHeight="512">
 
-    <group
-        android:name="launcher_bounds"
-        android:pivotX="256"
-        android:pivotY="256"
-        android:scaleX="0.95"
-        android:scaleY="0.95">
+    <group android:name="launcher_bounds" android:pivotX="256" android:pivotY="256" android:scaleX="0.95" android:scaleY="0.95">
 
         <!-- Outer Play Frame -->
-        <path
-            android:pathData="M 174,105 L 400,236 C 422,249 422,263 400,276 L 174,407 C 154,418 139,408 139,385 L 139,127 C 139,104 154,94 174,105 Z"
-            android:strokeWidth="26"
-            android:strokeColor="#FFFFFFFF"
-            android:strokeLineJoin="round"
-            android:strokeLineCap="round" />
+        <path android:pathData="M 174,105 L 400,236 C 422,249 422,263 400,276 L 174,407 C 154,418 139,408 139,385 L 139,127 C 139,104 154,94 174,105 Z" android:strokeWidth="26" android:strokeColor="#FFFFFFFF" android:strokeLineJoin="round" android:strokeLineCap="round" />
 
         <!-- Circuit Trace Nodes -->
-        <path
-            android:pathData="M 139,182 A 6,6 0 1,1 138.9,182 Z M 139,318 A 6,6 0 1,1 138.9,318 Z"
-            android:fillColor="#FFFFFFFF" />
+        <path android:pathData="M 139,182 A 6,6 0 1,1 138.9,182 Z M 139,318 A 6,6 0 1,1 138.9,318 Z" android:fillColor="#FFFFFFFF" />
 
         <!-- Circuit Trace Horizontal Lines -->
-        <path
-            android:pathData="M 139,188 L 172,188 M 139,324 L 172,324"
-            android:strokeColor="#FFFFFFFF"
-            android:strokeWidth="3.5"
-            android:strokeLineCap="round" />
+        <path android:pathData="M 139,188 L 172,188 M 139,324 L 172,324" android:strokeColor="#FFFFFFFF" android:strokeWidth="3.5" android:strokeLineCap="round" />
 
         <!-- Digital Equalizer Bars -->
-        <path
-            android:pathData="M 192,218 L 192,294"
-            android:strokeColor="#FFFFFFFF"
-            android:strokeWidth="16"
-            android:strokeLineCap="round" />
-        <path
-            android:pathData="M 220.5,174.5 L 220.5,337.5"
-            android:strokeColor="#FFFFFFFF"
-            android:strokeWidth="17"
-            android:strokeLineCap="round" />
-        <path
-            android:pathData="M 350.5,204.5 L 350.5,307.5"
-            android:strokeColor="#FFFFFFFF"
-            android:strokeWidth="17"
-            android:strokeLineCap="round" />
-        <path
-            android:pathData="M 378,230 L 378,282"
-            android:strokeColor="#FFFFFFFF"
-            android:strokeWidth="16"
-            android:strokeLineCap="round" />
+        <path android:pathData="M 192,218 L 192,294" android:strokeColor="#FFFFFFFF" android:strokeWidth="16" android:strokeLineCap="round" />
+        <path android:pathData="M 220.5,174.5 L 220.5,337.5" android:strokeColor="#FFFFFFFF" android:strokeWidth="17" android:strokeLineCap="round" />
+        <path android:pathData="M 350.5,204.5 L 350.5,307.5" android:strokeColor="#FFFFFFFF" android:strokeWidth="17" android:strokeLineCap="round" />
+        <path android:pathData="M 378,230 L 378,282" android:strokeColor="#FFFFFFFF" android:strokeWidth="16" android:strokeLineCap="round" />
 
         <!-- Center Crystal Prism Playhead -->
-        <path
-            android:pathData="M 256,222 L 324,256 L 256,290 Z"
-            android:fillColor="#FFFFFFFF" />
+        <path android:pathData="M 256,222 L 324,256 L 256,290 Z" android:fillColor="#FFFFFFFF" />
     </group>
 </vector>

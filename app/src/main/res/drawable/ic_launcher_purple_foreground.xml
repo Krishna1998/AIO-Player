@@ -1,48 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Clean Non-Neon Cyber Prism: Solar Amber Gold with Metallic Crimson Bevels -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aapt="http://schemas.android.com/aapt"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="512"
-    android:viewportHeight="512">
+    xmlns:aapt="http://schemas.android.com/aapt" android:width="108dp" android:height="108dp" android:viewportWidth="512" android:viewportHeight="512">
 
     <!-- Scaled safely at 95% geometry -->
-    <group
-        android:name="launcher_bounds"
-        android:pivotX="256"
-        android:pivotY="256"
-        android:scaleX="0.95"
-        android:scaleY="0.95">
+    <group android:name="launcher_bounds" android:pivotX="256" android:pivotY="256" android:scaleX="0.95" android:scaleY="0.95">
 
         <!-- Outer Alignment Notches -->
-        <path
-            android:pathData="M 120,256 L 140,256 M 428,256 L 448,256 M 260,66 L 260,86 M 260,426 L 260,446"
-            android:strokeColor="#99E11D48"
-            android:strokeWidth="3"
-            android:strokeLineCap="round" />
+        <path android:pathData="M 120,256 L 140,256 M 428,256 L 448,256 M 260,66 L 260,86 M 260,426 L 260,446" android:strokeColor="#99E11D48" android:strokeWidth="3" android:strokeLineCap="round" />
 
         <!-- Outer Play Frame: Dark Chamfer Shadow Base -->
-        <path
-            android:pathData="M 174,105 L 400,236 C 422,249 422,263 400,276 L 174,407 C 154,418 139,408 139,385 L 139,127 C 139,104 154,94 174,105 Z"
-            android:strokeColor="#4C0519"
-            android:strokeWidth="34"
-            android:strokeLineJoin="round"
-            android:strokeLineCap="round" />
+        <path android:pathData="M 174,105 L 400,236 C 422,249 422,263 400,276 L 174,407 C 154,418 139,408 139,385 L 139,127 C 139,104 154,94 174,105 Z" android:strokeColor="#4C0519" android:strokeWidth="34" android:strokeLineJoin="round" android:strokeLineCap="round" />
 
         <!-- Outer Play Frame: Primary Crimson Laser Stroke -->
-        <path
-            android:pathData="M 174,105 L 400,236 C 422,249 422,263 400,276 L 174,407 C 154,418 139,408 139,385 L 139,127 C 139,104 154,94 174,105 Z"
-            android:strokeWidth="26"
-            android:strokeLineJoin="round"
-            android:strokeLineCap="round">
+        <path android:pathData="M 174,105 L 400,236 C 422,249 422,263 400,276 L 174,407 C 154,418 139,408 139,385 L 139,127 C 139,104 154,94 174,105 Z" android:strokeWidth="26" android:strokeLineJoin="round" android:strokeLineCap="round">
             <aapt:attr name="android:strokeColor">
-                <gradient
-                    android:type="linear"
-                    android:startX="134"
-                    android:startY="90"
-                    android:endX="424"
-                    android:endY="400">
+                <gradient android:type="linear" android:startX="134" android:startY="90" android:endX="424" android:endY="400">
                     <item android:offset="0.0" android:color="#FFFF1A5B" />
                     <item android:offset="0.4" android:color="#FFE11D48" />
                     <item android:offset="1.0" android:color="#FF9F1239" />
@@ -51,18 +24,9 @@
         </path>
 
         <!-- Outer Play Frame: Specular Metallic Bevel Ridge -->
-        <path
-            android:pathData="M 174,105 L 400,236 C 422,249 422,263 400,276 L 174,407 C 154,418 139,408 139,385 L 139,127 C 139,104 154,94 174,105 Z"
-            android:strokeWidth="3.5"
-            android:strokeLineJoin="round"
-            android:strokeLineCap="round">
+        <path android:pathData="M 174,105 L 400,236 C 422,249 422,263 400,276 L 174,407 C 154,418 139,408 139,385 L 139,127 C 139,104 154,94 174,105 Z" android:strokeWidth="3.5" android:strokeLineJoin="round" android:strokeLineCap="round">
             <aapt:attr name="android:strokeColor">
-                <gradient
-                    android:type="linear"
-                    android:startX="144"
-                    android:startY="95"
-                    android:endX="424"
-                    android:endY="260">
+                <gradient android:type="linear" android:startX="144" android:startY="95" android:endX="424" android:endY="260">
                     <item android:offset="0.0" android:color="#D9FFFFFF" />
                     <item android:offset="0.5" android:color="#80FFA4BA" />
                     <item android:offset="1.0" android:color="#1AFFFFFF" />
@@ -71,82 +35,37 @@
         </path>
 
         <!-- Circuit Trace Nodes -->
-        <path
-            android:pathData="M 139,182 A 6,6 0 1,1 138.9,182 Z M 139,318 A 6,6 0 1,1 138.9,318 Z"
-            android:fillColor="#FFFFB800" />
+        <path android:pathData="M 139,182 A 6,6 0 1,1 138.9,182 Z M 139,318 A 6,6 0 1,1 138.9,318 Z" android:fillColor="#FFFFB800" />
 
         <!-- Circuit Trace Horizontal Lines -->
-        <path
-            android:pathData="M 139,188 L 172,188 M 139,324 L 172,324"
-            android:strokeColor="#FFFFB800"
-            android:strokeWidth="3.5"
-            android:strokeLineCap="round" />
+        <path android:pathData="M 139,188 L 172,188 M 139,324 L 172,324" android:strokeColor="#FFFFB800" android:strokeWidth="3.5" android:strokeLineCap="round" />
 
         <!-- Digital Equalizer Bars (Crisp Solid Colors) -->
         <!-- Bar 1 (Left Outer) -->
-        <path
-            android:pathData="M 192,218 L 192,294"
-            android:strokeColor="#FFE11D48"
-            android:strokeWidth="16"
-            android:strokeLineCap="round" />
+        <path android:pathData="M 192,218 L 192,294" android:strokeColor="#FFE11D48" android:strokeWidth="16" android:strokeLineCap="round" />
 
         <!-- Bar 2 (Left Inner) -->
-        <path
-            android:pathData="M 220.5,174.5 L 220.5,337.5"
-            android:strokeColor="#FFFF1A5B"
-            android:strokeWidth="17"
-            android:strokeLineCap="round" />
+        <path android:pathData="M 220.5,174.5 L 220.5,337.5" android:strokeColor="#FFFF1A5B" android:strokeWidth="17" android:strokeLineCap="round" />
 
         <!-- Bar 3 (Right Inner) -->
-        <path
-            android:pathData="M 350.5,204.5 L 350.5,307.5"
-            android:strokeColor="#FFBE123C"
-            android:strokeWidth="17"
-            android:strokeLineCap="round" />
+        <path android:pathData="M 350.5,204.5 L 350.5,307.5" android:strokeColor="#FFBE123C" android:strokeWidth="17" android:strokeLineCap="round" />
 
         <!-- Bar 4 (Right Outer) -->
-        <path
-            android:pathData="M 378,230 L 378,282"
-            android:strokeColor="#FF9F1239"
-            android:strokeWidth="16"
-            android:strokeLineCap="round" />
+        <path android:pathData="M 378,230 L 378,282" android:strokeColor="#FF9F1239" android:strokeWidth="16" android:strokeLineCap="round" />
 
         <!-- Floating 3D Crystal Prism Playhead (Solar Amber Gold) -->
-        <group
-            android:name="solar_playhead"
-            android:pivotX="290"
-            android:pivotY="256">
+        <group android:name="solar_playhead" android:pivotX="290" android:pivotY="256">
 
             <!-- Playhead 3D Drop Shadow -->
-            <path
-                android:pathData="M 256,222 L 324,256 L 256,290 Z"
-                android:fillColor="#99000000"
-                android:strokeColor="#99000000"
-                android:strokeWidth="12"
-                android:strokeLineJoin="round" />
+            <path android:pathData="M 256,222 L 324,256 L 256,290 Z" android:fillColor="#99000000" android:strokeColor="#99000000" android:strokeWidth="12" android:strokeLineJoin="round" />
 
             <!-- Solid Amber Chamfer Stroke -->
-            <path
-                android:pathData="M 256,222 L 324,256 L 256,290 Z"
-                android:strokeColor="#FFFF9100"
-                android:strokeWidth="10"
-                android:strokeLineJoin="round"
-                android:strokeLineCap="round" />
+            <path android:pathData="M 256,222 L 324,256 L 256,290 Z" android:strokeColor="#FFFF9100" android:strokeWidth="10" android:strokeLineJoin="round" android:strokeLineCap="round" />
 
             <!-- Crystal Prism Body Fill -->
-            <path
-                android:pathData="M 256,222 L 324,256 L 256,290 Z"
-                android:strokeColor="#66FFFFFF"
-                android:strokeWidth="1.5"
-                android:strokeLineJoin="round"
-                android:strokeLineCap="round">
+            <path android:pathData="M 256,222 L 324,256 L 256,290 Z" android:strokeColor="#66FFFFFF" android:strokeWidth="1.5" android:strokeLineJoin="round" android:strokeLineCap="round">
                 <aapt:attr name="android:fillColor">
-                    <gradient
-                        android:type="linear"
-                        android:startX="249"
-                        android:startY="205"
-                        android:endX="334"
-                        android:endY="295">
+                    <gradient android:type="linear" android:startX="249" android:startY="205" android:endX="334" android:endY="295">
                         <item android:offset="0.0" android:color="#FFFFF9D2" />
                         <item android:offset="0.35" android:color="#FFFFD700" />
                         <item android:offset="1.0" android:color="#FFFF9100" />
@@ -155,16 +74,10 @@
             </path>
 
             <!-- Precision Isometric Facet Line -->
-            <path
-                android:pathData="M 256,256 L 324,256"
-                android:strokeColor="#FFFFFFFF"
-                android:strokeWidth="3"
-                android:strokeLineCap="round" />
+            <path android:pathData="M 256,256 L 324,256" android:strokeColor="#FFFFFFFF" android:strokeWidth="3" android:strokeLineCap="round" />
 
             <!-- Diamond Tip Specular Spark -->
-            <path
-                android:pathData="M 324,251.5 A 4.5,4.5 0 1,1 323.9,251.5 Z"
-                android:fillColor="#FFFFFFFF" />
+            <path android:pathData="M 324,251.5 A 4.5,4.5 0 1,1 323.9,251.5 Z" android:fillColor="#FFFFFFFF" />
         </group>
     </group>
 </vector>
