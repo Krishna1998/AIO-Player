@@ -2,6 +2,11 @@
 
 These notes are written in plain English and focus on what changed for real use.
 
+## 1.0.0
+
+- Release version 1.0.0 (initial release).
+- High-performance, lightweight video and music player.
+
 ## 5.1.0
 
 - Release version 5.1.0.

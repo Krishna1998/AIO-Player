@@ -35,7 +35,7 @@ jobs:
       GRADLE_FLAVOR: ${{ matrix.distribution.gradle }}
       APK_DIR: ${{ matrix.distribution.dir }}
       APK_ABIS: ${{ matrix.distribution.abis }}
-      CUSTOM_APPLICATION_ID: com.videoplayer.beta
+      CUSTOM_APPLICATION_ID: video.music.playerbeta
 
     steps:
       - name: Checkout repository

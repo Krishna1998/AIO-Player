@@ -23,7 +23,7 @@ val sideloadDistributions = setOf("standard")
 // AGP cannot build an app bundle while ABI splits produce multiple APKs (issuetracker 402800800).
 val isBundleBuild =
   gradle.startParameter.taskNames.any { it.substringAfterLast(':').startsWith("bundle") }
-val releaseVersionCode = 510
+val releaseVersionCode = 100
 val versionCodeBandSize = 10_000
 val stableVersionCode = releaseVersionCode * versionCodeBandSize + (versionCodeBandSize - 1)
 val previewVersionCode =
@@ -49,14 +49,14 @@ android {
     buildConfigField("boolean", "MEASURE_CONFIGURED", "false")
     val customAppId = (project.findProperty("customApplicationId") as? String)?.takeIf { it.isNotBlank() }
       ?: System.getenv("CUSTOM_APPLICATION_ID")?.takeIf { it.isNotBlank() }
-    applicationId = customAppId ?: "app.video.player"
+    applicationId = customAppId ?: "video.music.player"
     minSdk = 26
     targetSdk = 36
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     // Stable occupies the top of its version band. Preview uses the next band's commit-count
     // offset, so Stable -> Preview -> newer Preview -> next Stable is always an Android upgrade.
     versionCode = stableVersionCode
-    versionName = "5.1.0"
+    versionName = "1.0.0"
 
     vectorDrawables {
       useSupportLibrary = true
