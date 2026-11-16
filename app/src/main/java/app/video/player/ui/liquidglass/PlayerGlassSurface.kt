@@ -9,6 +9,7 @@ import androidx.compose.foundation.border
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -26,7 +27,7 @@ internal val LocalPlayerGlassSurfaceActive = staticCompositionLocalOf { false }
 
 /** Shared material for player sheets and movable panels; one optical layer per container. */
 @Composable
-internal fun Modifier.playerGlassSurface(
+fun Modifier.playerGlassSurface(
   backdrop: Backdrop?,
   shape: Shape,
   containerColor: Color,
@@ -89,5 +90,21 @@ internal fun Modifier.playerGlassSurface(
     shadow = { rememberedShadow },
     innerShadow = { rememberedInnerShadow },
     onDrawSurface = { drawShapeTint(shape, tint) },
+  )
+}
+
+/** Universal glass surface modifier for app-wide components (dialogs, cards, sheets, bars). */
+@Composable
+fun Modifier.appGlassSurface(
+  shape: Shape = MaterialTheme.shapes.extraLarge,
+  containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh,
+  enabled: Boolean = liquidGlassActive(),
+): Modifier {
+  if (!enabled) return this
+  return playerGlassSurface(
+    backdrop = LocalKyantPlayerBackdrop.current,
+    shape = shape,
+    containerColor = containerColor,
+    enabled = enabled,
   )
 }

@@ -59,6 +59,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.key.onPreviewKeyEvent
@@ -83,6 +84,8 @@ import app.video.player.preferences.AppearancePreferences
 import app.video.player.preferences.preference.collectAsState
 import app.video.player.ui.icons.Icon
 import app.video.player.ui.icons.Icons
+import app.video.player.ui.liquidglass.appGlassSurface
+import app.video.player.ui.liquidglass.liquidGlassActive
 import app.video.player.ui.player.controls.components.tvFocusHighlight
 import app.video.player.ui.theme.DarkMode
 import app.video.player.ui.theme.AppMotion
@@ -344,11 +347,20 @@ private fun NormalTopBar(
     },
   )
 
+  val glassActive = liquidGlassActive()
+
   TopAppBar(
+    modifier = if (glassActive && !wallpaperActive) {
+      Modifier.appGlassSurface(
+        shape = RectangleShape,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.82f),
+        enabled = true,
+      )
+    } else Modifier,
     colors =
       colors ?: TopAppBarDefaults.topAppBarColors(
         containerColor =
-          if (wallpaperActive) {
+          if (wallpaperActive || glassActive) {
             Color.Transparent
           } else if (MaterialTheme.colorScheme.background == Color.Black) {
             Color.Black
@@ -564,11 +576,20 @@ private fun SelectionTopBar(
   val selectionDropdownShape = RoundedCornerShape(16.dp)
   val selectionActionCount = listOfNotNull(onSelectAll, onInvertSelection).size + 1
 
+  val glassActive = liquidGlassActive()
+
   TopAppBar(
+    modifier = if (glassActive && !wallpaperActive) {
+      Modifier.appGlassSurface(
+        shape = RectangleShape,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.82f),
+        enabled = true,
+      )
+    } else Modifier,
     colors =
       colors ?: TopAppBarDefaults.topAppBarColors(
         containerColor =
-          if (wallpaperActive) {
+          if (wallpaperActive || glassActive) {
             Color.Transparent
           } else if (MaterialTheme.colorScheme.background == Color.Black) {
             Color.Black

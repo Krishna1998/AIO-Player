@@ -36,6 +36,8 @@ import app.video.player.ui.theme.AppConnectedShapeTokens
 import app.video.player.ui.theme.ConnectedLayout
 import app.video.player.ui.theme.appDialogEnter
 import app.video.player.ui.theme.rememberConnectedShape
+import app.video.player.ui.liquidglass.appGlassSurface
+import app.video.player.ui.liquidglass.liquidGlassActive
 
 internal enum class DialogActionEmphasis { None, Primary, Secondary }
 internal val LocalDialogActionEmphasis = staticCompositionLocalOf { DialogActionEmphasis.None }
@@ -61,17 +63,24 @@ fun AppAlertDialog(
   singleRowActions: Boolean = false,
 ) {
   val colors = MaterialTheme.colorScheme
+  val glassActive = liquidGlassActive()
   val maximumHeight = (LocalConfiguration.current.screenHeightDp.dp - 48.dp).coerceAtLeast(120.dp)
   val hasHeader = title != null || icon != null
   val sections = (if (hasHeader) 1 else 0) + (if (text != null) 1 else 0) + 1
   val bodyIndex = if (hasHeader) 1 else 0
   BasicAlertDialog(onDismissRequest = onDismissRequest, modifier = modifier, properties = properties) {
     Surface(
-      modifier = Modifier.appDialogEnter(),
+      modifier = Modifier
+        .appDialogEnter()
+        .appGlassSurface(
+          shape = shape,
+          containerColor = containerColor,
+          enabled = glassActive,
+        ),
       shape = shape,
-      color = containerColor,
-      border = BorderStroke(1.dp, colors.outlineVariant.copy(alpha = 0.45f)),
-      tonalElevation = tonalElevation,
+      color = if (glassActive) Color.Transparent else containerColor,
+      border = if (glassActive) null else BorderStroke(1.dp, colors.outlineVariant.copy(alpha = 0.45f)),
+      tonalElevation = if (glassActive) 0.dp else tonalElevation,
     ) {
       Column(
         modifier = Modifier.widthIn(min = 280.dp, max = 560.dp).heightIn(max = maximumHeight).padding(8.dp),
@@ -81,7 +90,7 @@ fun AppAlertDialog(
           Surface(
             modifier = Modifier.fillMaxWidth(),
             shape = rememberConnectedShape(0, sections, ConnectedLayout.Vertical),
-            color = containerColor,
+            color = if (glassActive) Color.Transparent else containerColor,
             contentColor = titleContentColor,
           ) {
             Row(
@@ -106,7 +115,7 @@ fun AppAlertDialog(
           Surface(
             modifier = Modifier.fillMaxWidth().weight(1f, fill = false),
             shape = rememberConnectedShape(bodyIndex, sections, ConnectedLayout.Vertical),
-            color = containerColor,
+            color = if (glassActive) Color.Transparent else containerColor,
             contentColor = textContentColor,
           ) {
             Box(Modifier.padding(20.dp)) {
@@ -117,7 +126,7 @@ fun AppAlertDialog(
         Surface(
           modifier = Modifier.fillMaxWidth(),
           shape = rememberConnectedShape(sections - 1, sections, ConnectedLayout.Vertical),
-          color = containerColor,
+          color = if (glassActive) Color.Transparent else containerColor,
         ) {
           if (singleRowActions) {
             // Keep Cancel beside split confirmations while their status label changes width.

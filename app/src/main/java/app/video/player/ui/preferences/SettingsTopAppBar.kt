@@ -14,11 +14,15 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import app.video.player.R
 import app.video.player.ui.icons.Icon
 import app.video.player.ui.icons.Icons
+import app.video.player.ui.liquidglass.appGlassSurface
+import app.video.player.ui.liquidglass.liquidGlassActive
 import app.video.player.ui.utils.LocalShowSettingsBackArrow
 
 /** The floating player panel already owns system/keyboard insets; embedded pages need only their content padding. */
@@ -37,7 +41,20 @@ internal fun SettingsTopAppBar(
   windowInsets: WindowInsets = TopAppBarDefaults.windowInsets,
 ) {
   if (LocalPlayerSettingsPanel.current) return
+  val glassActive = liquidGlassActive()
   TopAppBar(
+    modifier = if (glassActive) {
+      Modifier.appGlassSurface(
+        shape = RectangleShape,
+        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.82f),
+        enabled = true,
+      )
+    } else Modifier,
+    colors = if (glassActive) {
+      TopAppBarDefaults.topAppBarColors(
+        containerColor = Color.Transparent,
+      )
+    } else TopAppBarDefaults.topAppBarColors(),
     title = {
       Text(
         modifier = titleModifier,

@@ -508,10 +508,10 @@ object AudioPreferencesScreen : Screen {
                 SliderPreference(
                   modifier = Modifier.settingsSearchTarget(R.string.pref_audio_volume_step_title),
                   value = volumeStep.toFloat(),
-                  onValueChange = { preferences.volumeStep.set(it.roundToInt().coerceIn(1, 5)) },
+                  onValueChange = { preferences.volumeStep.set(it.roundToInt().coerceIn(1, 10)) },
                   title = { Text(stringResource(R.string.pref_audio_volume_step_title)) },
-                  valueRange = 1f..5f,
-                  valueSteps = 3,
+                  valueRange = 1f..10f,
+                  valueSteps = 8,
                   summary = {
                     Text(
                       if (volumeStep == 1) {
@@ -522,7 +522,7 @@ object AudioPreferencesScreen : Screen {
                       color = MaterialTheme.colorScheme.outline,
                     )
                   },
-                  onSliderValueChange = { preferences.volumeStep.set(it.roundToInt().coerceIn(1, 5)) },
+                  onSliderValueChange = { preferences.volumeStep.set(it.roundToInt().coerceIn(1, 10)) },
                   sliderValue = volumeStep.toFloat(),
                 )
               }

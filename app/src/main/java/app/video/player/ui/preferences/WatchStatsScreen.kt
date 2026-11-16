@@ -48,6 +48,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import app.video.player.ui.liquidglass.appGlassSurface
+import app.video.player.ui.liquidglass.liquidGlassActive
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -194,11 +196,16 @@ private fun BentoCard(
   border: BorderStroke? = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f)),
   content: @Composable () -> Unit,
 ) {
+  val glassActive = liquidGlassActive()
   Surface(
-    modifier = modifier,
+    modifier = modifier.appGlassSurface(
+      shape = shape,
+      containerColor = containerColor,
+      enabled = glassActive,
+    ),
     shape = shape,
-    color = containerColor,
-    border = border,
+    color = if (glassActive) Color.Transparent else containerColor,
+    border = if (glassActive) null else border,
     content = content,
   )
 }

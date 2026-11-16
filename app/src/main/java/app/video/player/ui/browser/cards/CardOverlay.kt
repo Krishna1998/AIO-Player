@@ -10,9 +10,11 @@
 package app.video.player.ui.browser.cards
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
@@ -20,9 +22,19 @@ import app.video.player.ui.theme.AppShapeScale
 
 internal fun Modifier.cardOverlay(
   shape: Shape = AppShapeScale.extraSmall,
-  containerColor: Color = Color.Black.copy(alpha = 0.72f),
+  containerColor: Color = Color.Black.copy(alpha = 0.68f),
 ): Modifier =
   // A shadow shows through a see-through fill as a darker inner box, so only opaque fills get one.
   (if (containerColor.alpha >= 1f) shadow(elevation = 3.dp, shape = shape, clip = false) else this)
     .clip(shape)
     .background(containerColor)
+    .border(
+      width = 0.75.dp,
+      brush = Brush.verticalGradient(
+        listOf(
+          Color.White.copy(alpha = 0.22f),
+          Color.White.copy(alpha = 0.05f),
+        ),
+      ),
+      shape = shape,
+    )

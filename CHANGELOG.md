@@ -4,9 +4,15 @@ These notes are written in plain English and focus on what changed for real use.
 
 ## 1.0.2
 
-- **Configurable Volume Step:**
-  - Added a new "Volume step" preference under Settings > Audio (and in-player settings sheet) with a 1 to 5 discrete slider.
+- **Configurable Volume Step (1 to 10 Steps):**
+  - Added a "Volume step" preference under Settings > Audio (and in-player settings sheet) with a 1 to 10 discrete slider.
   - Controls how much volume changes per hardware button press, scaling volume boost proportionally.
+- **System-Wide Liquid Glass Expansion:**
+  - Extended Liquid Glass styling across the entire app with a universal `appGlassSurface` modifier.
+  - Applied frosted glass surfaces and specular rim highlights to all modal and single-choice dialogs (`AppAlertDialog`, `AppSingleChoiceDialog`).
+  - Added frosted translucent glass styling to top app bars (`BrowserTopBar`, `SettingsTopAppBar`) so scrolling content blurs beneath them.
+  - Converted Bento analytics dashboard cards (`WatchStatsScreen`) to liquid glass containers.
+  - Added specular top-lit glass borders to thumbnail duration and media badges (`cardOverlay`).
 - **Launcher Icon Perfection & OEM Fix:**
   - Switched launcher icon canvas to solid jet-black (`#FF000000`), completely resolving Material You wallpaper pastel tinting issues on OEM launchers.
   - Enlarged center-core electric cyan playhead by 25% with balanced 18px lateral margins for high contrast at small display sizes.
