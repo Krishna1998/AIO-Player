@@ -428,6 +428,10 @@ fun MusicLibraryContent(
       }
   }
 
+  LaunchedEffect(pagerState.currentPage) {
+    if (isFabExpanded.value) isFabExpanded.value = false
+  }
+
   app.video.player.ui.browser.NavigationBarSelectionEffect(
     inSelectionMode = activeSelectionManager.isInSelectionMode,
     onlyVideos = false,
@@ -690,8 +694,10 @@ fun MusicLibraryContent(
       }
     },
     floatingActionButton = {
-      val isPlaylistsTab = visibleTabs.getOrNull(pagerState.currentPage) == MusicTab.PLAYLISTS
-      val isFoldersTab = visibleTabs.getOrNull(pagerState.currentPage) == MusicTab.FOLDERS
+      val currentTab = visibleTabs.getOrNull(pagerState.currentPage) ?: MusicTab.SONGS
+      val isPlaylistsTab = currentTab == MusicTab.PLAYLISTS
+      val isFoldersTab = currentTab == MusicTab.FOLDERS
+      val isFavoritesTab = currentTab == MusicTab.FAVORITES
       val isFabShouldBeVisible =
         showQuickPlayFab && !activeSelectionManager.isInSelectionMode && isFabVisible.value && !MainScreen.getPermissionDeniedState()
 
@@ -718,6 +724,69 @@ fun MusicLibraryContent(
             }
           },
         ) { }
+      } else if (isFavoritesTab) {
+        if (favoriteSongs.isNotEmpty()) {
+          FloatingActionButtonMenu(
+            modifier = Modifier.padding(bottom = FabPlacement.scaffoldBottomPadding()),
+            expanded = isFabExpanded.value && !quickPlayFabDirect,
+            button = {
+              TooltipBox(
+                positionProvider =
+                  TooltipDefaults.rememberTooltipPositionProvider(
+                    if (isFabExpanded.value && !quickPlayFabDirect) TooltipAnchorPosition.Start else TooltipAnchorPosition.Above,
+                  ),
+                tooltip = { PlainTooltip { Text(stringResource(R.string.ui_toggle_menu)) } },
+                state = rememberTooltipState(),
+              ) {
+                ToggleFloatingActionButton(
+                  modifier =
+                    Modifier.animateFloatingActionButton(
+                      visible = isFabShouldBeVisible,
+                      alignment = Alignment.BottomEnd,
+                    ).focusableWhen(isFabShouldBeVisible),
+                  checked = isFabExpanded.value && !quickPlayFabDirect,
+                  onCheckedChange = {
+                    if (quickPlayFabDirect) {
+                      musicViewModel.playAllSongs(context, favoriteSongs, shuffle = false)
+                    } else {
+                      isFabExpanded.value = !isFabExpanded.value
+                    }
+                  },
+                ) {
+                  val imageVector by remember {
+                    derivedStateOf {
+                      if (checkedProgress > 0.5f && !quickPlayFabDirect) Icons.RoundedFilled.Close else Icons.RoundedFilled.PlayArrow
+                    }
+                  }
+                  Icon(
+                    imageVector = imageVector,
+                    contentDescription = null,
+                    modifier = Modifier.animateIcon({ if (quickPlayFabDirect) 0f else checkedProgress }),
+                  )
+                }
+              }
+            },
+          ) {
+            if (!quickPlayFabDirect) {
+              FloatingActionButtonMenuItem(
+                onClick = {
+                  isFabExpanded.value = false
+                  musicViewModel.playAllSongs(context, favoriteSongs, shuffle = false)
+                },
+                icon = { Icon(Icons.RoundedFilled.PlayArrow, contentDescription = null) },
+                text = { Text("Play All Favorites") },
+              )
+              FloatingActionButtonMenuItem(
+                onClick = {
+                  isFabExpanded.value = false
+                  musicViewModel.playAllSongs(context, favoriteSongs, shuffle = true)
+                },
+                icon = { Icon(Icons.RoundedFilled.Shuffle, contentDescription = null) },
+                text = { Text("Shuffle Favorites") },
+              )
+            }
+          }
+        }
       } else if (songs.isNotEmpty()) {
         FloatingActionButtonMenu(
           modifier = Modifier.padding(bottom = FabPlacement.scaffoldBottomPadding()),

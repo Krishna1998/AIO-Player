@@ -10,6 +10,7 @@ These notes are written in plain English and focus on what changed for real use.
   - **Modern Quick Actions Bar:** Introduced prominent "Shuffle All" and "Play All" action buttons at the top of the track list in both List and Grid views for effortless queue startup.
   - **High-Res Audio Format & Status Badges:** Track items in both list and grid views now display crystal-clear audio fidelity badges (`FLAC`, `WAV`, `ALAC`, `OPUS`, `AAC`, `320K`) and animated glowing `PLAYING` indicators.
   - **Enhanced Bento Album Cards:** Added specular borders and bottom-right track count badges (`X tracks`) to album grid cards for rich visual hierarchy.
+  - **Tab-Specific Quick Play FAB:** Separated Floating Action Button playback logic so tapping "Play All" or "Shuffle" on the Favorites tab plays only favorited tracks ("Play All Favorites" / "Shuffle Favorites") rather than entire library songs.
 - **Online Lyrics Providers & Settings Control:**
   - Surfaced all 17 available online lyrics providers (`lrc.red`, `BiniLyrics`, `BetterLyrics`, `BetterLyrics Portato`, `PaxSenix`, `PaxSenix: Spotify`, `PaxSenix: Musixmatch`, `LyricsPlus`, `SimpMusic`, `Unison`, `YouTube captions`, `YouTube Music`, `Megalobiz`, `KuGou`, `LRCLIB`, `Musixmatch`, `Genius`) directly inside Settings > Audio.
   - Added an interactive expandable card with live provider status, timing capability badges (Word-synced vs Line-synced), descriptions, and individual toggle switches.
