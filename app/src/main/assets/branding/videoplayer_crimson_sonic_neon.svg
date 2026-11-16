@@ -15,9 +15,9 @@
     </linearGradient>
 
     <!-- Electric Neon Cyan / Blue for Small Playhead -->
-    <linearGradient id="v2-blue" x1="220" y1="200" x2="350" y2="310" gradientUnits="userSpaceOnUse">
+    <linearGradient id="v2-blue" x1="266" y1="226" x2="314" y2="286" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#38bdf8"/>
-      <stop offset="40%" stop-color="#00f5ff"/>
+      <stop offset="45%" stop-color="#00f5ff"/>
       <stop offset="100%" stop-color="#2563eb"/>
     </linearGradient>
 
@@ -45,10 +45,9 @@
     <rect x="332" y="196" width="24" height="120" rx="12" fill="#ff2a6d" opacity="0.75"/>
     <rect x="368" y="238" width="24" height="36" rx="12" fill="#ff2a6d" opacity="0.6"/>
 
-    <!-- Small Electric Blue Play Icon in Center Focus -->
+    <!-- Small Electric Blue Play Icon: Exactly Centered at (290, 256) between bars -->
     <g filter="url(#v2-blue-glow)">
-      <path d="M 256 196 C 256 182 272 173 284 180 L 334 212 C 344 218 344 234 334 240 L 284 272 C 272 279 256 270 256 256 Z" fill="url(#v2-blue)" stroke="#e0f2fe" stroke-width="2"/>
+      <path d="M 266 235 C 266 227 275 222 282 226 L 310 247 C 317 251 317 261 310 265 L 282 286 C 275 290 266 285 266 277 Z" fill="url(#v2-blue)" stroke="#e0f2fe" stroke-width="2.5" stroke-linejoin="round"/>
     </g>
   </g>
 </svg>
-
