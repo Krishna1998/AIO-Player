@@ -9,6 +9,7 @@
 
 package app.video.player.ui.player
 
+import android.app.ActivityManager
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
@@ -2540,7 +2541,12 @@ internal fun userScriptsNeedReload(currentKey: String): Boolean {
     setPropertyString("cookies-file", AndroidCookieJar.playbackCookieFile(context).absolutePath)
     setPropertyString("cache", "auto")
     setPropertyString("cache-pause", "yes")
-    setPropertyString("demuxer-max-bytes", "64MiB")
+    val am = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
+    val isLowRam = am?.isLowRamDevice == true
+    val demuxerCache = if (isLowRam) "32MiB" else "64MiB"
+    val demuxerBackCache = if (isLowRam) "16MiB" else "32MiB"
+    setPropertyString("demuxer-max-bytes", demuxerCache)
+    setPropertyString("demuxer-max-back-bytes", demuxerBackCache)
     setPropertyString("tls-verify", "yes")
     setPropertyString("tls-ca-file", "${context.filesDir.path}/cacert.pem")
     // Recover boundedly from transient HTTP/TLS disconnects, including non-seekable live inputs.

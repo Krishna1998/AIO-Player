@@ -4,6 +4,15 @@ These notes are written in plain English and focus on what changed for real use.
 
 ## 1.0.1
 
+- **Ultra-Lightweight Engine Overhaul:**
+  - Stripped ~4.0 MB bundled `gflex_variable.ttf` font in favor of zero-overhead system typography (`FontFamily.SansSerif`), reducing resource footprint by over 90%.
+  - Switched to uncompressed page-aligned native library packaging (`useLegacyPackaging = false`), eliminating duplicate `.so` extraction on Android 8+ and halving installed storage.
+  - Pruned redundant Desktop/JVM multiplatform icon artifact (`composables-material-symbols-rounded-filled-cmp`).
+  - Removed 42 unused professional studio camera log shaders (`shaders/hdr-toys/transfer-function/log/`).
+  - Implemented dynamic low-RAM scaling for the streaming demuxer buffer (auto-drops to 32MB cache on budget devices to prevent memory pressure).
+- **Brand & Visual Identity:**
+  - Added Center-Core Electric Neon Crimson Sonic launcher icons with Material You Android 13+ themed monochrome silhouette support.
+  - Perfectly balanced and centered the cyan playhead with exact 18px lateral margins.
 - **Interactive Weekly Activity Chart:**
   - Made every day in the "Last 7 days" activity chart clickable to inspect individual watch times.
   - Added dynamic status pill showing exact watch time for the selected weekday, yesterday, or today.
