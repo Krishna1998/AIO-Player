@@ -463,7 +463,11 @@ class LyricsRepository(
       val lyrics = answers[provider]?.takeIf { it.fitsLength(durationMs) } ?: return null
       return OnlineLyricsResult(provider, lyrics, false, answers)
     }
-    val candidates = LyricsProvider.available.mapNotNull { source -> answers[source]?.let { source to it } }
+    val disabled = audioPreferences.disabledLyricsProviders.get()
+    val candidates =
+      LyricsProvider.available
+        .filterNot { it.name in disabled }
+        .mapNotNull { source -> answers[source]?.let { source to it } }
     val fitting = candidates.filter { (_, lyrics) -> lyrics.fitsLength(durationMs) }
     val winner = fitting.firstOrNull { (_, lyrics) -> lyrics.hasWordTiming() }
       ?: fitting.firstOrNull { (_, lyrics) -> !lyrics.synced.isNullOrEmpty() }
@@ -503,7 +507,8 @@ class LyricsRepository(
    */
   private suspend fun withRecording(query: LyricsFetchQuery): LyricsFetchQuery {
     if (!query.isrc.isNullOrBlank()) return query
-    if (LyricsProvider.BINI_LYRICS !in LyricsProvider.available) return query
+    val disabled = audioPreferences.disabledLyricsProviders.get()
+    if (LyricsProvider.BINI_LYRICS !in LyricsProvider.available || LyricsProvider.BINI_LYRICS.name in disabled) return query
     val key = recordingKey(query) ?: return query
     isrcs.get(key)?.let { return query.copy(isrc = it) }
     val found =
@@ -537,7 +542,8 @@ class LyricsRepository(
     excluded: Set<LyricsProvider> = emptySet(),
   ): OnlineLyricsResult {
     val raced = raceProviders(query, mediaPath, cached, excluded)
-    if (raced.lyrics != null || query.primary.artist.isNotBlank() || LyricsProvider.LRCLIB in excluded) return raced
+    val disabled = audioPreferences.disabledLyricsProviders.get()
+    if (raced.lyrics != null || query.primary.artist.isNotBlank() || LyricsProvider.LRCLIB in excluded || LyricsProvider.LRCLIB.name in disabled) return raced
 
     val loose =
       query.copy(
@@ -582,8 +588,9 @@ class LyricsRepository(
     excluded: Set<LyricsProvider> = emptySet(),
   ): OnlineLyricsResult =
     coroutineScope {
+      val disabled = audioPreferences.disabledLyricsProviders.get()
       val jobs =
-        LyricsProvider.available.filterNot { it in excluded }.map { provider ->
+        LyricsProvider.available.filterNot { it in excluded || it.name in disabled }.map { provider ->
           val start = if (provider in LyricsProvider.LAZY_PROVIDERS) CoroutineStart.LAZY else CoroutineStart.DEFAULT
           provider to async(Dispatchers.IO, start = start) {
             cached[provider]?.let(ProviderOutcome::Found) ?: fetchProvider(provider, query, mediaPath)

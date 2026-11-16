@@ -9,29 +9,46 @@
 
 package app.video.player.ui.preferences
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import app.video.player.presentation.components.AppTextField as TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import app.video.player.R
+import app.video.player.domain.lyrics.LyricsProvider
 import app.video.player.preferences.AudioChannels
 import app.video.player.preferences.AudioPlayerOrientation
 import app.video.player.preferences.AudioPreferences
 import app.video.player.preferences.BrowserPreferences
+import app.video.player.preferences.LyricsTranslationDisplayMode
 import app.video.player.preferences.MediaLibraryType
 import app.video.player.preferences.SpatialAudioMode
 import app.video.player.utils.media.MediaLibraryEvents
@@ -39,6 +56,9 @@ import app.video.player.ui.player.PlaybackSession
 import androidx.compose.runtime.collectAsState
 import app.video.player.preferences.preference.collectAsState
 import app.video.player.presentation.Screen
+import app.video.player.ui.components.IconSwitch
+import app.video.player.ui.icons.Icon
+import app.video.player.ui.icons.Icons
 import app.video.player.ui.preferences.components.SwitchPreference
 import app.video.player.ui.utils.LocalBackStack
 import app.video.player.ui.utils.currentMpvConfigOverrideOptions
@@ -49,7 +69,6 @@ import app.video.player.ui.preferences.components.AppSliderPreference as SliderP
 import app.video.player.ui.preferences.components.AppTextFieldPreference as TextFieldPreference
 import kotlin.math.roundToInt
 import org.koin.compose.koinInject
-import androidx.compose.runtime.setValue
 import app.video.player.ui.browser.music.MusicTab
 
 @Serializable
@@ -528,8 +547,304 @@ object AudioPreferencesScreen : Screen {
               }
             }
           }
+
+          item {
+            PreferenceSectionHeader(
+              position = PreferenceSectionPosition.Middle,
+              title = stringResource(R.string.pref_lyrics_sources_category),
+              modifier = Modifier.settingsSearchTarget(R.string.pref_lyrics_sources_category),
+            )
+          }
+
+          item {
+            PreferenceCard {
+              val lyricsAutoFetchOnline by preferences.lyricsAutoFetchOnline.collectAsState()
+              SwitchPreference(
+                modifier = Modifier.settingsSearchTarget(R.string.pref_lyrics_auto_fetch_online),
+                value = lyricsAutoFetchOnline,
+                onValueChange = { preferences.lyricsAutoFetchOnline.set(it) },
+                title = { Text(stringResource(R.string.pref_lyrics_auto_fetch_online)) },
+                summary = {
+                  Text(
+                    stringResource(R.string.pref_lyrics_auto_fetch_online_summary),
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+              )
+
+              PreferenceDivider()
+
+              var providersExpanded by rememberSaveable { mutableStateOf(false) }
+              val disabledLyricsProviders by preferences.disabledLyricsProviders.collectAsState()
+              val availableProviders = LyricsProvider.available
+              val activeCount = availableProviders.count { it.name !in disabledLyricsProviders }
+
+              Row(
+                modifier = Modifier
+                  .settingsSearchTarget(R.string.pref_lyrics_providers_title)
+                  .fillMaxWidth()
+                  .clickable { providersExpanded = !providersExpanded }
+                  .padding(horizontal = 16.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+              ) {
+                Icon(
+                  imageVector = Icons.RoundedFilled.Lyrics,
+                  contentDescription = null,
+                  tint = MaterialTheme.colorScheme.primary,
+                  modifier = Modifier.size(24.dp),
+                )
+                Column(
+                  modifier = Modifier.weight(1f),
+                  verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                  Text(
+                    text = stringResource(R.string.pref_lyrics_providers_title),
+                    style = MaterialTheme.typography.bodyLarge,
+                  )
+                  Text(
+                    text = stringResource(
+                      R.string.pref_lyrics_providers_summary,
+                      activeCount,
+                      availableProviders.size,
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                }
+                Icon(
+                  imageVector = if (providersExpanded) Icons.RoundedFilled.ExpandLess else Icons.RoundedFilled.ExpandMore,
+                  contentDescription = null,
+                  tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+              }
+
+              AnimatedVisibility(visible = providersExpanded) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                  PreferenceDivider()
+                  Row(
+                    modifier = Modifier
+                      .fillMaxWidth()
+                      .padding(horizontal = 16.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically,
+                  ) {
+                    TextButton(
+                      onClick = { preferences.disabledLyricsProviders.set(emptySet()) },
+                      contentPadding = PaddingValues(horizontal = 8.dp),
+                    ) {
+                      Text(stringResource(R.string.pref_lyrics_providers_enable_all), style = MaterialTheme.typography.labelMedium)
+                    }
+                    TextButton(
+                      onClick = {
+                        preferences.disabledLyricsProviders.set(availableProviders.map { it.name }.toSet())
+                      },
+                      contentPadding = PaddingValues(horizontal = 8.dp),
+                    ) {
+                      Text(stringResource(R.string.pref_lyrics_providers_disable_all), style = MaterialTheme.typography.labelMedium)
+                    }
+                  }
+
+                  availableProviders.forEachIndexed { index, provider ->
+                    if (index > 0) {
+                      PreferenceDivider()
+                    }
+                    val isEnabled = provider.name !in disabledLyricsProviders
+                    LyricsProviderItem(
+                      provider = provider,
+                      enabled = isEnabled,
+                      onEnabledChange = { enabled ->
+                        val updated = if (enabled) {
+                          disabledLyricsProviders - provider.name
+                        } else {
+                          disabledLyricsProviders + provider.name
+                        }
+                        preferences.disabledLyricsProviders.set(updated)
+                      },
+                    )
+                  }
+                }
+              }
+
+              PreferenceDivider()
+
+              val paxsenixApiKey by preferences.paxsenixApiKey.collectAsState()
+              ExpressivePreferenceItem {
+                TextFieldPreference(
+                  modifier = Modifier.settingsSearchTarget(R.string.pref_paxsenix_api_key),
+                  value = paxsenixApiKey,
+                  onValueChange = { preferences.paxsenixApiKey.set(it) },
+                  textToValue = { it.trim() },
+                  title = { Text(stringResource(R.string.pref_paxsenix_api_key)) },
+                  summary = {
+                    Text(
+                      if (paxsenixApiKey.isNotBlank()) "••••••••"
+                      else stringResource(R.string.pref_paxsenix_api_key_summary),
+                      color = MaterialTheme.colorScheme.outline,
+                    )
+                  },
+                  textField = { value, onValueChange, _ ->
+                    Column {
+                      Text(stringResource(R.string.pref_paxsenix_api_key_dialog_desc))
+                      TextField(
+                        value,
+                        onValueChange,
+                        modifier = Modifier.fillMaxWidth(),
+                      )
+                    }
+                  },
+                )
+              }
+            }
+          }
+
+          item {
+            PreferenceSectionHeader(
+              position = PreferenceSectionPosition.Last,
+              title = stringResource(R.string.pref_lyrics_translation_category),
+              modifier = Modifier.settingsSearchTarget(R.string.pref_lyrics_translation_category),
+            )
+          }
+
+          item {
+            PreferenceCard {
+              val lyricsAutoTranslate by preferences.lyricsAutoTranslate.collectAsState()
+              SwitchPreference(
+                modifier = Modifier.settingsSearchTarget(R.string.pref_lyrics_auto_translate),
+                value = lyricsAutoTranslate,
+                onValueChange = { preferences.lyricsAutoTranslate.set(it) },
+                title = { Text(stringResource(R.string.pref_lyrics_auto_translate)) },
+                summary = {
+                  Text(
+                    stringResource(R.string.pref_lyrics_auto_translate_summary),
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+              )
+
+              if (lyricsAutoTranslate) {
+                PreferenceDivider()
+
+                val lyricsTargetLanguage by preferences.lyricsTargetLanguage.collectAsState()
+                ExpressivePreferenceItem {
+                  TextFieldPreference(
+                    modifier = Modifier.settingsSearchTarget(R.string.pref_lyrics_target_language),
+                    value = lyricsTargetLanguage,
+                    onValueChange = { preferences.lyricsTargetLanguage.set(it) },
+                    textToValue = { it.trim().lowercase() },
+                    title = { Text(stringResource(R.string.pref_lyrics_target_language)) },
+                    summary = {
+                      Text(
+                        lyricsTargetLanguage.uppercase(),
+                        color = MaterialTheme.colorScheme.outline,
+                      )
+                    },
+                    textField = { value, onValueChange, _ ->
+                      Column {
+                        Text(stringResource(R.string.pref_lyrics_target_language))
+                        TextField(
+                          value,
+                          onValueChange,
+                          modifier = Modifier.fillMaxWidth(),
+                        )
+                      }
+                    },
+                  )
+                }
+
+                PreferenceDivider()
+
+                val lyricsTranslationDisplayMode by preferences.lyricsTranslationDisplayMode.collectAsState()
+                ExpressivePreferenceItem {
+                  ListPreference(
+                    modifier = Modifier.settingsSearchTarget(R.string.pref_lyrics_display_mode),
+                    value = lyricsTranslationDisplayMode,
+                    onValueChange = { preferences.lyricsTranslationDisplayMode.set(it) },
+                    values = LyricsTranslationDisplayMode.entries,
+                    valueToText = { AnnotatedString(resources.getString(it.title)) },
+                    title = { Text(stringResource(R.string.pref_lyrics_display_mode)) },
+                    summary = {
+                      Text(
+                        stringResource(lyricsTranslationDisplayMode.title),
+                        color = MaterialTheme.colorScheme.outline,
+                      )
+                    },
+                  )
+                }
+              }
+            }
+          }
         }
       }
     }
+  }
+}
+
+@Composable
+private fun LyricsProviderItem(
+  provider: LyricsProvider,
+  enabled: Boolean,
+  onEnabledChange: (Boolean) -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  Row(
+    modifier = modifier
+      .fillMaxWidth()
+      .clickable { onEnabledChange(!enabled) }
+      .padding(horizontal = 16.dp, vertical = 12.dp),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(12.dp),
+  ) {
+    Column(
+      modifier = Modifier.weight(1f),
+      verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
+        Text(
+          text = provider.label,
+          style = MaterialTheme.typography.bodyLarge,
+          fontWeight = FontWeight.SemiBold,
+          color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+        )
+
+        Surface(
+          shape = RoundedCornerShape(6.dp),
+          color = if (provider.wordSynced) {
+            MaterialTheme.colorScheme.primaryContainer.copy(alpha = if (enabled) 1f else 0.5f)
+          } else {
+            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (enabled) 1f else 0.5f)
+          },
+        ) {
+          Text(
+            text = stringResource(
+              if (provider.wordSynced) R.string.pref_lyrics_word_synced
+              else R.string.pref_lyrics_line_synced,
+            ),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Medium,
+            color = if (provider.wordSynced) {
+              MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = if (enabled) 1f else 0.6f)
+            } else {
+              MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (enabled) 1f else 0.6f)
+            },
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+          )
+        }
+      }
+
+      Text(
+        text = provider.detail,
+        style = MaterialTheme.typography.bodySmall,
+        color = if (enabled) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.outline.copy(alpha = 0.6f),
+      )
+    }
+
+    IconSwitch(
+      checked = enabled,
+      onCheckedChange = onEnabledChange,
+    )
   }
 }

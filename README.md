@@ -52,6 +52,7 @@ Whether decoding 4K HDR10+ anime with complex ASS karaoke subtitles or driving a
 | **Volume Boost Cap** | 🟢 **ACTIVE** | Clean digital pre-amplification boost up to +30 dB |
 | **Configurable Volume Step** | 🟢 **ACTIVE** | **NEW:** Discrete volume step multiplier (1 to 10 steps per hardware key press) with proportional boost scaling |
 | **Smart Sleep Timer** | 🟢 **ACTIVE** | **NEW:** Gentle 30-second audio fade-out, live countdown banner, "End of track" mode, and quick extensions |
+| **Online Lyrics Providers** | 🟢 **ACTIVE** | **NEW:** 17 online lyrics databases (Apple Music TTML, Musixmatch, LRCLIB, KuGou, PaxSenix, YouTube, etc.) with word/line sync badges, individual provider toggles, and translation controls |
 | **Pitch Correction** | 🟢 **ACTIVE** | Maintains natural harmonic pitch when speeding up or slowing down audio |
 
 ### 📊 Modern Bento Watch Analytics

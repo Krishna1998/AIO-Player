@@ -4,6 +4,12 @@ These notes are written in plain English and focus on what changed for real use.
 
 ## 1.0.2
 
+- **Online Lyrics Providers & Settings Control:**
+  - Surfaced all 17 available online lyrics providers (`lrc.red`, `BiniLyrics`, `BetterLyrics`, `BetterLyrics Portato`, `PaxSenix`, `PaxSenix: Spotify`, `PaxSenix: Musixmatch`, `LyricsPlus`, `SimpMusic`, `Unison`, `YouTube captions`, `YouTube Music`, `Megalobiz`, `KuGou`, `LRCLIB`, `Musixmatch`, `Genius`) directly inside Settings > Audio.
+  - Added an interactive expandable card with live provider status, timing capability badges (Word-synced vs Line-synced), descriptions, and individual toggle switches.
+  - Added "Enable all" and "Disable all" bulk toggles with persistent preference store sync (`disabled_lyrics_providers`).
+  - Integrated full PaxSenix API key configuration and foreign lyrics auto-translation controls with target language and display style options.
+  - Connected lyrics repository and racing engine to respect disabled providers during automatic and fallback lookups.
 - **Official "Crimson Sonic" App Theme Preset:**
   - Added a dedicated built-in theme preset matching the Crimson Sonic Neon launcher icon.
   - Combines Radiant Neon Crimson Pink (`#FF2A6D`) accents with Electric Cyan (`#00F5FF`) secondary highlights and deep Obsidian Black (`#0D0B12`) / soft pastel lavender backgrounds.

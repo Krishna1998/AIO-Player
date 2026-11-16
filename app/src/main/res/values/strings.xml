@@ -2095,6 +2095,12 @@
   <string name="pref_lyrics_sources_category">Online Lyrics</string>
   <string name="pref_lyrics_auto_fetch_online">Automatically fetch online lyrics</string>
   <string name="pref_lyrics_auto_fetch_online_summary">Search online providers only when no embedded or local lyrics are available. You can still search online manually.</string>
+  <string name="pref_lyrics_providers_title">Online lyrics providers</string>
+  <string name="pref_lyrics_providers_summary">%1$d of %2$d active • Tap to manage</string>
+  <string name="pref_lyrics_providers_enable_all">Enable all</string>
+  <string name="pref_lyrics_providers_disable_all">Disable all</string>
+  <string name="pref_lyrics_word_synced">Word-synced</string>
+  <string name="pref_lyrics_line_synced">Line-synced</string>
   <string name="pref_lyrics_translation_category">Lyrics Translation &amp; Romanization</string>
   <string name="pref_lyrics_auto_translate">Auto-translate foreign lyrics</string>
   <string name="pref_lyrics_auto_translate_summary">Automatically translate foreign language lyrics</string>

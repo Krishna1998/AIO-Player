@@ -205,11 +205,14 @@ private val settingsSearchListAnchors: Map<Screen, List<SettingsSearchListAnchor
         SettingsSearchListAnchor(titleRes = R.string.pref_audio_drc_title, itemIndex = 7),
         SettingsSearchListAnchor(titleRes = R.string.pref_audio_channels, itemIndex = 7),
         SettingsSearchListAnchor(titleRes = R.string.pref_audio_volume_boost_cap, itemIndex = 7),
+        SettingsSearchListAnchor(titleRes = R.string.pref_lyrics_sources_category, itemIndex = 8),
         SettingsSearchListAnchor(titleRes = R.string.pref_lyrics_auto_fetch_online, itemIndex = 9),
+        SettingsSearchListAnchor(titleRes = R.string.pref_lyrics_providers_title, itemIndex = 9),
+        SettingsSearchListAnchor(titleRes = R.string.pref_paxsenix_api_key, itemIndex = 9),
+        SettingsSearchListAnchor(titleRes = R.string.pref_lyrics_translation_category, itemIndex = 10),
         SettingsSearchListAnchor(titleRes = R.string.pref_lyrics_auto_translate, itemIndex = 11),
         SettingsSearchListAnchor(titleRes = R.string.pref_lyrics_target_language, itemIndex = 11),
         SettingsSearchListAnchor(titleRes = R.string.pref_lyrics_display_mode, itemIndex = 11),
-        SettingsSearchListAnchor(titleRes = R.string.pref_paxsenix_api_key, itemIndex = 11),
       ),
     SubtitlesPreferencesScreen to
       listOf(
