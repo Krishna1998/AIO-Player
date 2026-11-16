@@ -5,7 +5,7 @@
 # ⚡ V&M PLAYER
 ### *Next-Generation, Ultra-Lightweight Video & Audio Engine for Android*
 
-[![Release](https://img.shields.io/badge/Release-v1.0.1-00F5FF?style=for-the-badge&logo=android&logoColor=black)](https://github.com/Krishna1998/Video-Music-Player/releases)
+[![Release](https://img.shields.io/badge/Release-v1.0.2-00F5FF?style=for-the-badge&logo=android&logoColor=black)](https://github.com/Krishna1998/Video-Music-Player/releases)
 [![Android](https://img.shields.io/badge/Android-8.0%2B%20(API%2026%2B)-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com)
 [![Architecture](https://img.shields.io/badge/Arch-arm64--v8a-FF0055?style=for-the-badge&logo=arm&logoColor=white)](https://arm.com)
 [![Engine](https://img.shields.io/badge/Core-mpv%20%2B%20FFmpeg-9D4EDD?style=for-the-badge&logo=cplusplus&logoColor=white)](https://mpv.io)
@@ -50,6 +50,7 @@ Whether decoding 4K HDR10+ anime with complex ASS karaoke subtitles or driving a
 | **Playback Speed Persistence** | 🟢 **ACTIVE** | Granular speed control (0.25x – 4.0x) with state memory across tracks |
 | **Dynamic Range Compression** | 🟢 **ACTIVE** | Tames explosive volume spikes in movies while boosting subtle whispers |
 | **Volume Boost Cap** | 🟢 **ACTIVE** | Clean digital pre-amplification boost up to +30 dB |
+| **Configurable Volume Step** | 🟢 **ACTIVE** | **NEW:** Discrete volume step multiplier (1 to 5 steps per hardware key press) with proportional boost scaling |
 | **Pitch Correction** | 🟢 **ACTIVE** | Maintains natural harmonic pitch when speeding up or slowing down audio |
 
 ### 📊 Modern Bento Watch Analytics
@@ -64,7 +65,7 @@ Whether decoding 4K HDR10+ anime with complex ASS karaoke subtitles or driving a
 | Feature | State | Description |
 | :--- | :---: | :--- |
 | **Material 3 Expressive** | 🟢 **ACTIVE** | Full dynamic color integration, OLED pure black theme, and expressive typography |
-| **Neon Crimson Sonic Icon** | 🟢 **ACTIVE** | **NEW:** High-contrast neon ruby video frame + acoustic audio waveform with center-core electric cyan playhead |
+| **Neon Crimson Sonic Icon** | 🟢 **ACTIVE** | **NEW:** High-contrast neon ruby frame on solid obsidian black with bold center-core electric cyan playhead |
 | **Material You Themed Icons** | 🟢 **ACTIVE** | **NEW:** Full monochrome silhouette vector layer matching Android 13+ dynamic system color palettes |
 | **Connected Shape Morphing** | 🟢 **ACTIVE** | Animated corner morphing (`rememberConnectedShape`) across button presses |
 | **HUD Customization** | 🟢 **ACTIVE** | Adjustable button opacity (0–100%), seekbar opacity, and borderless player modes |
@@ -84,6 +85,8 @@ To maximize battery life and deliver instant startup speeds, the architecture wa
 * 🚫 **ZERO Analytics & Tracking:** Removed all `sh.measure` telemetry, OkHttp trackers, and tracking daemons.
 * 🚫 **ZERO Google Play Services:** Completely eliminated Cast SDK and Google Play Service dependencies.
 * 🚫 **ZERO Heavy Protocol Bloats:** Discarded legacy SMB/SFTP/FTP protocol stacks for modern, lightweight direct playback.
+* 🚫 **Stripped 4.0MB Bundled Font:** Delegated to Android's zero-overhead system native `SansSerif` typography, shrinking app resources by >90%.
+* 🚫 **Uncompressed Page-Aligned Native Packaging:** Eliminates duplicate `.so` native library extraction on Android 8+, halving device storage footprint.
 * 🚫 **Native Subtitle Engine:** Uses Android's built-in `ZipInputStream` and pure Java streams instead of heavy native archive binaries (`libarchive.so`, `libmediainfo.so`).
 
 ---

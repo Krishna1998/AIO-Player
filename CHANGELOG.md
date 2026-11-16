@@ -2,6 +2,18 @@
 
 These notes are written in plain English and focus on what changed for real use.
 
+## 1.0.2
+
+- **Configurable Volume Step:**
+  - Added a new "Volume step" preference under Settings > Audio (and in-player settings sheet) with a 1 to 5 discrete slider.
+  - Controls how much volume changes per hardware button press, scaling volume boost proportionally.
+- **Launcher Icon Perfection & OEM Fix:**
+  - Switched launcher icon canvas to solid jet-black (`#FF000000`), completely resolving Material You wallpaper pastel tinting issues on OEM launchers.
+  - Enlarged center-core electric cyan playhead by 25% with balanced 18px lateral margins for high contrast at small display sizes.
+  - Synchronized native Android splash screen assets and vector branding.
+- **Homescreen Widget Font Fix:**
+  - Replaced legacy `@font/gflex_variable` layout references with system `sans-serif` typography, resolving resource linking errors.
+
 ## 1.0.1
 
 - **Ultra-Lightweight Engine Overhaul:**
