@@ -136,7 +136,7 @@ flowchart TD
 
 ```powershell
 # Clone the repository
-git clone https://github.com/Krishna1998/Video-Music-Player.git
+git clone https://github.com/Krishna1998/AIO-Player.git
 cd "Video-Music-Player"
 
 # Build Debug APK
