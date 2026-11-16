@@ -113,6 +113,45 @@ class App :
     // paid a full core rebuild: initOptions() plus MPVLib.init() (mpv.conf + Lua scripts).
     private const val IDLE_MPV_CORE_GRACE_MS = 20L * 60L * 1000L
     private const val WATCH_STATS_INTERVAL_MS = 15_000L
+    private val activeActivities = java.util.Collections.synchronizedSet(java.util.Collections.newSetFromMap(java.util.WeakHashMap<Activity, Boolean>()))
+
+    fun closeAppCompletely(context: android.content.Context? = null) {
+      Log.i(TAG, "Closing app completely...")
+      try {
+        PlaybackSession.stop()
+        PlaybackSession.destroy()
+      } catch (e: Exception) {
+        Log.w(TAG, "Error stopping playback session during app close", e)
+      }
+
+      context?.let { ctx ->
+        try {
+          val intent = android.content.Intent(ctx, app.video.player.ui.player.MediaPlaybackService::class.java)
+          ctx.stopService(intent)
+        } catch (e: Exception) {
+          Log.w(TAG, "Error stopping MediaPlaybackService during app close", e)
+        }
+      }
+
+      val activities = synchronized(activeActivities) { activeActivities.toList() }
+      for (activity in activities) {
+        try {
+          if (!activity.isFinishing && !activity.isDestroyed) {
+            activity.finishAndRemoveTask()
+          }
+        } catch (e: Exception) {
+          try {
+            activity.finishAffinity()
+          } catch (_: Exception) {}
+        }
+      }
+
+      CoroutineScope(Dispatchers.Main).launch {
+        delay(400)
+        android.os.Process.killProcess(android.os.Process.myPid())
+        System.exit(0)
+      }
+    }
   }
 
   override fun attachBaseContext(base: android.content.Context) {
@@ -381,6 +420,7 @@ class App :
     activity: Activity,
     savedInstanceState: Bundle?,
   ) {
+    activeActivities.add(activity)
     if (activity is PlayerActivity) PlaybackPerformanceTrace.mark("PLAYER_ACTIVITY_CREATE_END")
     if (activity.javaClass.name.contains("leakcanary", ignoreCase = true)) {
       val rootView = activity.findViewById<View>(android.R.id.content)
@@ -458,7 +498,9 @@ class App :
     if (activity is PlayerActivity) PlaybackPerformanceTrace.begin("ON_DESTROY")
   }
 
-  override fun onActivityDestroyed(activity: Activity) = Unit
+  override fun onActivityDestroyed(activity: Activity) {
+    activeActivities.remove(activity)
+  }
 
   override fun onActivityPostDestroyed(activity: Activity) {
     if (activity is PlayerActivity) PlaybackPerformanceTrace.end("ON_DESTROY")

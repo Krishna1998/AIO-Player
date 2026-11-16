@@ -3473,7 +3473,7 @@ fun restartFromBeginning() {
 
     val initialVolume = PlaybackSession.getPropertyInt("volume") ?: 100
     preTimerVolume = initialVolume
-    val fadeDuration = 30 // seconds of gentle fade-out
+    val fadeDuration = 5 // seconds of gentle fade-out
 
     timerJob =
       viewModelScope.launch {
@@ -3490,7 +3490,7 @@ fun restartFromBeginning() {
           // Timer only ticks down when music/playback is actively running (not paused)
           val isPaused = paused == true || (PlaybackSession.getPropertyBoolean("pause") ?: false)
           if (!isPaused) {
-            // Gentle Audio Fade-out over the last 30 seconds
+            // Gentle Audio Fade-out over the last 5 seconds
             if (fadeOut && currentLeft <= fadeDuration) {
               val fadeRatio = (currentLeft.toFloat() / fadeDuration).coerceIn(0f, 1f)
               val fadedVolume = (initialVolume * fadeRatio).roundToInt().coerceIn(0, initialVolume)
@@ -3509,6 +3509,10 @@ fun restartFromBeginning() {
         preTimerVolume = null
         _sleepTimerEndOfTrack.value = false
         showToast(appContext.getString(R.string.toast_sleep_timer_ended))
+
+        // When sleep timer ends: close app completely
+        delay(1200)
+        app.video.player.App.closeAppCompletely(appContext)
       }
   }
 

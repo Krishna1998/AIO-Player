@@ -13,7 +13,7 @@ These notes are written in plain English and focus on what changed for real use.
   - Added dedicated Sleep Timer controls to the Audio Player controls row and top header bar.
   - Active countdown badge displayed directly in the top header bar with live elapsed time pill (e.g. `14:32`).
   - **Playback-Aware Timer:** The countdown timer now ticks exclusively while music is actively running. If playback is paused, the timer automatically pauses, preserving remaining time without draining down while the player is idle.
-  - Integrated `Sheets.SleepTimer` unified player sheet with 30-second gentle audio fade-out, stop time estimation, quick extension chips (+5m, +15m), and presets (15m, 30m, 45m, 60m, End of Track).
+  - Integrated `Sheets.SleepTimer` unified player sheet with 5-second gentle audio fade-out, auto-close app completely on completion, stop time estimation, quick extension chips (+5m, +15m), and presets (15m, 30m, 45m, 60m, End of Track).
 - **Video Folder & Media Browser FAB Alignment Fix:**
   - Fixed an issue where activating the music mini-player pushed the Floating Action Button (FAB) high up into the middle of the screen when browsing video folders (`VideoListScreen`), playlists, or filesystem directories.
   - Exempted full-height media browser screens from redundant host container insets, allowing video lists to scroll smoothly behind the translucent mini player while anchoring the FAB at its clean resting position 12dp above the mini player.
@@ -31,7 +31,7 @@ These notes are written in plain English and focus on what changed for real use.
   - Added dedicated Sleep Timer controls to the Audio Player controls row and top header bar.
   - Active countdown badge displayed directly in the top header bar with live elapsed time pill (e.g. `14:32`).
   - **Playback-Aware Timer:** The countdown timer now ticks exclusively while music is actively running. If playback is paused, the timer automatically pauses, preserving remaining time without draining down while the player is idle.
-  - Integrated `Sheets.SleepTimer` unified player sheet with 30-second gentle audio fade-out, stop time estimation, quick extension chips (+5m, +15m), and presets (15m, 30m, 45m, 60m, End of Track).
+  - Integrated `Sheets.SleepTimer` unified player sheet with 5-second gentle audio fade-out, auto-close app completely on completion, stop time estimation, quick extension chips (+5m, +15m), and presets (15m, 30m, 45m, 60m, End of Track).
 - **Video Folder & Media Browser FAB Alignment Fix:**
   - Fixed an issue where activating the music mini-player pushed the Floating Action Button (FAB) high up into the middle of the screen when browsing video folders (`VideoListScreen`), playlists, or filesystem directories.
   - Exempted full-height media browser screens from redundant host container insets, allowing video lists to scroll smoothly behind the translucent mini player while anchoring the FAB at its clean resting position 12dp above the mini player.
@@ -57,7 +57,7 @@ These notes are written in plain English and focus on what changed for real use.
   - Combines Radiant Neon Crimson Pink (`#FF2A6D`) accents with Electric Cyan (`#00F5FF`) secondary highlights and deep Obsidian Black (`#0D0B12`) / soft pastel lavender backgrounds.
 - **Smart Sleep Timer with Gentle Audio Fade-Out:**
   - Added smart sleep timer controls accessible from player sheets with custom hours/minutes input and quick presets (15m, 30m, 45m, 60m, and End of Track).
-  - Implemented 30-second gentle audio fade-out so volume gradually and smoothly decreases before pausing playback, preventing sudden waking.
+  - Implemented 5-second gentle audio fade-out so volume gradually and smoothly decreases before automatically closing the app completely on timer completion.
   - Added active timer banner showing exact countdown, estimated stop time (e.g. "Stops at 11:45 PM"), and quick extension chips (+5m, +15m).
   - Volume is automatically restored upon completion or cancellation so future playback is never left muted.
 - **Configurable Volume Step (1 to 10 Steps):**

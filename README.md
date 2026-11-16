@@ -51,7 +51,7 @@ Whether decoding 4K HDR10+ anime with complex ASS karaoke subtitles or driving a
 | **Dynamic Range Compression** | 🟢 **ACTIVE** | Tames explosive volume spikes in movies while boosting subtle whispers |
 | **Volume Boost Cap** | 🟢 **ACTIVE** | Clean digital pre-amplification boost up to +30 dB |
 | **Configurable Volume Step** | 🟢 **ACTIVE** | Discrete volume step multiplier (1 to 10 steps per hardware key press) with proportional boost scaling |
-| **Smart Sleep Timer** | 🟢 **ACTIVE** | **NEW:** Integrated into both Audio & Video player controls with active playback sync (ticks down only while music runs, auto-pausing when player is paused), gentle 30s audio fade-out, live countdown badge, "End of track" mode, and quick extensions |
+| **Smart Sleep Timer** | 🟢 **ACTIVE** | **NEW:** Integrated into both Audio & Video player controls with active playback sync (ticks down only while music runs), gentle 5s audio fade-out, auto-closes app completely on timer completion, live countdown badge, "End of track" mode, and quick extensions |
 | **Online Lyrics Providers** | 🟢 **ACTIVE** | 17 online lyrics databases (Apple Music TTML, Musixmatch, LRCLIB, KuGou, PaxSenix, YouTube, etc.) with word/line sync badges, individual provider toggles, and translation controls |
 | **Pitch Correction** | 🟢 **ACTIVE** | Maintains natural harmonic pitch when speeding up or slowing down audio |
 
