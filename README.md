@@ -5,7 +5,7 @@
 # ⚡ V&M PLAYER ⚡
 ### *Next-Generation, Ultra-Lightweight Video & Audio Engine for Android*
 
-[![Release](https://img.shields.io/badge/Release-v1.0.3-00F5FF?style=for-the-badge&logo=android&logoColor=black)](https://github.com/Krishna1998/Video-Music-Player/releases)
+[![Release](https://img.shields.io/badge/Release-v1.0.4-00F5FF?style=for-the-badge&logo=android&logoColor=black)](https://github.com/Krishna1998/Video-Music-Player/releases)
 [![Android](https://img.shields.io/badge/Android-8.0%2B%20(API%2026%2B)-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com)
 [![Architecture](https://img.shields.io/badge/Arch-arm64--v8a-FF0055?style=for-the-badge&logo=arm&logoColor=white)](https://arm.com)
 [![Engine](https://img.shields.io/badge/Core-mpv%20%2B%20FFmpeg-9D4EDD?style=for-the-badge&logo=cplusplus&logoColor=white)](https://mpv.io)
@@ -51,7 +51,7 @@ Whether decoding 4K HDR10+ anime with complex ASS karaoke subtitles or driving a
 | **Dynamic Range Compression** | 🟢 **ACTIVE** | Tames explosive volume spikes in movies while boosting subtle whispers |
 | **Volume Boost Cap** | 🟢 **ACTIVE** | Clean digital pre-amplification boost up to +30 dB |
 | **Configurable Volume Step** | 🟢 **ACTIVE** | Discrete volume step multiplier (1 to 10 steps per hardware key press) with proportional boost scaling |
-| **Smart Sleep Timer** | 🟢 **ACTIVE** | **NEW:** Integrated into both Audio & Video player controls with active playback sync (ticks down only while music runs), gentle 5s audio fade-out, auto-closes app completely on timer completion, live countdown badge, "End of track" mode, and quick extensions |
+| **Smart Sleep Timer** | 🟢 **ACTIVE** | **NEW:** Integrated into both Audio & Video player controls with active playback sync (ticks down only while music runs), gentle 5s audio fade-out, graceful crash-free app auto-close on completion, live countdown badge, "End of track" mode, and quick extensions |
 | **Online Lyrics Providers** | 🟢 **ACTIVE** | 17 online lyrics databases (Apple Music TTML, Musixmatch, LRCLIB, KuGou, PaxSenix, YouTube, etc.) with word/line sync badges, individual provider toggles, and translation controls |
 | **Pitch Correction** | 🟢 **ACTIVE** | Maintains natural harmonic pitch when speeding up or slowing down audio |
 
@@ -67,7 +67,8 @@ Whether decoding 4K HDR10+ anime with complex ASS karaoke subtitles or driving a
 | Feature | State | Description |
 | :--- | :---: | :--- |
 | **Material 3 Expressive** | 🟢 **ACTIVE** | Full dynamic color integration, OLED pure black theme, and expressive typography |
-| **Solar Amber Gold Cyber Prism Icon** | 🟢 **ACTIVE** | **NEW:** 95% scale geometric Cyber Prism with metallic specular bevels, dark chamfer shadows, solid equalizer bars, and liquid amber gold crystal playhead |
+| **Acoustic Turbine Flagship Icon** | 🟢 **ACTIVE** | **NEW:** 95% scale Acoustic Turbine sound-arrow geometry in Icy Cyan & Electric Cobalt Blue on AMOLED pitch black with synchronized splash screen, vector branding, and Material You monochrome layer |
+| **Streamlined Identity & Settings** | 🟢 **ACTIVE** | **NEW:** Concept 4 Black enforced as sole active launcher icon; legacy icon aliases retired and experimental tags removed across Liquid Glass and Vulkan settings |
 | **Material You Themed Icons** | 🟢 **ACTIVE** | Full monochrome silhouette vector layer matching Android 13+ dynamic system color palettes |
 | **Seamless FAB Alignment** | 🟢 **ACTIVE** | **NEW:** Perfect 12dp floating clearance above active mini player in video folders, playlists, and file browsers |
 | **Crimson Sonic Theme** | 🟢 **ACTIVE** | Dedicated built-in neon ruby pink & electric cyan color scheme |

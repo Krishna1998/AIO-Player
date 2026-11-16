@@ -2,23 +2,21 @@
 
 These notes are written in plain English and focus on what changed for real use.
 
-## 1.0.3
+## 1.0.4
 
-- **Default App Icon: "Solar Amber Gold" Cyber Prism (95% Scale):**
-  - Upgraded the default launcher icon to the futuristic **Cyber Prism** design at a balanced 95% scale for ideal home-screen visual presence.
-  - Eliminated blurry diffuse neon glow in favor of a clean, razor-sharp vector aesthetic with metallic specular bevels, dark chamfer shadows, and solid crimson equalizer bars.
-  - Introduced the **Solar Amber Gold** palette: a liquid gold (`#FFD700`) and deep amber (`#FF9100`) 3D crystal prism playhead with diamond white facet lines.
-  - Fully synchronized the Android 13+ Material You monochrome themed icon asset.
-- **Audio Player Sleep Timer Integration & Active Playback Sync:**
-  - Added dedicated Sleep Timer controls to the Audio Player controls row and top header bar.
-  - Active countdown badge displayed directly in the top header bar with live elapsed time pill (e.g. `14:32`).
-  - **Playback-Aware Timer:** The countdown timer now ticks exclusively while music is actively running. If playback is paused, the timer automatically pauses, preserving remaining time without draining down while the player is idle.
-  - Integrated `Sheets.SleepTimer` unified player sheet with 5-second gentle audio fade-out, auto-close app completely on completion, stop time estimation, quick extension chips (+5m, +15m), and presets (15m, 30m, 45m, 60m, End of Track).
-- **Video Folder & Media Browser FAB Alignment Fix:**
-  - Fixed an issue where activating the music mini-player pushed the Floating Action Button (FAB) high up into the middle of the screen when browsing video folders (`VideoListScreen`), playlists, or filesystem directories.
-  - Exempted full-height media browser screens from redundant host container insets, allowing video lists to scroll smoothly behind the translucent mini player while anchoring the FAB at its clean resting position 12dp above the mini player.
-- **Tab-Specific Quick Play FAB:**
-  - Separated Floating Action Button playback logic so tapping "Play All" or "Shuffle" on the Favorites tab plays only favorited tracks ("Play All Favorites" / "Shuffle Favorites") rather than entire library songs.
+- **Flagship Brand Identity: "Acoustic Turbine" (Icy Cyan & Cobalt Blue on Pitch Black):**
+  - Modernized the official brand identity with the futuristic **Concept 4: Acoustic Turbine** at a balanced 95% scale for peak home-screen visual presence.
+  - Crafted acoustic turbine blade arcs in Icy Cyan (`#00F5FF`, `#00D2FF`) and Electric Cobalt Blue (`#0051FF`, `#0038A8`) with a central white specular playhead atop an AMOLED pitch black (`#000000`) canvas.
+  - Fully synchronized 1:1 across default launcher icon (`ic_launcher_black_gradient`), Android 12+ Splash Screen (`ic_splash_purple_foreground`), Android 13+ Material You monochrome silhouette, and project documentation SVG assets (`videoplayer_icon.svg`).
+  - Streamlined icon management: removed alternative icon pickers and disabled all 58 legacy aliases, enforcing Concept 4 Black as the single active launcher icon across all installs and updates.
+- **Sleep Timer Graceful Shutdown & Crash Fix:**
+  - Resolved an unexpected error dialog that occurred when the sleep timer triggered application exit.
+  - Replaced abrupt process kill (`SIGKILL`) with graceful multi-stage shutdown (`App.exitApplication`) and flagged intentional shutdowns in `CrashMonitor` to eliminate false-positive crash detection.
+  - Tuned gentle audio fade-out to 5 seconds before clean application termination.
+- **Settings Refinement & General Polish:**
+  - Removed "Experimental" status badge and banner from Liquid Glass preferences, promoting it to standard UI status.
+  - Promoted Vulkan video decoding from "Vulkan (Experimental)" to "Vulkan".
+  - Cleaned up obsolete app icon settings entries from settings search indexing.
 
 ## 1.0.3
 
