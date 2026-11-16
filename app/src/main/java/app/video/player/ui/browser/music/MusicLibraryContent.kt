@@ -22,7 +22,6 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FilledTonalButtonDefaults
 import app.video.player.ui.browser.cards.mediaCardClickable
 import app.video.player.ui.browser.components.mediaItemMotion
 import androidx.compose.foundation.layout.Arrangement
@@ -1662,7 +1661,7 @@ private fun MusicQuickActionBar(
       onClick = onPlayAll,
       modifier = Modifier.weight(1f),
       shape = RoundedCornerShape(12.dp),
-      colors = FilledTonalButtonDefaults.filledTonalButtonColors(
+      colors = ButtonDefaults.filledTonalButtonColors(
         containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         contentColor = MaterialTheme.colorScheme.onSurface,
       ),
