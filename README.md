@@ -156,7 +156,7 @@ cd "Video-Music-Player"
 | Variant | Package Identity | Purpose |
 | :--- | :--- | :--- |
 | **Release Build** | `video.music.player` | Official production release signed with production key |
-| **CI / Beta Build** | `video.music.playerbeta` | Bleeding-edge continuous deployment builds |
+| **CI / Beta Build** | `video.music.player.beta` | Bleeding-edge continuous deployment builds |
 | **Debug Build** | `video.music.player.debug` | Local developer inspection with live profiling |
 
 ---
