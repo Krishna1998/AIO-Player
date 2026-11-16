@@ -370,7 +370,7 @@ private fun WeeklyActivityBentoCard(days: Map<String, Long>) {
 
           val animatedBarWidth by animateDpAsState(
             targetValue = if (isSelected) 22.dp else 18.dp,
-            animationSpec = if (AppMotion.shouldReduceMotion()) snap() else AppMotion.Spatial.Expressive,
+            animationSpec = if (AppMotion.shouldReduceMotion()) snap() else AppMotion.Spatial.ExpressiveDp,
             label = "weeklyBarWidth$index",
           )
 
