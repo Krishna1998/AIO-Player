@@ -23,6 +23,12 @@ class AudioPreferences(
   val preferredLanguages = preferenceStore.getString("audio_preferred_languages", "hi")
   val defaultAudioDelay = preferenceStore.getInt("audio_delay_default")
   val pickerPath = preferenceStore.getString("audio_picker_path")
+  val defaultAudioSpeed = preferenceStore.getFloat("default_audio_speed", 1f)
+  val audioSpeedPresets =
+    preferenceStore.getStringSet(
+      "default_audio_speed_presets",
+      setOf("0.25", "0.5", "0.75", "1.0", "1.25", "1.5", "1.75", "2.0", "2.5", "3.0", "3.5", "4.0"),
+    )
   val audioPitchCorrection = preferenceStore.getBoolean("audio_pitch_correction", true)
   val audioChannels = preferenceStore.getEnum("audio_channels", AudioChannels.AutoSafe)
   val volumeBoostCap = preferenceStore.getInt("audio_volume_boost_cap", 30)

@@ -1447,6 +1447,7 @@ fun AudioPlayerControls(
                       if (isAudiobook) {
                         AudiobookPlayback.setSpeed(nextSpeed)
                       } else {
+                        audioPreferences.defaultAudioSpeed.set(nextSpeed)
                         PlaybackSession.setPropertyFloat("speed", nextSpeed)
                       }
                       viewModel.playerUpdate.value = PlayerUpdates.DynamicSpeedControl(nextSpeed)

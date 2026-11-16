@@ -8,6 +8,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.foundation.Image
@@ -129,7 +130,7 @@ internal fun ProfileWatchStatistics() {
     WatchTimeBentoCard(stats)
     WeeklyActivityBentoCard(stats.days)
 
-    val topMedia =
+    val topVideos =
       remember(stats.media) {
         stats.media.entries
           .filter { it.value.seconds > 0 && !it.value.isAudio }
@@ -138,8 +139,18 @@ internal fun ProfileWatchStatistics() {
           .map { it.value }
       }
 
+    val topAudios =
+      remember(stats.media) {
+        stats.media.entries
+          .filter { it.value.seconds > 0 && it.value.isAudio }
+          .sortedByDescending { it.value.seconds }
+          .take(8)
+          .map { it.value }
+      }
+
     TopMediaLeaderboardBentoCard(
-      topMedia = topMedia,
+      topVideos = topVideos,
+      topAudios = topAudios,
     )
   }
 
@@ -415,10 +426,16 @@ private fun WeeklyActivityBentoCard(days: Map<String, Long>) {
   }
 }
 
+private enum class MostWatchedMediaType { VIDEO, AUDIO }
+
 @Composable
 private fun TopMediaLeaderboardBentoCard(
-  topMedia: List<WatchMediaStats>,
+  topVideos: List<WatchMediaStats>,
+  topAudios: List<WatchMediaStats>,
 ) {
+  var selectedTab by rememberSaveable { mutableStateOf(MostWatchedMediaType.VIDEO) }
+  val currentList = if (selectedTab == MostWatchedMediaType.VIDEO) topVideos else topAudios
+
   BentoCard(modifier = Modifier.fillMaxWidth()) {
     Column(
       modifier = Modifier.padding(20.dp),
@@ -453,9 +470,73 @@ private fun TopMediaLeaderboardBentoCard(
             fontWeight = FontWeight.SemiBold,
           )
         }
+
+        // Separate Tabs for Video and Audio
+        Row(
+          modifier = Modifier
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.65f))
+            .padding(2.dp),
+          horizontalArrangement = Arrangement.spacedBy(2.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          val isVideo = selectedTab == MostWatchedMediaType.VIDEO
+          Surface(
+            shape = CircleShape,
+            color = if (isVideo) MaterialTheme.colorScheme.primary else Color.Transparent,
+            contentColor = if (isVideo) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+              .clip(CircleShape)
+              .clickable { selectedTab = MostWatchedMediaType.VIDEO },
+          ) {
+            Row(
+              modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+              Icon(
+                imageVector = Icons.RoundedFilled.Videocam,
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+              )
+              Text(
+                text = stringResource(R.string.watch_stats_video),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = if (isVideo) FontWeight.Bold else FontWeight.Medium,
+              )
+            }
+          }
+
+          val isAudio = selectedTab == MostWatchedMediaType.AUDIO
+          Surface(
+            shape = CircleShape,
+            color = if (isAudio) MaterialTheme.colorScheme.primary else Color.Transparent,
+            contentColor = if (isAudio) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+              .clip(CircleShape)
+              .clickable { selectedTab = MostWatchedMediaType.AUDIO },
+          ) {
+            Row(
+              modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+              Icon(
+                imageVector = Icons.RoundedFilled.Audiotrack,
+                contentDescription = null,
+                modifier = Modifier.size(14.dp),
+              )
+              Text(
+                text = stringResource(R.string.watch_stats_audio),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = if (isAudio) FontWeight.Bold else FontWeight.Medium,
+              )
+            }
+          }
+        }
       }
 
-      if (topMedia.isEmpty()) {
+      if (currentList.isEmpty()) {
         Box(
           modifier = Modifier
             .fillMaxWidth()
@@ -463,21 +544,24 @@ private fun TopMediaLeaderboardBentoCard(
           contentAlignment = Alignment.Center,
         ) {
           Text(
-            text = stringResource(R.string.watch_stats_empty),
+            text = stringResource(
+              if (selectedTab == MostWatchedMediaType.VIDEO) R.string.watch_stats_empty_video
+              else R.string.watch_stats_empty_audio
+            ),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
         }
       } else {
-        val maxSeconds = topMedia.firstOrNull()?.seconds?.coerceAtLeast(1L) ?: 1L
+        val maxSeconds = currentList.firstOrNull()?.seconds?.coerceAtLeast(1L) ?: 1L
         Column(verticalArrangement = Arrangement.spacedBy(AppConnectedShapeTokens.spacing)) {
-          topMedia.forEachIndexed { index, media ->
+          currentList.forEachIndexed { index, media ->
             LeaderboardMediaRow(
               rank = index + 1,
               media = media,
               maxSeconds = maxSeconds,
               index = index,
-              itemCount = topMedia.size,
+              itemCount = currentList.size,
             )
           }
         }
@@ -628,7 +712,7 @@ private fun WatchMediaArtwork(media: WatchMediaStats) {
 
       else -> {
         Icon(
-          imageVector = Icons.RoundedFilled.PlayArrow,
+          imageVector = if (media.isAudio) Icons.RoundedFilled.Audiotrack else Icons.RoundedFilled.PlayArrow,
           contentDescription = null,
           tint = MaterialTheme.colorScheme.onSurfaceVariant,
           modifier = Modifier.size(24.dp),

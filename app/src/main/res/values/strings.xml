@@ -2464,6 +2464,9 @@
   <string name="watch_stats_sessions">%1$d playback sessions</string>
   <string name="watch_stats_reset">Reset</string>
   <string name="watch_stats_video">Video</string>
+  <string name="watch_stats_audio">Audio</string>
+  <string name="watch_stats_empty_video">No watched videos yet</string>
+  <string name="watch_stats_empty_audio">No played audio tracks yet</string>
   <string name="watch_stats_last_seven_days">Last 7 days</string>
   <string name="watch_stats_today">Today: %1$s</string>
   <string name="watch_stats_overall_playback">Overall playback</string>

@@ -5575,7 +5575,12 @@ class PlayerActivity :
     // The secondary track has its own delay property and is otherwise left on the startup
     // value, so a saved sync would silently not apply to it.
     PlaybackSession.setPropertyDouble("secondary-sub-delay", subDelay)
-    PlaybackSession.setPropertyDouble("speed", state.playbackSpeed)
+    val isAudio = viewModel.isAudioOnly.value || isCurrentMediaKnownAudio()
+    if (isAudio) {
+      PlaybackSession.setPropertyDouble("speed", audioPreferences.defaultAudioSpeed.get().toDouble())
+    } else {
+      PlaybackSession.setPropertyDouble("speed", state.playbackSpeed)
+    }
     // Re-apply audio-pitch-correction after speed change, as mpv resets it to default
     PlaybackSession.setPropertyBoolean("audio-pitch-correction", audioPreferences.audioPitchCorrection.get())
     PlaybackSession.setPropertyDouble("audio-delay", audioDelay)
@@ -5641,6 +5646,12 @@ private suspend fun restorePlaybackPosition(state: PlaybackStateEntity?, loadGen
    * @param state The saved playback state entity (null if no saved state)
    */
   private fun applyDefaultSettings(state: PlaybackStateEntity?) {
+    val isAudio = viewModel.isAudioOnly.value || isCurrentMediaKnownAudio()
+    if (isAudio) {
+      PlaybackSession.setPropertyDouble("speed", audioPreferences.defaultAudioSpeed.get().toDouble())
+    } else if (state == null) {
+      PlaybackSession.setPropertyDouble("speed", playerPreferences.defaultSpeed.get().toDouble())
+    }
     if (state == null) {
       val defaultSubSpeed = subtitlesPreferences.defaultSubSpeed.get().toDouble()
       PlaybackSession.setPropertyDouble("sub-speed", defaultSubSpeed)

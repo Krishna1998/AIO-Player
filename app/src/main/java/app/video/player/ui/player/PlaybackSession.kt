@@ -24,6 +24,7 @@ import app.video.player.network.AndroidCookieJar
 import app.video.player.preferences.AdvancedPreferences
 import app.video.player.preferences.AudioChannels
 import app.video.player.preferences.AudioPreferences
+import app.video.player.preferences.PlayerPreferences
 import app.video.player.preferences.SpatialAudioMode
 import app.video.player.preferences.MpvConfigControlledFeatures
 import app.video.player.preferences.MpvConfigOverridePolicy
@@ -236,6 +237,9 @@ object PlaybackSession : MPVLib.EventObserver {
   private val nativeLock = ReentrantLock(true)
   private val audioPreferences by lazy {
     org.koin.java.KoinJavaComponent.get<AudioPreferences>(AudioPreferences::class.java)
+  }
+  private val playerPreferences by lazy {
+    org.koin.java.KoinJavaComponent.get<PlayerPreferences>(PlayerPreferences::class.java)
   }
   private val observers = CopyOnWriteArraySet<MPVLib.EventObserver>()
   private val _state = MutableStateFlow(PlaybackSessionState())
@@ -1150,6 +1154,13 @@ internal fun userScriptsNeedReload(currentKey: String): Boolean {
       if (resolvedItem.audiobook == null && speedBeforeAudiobook != null) {
         if (!MpvConfigOverridePolicy.isOwnedByMpvConf("speed")) MPVLib.setPropertyDouble("speed", speedBeforeAudiobook!!.toDouble())
         speedBeforeAudiobook = null
+      } else if (resolvedItem.audiobook == null && !MpvConfigOverridePolicy.isOwnedByMpvConf("speed")) {
+        val targetSpeed = if (resolvedItem.isDefinitelyAudioOnly()) {
+          audioPreferences.defaultAudioSpeed.get()
+        } else {
+          playerPreferences.defaultSpeed.get()
+        }
+        MPVLib.setPropertyDouble("speed", targetSpeed.toDouble())
       }
       val videoSelection = resolvedItem.videoSelection()
       // MediaCodec needs a valid native window when the video decoder is created. The optimized

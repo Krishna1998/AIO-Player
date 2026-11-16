@@ -229,6 +229,7 @@ internal fun AudioPlayerScreen(
   inAppSheet: InAppMusicSheetState? = null,
 ) {
   val playerPreferences = koinInject<PlayerPreferences>()
+  val audioPreferences = koinInject<AudioPreferences>()
   val appearancePreferences = koinInject<AppearancePreferences>()
   val enableLiquidGlass by appearancePreferences.liquidGlassEnabled.collectAsState()
   val playbackQueue by PlaybackSession.queue.collectAsStateWithLifecycle()
@@ -294,8 +295,8 @@ internal fun AudioPlayerScreen(
   val panel by viewModel.panelShown.collectAsState()
   val subtitles by viewModel.subtitleTracks.collectAsState(persistentListOf())
   val audioTracks by viewModel.audioTracks.collectAsState(persistentListOf())
-  val speedPresets by playerPreferences.speedPresets.collectAsState()
-  val sortedSpeedPresets = remember(speedPresets) { speedPresets.map { it.toFloat() }.sorted() }
+  val audioSpeedPresets by audioPreferences.audioSpeedPresets.collectAsState()
+  val sortedAudioSpeedPresets = remember(audioSpeedPresets) { audioSpeedPresets.map { it.toFloat() }.sorted() }
 
   if (inAppSheet != null) {
     // PlayerActivity closes sheets and panels from its own back handling; the browser does not.
@@ -340,20 +341,28 @@ internal fun AudioPlayerScreen(
         },
         decoder = decoder,
         onUpdateDecoder = { PlaybackSession.setPropertyString("hwdec", it.value) },
-        speed = playbackSpeed ?: playerPreferences.defaultSpeed.get(),
+        speed = playbackSpeed ?: audioPreferences.defaultAudioSpeed.get(),
         onSpeedChange = {
           if (currentPlaybackItem?.audiobook != null) app.video.player.ui.player.AudiobookPlayback.setSpeed(it.toFixed(2))
-          else PlaybackSession.setPropertyFloat("speed", it.toFixed(2))
+          else {
+            val target = it.toFixed(2)
+            audioPreferences.defaultAudioSpeed.set(target)
+            PlaybackSession.setPropertyFloat("speed", target)
+            viewModel.playerUpdate.value = PlayerUpdates.DynamicSpeedControl(target)
+          }
         },
-        onMakeDefaultSpeed = { playerPreferences.defaultSpeed.set(it.toFixed(2)) },
-        onAddSpeedPreset = { playerPreferences.speedPresets += it.toFixed(2).toString() },
-        onRemoveSpeedPreset = { removeSpeedPreset(playerPreferences, it) },
-        onResetSpeedPresets = playerPreferences.speedPresets::delete,
-        speedPresets = sortedSpeedPresets,
+        onMakeDefaultSpeed = { audioPreferences.defaultAudioSpeed.set(it.toFixed(2)) },
+        onAddSpeedPreset = { audioPreferences.audioSpeedPresets += it.toFixed(2).toString() },
+        onRemoveSpeedPreset = { removeAudioSpeedPreset(audioPreferences, it) },
+        onResetSpeedPresets = audioPreferences.audioSpeedPresets::delete,
+        speedPresets = sortedAudioSpeedPresets,
         onResetDefaultSpeed = {
-          val speed = playerPreferences.defaultSpeed.deleteAndGet().toFixed(2)
+          val speed = audioPreferences.defaultAudioSpeed.deleteAndGet().toFixed(2)
           if (currentPlaybackItem?.audiobook != null) app.video.player.ui.player.AudiobookPlayback.setSpeed(speed)
-          else PlaybackSession.setPropertyFloat("speed", speed)
+          else {
+            PlaybackSession.setPropertyFloat("speed", speed)
+            viewModel.playerUpdate.value = PlayerUpdates.DynamicSpeedControl(speed)
+          }
         },
         onStartSleepTimer = viewModel::startTimer,
         onOpenPanel = onOpenPanel,
@@ -3047,6 +3056,16 @@ private fun CustomControlButton(
 private fun removeSpeedPreset(playerPreferences: PlayerPreferences, speedToRemove: Float) {
   val current = playerPreferences.speedPresets.get()
   playerPreferences.speedPresets.set(
+    current.filterNot { str ->
+      val f = str.toFloatOrNull()
+      f != null && kotlin.math.abs(f - speedToRemove) < 0.001f
+    }.toSet(),
+  )
+}
+
+private fun removeAudioSpeedPreset(audioPreferences: AudioPreferences, speedToRemove: Float) {
+  val current = audioPreferences.audioSpeedPresets.get()
+  audioPreferences.audioSpeedPresets.set(
     current.filterNot { str ->
       val f = str.toFloatOrNull()
       f != null && kotlin.math.abs(f - speedToRemove) < 0.001f
