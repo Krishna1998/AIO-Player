@@ -47,6 +47,7 @@ import kotlinx.serialization.Serializable
 import app.video.player.ui.preferences.components.AppListPreference as ListPreference
 import app.video.player.ui.preferences.components.AppSliderPreference as SliderPreference
 import app.video.player.ui.preferences.components.AppTextFieldPreference as TextFieldPreference
+import kotlin.math.roundToInt
 import org.koin.compose.koinInject
 import androidx.compose.runtime.setValue
 import app.video.player.ui.browser.music.MusicTab
@@ -498,6 +499,31 @@ object AudioPreferencesScreen : Screen {
                   },
                   onSliderValueChange = { preferences.volumeBoostCap.set(it.toInt()) },
                   sliderValue = volumeBoostCap.toFloat(),
+                )
+              }
+
+              PreferenceDivider()
+              val volumeStep by preferences.volumeStep.collectAsState()
+              ExpressivePreferenceItem {
+                SliderPreference(
+                  modifier = Modifier.settingsSearchTarget(R.string.pref_audio_volume_step_title),
+                  value = volumeStep.toFloat(),
+                  onValueChange = { preferences.volumeStep.set(it.roundToInt().coerceIn(1, 5)) },
+                  title = { Text(stringResource(R.string.pref_audio_volume_step_title)) },
+                  valueRange = 1f..5f,
+                  valueSteps = 3,
+                  summary = {
+                    Text(
+                      if (volumeStep == 1) {
+                        stringResource(R.string.pref_audio_volume_step_default)
+                      } else {
+                        stringResource(R.string.pref_audio_volume_step_summary, volumeStep)
+                      },
+                      color = MaterialTheme.colorScheme.outline,
+                    )
+                  },
+                  onSliderValueChange = { preferences.volumeStep.set(it.roundToInt().coerceIn(1, 5)) },
+                  sliderValue = volumeStep.toFloat(),
                 )
               }
             }

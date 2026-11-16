@@ -4827,10 +4827,12 @@ fun restartFromBeginning() {
     if (absoluteMaxVolume > 100 && currentSystemVolume == maxVolume) {
       if (mpvVolume == 100 && change < 0) {
         changeVolumeTo(currentSystemVolume + change, showUi)
-      }
-      val finalMPVVolume = (mpvVolume + change).coerceAtLeast(100)
-      if (finalMPVVolume in 100..absoluteMaxVolume) {
-        return changeMPVVolumeTo(finalMPVVolume)
+      } else {
+        val boostDelta = change * 5
+        val finalMPVVolume = (mpvVolume + boostDelta).coerceIn(100, absoluteMaxVolume)
+        if (finalMPVVolume != mpvVolume) {
+          return changeMPVVolumeTo(finalMPVVolume)
+        }
       }
     }
 

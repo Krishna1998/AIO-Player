@@ -7047,22 +7047,24 @@ private suspend fun restorePlaybackPosition(state: PlaybackStateEntity?, loadGen
 
       KeyEvent.KEYCODE_VOLUME_UP -> {
         if (isTelevision) consumedTvRemoteKeys += keyCode
+        val step = audioPreferences.volumeStep.get().coerceIn(1, 5)
         if (viewModel.isAudioOnly.value) {
-          viewModel.changeVolumeBy(1, showUi = true)
+          viewModel.changeVolumeBy(step, showUi = true)
           return true
         }
-        viewModel.changeVolumeBy(1)
+        viewModel.changeVolumeBy(step)
         viewModel.displayVolumeSlider()
         return true
       }
 
       KeyEvent.KEYCODE_VOLUME_DOWN -> {
         if (isTelevision) consumedTvRemoteKeys += keyCode
+        val step = audioPreferences.volumeStep.get().coerceIn(1, 5)
         if (viewModel.isAudioOnly.value) {
-          viewModel.changeVolumeBy(-1, showUi = true)
+          viewModel.changeVolumeBy(-step, showUi = true)
           return true
         }
-        viewModel.changeVolumeBy(-1)
+        viewModel.changeVolumeBy(-step)
         viewModel.displayVolumeSlider()
         return true
       }

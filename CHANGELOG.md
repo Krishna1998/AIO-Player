@@ -23,6 +23,9 @@ These notes are written in plain English and focus on what changed for real use.
   - Accurately tracks audio-only playback versus video watch time in `WatchStatsRepository`.
 - **Playback Speed Improvements:**
   - Added audio playback speed persistence and configurable speed presets.
+- **Configurable Volume Step:**
+  - Added a new "Volume step" preference under Settings > Audio (and in-player settings sheet) with a 1 to 5 discrete slider.
+  - Controls how much volume changes per hardware button press, scaling volume boost proportionally.
 
 ## 1.0.0
 
