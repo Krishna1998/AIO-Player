@@ -1,0 +1,156 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+package app.video.player.ui.player.controls
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import app.video.player.preferences.PlayerButton
+import app.video.player.ui.player.controls.components.fadingHorizontalScroll
+
+internal val LandscapeActionSize = 44.dp
+internal val LandscapeActionGap = 6.dp
+
+@Composable
+internal fun LandscapeActionGroup(
+  buttons: List<PlayerButton>,
+  modifier: Modifier = Modifier,
+  endAligned: Boolean = false,
+  fillWidth: Boolean = true,
+  renderButton: @Composable (PlayerButton) -> Unit,
+) {
+  val activeButtons = remember(buttons) { buttons.filterNot { it == PlayerButton.NONE } }
+  val shouldScroll = activeButtons.size > 4
+  val scrollState = rememberScrollState()
+
+  Row(
+    modifier =
+      modifier
+        .then(if (fillWidth) Modifier.fillMaxWidth() else Modifier)
+        .then(
+          if (shouldScroll) {
+            Modifier.fadingHorizontalScroll(
+              scrollState,
+              reverseScrolling = endAligned,
+              shadowRoom = 0.dp,
+            )
+          } else {
+            Modifier
+          },
+        ),
+    horizontalArrangement =
+      Arrangement.spacedBy(
+        LandscapeActionGap,
+        if (endAligned) Alignment.End else Alignment.Start,
+      ),
+    verticalAlignment = Alignment.CenterVertically,
+  ) {
+    activeButtons.forEach { button ->
+      key(button) {
+        Box(Modifier.align(Alignment.CenterVertically)) { renderButton(button) }
+      }
+    }
+  }
+}
+
+@Composable
+internal fun LandscapeControlsRow(
+  leftButtons: List<PlayerButton>,
+  rightButtons: List<PlayerButton>,
+  playbackWidth: Dp,
+  modifier: Modifier = Modifier,
+  leftModifier: Modifier = Modifier,
+  rightModifier: Modifier = Modifier,
+  renderButton: @Composable (PlayerButton) -> Unit,
+  playbackControls: @Composable () -> Unit,
+) {
+  if (playbackWidth > 0.dp) {
+    Row(
+      modifier = modifier.fillMaxWidth(),
+      horizontalArrangement = Arrangement.spacedBy(LandscapeActionGap),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      LandscapeActionGroup(
+        buttons = leftButtons,
+        modifier = Modifier.weight(1f).then(leftModifier),
+        renderButton = renderButton,
+      )
+      Box(Modifier.width(playbackWidth), contentAlignment = Alignment.Center) { playbackControls() }
+      LandscapeActionGroup(
+        buttons = rightButtons,
+        modifier = Modifier.weight(1f).then(rightModifier),
+        endAligned = true,
+        renderButton = renderButton,
+      )
+    }
+    return
+  }
+
+  Layout(
+    modifier = modifier.fillMaxWidth(),
+    content = {
+      LandscapeActionGroup(
+        buttons = leftButtons,
+        modifier = leftModifier,
+        fillWidth = false,
+        renderButton = renderButton,
+      )
+      Box(Modifier.width(playbackWidth), contentAlignment = Alignment.Center) { playbackControls() }
+      LandscapeActionGroup(
+        buttons = rightButtons,
+        modifier = rightModifier,
+        endAligned = true,
+        fillWidth = false,
+        renderButton = renderButton,
+      )
+    },
+  ) { measurables, constraints ->
+    val childConstraints = constraints.copy(minWidth = 0, minHeight = 0)
+    val left = measurables[0].measure(childConstraints)
+    val playback = measurables[1].measure(childConstraints)
+    val right = measurables[2].measure(childConstraints)
+    val gap = LandscapeActionGap.roundToPx()
+    val actionsWidth = left.width + right.width + if (left.width > 0 && right.width > 0) gap else 0
+    val rowWidth = if (playback.width == 0) actionsWidth else {
+      left.width + playback.width + right.width +
+        (if (left.width > 0) gap else 0) + (if (right.width > 0) gap else 0)
+    }
+    val width = constraints.maxWidth
+    if (rowWidth <= width) {
+      val height = maxOf(left.height, playback.height, right.height)
+      layout(width, height.coerceIn(constraints.minHeight, constraints.maxHeight)) {
+        left.placeRelative(0, (height - left.height) / 2)
+        val playbackStart = if (playback.width == 0) width / 2 else {
+          ((width - playback.width) / 2).coerceIn(
+            left.width + if (left.width > 0) gap else 0,
+            width - right.width - playback.width - if (right.width > 0) gap else 0,
+          )
+        }
+        playback.placeRelative(playbackStart, (height - playback.height) / 2)
+        right.placeRelative(width - right.width, (height - right.height) / 2)
+      }
+    } else {
+      val playbackHeight = if (playback.width > 0) playback.height else 0
+      val actionsTop = playbackHeight + if (playbackHeight > 0) gap else 0
+      val sharedActions = actionsWidth <= width
+      val actionsHeight = if (sharedActions) maxOf(left.height, right.height) else {
+        left.height + right.height + gap
+      }
+      layout(width, (actionsTop + actionsHeight).coerceIn(constraints.minHeight, constraints.maxHeight)) {
+        playback.placeRelative((width - playback.width) / 2, 0)
+        left.placeRelative(0, actionsTop)
+        right.placeRelative(width - right.width, actionsTop + if (sharedActions) 0 else left.height + gap)
+      }
+    }
+  }
+}

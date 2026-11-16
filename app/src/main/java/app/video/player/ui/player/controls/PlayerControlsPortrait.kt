@@ -1,0 +1,285 @@
+/*
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ */
+
+package app.video.player.ui.player.controls
+
+import androidx.compose.foundation.BorderStroke
+import app.video.player.ui.liquidglass.liquidGlassActive
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import app.video.player.R
+import app.video.player.preferences.PlayerButton
+import app.video.player.preferences.preference.collectAsState
+import app.video.player.ui.icons.Icon
+import app.video.player.ui.icons.Icons
+import app.video.player.ui.liquidglass.LiquidPillButton
+import app.video.player.ui.player.Panels
+import app.video.player.ui.player.PlayerActivity
+import app.video.player.ui.player.PlayerViewModel
+import app.video.player.ui.player.Sheets
+import app.video.player.ui.player.VideoAspect
+import app.video.player.ui.player.controls.components.ControlsButton
+import app.video.player.ui.player.controls.components.ControlsGroup
+import app.video.player.ui.player.controls.components.fadingHorizontalScroll
+import app.video.player.ui.player.controls.components.LocalBorderlessPlayerControls
+import app.video.player.ui.player.controls.components.playerButtonBorderColor
+import app.video.player.ui.player.controls.components.playerButtonContainerColor
+import app.video.player.ui.player.controls.components.playerButtonContentColor
+import app.video.player.ui.theme.spacing
+import dev.vivvvek.seeker.Segment
+import org.koin.compose.koinInject
+
+@Composable
+fun TopPlayerControlsPortrait(
+  mediaTitle: String?,
+  onBackPress: () -> Unit,
+  onOpenSheet: (Sheets) -> Unit,
+  viewModel: PlayerViewModel,
+  hideTitle: Boolean = false,
+) {
+  PlayerButtonTheme {
+    val playlistModeEnabled = viewModel.hasPlaylistSupport()
+    val clickEvent = LocalPlayerButtonsClickEvent.current
+    val titleHeight = playerTitleHeight(45.dp, MaterialTheme.typography.titleMedium.lineHeight)
+
+    Column(
+      modifier =
+        Modifier
+          .fillMaxWidth()
+          .padding(top = MaterialTheme.spacing.medium),
+    ) {
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        ControlsGroup {
+          ControlsButton(
+            icon = Icons.RoundedFilled.ArrowBack,
+            onClick = onBackPress,
+            color = playerButtonContentColor(),
+            modifier = Modifier.size(48.dp),
+          )
+
+          if (!hideTitle) {
+            Column(
+              modifier = Modifier.padding(start = 4.dp),
+            ) {
+              val enableLiquidGlass = liquidGlassActive()
+
+              if (enableLiquidGlass) {
+                LiquidPillButton(
+                  onClick = {
+                    if (playlistModeEnabled) {
+                      clickEvent()
+                      onOpenSheet(Sheets.Playlist)
+                    }
+                  },
+                  isInteractive = playlistModeEnabled,
+                  height = titleHeight,
+                  horizontalPadding = 14.dp,
+                ) {
+                  Text(
+                    mediaTitle ?: "",
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f, fill = false).playerTitleMarquee(),
+                  )
+                  viewModel.getPlaylistInfo()?.let { playlistInfo ->
+                    Text(
+                      " • $playlistInfo",
+                      maxLines = 1,
+                      style = MaterialTheme.typography.bodySmall,
+                      color = LocalContentColor.current.copy(alpha = 0.7f),
+                    )
+                  }
+                }
+              } else {
+                val titleInteractionSource =
+                  remember {
+                    androidx.compose.foundation.interaction
+                      .MutableInteractionSource()
+                  }
+
+                Surface(
+                  shape = CircleShape,
+                  color = if (LocalBorderlessPlayerControls.current) Color.Transparent else playerButtonContainerColor(),
+                  contentColor = playerButtonContentColor(),
+                  onClick = {
+                    clickEvent()
+                    onOpenSheet(Sheets.Playlist)
+                  },
+                  enabled = playlistModeEnabled,
+                  border = if (LocalBorderlessPlayerControls.current) null else BorderStroke(1.dp, playerButtonBorderColor()),
+                  modifier = Modifier.heightIn(min = titleHeight),
+                ) {
+                  Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.heightIn(min = titleHeight).padding(horizontal = 14.dp, vertical = 4.dp),
+                  ) {
+                    Text(
+                      mediaTitle ?: "",
+                      maxLines = 1,
+                      overflow = TextOverflow.Ellipsis,
+                      style = MaterialTheme.typography.titleMedium,
+                      modifier = Modifier.weight(1f, fill = false).playerTitleMarquee(),
+                    )
+                    viewModel.getPlaylistInfo()?.let { playlistInfo ->
+                      Text(
+                        " • $playlistInfo",
+                        maxLines = 1,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = LocalContentColor.current.copy(alpha = 0.7f),
+                      )
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+
+      val syncplayManager = org.koin.compose.koinInject<app.video.player.domain.syncplay.SyncplayManager>()
+      val syncplayState by syncplayManager.state.collectAsState()
+
+      androidx.compose.animation.AnimatedVisibility(
+        visible = syncplayState.isConnected,
+        enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.slideInVertically { -it },
+        exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.slideOutVertically { -it },
+      ) {
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          modifier = Modifier.padding(start = 14.dp, top = 8.dp),
+          horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+          Icon(
+            imageVector = Icons.RoundedFilled.CloudDownload,
+            contentDescription = null,
+            modifier = Modifier.size(14.dp),
+            tint = MaterialTheme.colorScheme.tertiary,
+          )
+          Text(
+            text =
+              stringResource(
+                R.string.syncplay_player_status,
+                syncplayState.room.orEmpty(),
+                syncplayState.users.size,
+              ),
+            style = MaterialTheme.typography.labelSmall,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            color = MaterialTheme.colorScheme.tertiary,
+          )
+        }
+      }
+    }
+  }
+}
+
+@Composable
+fun BottomPlayerControlsPortrait(
+  buttons: List<PlayerButton>,
+  showVideoQualitySelector: Boolean,
+  chapters: List<Segment>,
+  currentChapter: Int?,
+  isSpeedNonOne: Boolean,
+  currentZoom: Float,
+  aspect: VideoAspect,
+  mediaTitle: String?,
+  decoder: app.video.player.ui.player.Decoder,
+  playbackSpeed: Float,
+  onBackPress: () -> Unit,
+  onOpenSheet: (Sheets) -> Unit,
+  onOpenPanel: (Panels) -> Unit,
+  viewModel: PlayerViewModel,
+  activity: PlayerActivity,
+  alignToEnd: Boolean = false,
+  horizontalArrangement: Arrangement.Horizontal =
+    Arrangement.spacedBy(
+      MaterialTheme.spacing.medium,
+      Alignment.CenterHorizontally,
+    ),
+  modifier: Modifier = Modifier,
+) {
+  PlayerButtonTheme {
+    val enableLiquidGlass = liquidGlassActive()
+    // fillMaxWidth hands the scroll content a minimum width, so a short row still centers.
+    Row(
+      modifier =
+        modifier
+          .fillMaxWidth()
+          .fadingHorizontalScroll(
+            rememberScrollState(),
+            shadowRoom = if (enableLiquidGlass) PortraitActionShadowRoom else 0.dp,
+          )
+          .padding(horizontal = if (enableLiquidGlass) 8.dp else 0.dp),
+      horizontalArrangement = if (alignToEnd) {
+        Arrangement.spacedBy(MaterialTheme.spacing.small, Alignment.End)
+      } else horizontalArrangement,
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      buttons.forEach { button ->
+        val renderButton: @Composable () -> Unit = {
+          RenderPlayerButton(
+            button = button,
+            chapters = chapters,
+            currentChapter = currentChapter,
+            isPortrait = true,
+            isSpeedNonOne = isSpeedNonOne,
+            currentZoom = currentZoom,
+            aspect = aspect,
+            mediaTitle = mediaTitle,
+            onBackPress = onBackPress,
+            onOpenSheet = onOpenSheet,
+            onOpenPanel = onOpenPanel,
+            viewModel = viewModel,
+            activity = activity,
+            decoder = decoder,
+            playbackSpeed = playbackSpeed,
+            buttonSize = 48.dp,
+          )
+        }
+        // Unbounded scroll width would stretch a long title pill across the whole row.
+        if (button == PlayerButton.VIDEO_TITLE) Box(Modifier.widthIn(max = 220.dp)) { renderButton() } else renderButton()
+      }
+      if (showVideoQualitySelector) {
+        ControlsButton(
+          icon = Icons.RoundedFilled.Hd,
+          onClick = { onOpenSheet(Sheets.VideoQuality) },
+          title = stringResource(R.string.player_video_quality_button),
+          modifier = Modifier.size(48.dp),
+        )
+      }
+    }
+  }
+}

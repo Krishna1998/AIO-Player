@@ -1,0 +1,340 @@
+/*
+ * SPDX-License-Identifier: AGPL-3.0-or-later
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published
+ * by the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ */
+
+package app.video.player.ui.player.controls.components.sheets
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import app.video.player.R
+import app.video.player.presentation.components.PlayerSheet
+import app.video.player.presentation.components.PlayerSheetAction
+import app.video.player.presentation.components.PlayerSheetSectionHeader
+import app.video.player.ui.icons.Icons
+import app.video.player.ui.liquidglass.LocalPlayerGlassSurfaceActive
+import app.video.player.ui.player.TrackNode
+import app.video.player.ui.player.controls.components.rememberTvInitialFocusRequester
+import app.video.player.ui.player.controls.components.tvFocusHighlight
+import app.video.player.ui.player.controls.components.tvInitialFocus
+import app.video.player.ui.theme.ConnectedLayout
+import app.video.player.ui.theme.rememberConnectedShape
+import app.video.player.ui.theme.spacing
+import app.video.player.ui.utils.rememberAppHaptics
+import app.video.player.utils.device.DeviceFormFactor
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
+import java.util.Locale
+
+sealed class SubtitleItem {
+  data class Track(
+    val node: TrackNode,
+    val groupIndex: Int,
+    val groupSize: Int,
+  ) : SubtitleItem()
+
+  data class Header(
+    val title: String,
+  ) : SubtitleItem()
+
+  object Divider : SubtitleItem()
+
+  object Off : SubtitleItem()
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun SubtitlesSheet(
+  tracks: ImmutableList<TrackNode>,
+  onToggleSubtitle: (Int) -> Unit,
+  isSubtitleSelected: (Int) -> Boolean,
+  subtitleSelectionIndicator: (Int) -> String?,
+  onAddSubtitle: () -> Unit,
+  onOpenSubtitleSettings: () -> Unit,
+  onOpenSubtitleDelay: () -> Unit,
+  onRemoveSubtitle: (Int) -> Unit,
+  onOpenOnlineSearch: () -> Unit,
+  onDismissRequest: () -> Unit,
+  subtitlesOff: Boolean = false,
+  onDisableSubtitles: () -> Unit = {},
+  delayControlEnabled: Boolean = true,
+  modifier: Modifier = Modifier,
+) {
+  val isTelevision = DeviceFormFactor.isTelevision(LocalContext.current)
+  val initialFocusRequester = rememberTvInitialFocusRequester()
+  val items =
+    remember(tracks, subtitlesOff) {
+      val list = mutableListOf<SubtitleItem>()
+      list.add(SubtitleItem.Off)
+      val internal = tracks.filter { it.external != true }
+      val external = tracks.filter { it.external == true }
+
+      if (internal.isNotEmpty() || external.isNotEmpty()) {
+        list.add(SubtitleItem.Header(if (internal.isNotEmpty()) "Embedded Subtitles" else "Local Subtitles"))
+        internal.forEachIndexed { index, track ->
+          list.add(SubtitleItem.Track(track, groupIndex = index, groupSize = internal.size))
+        }
+        if (internal.isNotEmpty() && external.isNotEmpty()) {
+          list.add(SubtitleItem.Header("External Subtitles"))
+        }
+        external.forEachIndexed { index, track ->
+          list.add(SubtitleItem.Track(track, groupIndex = index, groupSize = external.size))
+        }
+      }
+
+      list.toImmutableList()
+    }
+
+  PlayerSheet(
+    onDismissRequest = onDismissRequest,
+    title = stringResource(R.string.btn_label_subtitles),
+  ) {
+    LazyColumn(
+      modifier = modifier.fillMaxWidth(),
+      contentPadding = PaddingValues(bottom = 8.dp),
+    ) {
+      item(key = "subtitle_actions") {
+        AddTrackRow(
+          stringResource(R.string.player_sheets_add_ext_sub),
+          onAddSubtitle,
+          modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+          shape = rememberConnectedShape(index = 0, itemCount = 2, layout = ConnectedLayout.Vertical),
+          actions = {
+            PlayerSheetAction(Icons.RoundedFilled.Search, stringResource(R.string.settings_search_title), onOpenOnlineSearch)
+            PlayerSheetAction(
+              icon = Icons.RoundedFilled.Palette,
+              label = stringResource(R.string.player_sheets_subtitles_settings_title),
+              onClick = onOpenSubtitleSettings,
+            )
+            PlayerSheetAction(
+              icon = Icons.RoundedFilled.AvTimer,
+              label = stringResource(R.string.player_sheets_sub_delay_card_title),
+              onClick = onOpenSubtitleDelay,
+              enabled = delayControlEnabled,
+            )
+          },
+        )
+      }
+
+      items(
+        items,
+        key = { item ->
+          when (item) {
+            is SubtitleItem.Track -> item.node.id
+            is SubtitleItem.Header -> item.title
+            is SubtitleItem.Off -> "off"
+            is SubtitleItem.Divider -> "divider"
+          }
+        },
+        contentType = { item -> item.javaClass.simpleName },
+      ) { item ->
+        when (item) {
+          is SubtitleItem.Track -> {
+            val track = item.node
+            SubtitleTrackRow(
+              track = track,
+              isSelected = isSubtitleSelected(track.id),
+              selectionIndicator = subtitleSelectionIndicator(track.id),
+              isExternal = track.external == true,
+              onToggle = { onToggleSubtitle(track.id) },
+              onRemove = { onRemoveSubtitle(track.id) },
+              groupIndex = item.groupIndex,
+              groupSize = item.groupSize,
+            )
+          }
+          is SubtitleItem.Header -> {
+              PlayerSheetSectionHeader(item.title)
+            }
+            is SubtitleItem.Off -> {
+              val haptics = rememberAppHaptics()
+              val shape = rememberConnectedShape(index = 1, itemCount = 2, layout = ConnectedLayout.Vertical)
+              val isFrostedOff = LocalPlayerGlassSurfaceActive.current
+              Surface(
+                modifier =
+                  Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 2.dp)
+                    .tvInitialFocus(initialFocusRequester)
+                    .tvFocusHighlight(shape)
+                    .clip(shape)
+                    .selectable(selected = subtitlesOff, role = Role.RadioButton) {
+                      onDisableSubtitles()
+                      if (!subtitlesOff) haptics.selection(false)
+                    },
+                shape = shape,
+                color =
+                  animatedPlayerSheetSelectionColor(subtitlesOff, frosted = isFrostedOff, label = "subtitlesOffSelection"),
+              ) {
+                Row(
+                  modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp).padding(horizontal = 12.dp, vertical = 10.dp),
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                  if (isTelevision) {
+                    RadioButton(selected = subtitlesOff, onClick = null)
+                  } else {
+                    Checkbox(checked = subtitlesOff, onCheckedChange = null)
+                  }
+                  Text(
+                    stringResource(R.string.player_sheets_off),
+                    style = if (subtitlesOff) MaterialTheme.typography.bodyLargeEmphasized else MaterialTheme.typography.bodyLarge,
+                    color = if (subtitlesOff) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f),
+                  )
+                }
+              }
+            }
+            is SubtitleItem.Divider -> {
+              HorizontalDivider(
+                modifier =
+                  Modifier.padding(
+                    horizontal = MaterialTheme.spacing.medium,
+                    vertical = MaterialTheme.spacing.small,
+                  ),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+              )
+            }
+          }
+        }
+    }
+  }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun SubtitleTrackRow(
+  track: TrackNode,
+  isSelected: Boolean,
+  selectionIndicator: String?,
+  isExternal: Boolean,
+  onToggle: () -> Unit,
+  onRemove: () -> Unit,
+  groupIndex: Int? = null,
+  groupSize: Int? = null,
+  modifier: Modifier = Modifier,
+) {
+  val isTelevision = DeviceFormFactor.isTelevision(LocalContext.current)
+  val haptics = rememberAppHaptics()
+  val shape =
+    if (groupIndex != null && groupSize != null && groupSize > 0) {
+      rememberConnectedShape(
+        index = groupIndex,
+        itemCount = groupSize,
+        layout = ConnectedLayout.Vertical,
+      )
+    } else {
+      MaterialTheme.shapes.medium
+    }
+  val isFrosted = LocalPlayerGlassSurfaceActive.current
+  val containerColor = animatedPlayerSheetSelectionColor(
+    selected = isSelected,
+    frosted = isFrosted,
+    label = "subtitleTrackSelection",
+  )
+  val badges = subtitleTrackBadges(track, selectionIndicator, isExternal)
+  Surface(
+    modifier =
+      modifier
+        .fillMaxWidth()
+        .padding(horizontal = 8.dp, vertical = 2.dp)
+        .tvFocusHighlight(shape)
+        .clip(shape)
+        .toggleable(value = isSelected, role = Role.Checkbox) { selected ->
+          onToggle()
+          haptics.selection(selected)
+        },
+    shape = shape,
+    color = containerColor,
+  ) {
+    Row(
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(10.dp),
+    ) {
+      if (isTelevision) {
+        RadioButton(selected = isSelected, onClick = null)
+      } else {
+        Checkbox(checked = isSelected, onCheckedChange = null)
+      }
+      Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(5.dp)) {
+        Text(
+          text = getTrackTitle(track),
+          style = if (isSelected) MaterialTheme.typography.bodyLargeEmphasized else MaterialTheme.typography.bodyLarge,
+          color = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface,
+        )
+        TrackBadgeFlow(badges = badges, selected = isSelected)
+      }
+      if (isExternal) {
+        PlayerSheetAction(Icons.RoundedFilled.Delete, stringResource(R.string.ui_remove), onRemove)
+      }
+    }
+  }
+}
+
+@Composable
+private fun subtitleTrackBadges(
+  track: TrackNode,
+  selectionIndicator: String?,
+  isExternal: Boolean,
+): List<TrackBadge> {
+  val primaryLabel = stringResource(R.string.track_badge_primary)
+  val secondaryLabel = stringResource(R.string.track_badge_secondary)
+  val defaultLabel = stringResource(R.string.theme_default)
+  val forcedLabel = stringResource(R.string.track_badge_forced)
+  val externalLabel = stringResource(R.string.track_badge_external)
+  return remember(track, selectionIndicator, isExternal, primaryLabel, secondaryLabel, defaultLabel, forcedLabel, externalLabel) {
+    buildList {
+      selectionIndicator?.let { indicator ->
+        val label = when (indicator) {
+          "P" -> primaryLabel
+          "S" -> secondaryLabel
+          else -> indicator
+        }
+        add(TrackBadge(label, emphasized = true))
+      }
+      track.effectiveLang?.takeIf(String::isNotBlank)?.let { add(TrackBadge(it.uppercase(Locale.ROOT))) }
+      (track.codec?.takeIf(String::isNotBlank) ?: track.codecDesc?.takeIf(String::isNotBlank))
+        ?.let { add(TrackBadge(it.uppercase(Locale.ROOT))) }
+      if (track.default == true) add(TrackBadge(defaultLabel))
+      if (track.forced == true) add(TrackBadge(forcedLabel))
+      if (track.hearingImpaired == true) add(TrackBadge("SDH"))
+      if (isExternal) add(TrackBadge(externalLabel))
+    }.distinctBy(TrackBadge::text)
+  }
+}

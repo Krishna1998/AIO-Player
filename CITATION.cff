@@ -1,0 +1,32 @@
+cff-version: 1.2.0
+message: "If you use VideoPlayer, please cite it using the metadata below."
+type: software
+title: "VideoPlayer"
+abstract: "An Android video and music player powered by mpv."
+authors:
+  - name: "Krishna"
+repository-code: "https://github.com/DARKNIGHT7473/VideoPlayer"
+license: AGPL-3.0-or-later
+keywords:
+  - Android
+  - Anime4K
+  - BitTorrent
+  - Chromecast
+  - Google Cast
+  - HDR
+  - Jellyfin
+  - Jetpack Compose
+  - Kotlin
+  - Navidrome
+  - SMB
+  - Subsonic
+  - Vulkan
+  - WebDAV
+  - libmpv
+  - media player
+  - media streaming
+  - music player
+  - speech-to-text
+  - subtitles
+  - video player
+  - yt-dlp
