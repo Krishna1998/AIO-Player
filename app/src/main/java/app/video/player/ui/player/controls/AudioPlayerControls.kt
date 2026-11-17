@@ -2197,101 +2197,61 @@ fun AudioPlayerControls(
             )
           }
         }
-        if (isTabletLandscape) {
-          Box(
-            modifier = Modifier.weight(1f),
-            contentAlignment = Alignment.CenterEnd,
-          ) {
-            Row(
-              modifier =
-                Modifier
-                  .clip(CircleShape)
-                  .background(
-                    MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.65f),
-                  )
-                  .horizontalScroll(rememberScrollState())
-                  .padding(horizontal = 8.dp, vertical = 4.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-              playbackModeButtons()
-              speedButton()
-              if (!isAudiobook) ReactiveIconButton(
-                onClick = {
-                  val act = context as? PlayerActivity
-                  if (act != null) {
-                    act.toggleAudioBackgroundPlayback()
-                  } else {
-                    audioPreferences.audioBackgroundPlayback.set(!backgroundPlaybackEnabled)
-                  }
-                },
-                modifier = Modifier.size(40.dp),
-              ) {
-                Icon(
-                  imageVector = Icons.RoundedFilled.Headset,
-                  contentDescription = stringResource(R.string.btn_label_background_playback),
-                  tint = if (backgroundPlaybackEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-              }
-            }
-          }
-        } else {
-          Spacer(modifier = Modifier.width(12.dp))
-          Box(
-            modifier = Modifier.weight(1f),
-            contentAlignment = Alignment.Center,
-          ) {
-            Row(
-              modifier =
-                Modifier
-                  .clip(CircleShape)
-                  .background(
-                    MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.65f),
-                  )
-                  .horizontalScroll(rememberScrollState())
-                  .padding(horizontal = 8.dp, vertical = 4.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-              playbackModeButtons()
-              speedButton()
-              if (!isAudiobook) ReactiveIconButton(
-                onClick = {
-                  val act = context as? PlayerActivity
-                  if (act != null) {
-                    act.toggleAudioBackgroundPlayback()
-                  } else {
-                    audioPreferences.audioBackgroundPlayback.set(!backgroundPlaybackEnabled)
-                  }
-                },
-                modifier = Modifier.size(40.dp),
-              ) {
-                Icon(
-                  imageVector = Icons.RoundedFilled.Headset,
-                  contentDescription = stringResource(R.string.btn_label_background_playback),
-                  tint = if (backgroundPlaybackEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-              }
-            }
-          }
-          Spacer(modifier = Modifier.width(12.dp))
-          ReactiveIconButton(
-            onClick = { onOpenSheet(Sheets.Playlist) },
+        Spacer(modifier = Modifier.width(12.dp))
+        Box(
+          modifier = Modifier.weight(1f),
+          contentAlignment = Alignment.Center,
+        ) {
+          Row(
             modifier =
               Modifier
-                .clip(
-                  CircleShape,
-                ).background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.65f))
-                .size(48.dp),
+                .clip(CircleShape)
+                .background(
+                  MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.65f),
+                )
+                .horizontalScroll(rememberScrollState())
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
           ) {
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+            playbackModeButtons()
+            speedButton()
+            if (!isAudiobook) ReactiveIconButton(
+              onClick = {
+                val act = context as? PlayerActivity
+                if (act != null) {
+                  act.toggleAudioBackgroundPlayback()
+                } else {
+                  audioPreferences.audioBackgroundPlayback.set(!backgroundPlaybackEnabled)
+                }
+              },
+              modifier = Modifier.size(40.dp),
+            ) {
               Icon(
-                imageVector = Icons.RoundedFilled.QueueMusic,
-                contentDescription = if (isAudiobook) stringResource(R.string.audiobook_chapters) else stringResource(R.string.player_up_next_title),
-                tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.size(24.dp),
+                imageVector = Icons.RoundedFilled.Headset,
+                contentDescription = stringResource(R.string.btn_label_background_playback),
+                tint = if (backgroundPlaybackEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
               )
             }
+          }
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        ReactiveIconButton(
+          onClick = { onOpenSheet(Sheets.Playlist) },
+          modifier =
+            Modifier
+              .clip(
+                CircleShape,
+              ).background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.65f))
+              .size(48.dp),
+        ) {
+          Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+            Icon(
+              imageVector = Icons.RoundedFilled.QueueMusic,
+              contentDescription = if (isAudiobook) stringResource(R.string.audiobook_chapters) else stringResource(R.string.player_up_next_title),
+              tint = MaterialTheme.colorScheme.onSurface,
+              modifier = Modifier.size(24.dp),
+            )
           }
         }
       }
