@@ -39,24 +39,6 @@
             </aapt:attr>
         </path>
 
-        <!-- Aperture Radial Calibration Tick Marks -->
-        <path
-            android:pathData="M 256,88 L 256,104 M 256,408 L 256,424 M 88,256 L 104,256"
-            android:strokeWidth="4"
-            android:strokeLineCap="round">
-            <aapt:attr name="android:strokeColor">
-                <gradient
-                    android:startX="0"
-                    android:startY="0"
-                    android:endX="512"
-                    android:endY="512"
-                    android:type="linear">
-                    <item android:offset="0.0" android:color="#FFFFFFFF"/>
-                    <item android:offset="1.0" android:color="#FF00F5FF"/>
-                </gradient>
-            </aapt:attr>
-        </path>
-
         <!-- Centered Sharp Optical Diamond Playhead: Deep Black 8px Stroke Base -->
         <path
             android:pathData="M 220,188 L 332,250 C 342,256 342,260 332,266 L 220,328 C 206,336 196,328 196,314 L 196,202 C 196,188 206,180 220,188 Z"
