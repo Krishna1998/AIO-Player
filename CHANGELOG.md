@@ -4,10 +4,10 @@ These notes are written in plain English and focus on what changed for real use.
 
 ## 1.0.5
 
-- **Flagship Brand Identity: "Continuous Ligature VM" (Cyber Magenta on Stealth Carbon):**
-  - Upgraded the official default app icon to the **Continuous Ligature VM** design: an unbroken, fluid 60° geometric monoline ribbon that welds **V** directly into **M** in a single continuous trajectory, crowned with a forward-firing playhead.
-  - Paired with deep, nocturnal **Stealth Carbon** (`#0E1017`) background and vibrant **Cyber Magenta** (`#FF007F`) for striking contrast and high optical legibility across all display types.
-  - Fully synchronized 1:1 across default adaptive launcher icon (`ic_launcher_background`, `ic_launcher_purple_foreground`), Android 12+ Splash Screen (`ic_splash_purple_foreground`, `splash_background`), Android 13+ Material You monochrome silhouette (`ic_launcher_purple_monochrome`), and project documentation branding (`videoplayer_icon.svg`).
+- **Flagship Brand Identity: "Aura Aperture Disc" (Acid Lime on Stealth Carbon):**
+  - Promoted the **Aura Aperture Disc** design as the official default app icon: an ultra-refined luxury vinyl and acoustic aperture silhouette featuring an outer dim aura ring, an inner solid disc, and a flawless negative-space playhead cutout in high-contrast electric **Acid Lime** (`#D4FF00`).
+  - Anchored on nocturnal **Stealth Carbon** (`#0E1017`) for striking 14:1 contrast ratio, zero noise, and unmistakable Bang & Olufsen luxury aesthetic.
+  - Fully synchronized 1:1 across default adaptive launcher icon (`ic_launcher_purple_foreground`), Android 12+ Animated Splash Screen (`ic_splash_purple_foreground`), Android 13+ Material You monochrome silhouette (`ic_launcher_purple_monochrome` with native `evenOdd` transparency cutout), and project documentation branding (`videoplayer_icon.svg`).
 - **Video & Audio Player Glass UI Architecture Polish:**
   - **Synchronized Video Player Controls with Top-Right Glass Aesthetic:** Unified bottom-left, bottom-right, and portrait bottom video controls to inherit the exact same Liquid Glass UI as top-right controls: frosted translucent backdrop gradients, top-lit specular rim borders, floating ambient drop shadows, and elastic press feedback (`AdaptiveControlsContainer`, `ControlsButton`).
   - **Frosted Glass UI Seekbar Across Video & Audio Players:** Upgraded both Video Player and Audio Player seekbars to default to the Liquid Glass seekbar (`SeekbarStyle.Liquid`), featuring a frosted glass trough track with top specular highlight rim, optical groove depth, glowing active playback gradient with specular reflection, floating liquid glass thumb with 8dp ambient drop shadow, inner refraction glow, and top-lit white specular border.

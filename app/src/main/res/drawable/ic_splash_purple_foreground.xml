@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Splash-only rendition: native AVD, 288dp canvas, Continuous Ligature VM inside central 160dp splash mask. -->
+<!-- Splash-only rendition: native AVD, 288dp canvas, Aura Aperture Disc inside central 160dp splash mask. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="288dp"
     android:height="288dp"
@@ -14,27 +14,27 @@
         android:scaleX="0.66"
         android:scaleY="0.66">
 
-        <!-- Unbroken Geometric Monoline Ribbon (Animated Main Logo) -->
+        <!-- Outer Dim Aura Ring (Animated Main Aura) -->
         <group
             android:name="logo_main"
             android:pivotX="256"
             android:pivotY="256">
             <path
-                android:strokeColor="#FFFF007F"
-                android:strokeWidth="28"
-                android:strokeLineCap="round"
-                android:strokeLineJoin="round"
-                android:pathData="M 105,172 L 172,365 L 231,214 L 290,365 L 348,214 L 407,365" />
+                android:strokeColor="#FFD4FF00"
+                android:strokeAlpha="0.35"
+                android:strokeWidth="11"
+                android:pathData="M 256,101 A 155,155 0 1,0 256,411 A 155,155 0 1,0 256,101 Z" />
         </group>
 
-        <!-- Centered Playhead (Animated Tip Pop) -->
+        <!-- Inner Solid Disc with Negative Space Playhead Cutout (Animated Tip Pop) -->
         <group
             android:name="logo_tip"
             android:pivotX="256"
             android:pivotY="256">
             <path
-                android:fillColor="#FFFF007F"
-                android:pathData="M 273,147 L 323,180 L 273,214 Z" />
+                android:fillColor="#FFD4FF00"
+                android:fillType="evenOdd"
+                android:pathData="M 256,144 A 112,112 0 1,0 256,368 A 112,112 0 1,0 256,144 Z M 222,191 L 325,256 L 222,321 Z" />
         </group>
     </group>
 </vector>
