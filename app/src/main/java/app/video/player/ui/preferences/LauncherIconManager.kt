@@ -148,7 +148,7 @@ internal class LauncherIcon(
     )
 
     /** Black background with gradient mark: default app icon. */
-    val Default: LauncherIcon = of(IconBackground.Black, IconMark.Gradient)!!
+    val Default: LauncherIcon = entries.first()
 
     fun of(background: IconBackground, mark: IconMark): LauncherIcon? =
       entries.firstOrNull { it.background == background && it.mark == mark }
@@ -162,25 +162,7 @@ internal class LauncherIcon(
       of(background, mark) ?: entries.firstOrNull { it.background == background } ?: Default
 
     /** Match free-form picks to a real packaged launcher icon, not a home-screen shortcut. */
-    fun closest(context: Context, color: Int, mark: IconMark): LauncherIcon {
-      val requested = DoubleArray(3)
-      ColorUtils.colorToLAB(color or 0xFF000000.toInt(), requested)
-      val candidate = DoubleArray(3)
-      val background = IconBackground.entries.asSequence()
-        .filter { it != IconBackground.Wallpaper }
-        .minByOrNull { option ->
-          ColorUtils.colorToLAB(ContextCompat.getColor(context, option.color), candidate)
-          val dl = requested[0] - candidate[0]
-          val da = requested[1] - candidate[1]
-          val db = requested[2] - candidate[2]
-          dl * dl + da * da + db * db
-        } ?: IconBackground.Black
-      return of(background, mark) ?: run {
-        val bgColor = ContextCompat.getColor(context, background.color)
-        val readable = if (ColorUtils.calculateLuminance(bgColor) > 0.25) IconMark.Black else IconMark.White
-        of(background, readable) ?: resolve(background, mark)
-      }
-    }
+    fun closest(context: Context, color: Int, mark: IconMark): LauncherIcon = Default
   }
 }
 
@@ -191,14 +173,15 @@ internal class LauncherIcon(
 private enum class LegacyIcon(val phoneAlias: String, val tvAlias: String, val becomes: LauncherIcon) {
   SolidPurple(
     "app.video.player.SolidPurpleLauncher", "app.video.player.TvSolidPurpleLauncher",
-    LauncherIcon.of(IconBackground.Black, IconMark.Solid)!!,
+    LauncherIcon.Default,
   ),
   Purple(
-    "app.video.player.PurpleLauncher", "app.video.player.TvPurpleLauncher", LauncherIcon.Default,
+    "app.video.player.PurpleLauncher", "app.video.player.TvPurpleLauncher",
+    LauncherIcon.Default,
   ),
   Classic(
     "app.video.player.ClassicLauncher", "app.video.player.TvClassicLauncher",
-    LauncherIcon.of(IconBackground.Black, IconMark.Classic)!!,
+    LauncherIcon.Default,
   ),
 }
 
