@@ -2487,7 +2487,8 @@
   <string name="watch_stats_last_seven_days">Last 7 days</string>
   <string name="watch_stats_today">Today: %1$s</string>
   <string name="watch_stats_overall_playback">Overall playback</string>
-  <string name="watch_stats_top_media">Most watched</string>
+  <string name="watch_stats_top_media">Most Watched</string>
+  <string name="watch_stats_top_media_audio">Most Listened</string>
   <string name="watch_stats_empty">Play some media to start building your statistics.</string>
   <string name="watch_stats_reset_confirm">Reset all playback statistics? Your history, watched status and playlists will be kept.</string>
   <string name="pref_debug_log_size_title">Log size limit</string>

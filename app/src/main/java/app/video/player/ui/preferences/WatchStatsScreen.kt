@@ -535,7 +535,10 @@ private fun TopMediaLeaderboardBentoCard(
             }
           }
           Text(
-            text = stringResource(R.string.watch_stats_top_media),
+            text = stringResource(
+              if (selectedTab == MostWatchedMediaType.VIDEO) R.string.watch_stats_top_media
+              else R.string.watch_stats_top_media_audio
+            ),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             maxLines = 1,
