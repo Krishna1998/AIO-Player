@@ -1,60 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- V&M Player Flagship Icon: Sonic Prism (Jet-Black Playhead with White Spectrum Bars & Acoustic Groove) -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="512"
-    android:viewportHeight="512">
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="512" android:viewportHeight="512">
 
-    <group android:name="sonic_prism"
-        android:pivotX="256"
-        android:pivotY="256">
+    <group android:name="sonic_prism" android:pivotX="256" android:pivotY="256">
 
         <!-- Circular Acoustic Groove (Jet Black Dash Arc) -->
-        <path
-            android:pathData="M 256.0,121.0 A 135,135 0 0,1 372.2,187.3 M 384.5,214.6 A 135,135 0 0,1 388.1,283.7 M 382.6,302.9 A 135,135 0 0,1 280.0,388.9 M 250.1,390.9 A 135,135 0 0,1 184.0,370.2 M 168.0,358.4 A 135,135 0 0,1 123.1,232.3 M 131.6,203.6 A 135,135 0 0,1 173.9,148.8 M 190.6,137.9 A 135,135 0 0,1 256.0,121.0"
-            android:strokeColor="#FF08080C"
-            android:strokeWidth="16"
-            android:strokeLineCap="round" />
+        <path android:pathData="M 256.0,121.0 A 135,135 0 0,1 372.2,187.3 M 384.5,214.6 A 135,135 0 0,1 388.1,283.7 M 382.6,302.9 A 135,135 0 0,1 280.0,388.9 M 250.1,390.9 A 135,135 0 0,1 184.0,370.2 M 168.0,358.4 A 135,135 0 0,1 123.1,232.3 M 131.6,203.6 A 135,135 0 0,1 173.9,148.8 M 190.6,137.9 A 135,135 0 0,1 256.0,121.0" android:strokeColor="#FF08080C" android:strokeWidth="16" android:strokeLineCap="round" />
 
         <!-- Jet Black Precision Playhead Base with Crisp White Border -->
-        <path
-            android:pathData="M 206,171 L 341,256 L 206,341 Z"
-            android:fillColor="#FF090A0F"
-            android:strokeColor="#FFFFFFFF"
-            android:strokeWidth="5"
-            android:strokeLineJoin="round"
-            android:strokeLineCap="round" />
+        <path android:pathData="M 206,171 L 341,256 L 206,341 Z" android:fillColor="#FF090A0F" android:strokeColor="#FFFFFFFF" android:strokeWidth="5" android:strokeLineJoin="round" android:strokeLineCap="round" />
 
         <!-- White Spectrum Frequency Bars (Cutting Across Playhead) -->
-        <path
-            android:pathData="M 230,205 L 230,307"
-            android:strokeColor="#FFFFFFFF"
-            android:strokeWidth="8"
-            android:strokeLineCap="round" />
+        <path android:pathData="M 230,205 L 230,307" android:strokeColor="#FFFFFFFF" android:strokeWidth="8" android:strokeLineCap="round" />
 
-        <path
-            android:pathData="M 248,188 L 248,324"
-            android:strokeColor="#FFFFFFFF"
-            android:strokeWidth="8"
-            android:strokeLineCap="round" />
+        <path android:pathData="M 248,188 L 248,324" android:strokeColor="#FFFFFFFF" android:strokeWidth="8" android:strokeLineCap="round" />
 
-        <path
-            android:pathData="M 266,214 L 266,298"
-            android:strokeColor="#E6FFFFFF"
-            android:strokeWidth="8"
-            android:strokeLineCap="round" />
+        <path android:pathData="M 266,214 L 266,298" android:strokeColor="#E6FFFFFF" android:strokeWidth="8" android:strokeLineCap="round" />
 
-        <path
-            android:pathData="M 284,232 L 284,280"
-            android:strokeColor="#CCFFFFFF"
-            android:strokeWidth="8"
-            android:strokeLineCap="round" />
+        <path android:pathData="M 284,232 L 284,280" android:strokeColor="#CCFFFFFF" android:strokeWidth="8" android:strokeLineCap="round" />
 
-        <path
-            android:pathData="M 302,248 L 302,264"
-            android:strokeColor="#B3FFFFFF"
-            android:strokeWidth="8"
-            android:strokeLineCap="round" />
+        <path android:pathData="M 302,248 L 302,264" android:strokeColor="#B3FFFFFF" android:strokeWidth="8" android:strokeLineCap="round" />
     </group>
 </vector>
