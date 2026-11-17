@@ -1427,60 +1427,6 @@ fun AudioPlayerControls(
               color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
             )
 
-            // 4. Playback Speed (left of A-B Loop)
-            Surface(
-              shape = CircleShape,
-              color = Color.Transparent,
-              modifier =
-                Modifier
-                  .height(30.dp)
-                  .clip(CircleShape)
-                  .combinedClickable(
-                    enabled = !speedConfigOwned,
-                    onClick = {
-                      val current = playbackSpeed ?: 1f
-                      val nextSpeed =
-                        when {
-                          current < 0.999f -> 1.00f
-                          current < 1.249f -> 1.25f
-                          current < 1.499f -> 1.50f
-                          current < 1.749f -> 1.75f
-                          current < 1.999f -> 2.00f
-                          else -> 1.00f
-                        }
-                      val isAudiobook = PlaybackSession.state.value.currentItem?.audiobook != null
-                      if (isAudiobook) {
-                        AudiobookPlayback.setSpeed(nextSpeed)
-                      } else {
-                        audioPreferences.defaultAudioSpeed.set(nextSpeed)
-                        PlaybackSession.setPropertyFloat("speed", nextSpeed)
-                      }
-                      viewModel.playerUpdate.value = PlayerUpdates.DynamicSpeedControl(nextSpeed)
-                    },
-                    onLongClick = { onOpenSheet(Sheets.PlaybackSpeed) },
-                  ),
-            ) {
-              Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.padding(horizontal = 10.dp),
-              ) {
-                Icon(
-                  imageVector = Icons.RoundedFilled.Speed,
-                  contentDescription = stringResource(R.string.ui_playback_speed),
-                  tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (speedConfigOwned) 0.38f else 1f),
-                  modifier = Modifier.size(16.dp),
-                )
-                val speedText = String.format("%.2fx", playbackSpeed ?: 1f)
-                Text(
-                  text = speedText,
-                  style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold).withTabularDigits(),
-                  color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (speedConfigOwned) 0.38f else 1f),
-                  modifier = Modifier.stableNumericWidth(speedText),
-                )
-              }
-            }
-
             AnimatedContent(
               targetState = abLoop.isExpanded,
               transitionSpec = {
@@ -2158,6 +2104,71 @@ fun AudioPlayerControls(
     }
 
     val bottomActionRow = @Composable {
+      val speedButton = @Composable {
+        Surface(
+          shape = CircleShape,
+          color = Color.Transparent,
+          modifier =
+            Modifier
+              .height(36.dp)
+              .clip(CircleShape)
+              .combinedClickable(
+                enabled = !speedConfigOwned,
+                onClick = {
+                  val current = playbackSpeed ?: 1f
+                  val nextSpeed =
+                    when {
+                      current < 0.999f -> 1.00f
+                      current < 1.249f -> 1.25f
+                      current < 1.499f -> 1.50f
+                      current < 1.749f -> 1.75f
+                      current < 1.999f -> 2.00f
+                      else -> 1.00f
+                    }
+                  val isAudiobookItem = PlaybackSession.state.value.currentItem?.audiobook != null
+                  if (isAudiobookItem) {
+                    AudiobookPlayback.setSpeed(nextSpeed)
+                  } else {
+                    audioPreferences.defaultAudioSpeed.set(nextSpeed)
+                    PlaybackSession.setPropertyFloat("speed", nextSpeed)
+                  }
+                  viewModel.playerUpdate.value = PlayerUpdates.DynamicSpeedControl(nextSpeed)
+                },
+                onLongClick = { onOpenSheet(Sheets.PlaybackSpeed) },
+              ),
+        ) {
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier.padding(horizontal = 8.dp),
+          ) {
+            Icon(
+              imageVector = Icons.RoundedFilled.Speed,
+              contentDescription = stringResource(R.string.ui_playback_speed),
+              tint =
+                if (kotlin.math.abs((playbackSpeed ?: 1f) - 1f) > 0.001f) {
+                  MaterialTheme.colorScheme.primary
+                } else {
+                  MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (speedConfigOwned) 0.38f else 1f)
+                },
+              modifier = Modifier.size(18.dp),
+            )
+            val speedText = String.format(java.util.Locale.US, "%.2fx", playbackSpeed ?: 1f)
+            Text(
+              text = speedText,
+              style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold).withTabularDigits(),
+              color =
+                if (kotlin.math.abs((playbackSpeed ?: 1f) - 1f) > 0.001f) {
+                  MaterialTheme.colorScheme.primary
+                } else {
+                  MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (speedConfigOwned) 0.38f else 1f)
+                },
+              modifier = Modifier.stableNumericWidth(speedText),
+            )
+          }
+        }
+      }
+
       Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -2199,6 +2210,7 @@ fun AudioPlayerControls(
               horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
               playbackModeButtons()
+              speedButton()
               if (!isAudiobook) ReactiveIconButton(
                 onClick = {
                   val act = context as? PlayerActivity
@@ -2237,6 +2249,7 @@ fun AudioPlayerControls(
               horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
               playbackModeButtons()
+              speedButton()
               if (!isAudiobook) ReactiveIconButton(
                 onClick = {
                   val act = context as? PlayerActivity
