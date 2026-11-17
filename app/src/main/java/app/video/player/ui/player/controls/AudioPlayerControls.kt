@@ -48,6 +48,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -1122,13 +1123,22 @@ fun AudioPlayerControls(
               onBackPress()
             }
           },
-          modifier = Modifier.align(Alignment.CenterStart),
+          modifier =
+            Modifier
+              .align(Alignment.CenterStart)
+              .audioGlassSurface(
+                shape = CircleShape,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f),
+                highlightAlpha = 0.28f,
+                elevation = 3.dp,
+              )
+              .size(42.dp),
         ) {
           Icon(
             imageVector = if (showInPlaceLyrics || isLyricsFullscreen) Icons.RoundedFilled.ArrowBack else Icons.RoundedFilled.ExpandMore,
             contentDescription = stringResource(if (showInPlaceLyrics || isLyricsFullscreen) R.string.back else R.string.ui_close),
             tint = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.size(if (showInPlaceLyrics || isLyricsFullscreen) 28.dp else 32.dp),
+            modifier = Modifier.size(if (showInPlaceLyrics || isLyricsFullscreen) 24.dp else 28.dp),
           )
         }
 
@@ -1142,7 +1152,16 @@ fun AudioPlayerControls(
         }
 
         Column(
-          modifier = Modifier.align(Alignment.Center),
+          modifier =
+            Modifier
+              .align(Alignment.Center)
+              .audioGlassSurface(
+                shape = CircleShape,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.42f),
+                highlightAlpha = 0.24f,
+                elevation = 3.dp,
+              )
+              .padding(horizontal = 16.dp, vertical = 4.dp),
           horizontalAlignment = Alignment.CenterHorizontally,
         ) {
           Text(
@@ -1173,12 +1192,23 @@ fun AudioPlayerControls(
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-          ReactiveIconButton(onClick = { onOpenSheet(Sheets.AudioProperties) }) {
+          ReactiveIconButton(
+            onClick = { onOpenSheet(Sheets.AudioProperties) },
+            modifier =
+              Modifier
+                .audioGlassSurface(
+                  shape = CircleShape,
+                  containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f),
+                  highlightAlpha = 0.28f,
+                  elevation = 3.dp,
+                )
+                .size(42.dp),
+          ) {
             Icon(
               imageVector = Icons.RoundedFilled.Info,
               contentDescription = stringResource(R.string.player_sheets_more_title),
               tint = MaterialTheme.colorScheme.onSurface,
-              modifier = Modifier.size(28.dp),
+              modifier = Modifier.size(24.dp),
             )
           }
         }
@@ -1354,10 +1384,23 @@ fun AudioPlayerControls(
 
             // 3. Current Cover Art Card
             Surface(
-              modifier = Modifier
-                .aspectRatio(1f)
-                .offset { IntOffset(currentOffset.roundToInt(), 0) }
-                .clip(coverShape),
+              modifier =
+                Modifier
+                  .aspectRatio(1f)
+                  .offset { IntOffset(currentOffset.roundToInt(), 0) }
+                  .outsideShadow(coverShape, radius = 16.dp, color = Color.Black.copy(alpha = 0.35f))
+                  .clip(coverShape)
+                  .border(
+                    1.dp,
+                    Brush.verticalGradient(
+                      listOf(
+                        Color.White.copy(alpha = 0.30f),
+                        Color.White.copy(alpha = 0.08f),
+                        Color.Transparent,
+                      ),
+                    ),
+                    coverShape,
+                  ),
               shape = coverShape,
               color = Color.Transparent,
             ) {
@@ -1551,7 +1594,14 @@ fun AudioPlayerControls(
               Surface(
                 onClick = { onOpenSheet(if (isAudiobook) Sheets.AudiobookSleepTimer else Sheets.SleepTimer) },
                 shape = CircleShape,
-                color = MaterialTheme.colorScheme.primaryContainer,
+                color = Color.Transparent,
+                modifier =
+                  Modifier.audioGlassSurface(
+                    shape = CircleShape,
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.70f),
+                    highlightAlpha = 0.35f,
+                    elevation = 3.dp,
+                  ),
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
               ) {
                 Row(
@@ -1574,13 +1624,21 @@ fun AudioPlayerControls(
             } else {
               ReactiveIconButton(
                 onClick = { onOpenSheet(if (isAudiobook) Sheets.AudiobookSleepTimer else Sheets.SleepTimer) },
-                modifier = Modifier.size(40.dp),
+                modifier =
+                  Modifier
+                    .audioGlassSurface(
+                      shape = CircleShape,
+                      containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f),
+                      highlightAlpha = 0.28f,
+                      elevation = 3.dp,
+                    )
+                    .size(40.dp),
               ) {
                 Icon(
                   imageVector = Icons.RoundedFilled.Timer,
                   contentDescription = stringResource(R.string.timer_title),
                   tint = MaterialTheme.colorScheme.onSurface,
-                  modifier = Modifier.size(26.dp),
+                  modifier = Modifier.size(22.dp),
                 )
               }
             }
@@ -1615,28 +1673,49 @@ fun AudioPlayerControls(
                   }
                 }
               },
-              modifier = Modifier.size(40.dp),
+              modifier =
+                Modifier
+                  .audioGlassSurface(
+                    shape = CircleShape,
+                    containerColor =
+                      if (isCurrentTrackFavorite) {
+                        Color(0xFFE91E63).copy(alpha = 0.35f)
+                      } else {
+                        MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f)
+                      },
+                    highlightAlpha = if (isCurrentTrackFavorite) 0.40f else 0.28f,
+                    elevation = 3.dp,
+                  )
+                  .size(40.dp),
             ) {
               AnimatedIcon(
                 imageVector = if (isCurrentTrackFavorite) Icons.RoundedFilled.Favorite else Icons.RoundedFilled.FavoriteBorder,
                 contentDescription = stringResource(
                   if (isCurrentTrackFavorite) R.string.generic_remove_from_favorites else R.string.notification_add_to_favorites,
                 ),
-                tint = if (isCurrentTrackFavorite) Color.White else MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.size(28.dp),
+                tint = if (isCurrentTrackFavorite) Color(0xFFFF4081) else MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.size(24.dp),
                 reduceMotion = AppMotion.playerReducedMotion(),
               )
             }
 
             ReactiveIconButton(
               onClick = { addToPlaylistDialogOpen = true },
-              modifier = Modifier.size(40.dp),
+              modifier =
+                Modifier
+                  .audioGlassSurface(
+                    shape = CircleShape,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f),
+                    highlightAlpha = 0.28f,
+                    elevation = 3.dp,
+                  )
+                  .size(40.dp),
             ) {
               Icon(
                 imageVector = Icons.RoundedFilled.PlaylistAdd,
                 contentDescription = stringResource(R.string.ui_add_to_playlist),
                 tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.size(32.dp),
+                modifier = Modifier.size(24.dp),
               )
             }
           }
@@ -1665,21 +1744,28 @@ fun AudioPlayerControls(
       val hasSyncedLyrics = !syncedLines.isNullOrEmpty()
       val isInstrumentalGap = hasSyncedLyrics && (currentLine == null || currentLine.line.isBlank() || currentLine.line.trim().equals("[instrumental]", ignoreCase = true) || currentLine.line.trim().equals("instrumental", ignoreCase = true))
 
+      val lyricGlassShape = RoundedCornerShape(16.dp)
       Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start,
-        modifier = Modifier
-          .fillMaxWidth()
-          .clip(RoundedCornerShape(8.dp))
-          .clickable {
-            if (isTabletLandscape) {
-              tabletDualPaneTab = 1
-            } else {
-              showInPlaceLyrics = true
+        modifier =
+          Modifier
+            .fillMaxWidth()
+            .audioGlassSurface(
+              shape = lyricGlassShape,
+              containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.40f),
+              highlightAlpha = 0.25f,
+              elevation = 3.dp,
+            )
+            .clickable {
+              if (isTabletLandscape) {
+                tabletDualPaneTab = 1
+              } else {
+                showInPlaceLyrics = true
+              }
+              resetInactivityTimer()
             }
-            resetInactivityTimer()
-          }
-          .padding(horizontal = 4.dp, vertical = 4.dp),
+            .padding(horizontal = 14.dp, vertical = 8.dp),
       ) {
         Box(
           modifier = Modifier.weight(1f, fill = false),
@@ -2017,7 +2103,15 @@ fun AudioPlayerControls(
             if (isAudiobook) viewModel.stepPlaybackChapter(-1) else viewModel.playPrevious()
           },
           enabled = prevEnabled,
-          modifier = Modifier.size(if (isAudiobook) 48.dp else 56.dp),
+          modifier =
+            Modifier
+              .audioGlassSurface(
+                shape = CircleShape,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.35f),
+                highlightAlpha = 0.22f,
+                elevation = 2.dp,
+              )
+              .size(if (isAudiobook) 48.dp else 56.dp),
         ) {
           Icon(
             imageVector = Icons.RoundedFilled.SkipPrevious,
@@ -2041,8 +2135,23 @@ fun AudioPlayerControls(
           onClick = { viewModel.pauseUnpause() },
           shape = CircleShape,
           color = MaterialTheme.colorScheme.primary,
-          modifier = Modifier.tvInitialFocus(tvPlayFocusRequester).size(if (isPortrait) 76.dp else 64.dp),
-          shadowElevation = 8.dp,
+          modifier =
+            Modifier
+              .tvInitialFocus(tvPlayFocusRequester)
+              .outsideShadow(CircleShape, radius = 12.dp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
+              .border(
+                1.5.dp,
+                Brush.verticalGradient(
+                  listOf(
+                    Color.White.copy(alpha = 0.50f),
+                    Color.White.copy(alpha = 0.15f),
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.30f),
+                  ),
+                ),
+                CircleShape,
+              )
+              .size(if (isPortrait) 76.dp else 64.dp),
+          shadowElevation = 0.dp,
         ) {
           Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
             AnimatedIcon(
@@ -2065,7 +2174,15 @@ fun AudioPlayerControls(
             if (isAudiobook) viewModel.stepPlaybackChapter(1) else viewModel.playNext()
           },
           enabled = nextEnabled,
-          modifier = Modifier.size(if (isAudiobook) 48.dp else 56.dp),
+          modifier =
+            Modifier
+              .audioGlassSurface(
+                shape = CircleShape,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.35f),
+                highlightAlpha = 0.22f,
+                elevation = 2.dp,
+              )
+              .size(if (isAudiobook) 48.dp else 56.dp),
         ) {
           Icon(
             imageVector = Icons.RoundedFilled.SkipNext,
@@ -2183,9 +2300,12 @@ fun AudioPlayerControls(
           enabled = !audioFiltersConfigOwned,
           modifier =
             Modifier
-              .clip(
-                CircleShape,
-              ).background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.65f))
+              .audioGlassSurface(
+                shape = CircleShape,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f),
+                highlightAlpha = 0.35f,
+                elevation = 6.dp,
+              )
               .size(48.dp),
         ) {
           Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
@@ -2205,9 +2325,11 @@ fun AudioPlayerControls(
           Row(
             modifier =
               Modifier
-                .clip(CircleShape)
-                .background(
-                  MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.65f),
+                .audioGlassSurface(
+                  shape = CircleShape,
+                  containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f),
+                  highlightAlpha = 0.35f,
+                  elevation = 6.dp,
                 )
                 .horizontalScroll(rememberScrollState())
                 .padding(horizontal = 8.dp, vertical = 4.dp),
@@ -2240,9 +2362,12 @@ fun AudioPlayerControls(
           onClick = { onOpenSheet(Sheets.Playlist) },
           modifier =
             Modifier
-              .clip(
-                CircleShape,
-              ).background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.65f))
+              .audioGlassSurface(
+                shape = CircleShape,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f),
+                highlightAlpha = 0.35f,
+                elevation = 6.dp,
+              )
               .size(48.dp),
         ) {
           Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
@@ -3038,6 +3163,34 @@ private fun ReactiveSurfaceButton(
   ) {
     content()
   }
+}
+
+@Composable
+private fun Modifier.audioGlassSurface(
+  shape: Shape,
+  containerColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f),
+  highlightAlpha: Float = 0.28f,
+  borderWidth: Dp = 1.dp,
+  elevation: Dp = 4.dp,
+): Modifier {
+  val fill = Brush.verticalGradient(
+    0f to containerColor.copy(alpha = (containerColor.alpha * 1.15f).coerceIn(0f, 1f)),
+    0.4f to containerColor.copy(alpha = (containerColor.alpha * 0.85f).coerceIn(0f, 1f)),
+    1f to containerColor.copy(alpha = (containerColor.alpha * 1.05f).coerceIn(0f, 1f)),
+  )
+  val specularBorder = Brush.verticalGradient(
+    listOf(
+      Color.White.copy(alpha = highlightAlpha),
+      Color.White.copy(alpha = highlightAlpha * 0.25f),
+      Color.White.copy(alpha = highlightAlpha * 0.05f),
+      containerColor.copy(alpha = 0.20f),
+    ),
+  )
+  return this
+    .outsideShadow(shape, radius = elevation)
+    .clip(shape)
+    .background(fill, shape)
+    .border(borderWidth, specularBorder, shape)
 }
 
 private fun String.stripAudioExtension(): String {
