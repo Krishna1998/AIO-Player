@@ -266,7 +266,7 @@ fun BottomPlayerControlsPortrait(
             activity = activity,
             decoder = decoder,
             playbackSpeed = playbackSpeed,
-            buttonSize = 48.dp,
+            buttonSize = LandscapeActionSize,
           )
         }
         // Unbounded scroll width would stretch a long title pill across the whole row.
@@ -277,7 +277,7 @@ fun BottomPlayerControlsPortrait(
           icon = Icons.RoundedFilled.Hd,
           onClick = { onOpenSheet(Sheets.VideoQuality) },
           title = stringResource(R.string.player_video_quality_button),
-          modifier = Modifier.size(48.dp),
+          modifier = Modifier.size(LandscapeActionSize),
         )
       }
     }

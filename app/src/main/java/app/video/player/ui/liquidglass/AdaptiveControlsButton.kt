@@ -6,6 +6,8 @@ package app.video.player.ui.liquidglass
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -32,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.Dp
@@ -189,56 +192,71 @@ fun AdaptiveControlsContainer(
       )
     }
   } else {
-    Surface(
-      shape = CircleShape,
-      color =
-        if (borderless || !useGlass) {
-          Color.Transparent
-        } else {
-          resolvedSurface
-        },
-      contentColor = contentTint,
-      tonalElevation = 0.dp,
-      shadowElevation = 0.dp,
-      border =
-        if (borderless || !useGlass) {
-          null
-        } else {
-          BorderStroke(1.dp, playerButtonBorderColor())
-        },
-      modifier =
-        controlModifier
-          .heightIn(min = buttonSize)
-          .appPressFeedback(
-            interactionSource,
-            enabled = isInteractive && enabled,
-            pressedScale = 0.94f,
-            reduceMotion = reduceMotion,
-          )
-          .clip(CircleShape)
-          .then(
-            if (isInteractive) {
-              Modifier.combinedClickable(
-                enabled = enabled,
-                role = Role.Button,
-                interactionSource = interactionSource,
-                indication = ripple(bounded = true),
-                onClick = {
-                  clickEvent()
-                  onClick()
-                },
-                onLongClick = {
-                  clickEvent()
-                  onLongClick()
-                },
-                onLongClickLabel = onLongClickLabel,
-              )
-            } else {
-              Modifier
-            },
-          ),
-    ) {
-      Box(contentAlignment = Alignment.Center) {
+    val fallbackShape = buttonShape
+    val useGlassSurface = useGlass && !borderless
+    val glassFill = remember(resolvedSurface) {
+      Brush.verticalGradient(
+        0f to resolvedSurface.copy(alpha = (resolvedSurface.alpha * 1.15f).coerceIn(0f, 1f)),
+        0.4f to resolvedSurface.copy(alpha = (resolvedSurface.alpha * 0.85f).coerceIn(0f, 1f)),
+        1f to resolvedSurface.copy(alpha = (resolvedSurface.alpha * 1.05f).coerceIn(0f, 1f)),
+      )
+    }
+    val specularBorder = remember(resolvedSurface) {
+      Brush.verticalGradient(
+        listOf(
+          Color.White.copy(alpha = 0.32f),
+          Color.White.copy(alpha = 0.10f),
+          Color.White.copy(alpha = 0.02f),
+          resolvedSurface.copy(alpha = 0.20f),
+        ),
+      )
+    }
+
+    CompositionLocalProvider(LocalContentColor provides contentTint) {
+      Box(
+        modifier =
+          controlModifier
+            .heightIn(min = buttonSize)
+            .then(
+              if (useGlassSurface) {
+                Modifier
+                  .outsideShadow(fallbackShape, radius = 4.dp)
+                  .clip(fallbackShape)
+                  .background(glassFill, fallbackShape)
+                  .border(1.dp, specularBorder, fallbackShape)
+              } else {
+                Modifier.clip(fallbackShape)
+              },
+            )
+            .appPressFeedback(
+              interactionSource,
+              enabled = isInteractive && enabled,
+              pressedScale = 0.94f,
+              reduceMotion = reduceMotion,
+            )
+            .then(
+              if (isInteractive) {
+                Modifier.combinedClickable(
+                  enabled = enabled,
+                  role = Role.Button,
+                  interactionSource = interactionSource,
+                  indication = ripple(bounded = true),
+                  onClick = {
+                    clickEvent()
+                    onClick()
+                  },
+                  onLongClick = {
+                    clickEvent()
+                    onLongClick()
+                  },
+                  onLongClickLabel = onLongClickLabel,
+                )
+              } else {
+                Modifier
+              },
+            ),
+        contentAlignment = Alignment.Center,
+      ) {
         Row(
           verticalAlignment = Alignment.CenterVertically,
           modifier = Modifier.padding(horizontal = horizontalPadding ?: MaterialTheme.spacing.small),

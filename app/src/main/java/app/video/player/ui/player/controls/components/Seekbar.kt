@@ -204,6 +204,7 @@ private fun DrawScope.drawSeekbarTrackSegments(
   playedColor: Color,
   bufferedColor: Color,
   unplayedColor: Color,
+  isGlass: Boolean = false,
 ) {
   if (trackHeight <= 0f || size.width <= 0f || segments.isEmpty()) return
 
@@ -285,16 +286,57 @@ private fun DrawScope.drawSeekbarTrackSegments(
   }
 
   // Base pill always owns the true outer shape. Progress and cache are overlays.
-  drawRange(0f, size.width, unplayedColor)
+  val baseColor = if (isGlass) Color.White.copy(alpha = 0.16f) else unplayedColor
+  drawRange(0f, size.width, baseColor)
 
   // Cache/read-ahead gets a rounded terminal cap while the base remains visible
   // underneath its curved corners. This is the piece that was flat previously.
   if (bufferedPx > playedPx) {
-    drawRange(playedPx, bufferedPx, bufferedColor, roundRangeEnd = true)
+    val cacheColor = if (isGlass) playedColor.copy(alpha = 0.35f) else bufferedColor
+    drawRange(playedPx, bufferedPx, cacheColor, roundRangeEnd = true)
   }
 
   if (playedPx > 0f) {
     drawRange(0f, playedPx, playedColor)
+  }
+
+  // Frosted Glass UI specular highlight rim and optical groove
+  if (isGlass) {
+    val strokeWidth = 1.dp.toPx()
+    val specularAlpha = 0.38f
+    val shadowAlpha = 0.18f
+    segments.forEach { segment ->
+      val left = segment.start
+      val right = segment.end
+      if (right - left < edgeEpsilon) return@forEach
+      // Top specular highlight line
+      drawLine(
+        color = Color.White.copy(alpha = specularAlpha),
+        start = Offset(left + outerRadius * 0.5f, centerY - outerRadius + strokeWidth / 2f),
+        end = Offset(right - outerRadius * 0.5f, centerY - outerRadius + strokeWidth / 2f),
+        strokeWidth = strokeWidth,
+        cap = StrokeCap.Round,
+      )
+      // Bottom ambient groove edge
+      drawLine(
+        color = Color.Black.copy(alpha = shadowAlpha),
+        start = Offset(left + outerRadius * 0.5f, centerY + outerRadius - strokeWidth / 2f),
+        end = Offset(right - outerRadius * 0.5f, centerY + outerRadius - strokeWidth / 2f),
+        strokeWidth = strokeWidth,
+        cap = StrokeCap.Round,
+      )
+    }
+    // Specular sheen on top of active progress
+    if (playedPx > 0f) {
+      val sheenEnd = minOf(playedPx, size.width)
+      drawLine(
+        color = Color.White.copy(alpha = 0.45f),
+        start = Offset(outerRadius * 0.5f, centerY - outerRadius + strokeWidth / 2f),
+        end = Offset(sheenEnd - outerRadius * 0.25f, centerY - outerRadius + strokeWidth / 2f),
+        strokeWidth = strokeWidth,
+        cap = StrokeCap.Round,
+      )
+    }
   }
 }
 
@@ -334,7 +376,7 @@ internal fun SeekbarWithTimers(
   chapters: ImmutableList<Segment>,
   skipSegments: ImmutableList<SkipSegment>,
   paused: Boolean,
-  seekbarStyle: SeekbarStyle = SeekbarStyle.Wavy,
+  seekbarStyle: SeekbarStyle = SeekbarStyle.Liquid,
   useWavySeekbar: Boolean = true,
   showWavyVisualizer: Boolean = false,
   waveFeatures: AudioFeatures? = null,
@@ -1661,7 +1703,8 @@ private fun LiquidSeekbar(
           trackHeight = heightPx,
           playedColor = accentColor,
           bufferedColor = accentColor.copy(alpha = readAheadAlpha),
-          unplayedColor = accentColor.copy(alpha = emptyAlpha),
+          unplayedColor = Color.White.copy(alpha = 0.16f),
+          isGlass = true,
         )
 
         // Loop markers
@@ -1734,20 +1777,21 @@ private fun LiquidSeekbar(
             glassSettings.highlight(Highlight.Ambient.copy(
               width = Highlight.Ambient.width / 1.5f,
               blurRadius = Highlight.Ambient.blurRadius / 1.5f,
-              alpha = progress,
+              alpha = 0.55f + 0.35f * progress,
             ))
           },
           shadow = {
             Shadow(
-              radius = 4.dp,
-              color = Color.Black.copy(alpha = 0.05f),
+              radius = 8.dp,
+              color = Color.Black.copy(alpha = 0.30f),
             )
           },
           innerShadow = {
             val progress = dampedDragAnimation.pressProgress
             InnerShadow(
-              radius = 4.dp * progress,
-              alpha = progress,
+              radius = 3.dp,
+              alpha = 0.40f + 0.35f * progress,
+              color = Color.White,
             )
           },
           layerBlock = {
@@ -1766,6 +1810,17 @@ private fun LiquidSeekbar(
             )
             drawCapsuleTint(glassSettings.surfaceColor(film))
           },
+        )
+        .border(
+          width = 1.dp,
+          brush = Brush.verticalGradient(
+            listOf(
+              Color.White.copy(alpha = 0.60f),
+              Color.White.copy(alpha = 0.18f),
+              Color.White.copy(alpha = 0.04f),
+            ),
+          ),
+          shape = Capsule(),
         )
         .size(thumbWidthDp, 24.dp),
     )

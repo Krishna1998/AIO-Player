@@ -79,7 +79,8 @@ class AppearancePreferences(
   val customWallpaperUseColors = preferenceStore.getBoolean("custom_wallpaper_use_colors", false)
   val amoledMode = preferenceStore.getBoolean("amoled_mode", true)
   // Opt-in: glass records the screen behind it every frame and moves player video to a TextureView.
-  val liquidGlassEnabled = preferenceStore.getBoolean("liquid_glass_enabled", false)
+  val liquidGlassEnabled =
+    preferenceStore.getBoolean("liquid_glass_enabled", Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
   val liquidGlassInHdr = preferenceStore.getBoolean("liquid_glass_in_hdr", false)
   val liquidGlassOpacity = preferenceStore.getFloat("liquid_glass_opacity", 1f)
   val liquidGlassBlur = preferenceStore.getFloat("liquid_glass_blur", 1f)
@@ -113,7 +114,7 @@ class AppearancePreferences(
   val seekbarOpacity = preferenceStore.getFloat("seekbar_opacity", 1.0f)
   val showUnplayedOldVideoLabel = preferenceStore.getBoolean("show_unplayed_old_video_label", true)
   val unplayedOldVideoDays = preferenceStore.getInt("unplayed_old_video_days", 7)
-  val seekbarStyle = preferenceStore.getEnum("seekbar_style", SeekbarStyle.Thick)
+  val seekbarStyle = preferenceStore.getEnum("seekbar_style", SeekbarStyle.Liquid)
   val portraitSeekbarPlacement =
     preferenceStore.getEnum("portrait_seekbar_placement", SeekbarPlacement.AboveButtons)
   val landscapeSeekbarPlacement =

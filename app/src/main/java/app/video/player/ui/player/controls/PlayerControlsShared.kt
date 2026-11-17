@@ -27,12 +27,16 @@ import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.graphics.Brush
+import app.video.player.ui.liquidglass.outsideShadow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -355,31 +359,35 @@ fun RenderPlayerButton(
               )
             }
           } else {
-            Surface(
-              shape = CircleShape,
-              color =
-                if (borderless) {
-                  Color.Transparent
-                } else {
-                  playerButtonContainerColor()
-                },
-              contentColor =
-                if (configOwned) disabledColor else if (borderless) controlColor else MaterialTheme.colorScheme.onSurface,
-              tonalElevation = 0.dp,
-              shadowElevation = 0.dp,
-              border =
-                if (borderless) {
-                  null
-                } else {
-                  BorderStroke(
-                    1.dp,
-                    playerButtonBorderColor(),
-                  )
-                },
+            val speedSurface = playerButtonContainerColor()
+            val speedGlassFill = remember(speedSurface) {
+              Brush.verticalGradient(
+                0f to speedSurface.copy(alpha = (speedSurface.alpha * 1.15f).coerceIn(0f, 1f)),
+                0.4f to speedSurface.copy(alpha = (speedSurface.alpha * 0.85f).coerceIn(0f, 1f)),
+                1f to speedSurface.copy(alpha = (speedSurface.alpha * 1.05f).coerceIn(0f, 1f)),
+              )
+            }
+            val speedSpecularBorder = remember(speedSurface) {
+              Brush.verticalGradient(
+                listOf(
+                  Color.White.copy(alpha = 0.32f),
+                  Color.White.copy(alpha = 0.10f),
+                  Color.White.copy(alpha = 0.02f),
+                  speedSurface.copy(alpha = 0.20f),
+                ),
+              )
+            }
+            Box(
               modifier =
                 speedAnimModifier
                   .height(buttonSize)
+                  .outsideShadow(CircleShape, radius = 4.dp)
                   .clip(CircleShape)
+                  .background(if (borderless) Color.Transparent else speedGlassFill, CircleShape)
+                  .then(
+                    if (borderless) Modifier
+                    else Modifier.border(1.dp, speedSpecularBorder, CircleShape),
+                  )
                   .combinedClickable(
                     enabled = !configOwned,
                     interactionSource = remember { MutableInteractionSource() },
@@ -388,6 +396,7 @@ fun RenderPlayerButton(
                     onLongClick = onOpenSpeedSheet,
                     onLongClickLabel = stringResource(R.string.btn_label_speed),
                   ),
+              contentAlignment = Alignment.Center,
             ) {
               Row(
                 verticalAlignment = Alignment.CenterVertically,
