@@ -4,9 +4,9 @@ These notes are written in plain English and focus on what changed for real use.
 
 ## 1.0.5
 
-- **Flagship Brand Identity: "Master Vinyl Aperture" (Diamond White on Velvet Cabernet):**
-  - Upgraded the official default app icon to the **Master Vinyl Aperture** design: an audiophile-inspired circular disc featuring an outer vinyl rim ring and an inner vinyl core with an optical negative-space playback triangle cutout (`fillType="evenOdd"`).
-  - Paired with the deep, nocturnal **Velvet Cabernet** (`#380812`) background for high-contrast visual impact across all screen types.
+- **Flagship Brand Identity: "Continuous Ligature VM" (Cyber Magenta on Stealth Carbon):**
+  - Upgraded the official default app icon to the **Continuous Ligature VM** design: an unbroken, fluid 60° geometric monoline ribbon that welds **V** directly into **M** in a single continuous trajectory, crowned with a forward-firing playhead.
+  - Paired with deep, nocturnal **Stealth Carbon** (`#0E1017`) background and vibrant **Cyber Magenta** (`#FF007F`) for striking contrast and high optical legibility across all display types.
   - Fully synchronized 1:1 across default adaptive launcher icon (`ic_launcher_background`, `ic_launcher_purple_foreground`), Android 12+ Splash Screen (`ic_splash_purple_foreground`, `splash_background`), Android 13+ Material You monochrome silhouette (`ic_launcher_purple_monochrome`), and project documentation branding (`videoplayer_icon.svg`).
 - **Audio Player Ergonomics & Layout Polish:**
   - **Full Liquid Glass UI Architecture:** Transformed the audio player interface with frosted translucent glass pods, specular top-lit gradient rims, and soft floating ambient drop shadows (`audioGlassSurface`) across bottom action pills, playback controls, header pods, lyric strips, and cover art tiles.

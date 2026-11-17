@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Splash-only rendition: native AVD, 288dp canvas, Master Vinyl Aperture inside central 160dp splash mask. -->
+<!-- Splash-only rendition: native AVD, 288dp canvas, Continuous Ligature VM inside central 160dp splash mask. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="288dp"
     android:height="288dp"
@@ -14,26 +14,27 @@
         android:scaleX="0.66"
         android:scaleY="0.66">
 
-        <!-- Outer Vinyl Rim Ring (Animated Entrance) -->
+        <!-- Unbroken Geometric Monoline Ribbon (Animated Main Logo) -->
         <group
             android:name="logo_main"
             android:pivotX="256"
             android:pivotY="256">
             <path
-                android:fillColor="#FFFFFFFF"
-                android:fillType="evenOdd"
-                android:pathData="M 256,106 A 150,150 0 1,0 256,406 A 150,150 0 1,0 256,106 M 256,141 A 115,115 0 1,1 256,371 A 115,115 0 1,1 256,141 Z" />
+                android:strokeColor="#FFFF007F"
+                android:strokeWidth="28"
+                android:strokeLineCap="round"
+                android:strokeLineJoin="round"
+                android:pathData="M 105,172 L 172,365 L 231,214 L 290,365 L 348,214 L 407,365" />
         </group>
 
-        <!-- Centered Vinyl Disc Core with Negative Space Play Triangle Punch (Animated Pop Entrance) -->
+        <!-- Centered Playhead (Animated Tip Pop) -->
         <group
             android:name="logo_tip"
             android:pivotX="256"
             android:pivotY="256">
             <path
-                android:fillColor="#E6FFFFFF"
-                android:fillType="evenOdd"
-                android:pathData="M 256,166 A 90,90 0 1,0 256,346 A 90,90 0 1,0 256,166 Z M 230,196 L 316,256 L 230,316 Z" />
+                android:fillColor="#FFFF007F"
+                android:pathData="M 273,147 L 323,180 L 273,214 Z" />
         </group>
     </group>
 </vector>

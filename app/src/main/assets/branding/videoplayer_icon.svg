@@ -1,22 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
   <defs>
-    <!-- Velvet Cabernet Depth Radial Gradient -->
-    <radialGradient id="cabernet_grad" cx="45%" cy="35%" r="65%">
-      <stop offset="0%" stop-color="#4F0B1A"/>
-      <stop offset="55%" stop-color="#380812"/>
-      <stop offset="100%" stop-color="#1C0206"/>
+    <!-- Stealth Carbon Depth Radial Gradient -->
+    <radialGradient id="stealth_carbon_grad" cx="45%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#1A1E2B"/>
+      <stop offset="55%" stop-color="#0E1017"/>
+      <stop offset="100%" stop-color="#050608"/>
     </radialGradient>
+    <filter id="magenta_glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#FF007F" flood-opacity="0.35"/>
+    </filter>
   </defs>
 
-  <!-- Velvet Cabernet Squircle Canvas for App Icon / GitHub README -->
-  <rect width="512" height="512" rx="116" fill="url(#cabernet_grad)"/>
+  <!-- Stealth Carbon Squircle Canvas for App Icon / GitHub README -->
+  <rect width="512" height="512" rx="116" fill="url(#stealth_carbon_grad)"/>
 
-  <!-- Centered Master Vinyl Aperture Emblem (Diamond White) -->
-  <g id="master_vinyl_aperture">
-    <!-- Outer Vinyl Rim Ring -->
-    <path fill="#FFFFFF" fill-rule="evenodd" d="M 256,106 A 150,150 0 1,0 256,406 A 150,150 0 1,0 256,106 M 256,141 A 115,115 0 1,1 256,371 A 115,115 0 1,1 256,141 Z"/>
+  <!-- Centered Continuous Ligature VM Emblem (Cyber Magenta) -->
+  <g id="continuous_ligature_vm" filter="url(#magenta_glow)">
+    <!-- Unbroken Geometric Monoline Ribbon: V into M -->
+    <path fill="none" stroke="#FF007F" stroke-width="28" stroke-linecap="round" stroke-linejoin="round" d="M 105,172 L 172,365 L 231,214 L 290,365 L 348,214 L 407,365"/>
 
-    <!-- Inner Disc Core with Negative Space Play Triangle Cutout -->
-    <path fill="#FFFFFF" fill-opacity="0.92" fill-rule="evenodd" d="M 256,166 A 90,90 0 1,0 256,346 A 90,90 0 1,0 256,166 Z M 230,196 L 316,256 L 230,316 Z"/>
+    <!-- Directional Playhead nestled in M apex -->
+    <polygon fill="#FF007F" points="273,147 323,180 273,214"/>
   </g>
 </svg>

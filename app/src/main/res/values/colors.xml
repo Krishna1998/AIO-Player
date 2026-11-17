@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Brand splash: Velvet Cabernet background with Master Vinyl Aperture emblem. -->
-    <color name="splash_background">#FF380812</color>
+    <!-- Brand splash: Stealth Carbon background with Continuous Ligature VM emblem. -->
+    <color name="splash_background">#FF0E1017</color>
     <color name="splash_background_classic">#F7F5F8</color>
 </resources>
