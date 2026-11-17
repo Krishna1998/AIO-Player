@@ -2,6 +2,25 @@
 
 These notes are written in plain English and focus on what changed for real use.
 
+## 1.0.5
+
+- **Flagship Brand Identity: "Master Vinyl Aperture" (Diamond White on Velvet Cabernet):**
+  - Upgraded the official default app icon to the **Master Vinyl Aperture** design: an audiophile-inspired circular disc featuring an outer vinyl rim ring and an inner vinyl core with an optical negative-space playback triangle cutout (`fillType="evenOdd"`).
+  - Paired with the deep, nocturnal **Velvet Cabernet** (`#380812`) background for high-contrast visual impact across all screen types.
+  - Fully synchronized 1:1 across default adaptive launcher icon (`ic_launcher_background`, `ic_launcher_purple_foreground`), Android 12+ Splash Screen (`ic_splash_purple_foreground`, `splash_background`), Android 13+ Material You monochrome silhouette (`ic_launcher_purple_monochrome`), and project documentation branding (`videoplayer_icon.svg`).
+- **Audio Player Ergonomics & Layout Polish:**
+  - **Relocated Playback Speed to Bottom Action Row:** Moved the playback speed toggle down into the central bottom action row pill (alongside Shuffle, Repeat, and Background Playback) for effortless one-handed thumb reach during listening sessions.
+  - **Upper Header Track & Chapter Counter:** Relocated the track and chapter counter (`Track X / Y` / `Chapter X / Y`) to the top header bar directly below `NOW PLAYING`, decluttering the song metadata area while keeping queue progression immediately visible.
+- **Dynamic Profile Watch & Listen Analytics:**
+  - Enhanced the Watch Stats screen in the Profile tab: the leaderboard header now dynamically switches between **"Most watched"** when browsing video playback and **"Most listened"** when the audio toggle is active, reflecting real media consumption semantics.
+- **5 Brand New Glass UI App Themes:**
+  - Added five modern themes engineered with frosted specular aesthetics into the `AppTheme` core engine:
+    - **CyberPrism:** Electric Neon Cyan & Cyberpunk frosted glass.
+    - **RossoPrism:** High-velocity Ferrari Scarlet & Velvet Cabernet dynamic glass.
+    - **AuroraMint:** Arctic Emerald & Mint frost glass.
+    - **HoloOpal:** Iridescent Holographic Opal & Lilac glass.
+    - **SolarAmber:** Warm Golden Amber & Sunset Citrus glass.
+
 ## 1.0.4
 
 - **Flagship Brand Identity: "Acoustic Turbine" (Icy Cyan & Cobalt Blue on Pitch Black):**

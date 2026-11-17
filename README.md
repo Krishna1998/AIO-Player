@@ -5,7 +5,7 @@
 # ⚡ V&M PLAYER ⚡
 ### *Next-Generation, Ultra-Lightweight Video & Audio Engine for Android*
 
-[![Release](https://img.shields.io/badge/Release-v1.0.4-00F5FF?style=for-the-badge&logo=android&logoColor=black)](https://github.com/Krishna1998/Video-Music-Player/releases)
+[![Release](https://img.shields.io/badge/Release-v1.0.5-00F5FF?style=for-the-badge&logo=android&logoColor=black)](https://github.com/Krishna1998/Video-Music-Player/releases)
 [![Android](https://img.shields.io/badge/Android-8.0%2B%20(API%2026%2B)-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com)
 [![Architecture](https://img.shields.io/badge/Arch-arm64--v8a-FF0055?style=for-the-badge&logo=arm&logoColor=white)](https://arm.com)
 [![Engine](https://img.shields.io/badge/Core-mpv%20%2B%20FFmpeg-9D4EDD?style=for-the-badge&logo=cplusplus&logoColor=white)](https://mpv.io)
@@ -48,18 +48,19 @@ Whether decoding 4K HDR10+ anime with complex ASS karaoke subtitles or driving a
 | **Graphic Equalizer** | 🟢 **ACTIVE** | Dual-mode tone controls (Bass / Treble) & multi-band graphical EQ |
 | **Spatializer & Stereo Widening** | 🟢 **ACTIVE** | Low-latency algorithmic stereo expansion for headphones |
 | **Playback Speed Persistence** | 🟢 **ACTIVE** | Granular speed control (0.25x – 4.0x) with state memory across tracks |
+| **Ergonomic Speed Pill** | 🟢 **ACTIVE** | **NEW:** Playback speed button relocated to bottom action row for instant one-handed thumb access |
 | **Dynamic Range Compression** | 🟢 **ACTIVE** | Tames explosive volume spikes in movies while boosting subtle whispers |
 | **Volume Boost Cap** | 🟢 **ACTIVE** | Clean digital pre-amplification boost up to +30 dB |
 | **Configurable Volume Step** | 🟢 **ACTIVE** | Discrete volume step multiplier (1 to 10 steps per hardware key press) with proportional boost scaling |
-| **Smart Sleep Timer** | 🟢 **ACTIVE** | **NEW:** Integrated into both Audio & Video player controls with active playback sync (ticks down only while music runs), gentle 5s audio fade-out, graceful crash-free app auto-close on completion, live countdown badge, "End of track" mode, and quick extensions |
+| **Smart Sleep Timer** | 🟢 **ACTIVE** | Integrated into both Audio & Video player controls with active playback sync (ticks down only while music runs), gentle 5s audio fade-out, graceful crash-free app auto-close on completion, live countdown badge, "End of track" mode, and quick extensions |
 | **Online Lyrics Providers** | 🟢 **ACTIVE** | 17 online lyrics databases (Apple Music TTML, Musixmatch, LRCLIB, KuGou, PaxSenix, YouTube, etc.) with word/line sync badges, individual provider toggles, and translation controls |
 | **Pitch Correction** | 🟢 **ACTIVE** | Maintains natural harmonic pitch when speeding up or slowing down audio |
 
 ### 📊 Modern Bento Watch Analytics
 | Feature | State | Description |
 | :--- | :---: | :--- |
-| **Interactive 7-Day Chart** | 🟢 **ACTIVE** | **NEW:** Click any weekday bar to reveal exact hours/minutes with animated morphing indicators |
-| **Video vs Audio Split** | 🟢 **ACTIVE** | **NEW:** Independent tracking and leaderboards for watched videos and music listening |
+| **Interactive 7-Day Chart** | 🟢 **ACTIVE** | Click any weekday bar to reveal exact hours/minutes with animated morphing indicators |
+| **Video vs Audio Split** | 🟢 **ACTIVE** | **NEW:** Dynamic category leaderboards: "Most watched" for video and "Most listened" for music listening |
 | **Playback Session Counter** | 🟢 **ACTIVE** | Atomic session tracking with zero background telemetry leakage |
 | **Privacy Reset** | 🟢 **ACTIVE** | Instant one-tap wipe of all historical playtime data |
 
@@ -67,16 +68,16 @@ Whether decoding 4K HDR10+ anime with complex ASS karaoke subtitles or driving a
 | Feature | State | Description |
 | :--- | :---: | :--- |
 | **Material 3 Expressive** | 🟢 **ACTIVE** | Full dynamic color integration, OLED pure black theme, and expressive typography |
-| **Acoustic Turbine Flagship Icon** | 🟢 **ACTIVE** | **NEW:** 95% scale Acoustic Turbine sound-arrow geometry in Icy Cyan & Electric Cobalt Blue on AMOLED pitch black with synchronized splash screen, vector branding, and Material You monochrome layer |
-| **Streamlined Identity & Settings** | 🟢 **ACTIVE** | **NEW:** Concept 4 Black enforced as sole active launcher icon; legacy icon aliases retired and experimental tags removed across Liquid Glass and Vulkan settings |
+| **Master Vinyl Aperture Flagship Icon** | 🟢 **ACTIVE** | **NEW:** Audiophile-inspired vinyl aperture emblem in Diamond White on deep Velvet Cabernet (`#380812`) with true negative-space playhead cutout, 1:1 synchronized across launcher, Android 12+ splash, Material You monochrome, and vector branding |
+| **5 Glass UI App Themes** | 🟢 **ACTIVE** | **NEW:** CyberPrism, RossoPrism, AuroraMint, HoloOpal, and SolarAmber theme engine additions with specular frosted glass styling |
+| **Top Header Track Counter** | 🟢 **ACTIVE** | **NEW:** Track and chapter counter (`Track X / Y`) relocated to upper side inside top header bar beneath NOW PLAYING |
 | **Material You Themed Icons** | 🟢 **ACTIVE** | Full monochrome silhouette vector layer matching Android 13+ dynamic system color palettes |
-| **Seamless FAB Alignment** | 🟢 **ACTIVE** | **NEW:** Perfect 12dp floating clearance above active mini player in video folders, playlists, and file browsers |
+| **Seamless FAB Alignment** | 🟢 **ACTIVE** | Perfect 12dp floating clearance above active mini player in video folders, playlists, and file browsers |
 | **Crimson Sonic Theme** | 🟢 **ACTIVE** | Dedicated built-in neon ruby pink & electric cyan color scheme |
 | **System-Wide Liquid Glass** | 🟢 **ACTIVE** | Frosted translucent surfaces with specular rim highlights across dialogs, app bars, and bento cards |
 | **Connected Shape Morphing** | 🟢 **ACTIVE** | Animated corner morphing (`rememberConnectedShape`) across button presses |
-| **Glass Specular Badges** | 🟢 **ACTIVE** | **NEW:** Media duration and 4K/HDR badges enhanced with top-lit specular glass borders |
+| **Glass Specular Badges** | 🟢 **ACTIVE** | Media duration and 4K/HDR badges enhanced with top-lit specular glass borders |
 | **HUD Customization** | 🟢 **ACTIVE** | Adjustable button opacity (0–100%), seekbar opacity, and borderless player modes |
-| **Dynamic Speed Pill** | 🟢 **ACTIVE** | Seamless live-resizing pill when cycling through playback speeds |
 | **File Name Conceal** | 🟢 **ACTIVE** | Hide video title and status pills for an ultra-immersive cinema canvas |
 
 ---
