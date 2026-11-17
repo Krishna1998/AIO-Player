@@ -1109,6 +1109,7 @@ fun AudioPlayerControls(
         .padding(horizontal = if (flushInPlaceLyrics) 0.dp else 16.dp)
         .padding(top = if (flushInPlaceLyrics) 0.dp else 6.dp, bottom = 12.dp),
   ) {
+    @OptIn(ExperimentalFoundationApi::class)
     val headerBar = @Composable {
       Box(modifier = Modifier.fillMaxWidth()) {
         ReactiveIconButton(
@@ -1131,13 +1132,41 @@ fun AudioPlayerControls(
           )
         }
 
-        Text(
-          text = stringResource(R.string.ui_now_playing),
-          style = MaterialTheme.typography.labelSmall,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-          letterSpacing = 2.sp,
+        val playlistInfo = viewModel.getPlaylistInfo()
+        val trackText = if (isAudiobook && bookChapterIndex >= 0) {
+          "${stringResource(R.string.audiobook_chapter_number, bookChapterIndex + 1)} / ${chapters.size}"
+        } else if (playlistInfo != null) {
+          "Track $playlistInfo"
+        } else {
+          null
+        }
+
+        Column(
           modifier = Modifier.align(Alignment.Center),
-        )
+          horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+          Text(
+            text = stringResource(R.string.ui_now_playing),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+            letterSpacing = 2.sp,
+          )
+          if (trackText != null) {
+            Text(
+              text = trackText,
+              style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+              color = MaterialTheme.colorScheme.onSurface,
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
+              modifier = Modifier.combinedClickable(
+                onClick = { onOpenSheet(Sheets.Chapters) },
+                onLongClick = {
+                  if (viewModel.preparePlaybackBookmark()) onOpenSheet(Sheets.BookmarkEditor)
+                },
+              ),
+            )
+          }
+        }
 
         Row(
           modifier = Modifier.align(Alignment.CenterEnd),
@@ -1393,11 +1422,6 @@ fun AudioPlayerControls(
           )
           Spacer(Modifier.height(4.dp))
         }
-        val playlistInfo = viewModel.getPlaylistInfo()
-        val trackText = if (isAudiobook && bookChapterIndex >= 0) {
-          "${stringResource(R.string.audiobook_chapter_number, bookChapterIndex + 1)} / ${chapters.size}"
-        } else if (playlistInfo != null) "Track $playlistInfo" else "Audio Media"
-
         Row(
           modifier = Modifier.fillMaxWidth(),
           verticalAlignment = Alignment.CenterVertically,
@@ -1408,25 +1432,6 @@ fun AudioPlayerControls(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
           ) {
-            Text(
-              text = trackText,
-              style = MaterialTheme.typography.labelLarge,
-              color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
-              maxLines = 1,
-              overflow = TextOverflow.Ellipsis,
-              modifier = Modifier.combinedClickable(
-                onClick = { onOpenSheet(Sheets.Chapters) },
-                onLongClick = {
-                  if (viewModel.preparePlaybackBookmark()) onOpenSheet(Sheets.BookmarkEditor)
-                },
-              ),
-            )
-            Text(
-              text = "|",
-              style = MaterialTheme.typography.labelLarge,
-              color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-            )
-
             AnimatedContent(
               targetState = abLoop.isExpanded,
               transitionSpec = {
