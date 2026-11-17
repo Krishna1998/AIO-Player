@@ -1,37 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- V&M Player Flagship Icon: Concept 4 Acoustic Turbine (Exact 1:1 Match to Preview Suite) -->
+<!-- V&M Player Flagship Icon: Sonic Prism (Jet-Black Playhead with White Spectrum Bars & Acoustic Groove) -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aapt="http://schemas.android.com/aapt" android:width="108dp" android:height="108dp" android:viewportWidth="512" android:viewportHeight="512">
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
 
-    <!-- 95% Geometric Size Scaling (Matches matrix(0.95 0 0 0.95 12.8 12.8)) -->
-    <group android:name="launcher_bounds" android:pivotX="256" android:pivotY="256" android:scaleX="0.95" android:scaleY="0.95">
+    <group android:name="sonic_prism"
+        android:pivotX="256"
+        android:pivotY="256">
 
-        <!-- Outer Subwoofer Stator Ring (Dark Track) -->
-        <path android:pathData="M 256,114 A 142,142 0 1,0 256.1,114" android:strokeColor="#FF151926" android:strokeWidth="20" />
+        <!-- Circular Acoustic Groove (Jet Black Dash Arc) -->
+        <path
+            android:pathData="M 256.0,121.0 A 135,135 0 0,1 372.2,187.3 M 384.5,214.6 A 135,135 0 0,1 388.1,283.7 M 382.6,302.9 A 135,135 0 0,1 280.0,388.9 M 250.1,390.9 A 135,135 0 0,1 184.0,370.2 M 168.0,358.4 A 135,135 0 0,1 123.1,232.3 M 131.6,203.6 A 135,135 0 0,1 173.9,148.8 M 190.6,137.9 A 135,135 0 0,1 256.0,121.0"
+            android:strokeColor="#FF08080C"
+            android:strokeWidth="16"
+            android:strokeLineCap="round" />
 
-        <!-- Acoustic Turbine Strobe Rim: 6 Exact Dash Segments of 160 30 60 40 Pattern -->
-        <path android:pathData="M 396.3,233.9 A 142,142 0 0,1 317,384.2 M 288.8,394.2 A 142,142 0 0,1 229.2,395.5 M 191.5,382.5 A 142,142 0 0,1 114.1,252.1 M 118,222.4 A 142,142 0 0,1 143.9,168.8 M 172.6,141.1 A 142,142 0 0,1 323.9,131.3 M 348.6,148.3 A 142,142 0 0,1 384.6,195.8" android:strokeWidth="20">
-            <aapt:attr name="android:strokeColor">
-                <gradient android:startX="51.2" android:startY="76.8" android:endX="460.8" android:endY="435.2" android:type="linear">
-                    <item android:offset="0.0" android:color="#FF00F5FF"/>
-                    <item android:offset="0.5" android:color="#FF3B82F6"/>
-                    <item android:offset="1.0" android:color="#FF1D4ED8"/>
-                </gradient>
-            </aapt:attr>
-        </path>
+        <!-- Jet Black Precision Playhead Base with Crisp White Border -->
+        <path
+            android:pathData="M 206,171 L 341,256 L 206,341 Z"
+            android:fillColor="#FF090A0F"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="5"
+            android:strokeLineJoin="round"
+            android:strokeLineCap="round" />
 
-        <!-- Centered Sharp Optical Diamond Playhead: Deep Black 8px Stroke Base -->
-        <path android:pathData="M 220,188 L 332,250 C 342,256 342,260 332,266 L 220,328 C 206,336 196,328 196,314 L 196,202 C 196,188 206,180 220,188 Z" android:strokeColor="#FF000000" android:strokeWidth="8" android:strokeLineJoin="round" />
+        <!-- White Spectrum Frequency Bars (Cutting Across Playhead) -->
+        <path
+            android:pathData="M 230,205 L 230,307"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="8"
+            android:strokeLineCap="round" />
 
-        <!-- Centered Sharp Optical Diamond Playhead: Solid Icy Cyan & Cobalt Blue Gradient Core -->
-        <path android:pathData="M 220,188 L 332,250 C 342,256 342,260 332,266 L 220,328 C 206,336 196,328 196,314 L 196,202 C 196,188 206,180 220,188 Z">
-            <aapt:attr name="android:fillColor">
-                <gradient android:startX="51.2" android:startY="76.8" android:endX="460.8" android:endY="435.2" android:type="linear">
-                    <item android:offset="0.0" android:color="#FF00F5FF"/>
-                    <item android:offset="0.5" android:color="#FF3B82F6"/>
-                    <item android:offset="1.0" android:color="#FF1D4ED8"/>
-                </gradient>
-            </aapt:attr>
-        </path>
+        <path
+            android:pathData="M 248,188 L 248,324"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="8"
+            android:strokeLineCap="round" />
+
+        <path
+            android:pathData="M 266,214 L 266,298"
+            android:strokeColor="#E6FFFFFF"
+            android:strokeWidth="8"
+            android:strokeLineCap="round" />
+
+        <path
+            android:pathData="M 284,232 L 284,280"
+            android:strokeColor="#CCFFFFFF"
+            android:strokeWidth="8"
+            android:strokeLineCap="round" />
+
+        <path
+            android:pathData="M 302,248 L 302,264"
+            android:strokeColor="#B3FFFFFF"
+            android:strokeWidth="8"
+            android:strokeLineCap="round" />
     </group>
 </vector>
