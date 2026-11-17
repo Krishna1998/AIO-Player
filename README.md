@@ -70,6 +70,7 @@ Whether decoding 4K HDR10+ anime with complex ASS karaoke subtitles or driving a
 | **Material 3 Expressive** | 🟢 **ACTIVE** | Full dynamic color integration, OLED pure black theme, and expressive typography |
 | **Master Vinyl Aperture Flagship Icon** | 🟢 **ACTIVE** | **NEW:** Audiophile-inspired vinyl aperture emblem in Diamond White on deep Velvet Cabernet (`#380812`) with true negative-space playhead cutout, 1:1 synchronized across launcher, Android 12+ splash, Material You monochrome, and vector branding |
 | **5 Glass UI App Themes** | 🟢 **ACTIVE** | **NEW:** CyberPrism, RossoPrism, AuroraMint, HoloOpal, and SolarAmber theme engine additions with specular frosted glass styling |
+| **Audio Player Liquid Glass** | 🟢 **ACTIVE** | **NEW:** Frosted translucent glass pods, specular top-lit gradient rims, and floating depth shadows across all audio controls |
 | **Top Header Track Counter** | 🟢 **ACTIVE** | **NEW:** Track and chapter counter (`Track X / Y`) relocated to upper side inside top header bar beneath NOW PLAYING |
 | **Material You Themed Icons** | 🟢 **ACTIVE** | Full monochrome silhouette vector layer matching Android 13+ dynamic system color palettes |
 | **Seamless FAB Alignment** | 🟢 **ACTIVE** | Perfect 12dp floating clearance above active mini player in video folders, playlists, and file browsers |

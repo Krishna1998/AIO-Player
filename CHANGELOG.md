@@ -9,8 +9,10 @@ These notes are written in plain English and focus on what changed for real use.
   - Paired with the deep, nocturnal **Velvet Cabernet** (`#380812`) background for high-contrast visual impact across all screen types.
   - Fully synchronized 1:1 across default adaptive launcher icon (`ic_launcher_background`, `ic_launcher_purple_foreground`), Android 12+ Splash Screen (`ic_splash_purple_foreground`, `splash_background`), Android 13+ Material You monochrome silhouette (`ic_launcher_purple_monochrome`), and project documentation branding (`videoplayer_icon.svg`).
 - **Audio Player Ergonomics & Layout Polish:**
+  - **Full Liquid Glass UI Architecture:** Transformed the audio player interface with frosted translucent glass pods, specular top-lit gradient rims, and soft floating ambient drop shadows (`audioGlassSurface`) across bottom action pills, playback controls, header pods, lyric strips, and cover art tiles.
   - **Relocated Playback Speed to Bottom Action Row:** Moved the playback speed toggle down into the central bottom action row pill (alongside Shuffle, Repeat, and Background Playback) for effortless one-handed thumb reach during listening sessions.
   - **Upper Header Track & Chapter Counter:** Relocated the track and chapter counter (`Track X / Y` / `Chapter X / Y`) to the top header bar directly below `NOW PLAYING`, decluttering the song metadata area while keeping queue progression immediately visible.
+  - **Landscape Bottom Bar Persistence:** Fixed landscape playback layout to guarantee the bottom-right Playlist / Now Playing queue button is always visible alongside the centered action pill.
 - **Dynamic Profile Watch & Listen Analytics:**
   - Enhanced the Watch Stats screen in the Profile tab: the leaderboard header now dynamically switches between **"Most watched"** when browsing video playback and **"Most listened"** when the audio toggle is active, reflecting real media consumption semantics.
 - **5 Brand New Glass UI App Themes:**
