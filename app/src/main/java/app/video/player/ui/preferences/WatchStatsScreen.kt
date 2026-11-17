@@ -68,6 +68,7 @@ import app.video.player.repository.WatchMediaStats
 import app.video.player.repository.WatchStatsRepository
 import app.video.player.repository.WatchStatsSnapshot
 import app.video.player.utils.media.HttpUtils
+import app.video.player.utils.media.MediaUtils
 import app.video.player.utils.media.fileExtension
 import app.video.player.utils.storage.FileTypeUtils
 import app.video.player.ui.icons.Icon
@@ -515,6 +516,7 @@ private fun TopMediaLeaderboardBentoCard(
         verticalAlignment = Alignment.CenterVertically,
       ) {
         Row(
+          modifier = Modifier.weight(1f, fill = false),
           horizontalArrangement = Arrangement.spacedBy(10.dp),
           verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -536,6 +538,8 @@ private fun TopMediaLeaderboardBentoCard(
             text = stringResource(R.string.watch_stats_top_media),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
           )
         }
 
@@ -550,22 +554,20 @@ private fun TopMediaLeaderboardBentoCard(
         ) {
           val isVideo = selectedTab == MostWatchedMediaType.VIDEO
           Surface(
+            onClick = { selectedTab = MostWatchedMediaType.VIDEO },
             shape = CircleShape,
             color = if (isVideo) MaterialTheme.colorScheme.primary else Color.Transparent,
             contentColor = if (isVideo) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier
-              .clip(CircleShape)
-              .clickable { selectedTab = MostWatchedMediaType.VIDEO },
           ) {
             Row(
-              modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+              modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
               Icon(
                 imageVector = Icons.RoundedFilled.Videocam,
                 contentDescription = null,
-                modifier = Modifier.size(14.dp),
+                modifier = Modifier.size(16.dp),
               )
               Text(
                 text = stringResource(R.string.watch_stats_video),
@@ -577,22 +579,20 @@ private fun TopMediaLeaderboardBentoCard(
 
           val isAudio = selectedTab == MostWatchedMediaType.AUDIO
           Surface(
+            onClick = { selectedTab = MostWatchedMediaType.AUDIO },
             shape = CircleShape,
             color = if (isAudio) MaterialTheme.colorScheme.primary else Color.Transparent,
             contentColor = if (isAudio) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier
-              .clip(CircleShape)
-              .clickable { selectedTab = MostWatchedMediaType.AUDIO },
           ) {
             Row(
-              modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+              modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
               Icon(
                 imageVector = Icons.RoundedFilled.Audiotrack,
                 contentDescription = null,
-                modifier = Modifier.size(14.dp),
+                modifier = Modifier.size(16.dp),
               )
               Text(
                 text = stringResource(R.string.watch_stats_audio),
@@ -660,7 +660,20 @@ private fun LeaderboardMediaRow(
     else -> MaterialTheme.colorScheme.surfaceContainerHighest
   }
 
+  val context = LocalContext.current
   Surface(
+    onClick = {
+      val video = resolveWatchStatsVideo(context, media)
+      if (video != null) {
+        MediaUtils.playFile(
+          source = video,
+          context = context,
+          launchSource = "watch_stats",
+          title = media.title,
+          isAudio = media.isAudio,
+        )
+      }
+    },
     shape = rememberConnectedShape(index, itemCount, ConnectedLayout.Vertical),
     color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.5f),
     modifier = Modifier.fillMaxWidth(),
@@ -797,7 +810,7 @@ private fun resolveWatchStatsVideo(
   val source =
     media.sourceUri
       ?.takeIf(String::isNotBlank)
-      ?: findLegacyMediaUri(context, media.title)?.toString()
+      ?: findLegacyMediaUri(context, media.title, isAudio = media.isAudio)?.toString()
       ?: return null
 
   val parsed = runCatching { Uri.parse(source) }.getOrNull()
@@ -839,6 +852,7 @@ internal fun isWatchMediaAudio(key: String, media: WatchMediaStats): Boolean {
       ext in FileTypeUtils.AUDIO_EXTENSIONS ||
         s.contains("/audio/", ignoreCase = true) ||
         s.contains("audio%3A", ignoreCase = true) ||
+        s.contains("/music/", ignoreCase = true) ||
         s.contains("includeItemTypes=Audio", ignoreCase = true) ||
         HttpUtils.isMusicStreamingUrl(s)
     }) return true
@@ -846,22 +860,23 @@ internal fun isWatchMediaAudio(key: String, media: WatchMediaStats): Boolean {
 }
 
 /**
- * Older watch_stats.json entries predate sourceUri. Recover a local video by its display name so
+ * Older watch_stats.json entries predate sourceUri. Recover a local video/audio by its display name so
  * those rows can get thumbnails immediately instead of waiting for the item to be played again.
  */
 private fun findLegacyMediaUri(
   context: Context,
   title: String,
+  isAudio: Boolean = false,
 ): Uri? {
   val displayName = title.substringAfterLast('/').substringAfterLast('\\').trim()
   if (displayName.isBlank()) return null
 
   val resolver = context.contentResolver
-  val contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+  val contentUri = if (isAudio) MediaStore.Audio.Media.EXTERNAL_CONTENT_URI else MediaStore.Video.Media.EXTERNAL_CONTENT_URI
   val projection =
     arrayOf(
-      MediaStore.Video.Media._ID,
-      MediaStore.Video.Media.DISPLAY_NAME,
+      MediaStore.MediaColumns._ID,
+      MediaStore.MediaColumns.DISPLAY_NAME,
     )
 
   fun query(selection: String, argument: String): Uri? =
