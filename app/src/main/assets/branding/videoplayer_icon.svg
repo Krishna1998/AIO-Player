@@ -1,29 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
   <defs>
-    <!-- Ferrari Scarlet Depth Radial Gradient -->
-    <radialGradient id="ferrari_grad" cx="45%" cy="35%" r="65%">
-      <stop offset="0%" stop-color="#ff1a40"/>
-      <stop offset="55%" stop-color="#e1062b"/>
-      <stop offset="100%" stop-color="#99001a"/>
+    <!-- Velvet Cabernet Depth Radial Gradient -->
+    <radialGradient id="cabernet_grad" cx="45%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#4F0B1A"/>
+      <stop offset="55%" stop-color="#380812"/>
+      <stop offset="100%" stop-color="#1C0206"/>
     </radialGradient>
   </defs>
 
-  <!-- Ferrari Scarlet Squircle Canvas for App Icon / GitHub README -->
-  <rect width="512" height="512" rx="116" fill="url(#ferrari_grad)"/>
+  <!-- Velvet Cabernet Squircle Canvas for App Icon / GitHub README -->
+  <rect width="512" height="512" rx="116" fill="url(#cabernet_grad)"/>
 
-  <!-- Centered Sonic Prism Emblem -->
-  <g transform="translate(256, 256)">
-    <!-- Circular Acoustic Groove -->
-    <path d="M 0.0,-135.0 A 135,135 0 0,1 116.2,-68.7 M 128.5,-41.4 A 135,135 0 0,1 132.1,27.7 M 126.6,46.9 A 135,135 0 0,1 24.0,132.9 M -5.9,134.9 A 135,135 0 0,1 -72.0,114.2 M -88.0,102.4 A 135,135 0 0,1 -132.9,-23.7 M -124.4,-52.4 A 135,135 0 0,1 -82.1,-107.2 M -65.4,-118.1 A 135,135 0 0,1 0.0,-135.0" fill="none" stroke="#08080c" stroke-width="16" stroke-linecap="round"/>
+  <!-- Centered Master Vinyl Aperture Emblem (Diamond White) -->
+  <g id="master_vinyl_aperture">
+    <!-- Outer Vinyl Rim Ring -->
+    <path fill="#FFFFFF" fill-rule="evenodd" d="M 256,106 A 150,150 0 1,0 256,406 A 150,150 0 1,0 256,106 M 256,141 A 115,115 0 1,1 256,371 A 115,115 0 1,1 256,141 Z"/>
 
-    <!-- Jet Black Playhead Base with Crisp White Border -->
-    <path d="M -50,-85 L 85,0 L -50,85 Z" fill="#090a0f" stroke="#ffffff" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
-
-    <!-- White Spectrum Frequency Bars -->
-    <path d="M -26,-51 L -26,51" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
-    <path d="M -8,-68 L -8,68" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
-    <path d="M 10,-42 L 10,42" stroke="#ffffff" stroke-width="8" stroke-linecap="round" stroke-opacity="0.9"/>
-    <path d="M 28,-24 L 28,24" stroke="#ffffff" stroke-width="8" stroke-linecap="round" stroke-opacity="0.8"/>
-    <path d="M 46,-8 L 46,8" stroke="#ffffff" stroke-width="8" stroke-linecap="round" stroke-opacity="0.7"/>
+    <!-- Inner Disc Core with Negative Space Play Triangle Cutout -->
+    <path fill="#FFFFFF" fill-opacity="0.92" fill-rule="evenodd" d="M 256,166 A 90,90 0 1,0 256,346 A 90,90 0 1,0 256,166 Z M 230,196 L 316,256 L 230,316 Z"/>
   </g>
 </svg>
