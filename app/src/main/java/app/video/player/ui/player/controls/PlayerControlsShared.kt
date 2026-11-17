@@ -383,10 +383,9 @@ fun RenderPlayerButton(
                   .height(buttonSize)
                   .outsideShadow(CircleShape, radius = 4.dp)
                   .clip(CircleShape)
-                  .background(if (borderless) Color.Transparent else speedGlassFill, CircleShape)
                   .then(
                     if (borderless) Modifier
-                    else Modifier.border(1.dp, speedSpecularBorder, CircleShape),
+                    else Modifier.background(speedGlassFill, CircleShape).border(1.dp, speedSpecularBorder, CircleShape),
                   )
                   .combinedClickable(
                     enabled = !configOwned,
