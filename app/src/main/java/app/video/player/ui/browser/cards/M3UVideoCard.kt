@@ -227,7 +227,7 @@ fun M3UVideoCard(
     }
   }
 
-  val maxLines = if (displayConfig.unlimitedNameLines) Int.MAX_VALUE else 2
+  val maxLines = if (displayConfig.unlimitedNameLines) Int.MAX_VALUE else 1
   val displayTitle =
     if (sourceLabel != null && !displayConfig.showExtensionField) {
       if (video?.isAudio == true && video.title.isNotBlank()) video.title else FileTypeUtils.stripExtension(title)

@@ -253,7 +253,7 @@ fun FolderCard(
     }
   }
 
-  val maxLines = if (unlimitedNameLines) Int.MAX_VALUE else 2
+  val maxLines = if (unlimitedNameLines) Int.MAX_VALUE else 1
   val selectionContainerColor = animatedSelectionColor(isSelected)
   val showSelectionBadge = isSelected || selectionContainerColor.alpha > 0.001f
 

@@ -91,7 +91,7 @@ fun NetworkVideoCard(
   val centerGridTitles by browserPreferences.centerGridTitles.collectAsState()
 
   val displayThumb = false
-  val maxLines = if (unlimitedNameLines) Int.MAX_VALUE else 2
+  val maxLines = if (unlimitedNameLines) Int.MAX_VALUE else 1
 
   val thumbSizeDp = 128.dp
   val density = LocalDensity.current

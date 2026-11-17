@@ -86,7 +86,7 @@ fun NetworkImageCard(
   val showDateChip by browserPreferences.showDateChip.collectAsState()
   val centerGridTitles by browserPreferences.centerGridTitles.collectAsState()
   val unlimitedNameLines by appearancePreferences.unlimitedNameLines.collectAsState()
-  val maxLines = if (unlimitedNameLines) Int.MAX_VALUE else 2
+  val maxLines = if (unlimitedNameLines) Int.MAX_VALUE else 1
   val displayName = if (showExtensionField) file.name else file.name.substringBeforeLast('.', file.name)
   val displayThumb = false
 

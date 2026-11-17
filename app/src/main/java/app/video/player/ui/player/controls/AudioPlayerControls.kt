@@ -1144,40 +1144,6 @@ fun AudioPlayerControls(
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-          if (activeSleepTimerSeconds > 0) {
-            Surface(
-              onClick = { onOpenSheet(if (isAudiobook) Sheets.AudiobookSleepTimer else Sheets.SleepTimer) },
-              shape = CircleShape,
-              color = MaterialTheme.colorScheme.primaryContainer,
-              contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            ) {
-              Row(
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-              ) {
-                Icon(
-                  imageVector = Icons.RoundedFilled.Timer,
-                  contentDescription = stringResource(R.string.timer_title),
-                  modifier = Modifier.size(16.dp),
-                )
-                Text(
-                  text = DateUtils.formatElapsedTime(activeSleepTimerSeconds.toLong()),
-                  style = MaterialTheme.typography.labelSmall,
-                  fontWeight = FontWeight.Bold,
-                )
-              }
-            }
-          } else {
-            ReactiveIconButton(onClick = { onOpenSheet(if (isAudiobook) Sheets.AudiobookSleepTimer else Sheets.SleepTimer) }) {
-              Icon(
-                imageVector = Icons.RoundedFilled.Timer,
-                contentDescription = stringResource(R.string.timer_title),
-                tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.size(26.dp),
-              )
-            }
-          }
           ReactiveIconButton(onClick = { onOpenSheet(Sheets.AudioProperties) }) {
             Icon(
               imageVector = Icons.RoundedFilled.Info,
@@ -1629,6 +1595,45 @@ fun AudioPlayerControls(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
           ) {
+            // Sleep Timer Button (left of Favorite)
+            if (activeSleepTimerSeconds > 0) {
+              Surface(
+                onClick = { onOpenSheet(if (isAudiobook) Sheets.AudiobookSleepTimer else Sheets.SleepTimer) },
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+              ) {
+                Row(
+                  modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                  Icon(
+                    imageVector = Icons.RoundedFilled.Timer,
+                    contentDescription = stringResource(R.string.timer_title),
+                    modifier = Modifier.size(16.dp),
+                  )
+                  Text(
+                    text = DateUtils.formatElapsedTime(activeSleepTimerSeconds.toLong()),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                  )
+                }
+              }
+            } else {
+              ReactiveIconButton(
+                onClick = { onOpenSheet(if (isAudiobook) Sheets.AudiobookSleepTimer else Sheets.SleepTimer) },
+                modifier = Modifier.size(40.dp),
+              ) {
+                Icon(
+                  imageVector = Icons.RoundedFilled.Timer,
+                  contentDescription = stringResource(R.string.timer_title),
+                  tint = MaterialTheme.colorScheme.onSurface,
+                  modifier = Modifier.size(26.dp),
+                )
+              }
+            }
+
             // Favorite Button (right before Add to Playlist)
             ReactiveIconButton(
               onClick = {
@@ -2128,13 +2133,8 @@ fun AudioPlayerControls(
 
     val playbackModeButtons = @Composable {
       if (isAudiobook) {
-        val timer by app.video.player.ui.player.AudiobookPlayback.timer.collectAsStateWithLifecycle()
         ReactiveIconButton(onClick = { onOpenSheet(Sheets.AudiobookRewind) }, modifier = Modifier.size(40.dp)) {
           Icon(Icons.RoundedFilled.Replay, stringResource(R.string.audiobook_smart_rewind), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
-        ReactiveIconButton(onClick = { onOpenSheet(Sheets.AudiobookSleepTimer) }, modifier = Modifier.size(40.dp)) {
-          Icon(Icons.RoundedFilled.Timer, stringResource(R.string.audiobook_sleep_timer),
-            tint = if (timer != null) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant)
         }
       } else {
         ReactiveIconButton(
@@ -2153,16 +2153,6 @@ fun AudioPlayerControls(
             RepeatMode.ALL -> Icons.RoundedFilled.RepeatOn
           }, null, tint = if (repeatMode != RepeatMode.OFF) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             reduceMotion = AppMotion.playerReducedMotion())
-        }
-        ReactiveIconButton(
-          onClick = { onOpenSheet(Sheets.SleepTimer) },
-          modifier = Modifier.size(40.dp),
-        ) {
-          Icon(
-            imageVector = Icons.RoundedFilled.Timer,
-            contentDescription = stringResource(R.string.timer_title),
-            tint = if (sleepTimerRemaining > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-          )
         }
       }
     }

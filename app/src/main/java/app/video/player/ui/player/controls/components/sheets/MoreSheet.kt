@@ -77,7 +77,7 @@ fun MoreSheet(
   onStartTimer: (Int) -> Unit,
   onDismissRequest: () -> Unit,
   onEnterFiltersPanel: () -> Unit,
-  onEnterLuaScriptsPanel: () -> Unit,
+  onEnterLuaScriptsPanel: (() -> Unit)? = null,
   onEnterEqualizerSheet: (() -> Unit)? = null,
   onEnterSettingsPanel: (() -> Unit)? = null,
   anime4KUiState: Anime4KUiState,
@@ -94,9 +94,6 @@ fun MoreSheet(
 ) {
   val advancedPreferences = koinInject<AdvancedPreferences>()
   val statisticsPage by advancedPreferences.enabledStatisticsPage.collectAsState()
-  val enableLuaScripts by advancedPreferences.enableLuaScripts.collectAsState()
-  val selectedLuaScripts by advancedPreferences.selectedLuaScripts.collectAsState()
-  val mpvConfStorageLocation by advancedPreferences.mpvConfStorageUri.collectAsState()
   val showActionLabels = LocalConfiguration.current.orientation != Configuration.ORIENTATION_PORTRAIT
 
   PlayerSheet(
@@ -194,42 +191,6 @@ fun MoreSheet(
               )
               if (showActionLabels) {
                 Text(text = stringResource(id = R.string.player_sheets_filters_title))
-              }
-            }
-          }
-          TextButton(
-            onClick = onEnterLuaScriptsPanel,
-            enabled = mpvConfStorageLocation.isNotBlank(),
-          ) {
-            Row(
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.extraSmall),
-            ) {
-              Icon(
-                imageVector = Icons.RoundedFilled.Code,
-                contentDescription = "Scripts",
-                tint =
-                  if (enableLuaScripts && selectedLuaScripts.isNotEmpty()) {
-                    MaterialTheme.colorScheme.primary
-                  } else {
-                    LocalContentColor.current
-                  },
-              )
-              if (showActionLabels) {
-                Text(
-                  text =
-                    if (selectedLuaScripts.isEmpty()) {
-                      "Scripts"
-                    } else {
-                      "Scripts (${selectedLuaScripts.size})"
-                    },
-                  color =
-                    if (enableLuaScripts && selectedLuaScripts.isNotEmpty()) {
-                      MaterialTheme.colorScheme.primary
-                    } else {
-                      LocalContentColor.current
-                    },
-                )
               }
             }
           }

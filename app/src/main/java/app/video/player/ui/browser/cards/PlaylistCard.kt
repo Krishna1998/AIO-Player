@@ -578,7 +578,7 @@ private fun YouTubePlaylistGridCard(
           style = MaterialTheme.typography.titleMedium,
           color = MaterialTheme.colorScheme.onSurface,
           fontWeight = FontWeight.SemiBold,
-          maxLines = 2,
+          maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
         Spacer(Modifier.height(2.dp))

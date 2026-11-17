@@ -442,7 +442,6 @@ fun PlayerSheets(
         remainingTrackSeconds = viewModel.remainingTrackSeconds(),
         onDismissRequest = onDismissRequest,
         onEnterFiltersPanel = { onOpenPanel(Panels.VideoFilters) },
-        onEnterLuaScriptsPanel = { onOpenPanel(Panels.LuaScripts) },
         onEnterSettingsPanel =
           if (!isTelevision && !isAudioOnly) ({ onOpenPanel(Panels.PlayerSettings) }) else null,
         onEnterEqualizerSheet = { onShowSheet(Sheets.Equalizer) },

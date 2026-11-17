@@ -250,7 +250,7 @@ fun VideoCard(
   // preference observers for every visible item in a grid.
   val thumbnailCacheRevision by koinInject<ThumbnailRepository>().cacheRevision.collectAsState()
   val resolvedUiConfig = uiConfig ?: rememberVideoCardUiConfig()
-  val maxLines = if (resolvedUiConfig.unlimitedNameLines) Int.MAX_VALUE else 2
+  val maxLines = if (resolvedUiConfig.unlimitedNameLines) Int.MAX_VALUE else 1
 
   val showThumbnails = resolvedUiConfig.showThumbnails
   val thumbnailQuality = resolvedUiConfig.thumbnailQuality
