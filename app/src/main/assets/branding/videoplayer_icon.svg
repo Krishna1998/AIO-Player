@@ -14,8 +14,8 @@
   <!-- Stealth Carbon Squircle Canvas for App Icon / GitHub README -->
   <rect width="512" height="512" rx="116" fill="url(#stealth_carbon_grad)"/>
 
-  <!-- Centered Aura Aperture Disc Emblem (Acid Lime #D4FF00 on Stealth Carbon) -->
-  <g id="aura_aperture_disc" filter="url(#lime_glow)">
+  <!-- Centered Aura Aperture Disc Emblem (Acid Lime #D4FF00 on Stealth Carbon, Scaled 87%) -->
+  <g id="aura_aperture_disc" transform="translate(33.28 33.28) scale(0.87)" filter="url(#lime_glow)">
     <!-- Outer Dim Aura Ring -->
     <circle cx="256" cy="256" r="155" fill="none" stroke="#D4FF00" stroke-width="11" stroke-opacity="0.35"/>
     <!-- Inner Solid Disc with Negative-Space Playhead Cutout -->

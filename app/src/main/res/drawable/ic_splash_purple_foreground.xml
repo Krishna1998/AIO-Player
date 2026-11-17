@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Splash-only rendition: native AVD, 288dp canvas, Aura Aperture Disc inside central 160dp splash mask. -->
+<!-- Splash-only rendition: native AVD, 288dp canvas, Aura Aperture Disc (87% scale) inside central 160dp splash mask. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="288dp"
     android:height="288dp"
     android:viewportWidth="512"
     android:viewportHeight="512">
 
-    <!-- Inset for Android 12+ circular system splash masks (66% scale keeps it well within 160dp circle) -->
+    <!-- Inset for Android 12+ circular system splash masks (87% proportional scaling = 0.574) -->
     <group
         android:name="launcher_bounds"
         android:pivotX="256"
         android:pivotY="256"
-        android:scaleX="0.66"
-        android:scaleY="0.66">
+        android:scaleX="0.574"
+        android:scaleY="0.574">
 
         <!-- Outer Dim Aura Ring (Animated Main Aura) -->
         <group

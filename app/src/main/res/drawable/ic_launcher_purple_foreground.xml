@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- V&M Player Flagship Icon: Aura Aperture Disc (Acid Lime on Stealth Carbon) -->
+<!-- V&M Player Flagship Icon: Aura Aperture Disc (Acid Lime on Stealth Carbon) - 87% Scale -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
@@ -9,7 +9,9 @@
     <group
         android:name="aura_aperture_disc"
         android:pivotX="256"
-        android:pivotY="256">
+        android:pivotY="256"
+        android:scaleX="0.87"
+        android:scaleY="0.87">
 
         <!-- Outer Dim Aura Ring (Acid Lime at 35% opacity) -->
         <path

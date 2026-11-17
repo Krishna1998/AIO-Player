@@ -4,8 +4,9 @@ These notes are written in plain English and focus on what changed for real use.
 
 ## 1.0.5
 
-- **Flagship Brand Identity: "Aura Aperture Disc" (Acid Lime on Stealth Carbon):**
+- **Flagship Brand Identity: "Aura Aperture Disc" (Acid Lime on Stealth Carbon at 87% Scale):**
   - Promoted the **Aura Aperture Disc** design as the official default app icon: an ultra-refined luxury vinyl and acoustic aperture silhouette featuring an outer dim aura ring, an inner solid disc, and a flawless negative-space playhead cutout in high-contrast electric **Acid Lime** (`#D4FF00`).
+  - Tuned emblem geometry to **87% scale** (`scaleX="0.87" scaleY="0.87"`), delivering balanced optical breathing room on Android home-screen launchers.
   - Anchored on nocturnal **Stealth Carbon** (`#0E1017`) for striking 14:1 contrast ratio, zero noise, and unmistakable Bang & Olufsen luxury aesthetic.
   - Fully synchronized 1:1 across default adaptive launcher icon (`ic_launcher_purple_foreground`), Android 12+ Animated Splash Screen (`ic_splash_purple_foreground`), Android 13+ Material You monochrome silhouette (`ic_launcher_purple_monochrome` with native `evenOdd` transparency cutout), and project documentation branding (`videoplayer_icon.svg`).
 - **Video & Audio Player Glass UI Architecture Polish:**
