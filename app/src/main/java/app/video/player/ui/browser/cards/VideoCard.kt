@@ -12,6 +12,7 @@ package app.video.player.ui.browser.cards
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,6 +46,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
@@ -364,7 +366,7 @@ fun VideoCard(
           verticalArrangement = if (sourceLabel != null) Arrangement.spacedBy(6.dp) else Arrangement.Top,
         ) {
           val thumbnailRepository = koinInject<ThumbnailRepository>()
-          val aspect = if (video.isAudio) 1f else 16f / 10f
+          val aspect = if (video.isAudio) 1f else 16f / 9f
           // Screens that know their grid-cell dimensions pass them here. This is
           // essential for a one-column grid, whose full-width artwork used to be
           // rendered from a fixed 160 dp thumbnail.
@@ -432,8 +434,18 @@ fun VideoCard(
               Modifier
                 .fillMaxWidth()
                 .aspectRatio(aspect)
-                .clip(AppShapeScale.medium)
+                .clip(AppShapeScale.large)
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .border(
+                  width = 1.dp,
+                  brush = Brush.verticalGradient(
+                    listOf(
+                      Color.White.copy(alpha = 0.12f),
+                      Color.White.copy(alpha = 0.04f),
+                    ),
+                  ),
+                  shape = AppShapeScale.large,
+                )
                 .mediaCardClickable(
                   onClick = onThumbClick,
                   onLongClick = onLongClick,
@@ -460,8 +472,63 @@ fun VideoCard(
                   colorFilter = thumbnailColorFilter,
                 )
               } ?: run {
+                if (video.isAudio) {
+                  Box(
+                    modifier = Modifier
+                      .matchParentSize()
+                      .background(
+                        Brush.radialGradient(
+                          colors = listOf(
+                            MaterialTheme.colorScheme.tertiary.copy(alpha = 0.25f),
+                            MaterialTheme.colorScheme.surfaceContainerHighest,
+                          ),
+                        ),
+                      ),
+                    contentAlignment = Alignment.Center,
+                  ) {
+                    Icon(
+                      Icons.RoundedFilled.Audiotrack,
+                      contentDescription = androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_play),
+                      modifier = Modifier.size(42.dp),
+                      tint = MaterialTheme.colorScheme.tertiary,
+                    )
+                  }
+                } else {
+                  Icon(
+                    Icons.RoundedFilled.PlayArrow,
+                    contentDescription =
+                      androidx.compose.ui.res
+                        .stringResource(app.video.player.R.string.ui_play),
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.secondary,
+                  )
+                }
+              }
+            } else {
+              if (video.isAudio) {
+                Box(
+                  modifier = Modifier
+                    .matchParentSize()
+                    .background(
+                      Brush.radialGradient(
+                        colors = listOf(
+                          MaterialTheme.colorScheme.tertiary.copy(alpha = 0.25f),
+                          MaterialTheme.colorScheme.surfaceContainerHighest,
+                        ),
+                      ),
+                    ),
+                  contentAlignment = Alignment.Center,
+                ) {
+                  Icon(
+                    Icons.RoundedFilled.Audiotrack,
+                    contentDescription = androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_play),
+                    modifier = Modifier.size(42.dp),
+                    tint = MaterialTheme.colorScheme.tertiary,
+                  )
+                }
+              } else {
                 Icon(
-                  if (video.isAudio) Icons.RoundedFilled.Audiotrack else Icons.RoundedFilled.PlayArrow,
+                  Icons.RoundedFilled.PlayArrow,
                   contentDescription =
                     androidx.compose.ui.res
                       .stringResource(app.video.player.R.string.ui_play),
@@ -469,16 +536,22 @@ fun VideoCard(
                   tint = MaterialTheme.colorScheme.secondary,
                 )
               }
-            } else {
-              Icon(
-                if (video.isAudio) Icons.RoundedFilled.Audiotrack else Icons.RoundedFilled.PlayArrow,
-                contentDescription =
-                  androidx.compose.ui.res
-                    .stringResource(app.video.player.R.string.ui_play),
-                modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colorScheme.secondary,
-              )
             }
+
+            // Subtle dark bottom gradient vignette
+            Box(
+              modifier = Modifier
+                .matchParentSize()
+                .background(
+                  Brush.verticalGradient(
+                    listOf(
+                      Color.Transparent,
+                      Color.Black.copy(alpha = 0.15f),
+                      Color.Black.copy(alpha = 0.68f),
+                    ),
+                  ),
+                ),
+            )
 
             VideoTopStartBadges(
               // The pin always stays visible, including on a selected card: it says the video is
@@ -520,12 +593,12 @@ fun VideoCard(
                   Modifier
                     .align(Alignment.BottomEnd)
                     .padding(6.dp)
-                      .cardOverlay()
-                    .padding(horizontal = 6.dp, vertical = 2.dp),
+                    .cardOverlay(shape = AppShapeScale.small)
+                    .padding(horizontal = 7.dp, vertical = 2.5.dp),
               ) {
                 Text(
                   text = video.durationFormatted,
-                  style = MaterialTheme.typography.labelSmall,
+                  style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                   color = Color.White,
                 )
               }
@@ -539,12 +612,12 @@ fun VideoCard(
                   Modifier
                     .align(Alignment.BottomStart)
                     .padding(6.dp)
-                    .cardOverlay()
-                    .padding(horizontal = 6.dp, vertical = 2.dp),
+                    .cardOverlay(shape = AppShapeScale.small)
+                    .padding(horizontal = 7.dp, vertical = 2.5.dp),
               ) {
                 Text(
                   text = displayResolution,
-                  style = MaterialTheme.typography.labelSmall,
+                  style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                   color = Color.White,
                 )
               }
@@ -565,7 +638,14 @@ fun VideoCard(
                     Modifier
                       .fillMaxHeight()
                       .fillMaxWidth(progressPercentage)
-                      .background(MaterialTheme.colorScheme.primary),
+                      .background(
+                        Brush.horizontalGradient(
+                          listOf(
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.tertiary,
+                          ),
+                        ),
+                      ),
                 )
               }
             }
@@ -778,8 +858,18 @@ fun VideoCard(
               Modifier
                 .width(thumbWidthDp)
                 .aspectRatio(aspect)
-                .clip(AppShapeScale.medium)
+                .clip(AppShapeScale.large)
                 .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                .border(
+                  width = 1.dp,
+                  brush = Brush.verticalGradient(
+                    listOf(
+                      Color.White.copy(alpha = 0.12f),
+                      Color.White.copy(alpha = 0.04f),
+                    ),
+                  ),
+                  shape = AppShapeScale.large,
+                )
                 .mediaCardClickable(
                   onClick = onThumbClick,
                   onLongClick = onLongClick,
@@ -806,6 +896,61 @@ fun VideoCard(
                   colorFilter = thumbnailColorFilter,
                 )
               } ?: run {
+                if (video.isAudio) {
+                  Box(
+                    modifier = Modifier
+                      .matchParentSize()
+                      .background(
+                        Brush.radialGradient(
+                          colors = listOf(
+                            MaterialTheme.colorScheme.tertiary.copy(alpha = 0.25f),
+                            MaterialTheme.colorScheme.surfaceContainerHighest,
+                          ),
+                        ),
+                      ),
+                    contentAlignment = Alignment.Center,
+                  ) {
+                    Icon(
+                      Icons.RoundedFilled.Audiotrack,
+                      contentDescription = androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_play),
+                      modifier = Modifier.size(36.dp),
+                      tint = MaterialTheme.colorScheme.tertiary,
+                    )
+                  }
+                } else {
+                  Icon(
+                    if (video.isAudio) Icons.RoundedFilled.Audiotrack else Icons.RoundedFilled.PlayArrow,
+                    contentDescription =
+                      androidx.compose.ui.res
+                        .stringResource(app.video.player.R.string.ui_play),
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.secondary,
+                  )
+                }
+              }
+            } else {
+              if (video.isAudio) {
+                Box(
+                  modifier = Modifier
+                    .matchParentSize()
+                    .background(
+                      Brush.radialGradient(
+                        colors = listOf(
+                          MaterialTheme.colorScheme.tertiary.copy(alpha = 0.25f),
+                          MaterialTheme.colorScheme.surfaceContainerHighest,
+                        ),
+                      ),
+                    ),
+                  contentAlignment = Alignment.Center,
+                ) {
+                  Icon(
+                    Icons.RoundedFilled.Audiotrack,
+                    contentDescription = androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_play),
+                    modifier = Modifier.size(36.dp),
+                    tint = MaterialTheme.colorScheme.tertiary,
+                  )
+                }
+              } else {
                 Icon(
                   if (video.isAudio) Icons.RoundedFilled.Audiotrack else Icons.RoundedFilled.PlayArrow,
                   contentDescription =
@@ -815,15 +960,6 @@ fun VideoCard(
                   tint = MaterialTheme.colorScheme.secondary,
                 )
               }
-            } else {
-              Icon(
-                if (video.isAudio) Icons.RoundedFilled.Audiotrack else Icons.RoundedFilled.PlayArrow,
-                contentDescription =
-                  androidx.compose.ui.res
-                    .stringResource(app.video.player.R.string.ui_play),
-                modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colorScheme.secondary,
-              )
             }
 
             VideoTopStartBadges(
@@ -852,12 +988,12 @@ fun VideoCard(
                   Modifier
                     .align(Alignment.BottomEnd)
                     .padding(6.dp)
-                      .cardOverlay()
-                    .padding(horizontal = 6.dp, vertical = 2.dp),
+                    .cardOverlay(shape = AppShapeScale.small)
+                    .padding(horizontal = 7.dp, vertical = 2.5.dp),
               ) {
                 Text(
                   text = video.durationFormatted,
-                  style = MaterialTheme.typography.labelSmall,
+                  style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                   color = Color.White,
                 )
               }
@@ -885,7 +1021,14 @@ fun VideoCard(
                     Modifier
                       .fillMaxHeight()
                       .fillMaxWidth(progressPercentage)
-                      .background(MaterialTheme.colorScheme.primary),
+                      .background(
+                        Brush.horizontalGradient(
+                          listOf(
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.tertiary,
+                          ),
+                        ),
+                      ),
                 )
               }
             }

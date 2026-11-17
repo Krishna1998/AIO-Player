@@ -21,10 +21,9 @@ import androidx.compose.ui.unit.dp
 import app.video.player.ui.theme.AppShapeScale
 
 internal fun Modifier.cardOverlay(
-  shape: Shape = AppShapeScale.extraSmall,
-  containerColor: Color = Color.Black.copy(alpha = 0.68f),
+  shape: Shape = AppShapeScale.small,
+  containerColor: Color = Color.Black.copy(alpha = 0.62f),
 ): Modifier =
-  // A shadow shows through a see-through fill as a darker inner box, so only opaque fills get one.
   (if (containerColor.alpha >= 1f) shadow(elevation = 3.dp, shape = shape, clip = false) else this)
     .clip(shape)
     .background(containerColor)
@@ -32,8 +31,8 @@ internal fun Modifier.cardOverlay(
       width = 0.75.dp,
       brush = Brush.verticalGradient(
         listOf(
-          Color.White.copy(alpha = 0.22f),
-          Color.White.copy(alpha = 0.05f),
+          Color.White.copy(alpha = 0.25f),
+          Color.White.copy(alpha = 0.08f),
         ),
       ),
       shape = shape,

@@ -10,6 +10,7 @@
 package app.video.player.ui.browser.cards
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -337,7 +339,7 @@ fun FolderCard(
               .onSizeChanged { size -> onGridContentHeightChanged?.invoke(size.height) },
           horizontalAlignment = horizontalAlignment,
         ) {
-          val aspect = 20f / 17f
+          val aspect = 16f / 10f
 
           Box(
             modifier =
@@ -345,7 +347,7 @@ fun FolderCard(
                 .fillMaxWidth()
                 .aspectRatio(aspect)
                 .onSizeChanged { thumbnailSize = it }
-                .tvFocusHighlight(AppShapeScale.medium, focusedScale = 1.03f)
+                .tvFocusHighlight(AppShapeScale.large, focusedScale = 1.03f)
                 .mediaCardClickable(
                   onClick = onThumbClick,
                   onLongClick = onLongClick,
@@ -354,25 +356,119 @@ fun FolderCard(
           ) {
             val folderImageBitmap = remember(folderThumbnail) { folderThumbnail?.asImageBitmap() }
             val resolvedThumbnail = thumbnail ?: folderImageBitmap.takeIf { showFolderThumbnails }
-            if (thumbnail == null && showFolderThumbnails && folderPreviewFrames.size > 1 &&
-              folderPreviewFrames.any { it != null }) {
-              FolderPreviewMosaic(folderPreviewFrames, Modifier.matchParentSize().clip(AppShapeScale.medium))
+            val hasPreviewMosaic = thumbnail == null && showFolderThumbnails && folderPreviewFrames.size > 1 &&
+              folderPreviewFrames.any { it != null }
+
+            if (hasPreviewMosaic) {
+              FolderPreviewMosaic(folderPreviewFrames, Modifier.matchParentSize().clip(AppShapeScale.large))
+              Box(
+                modifier = Modifier
+                  .matchParentSize()
+                  .background(
+                    Brush.verticalGradient(
+                      listOf(
+                        Color.Transparent,
+                        Color.Black.copy(alpha = 0.2f),
+                        Color.Black.copy(alpha = 0.72f),
+                      ),
+                    ),
+                  ),
+              )
             } else if (resolvedThumbnail != null) {
               androidx.compose.foundation.Image(
                 bitmap = resolvedThumbnail,
                 contentDescription = null,
-                modifier = Modifier.matchParentSize().clip(AppShapeScale.medium),
+                modifier = Modifier.matchParentSize().clip(AppShapeScale.large),
                 contentScale = ContentScale.Crop,
               )
-            } else {
-              Icon(
-                customIcon ?: Icons.RoundedFilled.Folder,
-                contentDescription =
-                  androidx.compose.ui.res
-                    .stringResource(app.video.player.R.string.ui_folder),
-                modifier = placeholderIconSize?.let { Modifier.size(it) } ?: Modifier.fillMaxWidth().aspectRatio(aspect),
-                tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+              Box(
+                modifier = Modifier
+                  .matchParentSize()
+                  .background(
+                    Brush.verticalGradient(
+                      listOf(
+                        Color.Transparent,
+                        Color.Black.copy(alpha = 0.2f),
+                        Color.Black.copy(alpha = 0.72f),
+                      ),
+                    ),
+                  ),
               )
+            } else {
+              Box(
+                modifier = Modifier
+                  .matchParentSize()
+                  .clip(AppShapeScale.large)
+                  .background(
+                    Brush.radialGradient(
+                      colors = listOf(
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.16f),
+                        MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.5f),
+                      ),
+                    ),
+                  )
+                  .border(
+                    width = 1.dp,
+                    brush = Brush.verticalGradient(
+                      listOf(
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
+                        Color.White.copy(alpha = 0.06f),
+                      ),
+                    ),
+                    shape = AppShapeScale.large,
+                  ),
+                contentAlignment = Alignment.Center,
+              ) {
+                // 3D Depth stacked shadow
+                Box(
+                  modifier = Modifier
+                    .size(50.dp)
+                    .rotate(4f)
+                    .clip(AppShapeScale.medium)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)),
+                )
+                // Front folder tile
+                Box(
+                  modifier = Modifier
+                    .size(50.dp)
+                    .clip(AppShapeScale.medium)
+                    .background(
+                      Brush.linearGradient(
+                        colors = listOf(
+                          MaterialTheme.colorScheme.primaryContainer,
+                          MaterialTheme.colorScheme.surfaceContainerHighest,
+                        ),
+                      ),
+                    )
+                    .border(1.dp, Color.White.copy(alpha = 0.15f), AppShapeScale.medium),
+                  contentAlignment = Alignment.Center,
+                ) {
+                  Icon(
+                    customIcon ?: if (isAudioOnly) Icons.RoundedFilled.Audiotrack else Icons.RoundedFilled.Folder,
+                    contentDescription = androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_folder),
+                    modifier = Modifier.size(26.dp),
+                    tint = MaterialTheme.colorScheme.primary,
+                  )
+                }
+              }
+            }
+
+            // Top-Start floating glyph pill when thumbnails exist
+            if ((resolvedThumbnail != null || hasPreviewMosaic) && !showSelectionBadge) {
+              Box(
+                modifier = Modifier
+                  .align(Alignment.TopStart)
+                  .padding(6.dp)
+                  .cardOverlay(shape = AppShapeScale.small)
+                  .padding(horizontal = 6.dp, vertical = 3.dp),
+              ) {
+                Icon(
+                  if (isAudioOnly) Icons.RoundedFilled.Audiotrack else Icons.RoundedFilled.Folder,
+                  contentDescription = null,
+                  modifier = Modifier.size(12.dp),
+                  tint = MaterialTheme.colorScheme.primary,
+                )
+              }
             }
 
             if (newVideoCount > 0 && !showSelectionBadge) {
@@ -381,7 +477,7 @@ fun FolderCard(
                   Modifier
                     .align(Alignment.TopEnd)
                     .padding(6.dp)
-                    .cardOverlay(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+                    .cardOverlay(containerColor = MaterialTheme.colorScheme.tertiaryContainer, shape = AppShapeScale.small)
                     .padding(horizontal = 6.dp, vertical = 2.dp),
               ) {
                 Text(
@@ -391,6 +487,21 @@ fun FolderCard(
                       fontWeight = FontWeight.Bold,
                     ),
                   color = MaterialTheme.colorScheme.onTertiaryContainer,
+                )
+              }
+            } else if (folder.videoCount > 0 && !showSelectionBadge) {
+              Box(
+                modifier =
+                  Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(6.dp)
+                    .cardOverlay(shape = AppShapeScale.small)
+                    .padding(horizontal = 7.dp, vertical = 2.dp),
+              ) {
+                Text(
+                  text = "${folder.videoCount}",
+                  style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                  color = Color.White,
                 )
               }
             }
@@ -412,23 +523,23 @@ fun FolderCard(
                   Modifier
                     .align(Alignment.BottomEnd)
                     .padding(6.dp)
-                      .cardOverlay()
+                    .cardOverlay(shape = AppShapeScale.small)
                     .padding(horizontal = 6.dp, vertical = 2.dp),
               ) {
                 Text(
                   text = formatDuration(folder.totalDuration),
-                  style = MaterialTheme.typography.labelSmall,
+                  style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                   color = Color.White,
                 )
               }
             }
           }
 
-          Spacer(modifier = Modifier.height(4.dp))
+          Spacer(modifier = Modifier.height(6.dp))
 
           Text(
             folder.name,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
             color =
               when {
                 isActive -> MaterialTheme.colorScheme.primary
@@ -445,20 +556,40 @@ fun FolderCard(
               },
           )
 
-          if (showTotalVideosChip && folder.videoCount > 0) {
-            Text(
-              androidx.compose.ui.res.pluralStringResource(
-                when {
-                  isAudioOnly -> R.plurals.folder_song_count
-                  includeAudio -> R.plurals.folder_media_item_count
-                  else -> R.plurals.folder_video_count
-                },
-                folder.videoCount,
-                folder.videoCount,
-              ),
-              style = MaterialTheme.typography.labelSmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant.onWallpaper(),
-            )
+          Row(
+            modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = if (centerGridTitles) Arrangement.Center else Arrangement.spacedBy(4.dp),
+          ) {
+            if (showTotalVideosChip && folder.videoCount > 0) {
+              Text(
+                androidx.compose.ui.res.pluralStringResource(
+                  when {
+                    isAudioOnly -> R.plurals.folder_song_count
+                    includeAudio -> R.plurals.folder_media_item_count
+                    else -> R.plurals.folder_video_count
+                  },
+                  folder.videoCount,
+                  folder.videoCount,
+                ),
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
+                color = MaterialTheme.colorScheme.primary,
+              )
+            }
+            if (showTotalSizeChip && folder.totalSize > 0) {
+              if (showTotalVideosChip && folder.videoCount > 0) {
+                Text(
+                  "•",
+                  style = MaterialTheme.typography.labelSmall,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                )
+              }
+              Text(
+                formatFileSize(folder.totalSize),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.onWallpaper(),
+              )
+            }
           }
           if (customChipContent != null) {
             FlowRow(
@@ -481,8 +612,8 @@ fun FolderCard(
           Box(
             modifier =
               Modifier
-                .size(72.dp)
-                .tvFocusHighlight(AppShapeScale.medium, focusedScale = 1.03f)
+                .size(68.dp)
+                .tvFocusHighlight(AppShapeScale.large, focusedScale = 1.03f)
                 .mediaCardClickable(
                   onClick = onThumbClick,
                   onLongClick = onLongClick,
@@ -493,18 +624,41 @@ fun FolderCard(
               androidx.compose.foundation.Image(
                 bitmap = thumbnail,
                 contentDescription = null,
-                modifier = Modifier.matchParentSize().clip(AppShapeScale.medium),
+                modifier = Modifier.matchParentSize().clip(AppShapeScale.large),
                 contentScale = ContentScale.Crop,
               )
             } else {
-              Icon(
-                customIcon ?: Icons.RoundedFilled.Folder,
-                contentDescription =
-                  androidx.compose.ui.res
-                    .stringResource(app.video.player.R.string.ui_folder),
-                modifier = placeholderIconSize?.let { Modifier.size(it) } ?: Modifier.matchParentSize(),
-                tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
-              )
+              Box(
+                modifier = Modifier
+                  .matchParentSize()
+                  .clip(AppShapeScale.large)
+                  .background(
+                    Brush.radialGradient(
+                      colors = listOf(
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.16f),
+                        MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.5f),
+                      ),
+                    ),
+                  )
+                  .border(
+                    width = 1.dp,
+                    brush = Brush.verticalGradient(
+                      listOf(
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
+                        Color.White.copy(alpha = 0.06f),
+                      ),
+                    ),
+                    shape = AppShapeScale.large,
+                  ),
+                contentAlignment = Alignment.Center,
+              ) {
+                Icon(
+                  customIcon ?: if (isAudioOnly) Icons.RoundedFilled.Audiotrack else Icons.RoundedFilled.Folder,
+                  contentDescription = androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_folder),
+                  modifier = Modifier.size(30.dp),
+                  tint = MaterialTheme.colorScheme.primary,
+                )
+              }
             }
 
             // Show new video count badge if folder contains new videos
