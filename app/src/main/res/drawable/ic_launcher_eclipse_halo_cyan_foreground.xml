@@ -10,8 +10,8 @@
         android:name="eclipse_halo_cyan"
         android:pivotX="256"
         android:pivotY="256"
-        android:scaleX="0.87"
-        android:scaleY="0.87">
+        android:scaleX="0.75"
+        android:scaleY="0.75">
 
         <!-- Ethereal Halo Ring (Electric Cyan) -->
         <path
