@@ -5,7 +5,7 @@
 # ⚡ V&M PLAYER ⚡
 ### *Next-Generation, Ultra-Lightweight Video & Audio Engine for Android*
 
-[![Release](https://img.shields.io/badge/Release-v1.0.5-00F5FF?style=for-the-badge&logo=android&logoColor=black)](https://github.com/Krishna1998/Video-Music-Player/releases)
+[![Release](https://img.shields.io/badge/Release-v1.0.6-00F5FF?style=for-the-badge&logo=android&logoColor=black)](https://github.com/Krishna1998/Video-Music-Player/releases)
 [![Android](https://img.shields.io/badge/Android-8.0%2B%20(API%2026%2B)-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com)
 [![Architecture](https://img.shields.io/badge/Arch-arm64--v8a-FF0055?style=for-the-badge&logo=arm&logoColor=white)](https://arm.com)
 [![Engine](https://img.shields.io/badge/Core-mpv%20%2B%20FFmpeg-9D4EDD?style=for-the-badge&logo=cplusplus&logoColor=white)](https://mpv.io)
@@ -68,7 +68,7 @@ Whether decoding 4K HDR10+ anime with complex ASS karaoke subtitles or driving a
 | Feature | State | Description |
 | :--- | :---: | :--- |
 | **Material 3 Expressive** | 🟢 **ACTIVE** | Full dynamic color integration, OLED pure black theme, and expressive typography |
-| **Master Vinyl Aperture Flagship Icon** | 🟢 **ACTIVE** | **NEW:** Audiophile-inspired vinyl aperture emblem in Diamond White on deep Velvet Cabernet (`#380812`) with true negative-space playhead cutout, 1:1 synchronized across launcher, Android 12+ splash, Material You monochrome, and vector branding |
+| **Curated 10-Icon Elite Suite** | 🟢 **ACTIVE** | **NEW:** In-app icon switcher dedicated to 10 futuristic designs on Stealth Carbon: Aura Aperture (Acid Lime default), Stealth Shutter 'V', Kilo-Hertz Monolith, Quantum Aperture, Liquid Acoustic Droplet, Horizon Aero Blades (Crimson), Aura Aperture (Cyan), Eclipse Halo (Cyan), Eclipse Halo (Lime), and Supersonic Split Arrow, tuned to 87% scale with Android 12+ animated splash screens and Material You dynamic theming |
 | **5 Glass UI App Themes** | 🟢 **ACTIVE** | **NEW:** CyberPrism, RossoPrism, AuroraMint, HoloOpal, and SolarAmber theme engine additions with specular frosted glass styling |
 | **Audio Player Liquid Glass** | 🟢 **ACTIVE** | **NEW:** Frosted translucent glass pods, specular top-lit gradient rims, and floating depth shadows across all audio controls |
 | **Top Header Track Counter** | 🟢 **ACTIVE** | **NEW:** Track and chapter counter (`Track X / Y`) relocated to upper side inside top header bar beneath NOW PLAYING |

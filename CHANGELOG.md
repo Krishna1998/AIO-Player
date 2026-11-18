@@ -2,6 +2,26 @@
 
 These notes are written in plain English and focus on what changed for real use.
 
+## 1.0.6
+
+- **Composable Compilation Fix in App Icon Switcher:**
+  - Resolved a Kotlin compiler error (`@Composable invocations can only happen from the context of a @Composable function`) in `AppIconPreferencesScreen.kt` by evaluating `reduceMotion` safely in the composable body rather than inside non-composable `transitionSpec` lambdas.
+- **Exclusive 10-Icon Elite Launcher Suite:**
+  - Dedicated the **App icon** switcher in **Settings → Appearance → App icon** exclusively to the 10 premier flagship and futuristic designs, completely removing all obsolete and legacy icons.
+  - The curated 10-icon collection comprises:
+    1. **Aura Aperture Disc (Acid Lime):** Official default flagship luxury vinyl aperture in Acid Lime (`#D4FF00`).
+    2. **Stealth Shutter 'V':** High-voltage Neon Lime & Cyan apex chevron with internal playhead.
+    3. **Kilo-Hertz Monolith:** Stepped equalizer frequency pillars in Acid Lime ascending into a play apex.
+    4. **Quantum Aperture:** Single-stroke particle accelerator ring emitting a focused play diamond in Electric Cyan.
+    5. **Liquid Acoustic Droplet:** Organic acoustic resonance droplet triggering concentric frosted ripples in Cyber Magenta & Ultraviolet.
+    6. **Horizon Aero Blades (Crimson):** Aerodynamic dual media blades gliding together in Hyper Crimson.
+    7. **Aura Aperture Disc (Cyan):** Flagship audiophile vinyl disc and aperture silhouette rendered in Electric Cyan.
+    8. **Eclipse Halo (Cyan):** Zen architectural glowing halo containing a floating playhead in Electric Cyan.
+    9. **Eclipse Halo (Lime):** Zen architectural glowing halo containing a floating playhead in Acid Lime.
+    10. **Supersonic Split Arrow:** Forward-pointing delta arrow sliced into an angular 'V' intake and rhythmic 'M' vector ripples in Cyber Magenta.
+  - Streamlined the icon picker interface: replaced the 22-background carousel with a direct, responsive 2-column grid of the 10 icons with live 132dp animated previews and instant one-tap switching.
+  - All 10 icons feature 87% scale balance, Android 12+ Animated Splash Screens (`ic_splash_*`), and Android 13+ Material You monochrome dynamic theming (`ic_launcher_*_monochrome`).
+
 ## 1.0.5
 
 - **Flagship Brand Identity: "Aura Aperture Disc" (Acid Lime on Stealth Carbon at 87% Scale):**

@@ -95,6 +95,7 @@ object AppIconPreferencesScreen : Screen {
     var confirming by remember { mutableStateOf<LauncherIcon?>(null) }
     val canApply = pending != current
     val applyInteractionSource = remember { MutableInteractionSource() }
+    val reduceMotion = AppMotion.shouldReduceMotion()
 
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
       current = runCatching { LauncherIconManager.current(context) }.getOrDefault(current)
@@ -133,7 +134,7 @@ object AppIconPreferencesScreen : Screen {
             AnimatedContent(
               targetState = iconName(pending),
               transitionSpec = {
-                val transition = if (AppMotion.shouldReduceMotion()) {
+                val transition = if (reduceMotion) {
                   fadeIn(snap()) togetherWith fadeOut(snap())
                 } else {
                   fadeIn(tween(200)) togetherWith fadeOut(tween(150))
@@ -347,6 +348,7 @@ private fun IconPreview(
   size: Dp,
   modifier: Modifier = Modifier,
 ) {
+  val reduceMotion = AppMotion.shouldReduceMotion()
   val fill = colorResource(background.color)
   Box(
     modifier = modifier
@@ -358,7 +360,7 @@ private fun IconPreview(
     AnimatedContent(
       targetState = mark,
       transitionSpec = {
-        val transition = if (AppMotion.shouldReduceMotion()) {
+        val transition = if (reduceMotion) {
           fadeIn(snap()) togetherWith fadeOut(snap())
         } else {
           (scaleIn(initialScale = 0.6f, animationSpec = spring(dampingRatio = 0.55f, stiffness = 400f)) +
