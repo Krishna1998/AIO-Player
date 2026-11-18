@@ -67,6 +67,7 @@ import app.video.player.ui.preferences.components.ThemePicker
 import app.video.player.ui.preferences.components.ThumbnailParallelismDialog
 import app.video.player.ui.preferences.components.thumbnailParallelismLabel
 import app.video.player.domain.thumbnail.maxThumbnailParallelism
+import app.video.player.ui.theme.AppTheme
 import app.video.player.ui.theme.DarkMode
 import app.video.player.ui.theme.CustomThemeDefinition
 import app.video.player.ui.theme.LocalThemeTransitionState
