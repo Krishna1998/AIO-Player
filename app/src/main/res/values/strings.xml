@@ -193,6 +193,12 @@
   <string name="theme_aurora_mint">Aurora Mint</string>
   <string name="theme_holo_opal">Holo Opal</string>
   <string name="theme_solar_amber">Solar Amber</string>
+  <string name="theme_stealth_acid_lime">Stealth Acid Lime</string>
+  <string name="theme_electric_cyan">Electric Cyan</string>
+  <string name="theme_hyper_crimson">Hyper Crimson</string>
+  <string name="theme_cyber_magenta">Cyber Magenta</string>
+  <string name="theme_quantum_violet">Quantum Violet</string>
+  <string name="theme_solar_gold">Solar Gold</string>
   <!-- Settings Search -->
   <string name="settings_search_hint">Search settings...</string>
   <string name="settings_search_no_results">No settings found</string>
