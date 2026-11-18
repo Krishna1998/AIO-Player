@@ -1266,7 +1266,12 @@ class PlayerActivity :
       when (startBackgroundPlayback()) {
         BackgroundPlaybackStartResult.Started -> {
           pendingBackNavigationBackgroundTransition = true
-          startSheetCollapse()
+          if (isMiniPlayerEnabled()) {
+            startSheetCollapse()
+          } else {
+            isUserFinishing = true
+            finish()
+          }
           completePendingBackgroundHandoff()
         }
         BackgroundPlaybackStartResult.PendingPermission -> {
@@ -2176,7 +2181,8 @@ class PlayerActivity :
 
   /** Reopened from the mini player, still showing its hand-off sheet over the live session. */
   private fun canReturnPendingOpenToMiniPlayer(): Boolean =
-    !mpvInitialized && reusingPlaybackSessionOnLaunch && playerControlsComposed &&
+    isCurrentPlaybackAudio() && isMiniPlayerEnabled() &&
+      !mpvInitialized && reusingPlaybackSessionOnLaunch && playerControlsComposed &&
       MediaPlaybackService.isNotificationOwnerReady()
 
   /**
@@ -3837,13 +3843,7 @@ class PlayerActivity :
     }
   }
 
-  private fun isMiniPlayerEnabled(): Boolean {
-    return if (isCurrentPlaybackAudio()) {
-      true
-    } else {
-      !isTelevision && playerPreferences.enableVideoMiniPlayer.get()
-    }
-  }
+  private fun isMiniPlayerEnabled(): Boolean = isCurrentPlaybackAudio()
 
   private fun isBackgroundPlaybackEnabled(): Boolean =
     if (PlaybackSession.state.value.currentItem?.audiobook != null) true

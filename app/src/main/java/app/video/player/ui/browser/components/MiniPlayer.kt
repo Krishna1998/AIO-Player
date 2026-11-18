@@ -176,8 +176,7 @@ fun MiniPlayer(modifier: Modifier = Modifier) {
       DeclaredPlaybackMediaKind.UNKNOWN -> !hasRealVideo && (hasAlbumArt || tracks.any { it.isAudio })
     }
 
-  val isMiniPlayerAllowed = isAudioOnlyItem ||
-    (enableVideoMiniPlayer && !app.video.player.ui.tv.isTelevision())
+  val isMiniPlayerAllowed = isAudioOnlyItem
 
   // A full-player collapse lands here before the service flips to foreground; showing the mini
   // player only after that would make it pop out and slide back in under the finished morph.
@@ -266,7 +265,7 @@ fun MiniPlayer(modifier: Modifier = Modifier) {
   ) {
     MiniPlayerContent(
       context = context,
-      enableVideoMiniPlayer = enableVideoMiniPlayer,
+      enableVideoMiniPlayer = false,
       isAudioOnlyItem = isAudioOnlyItem,
       hasRealVideo = hasRealVideo,
       detachedPlaybackActive = isServiceRunning && expansionHoldId == null,
