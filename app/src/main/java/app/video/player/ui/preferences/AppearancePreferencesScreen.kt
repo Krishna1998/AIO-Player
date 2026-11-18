@@ -347,7 +347,25 @@ object AppearancePreferencesScreen : Screen {
                   )
 
                   PreferenceCard {
-                  SwitchPreference(
+                    DevicePreference(R.string.pref_app_icon_title) {
+                      ExpressivePreferenceItem {
+                        Preference(
+                          modifier = Modifier.settingsSearchTarget(R.string.pref_app_icon_title),
+                          title = { Text(stringResource(R.string.pref_app_icon_title)) },
+                          summary = {
+                            Text(
+                              stringResource(R.string.pref_app_icon_summary),
+                              color = MaterialTheme.colorScheme.outline,
+                            )
+                          },
+                          onClick = { backstack.navigateTo(AppIconPreferencesScreen) },
+                        )
+                      }
+
+                      PreferenceDivider()
+                    }
+
+                    SwitchPreference(
                     modifier = Modifier.settingsSearchTarget(R.string.pref_appearance_amoled_mode_title),
                     value = amoledMode,
                     onValueChange = { newValue ->
