@@ -731,6 +731,7 @@ fun AudioPlayerControls(
   val audioPreferences = koinInject<AudioPreferences>()
   val appearancePreferences = koinInject<AppearancePreferences>()
   val audioWavySeekbar by audioPreferences.audioWavySeekbar.collectAsState()
+  val animatedAlbumArtwork by audioPreferences.animatedAlbumArtwork.collectAsState()
   val backgroundPlaybackEnabled by audioPreferences.audioBackgroundPlayback.collectAsState()
   val colorScheme = MaterialTheme.colorScheme
   val palette =
@@ -1490,7 +1491,7 @@ fun AudioPlayerControls(
                   bitmap = activeCoverOverride ?: albumArtBitmap,
                   artworkUrl = currentArtworkUri?.takeUnless { isLocalArtworkSource(currentMediaSource) },
                   contentScale = if (isAudiobook) ContentScale.Fit else ContentScale.Crop,
-                  motionArtwork = null,
+                  motionArtwork = if (animatedAlbumArtwork && activeCoverOverride == null) currentAudioPresentation?.motionArtwork else null,
                   isPlaying = isPlaying,
                 )
               }
@@ -2131,8 +2132,8 @@ fun AudioPlayerControls(
         skipSegments = persistentListOf(),
         paused = isPaused,
         seekbarStyle = seekbarStyle,
-        showWavyVisualizer = false,
-        waveFeatures = null,
+        showWavyVisualizer = audioWavySeekbar,
+        waveFeatures = visualizerFeatures.takeIf { audioWavySeekbar },
         wavePalette = visualizerPalette,
         waveSheetOpen = isSheetOpen,
         loopStart = abLoopA?.toFloat()?.plus(bookOffset),
