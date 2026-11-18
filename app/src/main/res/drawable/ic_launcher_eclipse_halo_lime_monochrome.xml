@@ -1,26 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- V&M Player Material You Monochrome: Eclipse Halo (Lime) - 87% Scale -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="512"
-    android:viewportHeight="512">
+<!-- V&M Player Material You Monochrome: Eclipse Halo - 87% Scale -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="512" android:viewportHeight="512">
 
-    <group
-        android:name="eclipse_halo_lime"
-        android:pivotX="256"
-        android:pivotY="256"
-        android:scaleX="0.87"
-        android:scaleY="0.87">
+    <group android:name="eclipse_halo_lime" android:pivotX="256" android:pivotY="256" android:scaleX="0.80" android:scaleY="0.80">
 
-        <path
-            android:strokeColor="#FFFFFFFF"
-            android:strokeWidth="26"
-            android:pathData="M 256,82 A 174,174 0 1,0 256,430 A 174,174 0 1,0 256,82 Z" />
+        <path android:strokeColor="#FFFFFFFF" android:strokeWidth="26" android:pathData="M 256,82 A 174,174 0 1,0 256,430 A 174,174 0 1,0 256,82 Z" />
 
-        <path
-            android:fillColor="#FFFFFFFF"
-            android:pathData="M 220,184 L 343,256 L 220,328 Z" />
+        <path android:fillColor="#FFFFFFFF" android:pathData="M 220,184 L 343,256 L 220,328 Z" />
     </group>
 </vector>
 

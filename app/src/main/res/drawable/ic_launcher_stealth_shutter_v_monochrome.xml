@@ -1,28 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- V&M Player Material You Monochrome: Stealth Shutter 'V' - 87% Scale -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="512"
-    android:viewportHeight="512">
+<!-- V&M Player Material You Monochrome: Stealth Shutter - 87% Scale -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="512" android:viewportHeight="512">
 
-    <group
-        android:name="stealth_shutter_v"
-        android:pivotX="256"
-        android:pivotY="256"
-        android:scaleX="0.87"
-        android:scaleY="0.87">
+    <group android:name="stealth_shutter_v" android:pivotX="256" android:pivotY="256" android:scaleX="0.87" android:scaleY="0.87">
 
-        <path
-            android:strokeColor="#FFFFFFFF"
-            android:strokeWidth="36"
-            android:strokeLineCap="round"
-            android:strokeLineJoin="round"
-            android:pathData="M 136,150 L 256,380 L 376,150" />
+        <path android:strokeColor="#FFFFFFFF" android:strokeWidth="36" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M 136,150 L 256,380 L 376,150" />
 
-        <path
-            android:fillColor="#FFFFFFFF"
-            android:pathData="M 236,210 L 296,256 L 236,302 Z" />
+        <path android:fillColor="#FFFFFFFF" android:pathData="M 236,210 L 296,256 L 236,302 Z" />
     </group>
 </vector>
 

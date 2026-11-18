@@ -2587,15 +2587,15 @@
   <string name="app_icon_bg_cocoa">Cocoa</string>
   <string name="app_icon_bg_wallpaper">Wallpaper colors</string>
 
-  <string name="app_icon_logo_gradient">Aura Aperture (Acid Lime)</string>
-  <string name="app_icon_logo_stealth_shutter_v">Stealth Shutter \'V\'</string>
+  <string name="app_icon_logo_gradient">Aura Aperture</string>
+  <string name="app_icon_logo_stealth_shutter_v">Stealth Shutter</string>
   <string name="app_icon_logo_kilo_hertz_monolith">Kilo-Hertz Monolith</string>
   <string name="app_icon_logo_quantum_aperture">Quantum Aperture</string>
   <string name="app_icon_logo_liquid_acoustic_droplet">Liquid Acoustic Droplet</string>
-  <string name="app_icon_logo_horizon_aero_blades">Horizon Aero Blades (Crimson)</string>
-  <string name="app_icon_logo_aura_aperture_cyan">Aura Aperture (Cyan)</string>
-  <string name="app_icon_logo_eclipse_halo_cyan">Eclipse Halo (Cyan)</string>
-  <string name="app_icon_logo_eclipse_halo_lime">Eclipse Halo (Lime)</string>
+  <string name="app_icon_logo_horizon_aero_blades">Horizon Aero Blades</string>
+  <string name="app_icon_logo_aura_aperture_cyan">Aura Aperture</string>
+  <string name="app_icon_logo_eclipse_halo_cyan">Eclipse Halo</string>
+  <string name="app_icon_logo_eclipse_halo_lime">Eclipse Halo</string>
   <string name="app_icon_logo_supersonic_split_arrow">Supersonic Split Arrow</string>
   <string name="downloads_all">All downloads</string>
   <string name="downloads_attention_section">Needs attention</string>

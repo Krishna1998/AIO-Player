@@ -68,7 +68,7 @@ Whether decoding 4K HDR10+ anime with complex ASS karaoke subtitles or driving a
 | Feature | State | Description |
 | :--- | :---: | :--- |
 | **Material 3 Expressive** | 🟢 **ACTIVE** | Full dynamic color integration, OLED pure black theme, and expressive typography |
-| **Curated 10-Icon Elite Suite** | 🟢 **ACTIVE** | **NEW:** In-app icon switcher dedicated to 10 futuristic designs on Stealth Carbon: Aura Aperture (Acid Lime default), Stealth Shutter 'V', Kilo-Hertz Monolith, Quantum Aperture, Liquid Acoustic Droplet, Horizon Aero Blades (Crimson), Aura Aperture (Cyan), Eclipse Halo (Cyan), Eclipse Halo (Lime), and Supersonic Split Arrow, tuned to 87% scale with Android 12+ animated splash screens and Material You dynamic theming |
+| **Curated 10-Icon Elite Suite** | 🟢 **ACTIVE** | **NEW:** In-app icon switcher dedicated to 10 futuristic designs on Stealth Carbon: Aura Aperture (default), Stealth Shutter, Kilo-Hertz Monolith, Quantum Aperture, Liquid Acoustic Droplet, Horizon Aero Blades, Aura Aperture, Eclipse Halo, Eclipse Halo, and Supersonic Split Arrow, tuned to 87% scale with Android 12+ animated splash screens and Material You dynamic theming |
 | **5 Glass UI App Themes** | 🟢 **ACTIVE** | **NEW:** CyberPrism, RossoPrism, AuroraMint, HoloOpal, and SolarAmber theme engine additions with specular frosted glass styling |
 | **Audio Player Liquid Glass** | 🟢 **ACTIVE** | **NEW:** Frosted translucent glass pods, specular top-lit gradient rims, and floating depth shadows across all audio controls |
 | **Top Header Track Counter** | 🟢 **ACTIVE** | **NEW:** Track and chapter counter (`Track X / Y`) relocated to upper side inside top header bar beneath NOW PLAYING |
