@@ -2887,7 +2887,7 @@
   <string name="lyrics_editor_saved">Lyric edits saved</string>
   <string name="lyrics_editor_restored">Original lyrics restored</string>
   <string name="pref_audio_immersive_artwork_title">Immersive artwork</string>
-  <string name="pref_audio_immersive_artwork_summary">Show edge-to-edge artwork fading into the portrait music player background. Off by default. Switch from the visualizer to the cover to see it.</string>
+  <string name="pref_audio_immersive_artwork_summary">Show ambient blurred cover art filling the music player background behind a floating 3D album card.</string>
   <string name="lyrics_provider_auto">Auto</string>
   <string name="lyrics_provider_auto_with">Auto (%1$s)</string>
   <string name="lyrics_by">Lyrics by %1$s</string>

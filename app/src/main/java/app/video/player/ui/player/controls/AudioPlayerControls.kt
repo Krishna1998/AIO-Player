@@ -141,6 +141,8 @@ import app.video.player.ui.utils.dragElevation
 import app.video.player.ui.utils.rememberReorderFeedback
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.BlurredEdgeTreatment
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.layout.onSizeChanged
@@ -977,6 +979,7 @@ fun AudioPlayerControls(
   }
 
   val ambientModeEnabled by audioPreferences.audioAmbientMode.collectAsState()
+  val immersiveArtworkEnabled by audioPreferences.immersiveArtwork.collectAsState()
 
   val ambientColors by produceState<Pair<Color, Color>?>(
     initialValue = null,
@@ -1049,6 +1052,15 @@ fun AudioPlayerControls(
   // The header keeps the side and top padding the root gives up while the lyrics are flush.
   val headerContentPadding =
     if (flushInPlaceLyrics) Modifier.padding(start = 16.dp, top = 6.dp, end = 16.dp) else Modifier
+
+  val artworkRevision by koinInject<app.video.player.domain.thumbnail.ThumbnailRepository>().cacheRevision.collectAsState()
+  var activeCoverOverride by remember(artworkRevision) { mutableStateOf<Bitmap?>(null) }
+  LaunchedEffect(currentItem?.stableId, albumArtBitmap) {
+    activeCoverOverride = null
+  }
+  val activeAmbientBitmap = activeCoverOverride ?: albumArtBitmap
+  val ambientImageBitmap = remember(activeAmbientBitmap) { activeAmbientBitmap?.asImageBitmap() }
+
   Box(
     modifier =
       modifier
@@ -1075,41 +1087,92 @@ fun AudioPlayerControls(
           },
         )
         .fillMaxSize()
-        .background(MaterialTheme.colorScheme.surface)
-        .drawWithCache {
-          if (ambientModeEnabled && (animatedAmbientTop != Color.Transparent || animatedAmbientBottom != Color.Transparent)) {
-            val topColor = animatedAmbientTop
-            val bottomColor = animatedAmbientBottom
-            val radialGradient = Brush.radialGradient(
-              colors = listOf(
-                topColor,
-                bottomColor,
-                Color.Transparent,
-              ),
-              center = Offset(size.width * 0.5f, size.height * 0.25f),
-              radius = size.width * 1.3f,
-            )
-            val linearGradient = Brush.verticalGradient(
-              colors = listOf(
-                topColor.copy(alpha = topColor.alpha * 0.65f),
-                bottomColor.copy(alpha = bottomColor.alpha * 0.35f),
-                Color.Transparent,
-              ),
-              startY = 0f,
-              endY = size.height * 0.80f,
-            )
-            onDrawBehind {
-              drawRect(radialGradient)
-              drawRect(linearGradient)
-            }
-          } else {
-            onDrawBehind {}
-          }
-        }
-        .windowInsetsPadding(WindowInsets.safeDrawing)
-        .padding(horizontal = if (flushInPlaceLyrics) 0.dp else 16.dp)
-        .padding(top = if (flushInPlaceLyrics) 0.dp else 6.dp, bottom = 12.dp),
+        .background(MaterialTheme.colorScheme.surface),
   ) {
+    // 1. Full-Screen Ambient Blurred Canvas (Option B: Dual-Layer Ambient Canvas)
+    if (immersiveArtworkEnabled && ambientImageBitmap != null) {
+      Box(modifier = Modifier.fillMaxSize()) {
+        Image(
+          bitmap = ambientImageBitmap,
+          contentDescription = null,
+          contentScale = ContentScale.Crop,
+          modifier =
+            Modifier
+              .fillMaxSize()
+              .graphicsLayer {
+                scaleX = 1.30f
+                scaleY = 1.30f
+              }
+              .blur(56.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded),
+        )
+        // High-contrast atmospheric darkening scrims for 100% text and icon legibility
+        Box(
+          modifier =
+            Modifier
+              .fillMaxSize()
+              .background(
+                Brush.verticalGradient(
+                  colors =
+                    listOf(
+                      Color.Black.copy(alpha = 0.42f),
+                      Color.Black.copy(alpha = 0.25f),
+                      Color.Black.copy(alpha = 0.65f),
+                      Color.Black.copy(alpha = 0.85f),
+                    ),
+                ),
+              ),
+        )
+      }
+    }
+
+    // 2. Dynamic Radial Color Mesh (palette-tinted glow)
+    if (ambientModeEnabled && (animatedAmbientTop != Color.Transparent || animatedAmbientBottom != Color.Transparent)) {
+      Box(
+        modifier =
+          Modifier
+            .fillMaxSize()
+            .drawWithCache {
+              val topColor = animatedAmbientTop
+              val bottomColor = animatedAmbientBottom
+              val radialGradient =
+                Brush.radialGradient(
+                  colors =
+                    listOf(
+                      topColor,
+                      bottomColor,
+                      Color.Transparent,
+                    ),
+                  center = Offset(size.width * 0.5f, size.height * 0.25f),
+                  radius = size.width * 1.3f,
+                )
+              val linearGradient =
+                Brush.verticalGradient(
+                  colors =
+                    listOf(
+                      topColor.copy(alpha = topColor.alpha * 0.50f),
+                      bottomColor.copy(alpha = bottomColor.alpha * 0.25f),
+                      Color.Transparent,
+                    ),
+                  startY = 0f,
+                  endY = size.height * 0.80f,
+                )
+              onDrawBehind {
+                drawRect(radialGradient)
+                drawRect(linearGradient)
+              }
+            },
+      )
+    }
+
+    // 3. Foreground Controls and Visualizer Layer
+    Box(
+      modifier =
+        Modifier
+          .fillMaxSize()
+          .windowInsetsPadding(WindowInsets.safeDrawing)
+          .padding(horizontal = if (flushInPlaceLyrics) 0.dp else 16.dp)
+          .padding(top = if (flushInPlaceLyrics) 0.dp else 6.dp, bottom = 12.dp),
+    ) {
     @OptIn(ExperimentalFoundationApi::class)
     val headerBar = @Composable {
       Box(modifier = Modifier.fillMaxWidth()) {
@@ -1219,12 +1282,6 @@ fun AudioPlayerControls(
     val animatableOffsetX = remember { Animatable(0f) }
     val coroutineScope = rememberCoroutineScope()
     val haptic = rememberAppHaptics()
-    val artworkRevision by koinInject<app.video.player.domain.thumbnail.ThumbnailRepository>().cacheRevision.collectAsState()
-    var activeCoverOverride by remember(artworkRevision) { mutableStateOf<Bitmap?>(null) }
-
-    LaunchedEffect(currentItem?.stableId, albumArtBitmap) {
-      activeCoverOverride = null
-    }
 
     val nextItem = remember(filteredPlaylist, mediaPath) {
       val idx = filteredPlaylist.indexOfFirst { it.isPlaying || it.path == mediaPath || it.uri.toString() == mediaPath }
@@ -1286,7 +1343,7 @@ fun AudioPlayerControls(
           Box(
             modifier = Modifier
               .fillMaxHeight()
-              .fillMaxWidth(if (isTabletPortrait) 0.52f else if (isPortrait) 0.88f else 1f)
+              .fillMaxWidth(if (isTabletPortrait) 0.56f else if (isPortrait) 0.92f else 1f)
               .pointerInput(viewModel, mediaPath, containerWidthPx, isAudiobook) {
                 if (isAudiobook || containerWidthPx <= 0f) return@pointerInput
                 detectHorizontalDragGestures(
@@ -1352,7 +1409,19 @@ fun AudioPlayerControls(
                 modifier = Modifier
                   .aspectRatio(1f)
                   .offset { IntOffset((-stride + currentOffset).roundToInt(), 0) }
-                  .clip(coverShape),
+                  .outsideShadow(coverShape, radius = 24.dp, color = Color.Black.copy(alpha = 0.50f), offsetY = 8.dp)
+                  .clip(coverShape)
+                  .border(
+                    1.dp,
+                    Brush.verticalGradient(
+                      listOf(
+                        Color.White.copy(alpha = 0.35f),
+                        Color.White.copy(alpha = 0.10f),
+                        Color.Transparent,
+                      ),
+                    ),
+                    coverShape,
+                  ),
                 shape = coverShape,
                 color = Color.Transparent,
               ) {
@@ -1370,7 +1439,19 @@ fun AudioPlayerControls(
                 modifier = Modifier
                   .aspectRatio(1f)
                   .offset { IntOffset((stride + currentOffset).roundToInt(), 0) }
-                  .clip(coverShape),
+                  .outsideShadow(coverShape, radius = 24.dp, color = Color.Black.copy(alpha = 0.50f), offsetY = 8.dp)
+                  .clip(coverShape)
+                  .border(
+                    1.dp,
+                    Brush.verticalGradient(
+                      listOf(
+                        Color.White.copy(alpha = 0.35f),
+                        Color.White.copy(alpha = 0.10f),
+                        Color.Transparent,
+                      ),
+                    ),
+                    coverShape,
+                  ),
                 shape = coverShape,
                 color = Color.Transparent,
               ) {
@@ -1388,14 +1469,14 @@ fun AudioPlayerControls(
                 Modifier
                   .aspectRatio(1f)
                   .offset { IntOffset(currentOffset.roundToInt(), 0) }
-                  .outsideShadow(coverShape, radius = 16.dp, color = Color.Black.copy(alpha = 0.35f))
+                  .outsideShadow(coverShape, radius = 24.dp, color = Color.Black.copy(alpha = 0.50f), offsetY = 8.dp)
                   .clip(coverShape)
                   .border(
                     1.dp,
                     Brush.verticalGradient(
                       listOf(
-                        Color.White.copy(alpha = 0.30f),
-                        Color.White.copy(alpha = 0.08f),
+                        Color.White.copy(alpha = 0.35f),
+                        Color.White.copy(alpha = 0.10f),
                         Color.Transparent,
                       ),
                     ),
@@ -2533,6 +2614,7 @@ fun AudioPlayerControls(
           bottomActionRow()
         }
       }
+    }
     }
   }
 

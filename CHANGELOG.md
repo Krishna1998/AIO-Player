@@ -4,6 +4,11 @@ These notes are written in plain English and focus on what changed for real use.
 
 ## 2.0.0
 
+- **Dual-Layer Ambient Cover Art Fill (Audio Player):**
+  - Upgraded the audio player background to a full-screen ambient canvas that magnifies and heavily blurs the current album artwork across the entire display from status bar to navigation bar.
+  - Paired with high-contrast vertical darkening scrims to maintain 100% legibility for track titles, lyrics, seekbar, and playback controls.
+  - Elevated the central cover art card to an expanded 92% width hero card with a 24dp floating 3D drop shadow, top specular gradient highlight rim, and 32dp continuous corners.
+  - Enabled immersive artwork by default in audio preferences.
 - **Complete Removal of Mini Player for Video Playback:**
   - When watching a video and navigating back to the home or browse tabs, video playback cleanly finishes and closes without sliding down or morphing into a docked mini player.
   - Video player gesture controls now disable swipe-down-to-mini-player, maintaining mini player docking exclusively for music/audio playback.
