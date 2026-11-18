@@ -209,9 +209,9 @@ fun SeekbarWavyVisualizerOverlay(
   // 3-Tier Amplitudes scaled proportionally with seekbar thickness, with smooth 280ms dampening on pause/scrub
   val density = LocalDensity.current
   val thicknessScale = (effectiveTrackHeightDp.value / 12f).coerceIn(0.75f, 1.25f)
-  val baseAmp1Px = with(density) { 13.0.dp.toPx() } * thicknessScale
-  val baseAmp2Px = with(density) { 10.0.dp.toPx() } * thicknessScale
-  val baseAmp3Px = with(density) { 7.5.dp.toPx() } * thicknessScale
+  val baseAmp1Px = with(density) { 15.0.dp.toPx() } * thicknessScale
+  val baseAmp2Px = with(density) { 13.0.dp.toPx() } * thicknessScale
+  val baseAmp3Px = with(density) { 11.0.dp.toPx() } * thicknessScale
 
   val amp1 by animateFloatAsState(
     targetValue = if (!wavesActive) 0f else baseAmp1Px,
