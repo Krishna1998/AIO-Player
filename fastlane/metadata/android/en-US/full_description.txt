@@ -6,7 +6,6 @@ Video Player is a front-end for the versatile media player mpv, built on the lib
  - Picture-in-Picture (PiP): Continue watching videos while using other apps.
  - Multi-Modal Controls: Includes customizable gestures for controlling volume, brightness, and playback, along with keyboard input support.
  - High-Quality Rendering: Hardware and software video decoding with advanced rendering settings.
- - Network Streaming: Play network streams with the "Open URL" function.
  - File Management: Provides basic file operations like copy, move, rename, and delete.
 
 Video Player aims to enhance the mpv experience by making it more accessible while retaining its flexibility and powerful playback capabilities.
