@@ -145,6 +145,7 @@ import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
@@ -1409,7 +1410,13 @@ fun AudioPlayerControls(
                 modifier = Modifier
                   .aspectRatio(1f)
                   .offset { IntOffset((-stride + currentOffset).roundToInt(), 0) }
-                  .outsideShadow(coverShape, radius = 24.dp, color = Color.Black.copy(alpha = 0.50f), offsetY = 8.dp)
+                  .shadow(
+                    elevation = 24.dp,
+                    shape = coverShape,
+                    clip = false,
+                    ambientColor = Color.Black.copy(alpha = 0.60f),
+                    spotColor = Color.Black.copy(alpha = 0.60f),
+                  )
                   .clip(coverShape)
                   .border(
                     1.dp,
@@ -1423,7 +1430,7 @@ fun AudioPlayerControls(
                     coverShape,
                   ),
                 shape = coverShape,
-                color = Color.Transparent,
+                color = MaterialTheme.colorScheme.surfaceVariant,
               ) {
                 CoverArtCardImage(
                   bitmap = prevCoverBitmap,
@@ -1439,7 +1446,13 @@ fun AudioPlayerControls(
                 modifier = Modifier
                   .aspectRatio(1f)
                   .offset { IntOffset((stride + currentOffset).roundToInt(), 0) }
-                  .outsideShadow(coverShape, radius = 24.dp, color = Color.Black.copy(alpha = 0.50f), offsetY = 8.dp)
+                  .shadow(
+                    elevation = 24.dp,
+                    shape = coverShape,
+                    clip = false,
+                    ambientColor = Color.Black.copy(alpha = 0.60f),
+                    spotColor = Color.Black.copy(alpha = 0.60f),
+                  )
                   .clip(coverShape)
                   .border(
                     1.dp,
@@ -1453,7 +1466,7 @@ fun AudioPlayerControls(
                     coverShape,
                   ),
                 shape = coverShape,
-                color = Color.Transparent,
+                color = MaterialTheme.colorScheme.surfaceVariant,
               ) {
                 CoverArtCardImage(
                   bitmap = nextCoverBitmap,
@@ -1469,7 +1482,13 @@ fun AudioPlayerControls(
                 Modifier
                   .aspectRatio(1f)
                   .offset { IntOffset(currentOffset.roundToInt(), 0) }
-                  .outsideShadow(coverShape, radius = 24.dp, color = Color.Black.copy(alpha = 0.50f), offsetY = 8.dp)
+                  .shadow(
+                    elevation = 24.dp,
+                    shape = coverShape,
+                    clip = false,
+                    ambientColor = Color.Black.copy(alpha = 0.60f),
+                    spotColor = Color.Black.copy(alpha = 0.60f),
+                  )
                   .clip(coverShape)
                   .border(
                     1.dp,
@@ -1483,7 +1502,7 @@ fun AudioPlayerControls(
                     coverShape,
                   ),
               shape = coverShape,
-              color = Color.Transparent,
+              color = MaterialTheme.colorScheme.surfaceVariant,
             ) {
               Box(Modifier.fillMaxSize()) {
                 CoverArtCardImage(
