@@ -22,8 +22,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.math.PI
@@ -166,9 +170,12 @@ internal fun WaveVisualizerOverlay(
     label = "wave_amplitude",
   )
 
-  val lowRibbonPath = remember { Path() }
-  val midRibbonPath = remember { Path() }
-  val highRibbonPath = remember { Path() }
+  val lowFilledPath = remember { Path() }
+  val lowContourPath = remember { Path() }
+  val midFilledPath = remember { Path() }
+  val midContourPath = remember { Path() }
+  val highFilledPath = remember { Path() }
+  val highContourPath = remember { Path() }
   val tones = remember(palette) { ribbonTones(palette) }
 
   Canvas(modifier = modifier) {
@@ -191,13 +198,20 @@ internal fun WaveVisualizerOverlay(
     }
 
     fun drawRibbon(
-      path: Path,
+      filledPath: Path,
+      contourPath: Path,
       color: Color,
       wavelength: Float,
       baseLift: Float,
       phase: Float,
       liftScale: Float,
       beatLift: Float,
+      contourWidth: Float,
+      glowWidth: Float,
+      glowAlpha: Float,
+      bodyTopAlpha: Float,
+      bodyBottomAlpha: Float,
+      hasWhiteHighlight: Boolean = false,
     ) {
       val availableLift = (trackTop - 1.dp.toPx()).coerceAtLeast(0f)
       val lift = min((baseLift * liftScale + beatLift) * amplitudeFraction, availableLift)
@@ -214,19 +228,76 @@ internal fun WaveVisualizerOverlay(
         return trackTop - lift * undulation * envelope
       }
 
-      val step = 1.dp.toPx().coerceAtLeast(1f)
+      val step = 1.5.dp.toPx().coerceAtLeast(1f)
       val baseline = trackTop + min(trackHalf, 1.5.dp.toPx())
-      path.reset()
-      path.moveTo(ribbonStart, baseline)
-      path.lineTo(ribbonStart, ribbonTop(ribbonStart))
+      filledPath.reset()
+      contourPath.reset()
+
+      val startY = ribbonTop(ribbonStart)
+      filledPath.moveTo(ribbonStart, baseline)
+      filledPath.lineTo(ribbonStart, startY)
+      contourPath.moveTo(ribbonStart, startY)
+
       var x = ribbonStart
       while (x < ribbonEnd) {
         x = min(x + step, ribbonEnd)
-        path.lineTo(x, ribbonTop(x))
+        val y = ribbonTop(x)
+        filledPath.lineTo(x, y)
+        contourPath.lineTo(x, y)
       }
-      path.lineTo(ribbonEnd, baseline)
-      path.close()
-      drawPath(path = path, color = color)
+      filledPath.lineTo(ribbonEnd, baseline)
+      filledPath.close()
+
+      // 1. One UI 9.5 Frosted Glass Gradient Body Fill (curtain down to baseline)
+      val topY = trackTop - lift
+      drawPath(
+        path = filledPath,
+        brush = Brush.verticalGradient(
+          colors = listOf(
+            color.copy(alpha = (bodyTopAlpha * amplitudeFraction).coerceIn(0f, 1f)),
+            color.copy(alpha = (bodyBottomAlpha * amplitudeFraction).coerceIn(0f, 1f)),
+          ),
+          startY = topY,
+          endY = baseline,
+        ),
+      )
+
+      // 2. Diffused Luminous Gaussian Glow Halo along wave crests
+      if (glowWidth > 0f && lift > 1.dp.toPx()) {
+        drawPath(
+          path = contourPath,
+          color = color.copy(alpha = (glowAlpha * amplitudeFraction).coerceIn(0f, 1f)),
+          style = Stroke(
+            width = glowWidth,
+            cap = StrokeCap.Round,
+            join = StrokeJoin.Round,
+          ),
+        )
+      }
+
+      // 3. Crisp Luminous Crest Contour Stroke
+      drawPath(
+        path = contourPath,
+        color = color.copy(alpha = (0.95f * amplitudeFraction).coerceIn(0f, 1f)),
+        style = Stroke(
+          width = contourWidth,
+          cap = StrokeCap.Round,
+          join = StrokeJoin.Round,
+        ),
+      )
+
+      // 4. Foreground White Specular Highlight Core for crisp liquid glass reflection
+      if (hasWhiteHighlight && lift > 2.dp.toPx()) {
+        drawPath(
+          path = contourPath,
+          color = Color.White.copy(alpha = (0.65f * amplitudeFraction).coerceIn(0f, 1f)),
+          style = Stroke(
+            width = 1.0.dp.toPx(),
+            cap = StrokeCap.Round,
+            join = StrokeJoin.Round,
+          ),
+        )
+      }
     }
 
     val rearLiftScale = ribbonLiftScale(outputVolume, loudness, lowLevel)
@@ -242,33 +313,57 @@ internal fun WaveVisualizerOverlay(
       )
     val beatImpact = beatPulse * outputVolume
 
-    // Band-specific motion stays ordered rear > middle > front at every volume.
+    // One UI 9.5 Aurora Frosted Glass Veil: 3-tier multi-depth wave curtains
+    // Layer 1: Ambient Deep Bass Veil
     drawRibbon(
-      path = lowRibbonPath,
-      color = tones.bass.copy(alpha = 0.82f),
-      wavelength = 108.dp.toPx(),
-      baseLift = 15.5.dp.toPx(),
+      filledPath = lowFilledPath,
+      contourPath = lowContourPath,
+      color = tones.bass,
+      wavelength = 112.dp.toPx(),
+      baseLift = 17.5.dp.toPx(),
       phase = lowPhase,
       liftScale = rearLiftScale,
       beatLift = 4.dp.toPx() * beatImpact,
+      contourWidth = 1.2.dp.toPx(),
+      glowWidth = 5.0.dp.toPx(),
+      glowAlpha = 0.28f,
+      bodyTopAlpha = 0.28f,
+      bodyBottomAlpha = 0.04f,
     )
+
+    // Layer 2: Harmonic Mid Veil
     drawRibbon(
-      path = midRibbonPath,
-      color = tones.mid.copy(alpha = 0.88f),
-      wavelength = 66.dp.toPx(),
-      baseLift = 12.dp.toPx(),
+      filledPath = midFilledPath,
+      contourPath = midContourPath,
+      color = tones.mid,
+      wavelength = 70.dp.toPx(),
+      baseLift = 13.5.dp.toPx(),
       phase = midPhase,
       liftScale = middleLiftScale,
       beatLift = 3.dp.toPx() * beatImpact,
+      contourWidth = 1.6.dp.toPx(),
+      glowWidth = 6.0.dp.toPx(),
+      glowAlpha = 0.38f,
+      bodyTopAlpha = 0.42f,
+      bodyBottomAlpha = 0.08f,
     )
+
+    // Layer 3: Vibrant Lead Luminous Wave with Specular Core
     drawRibbon(
-      path = highRibbonPath,
+      filledPath = highFilledPath,
+      contourPath = highContourPath,
       color = trackColor,
-      wavelength = 40.dp.toPx(),
-      baseLift = 9.dp.toPx(),
+      wavelength = 44.dp.toPx(),
+      baseLift = 10.dp.toPx(),
       phase = highPhase,
       liftScale = frontLiftScale,
       beatLift = 2.dp.toPx() * beatImpact,
+      contourWidth = 2.0.dp.toPx(),
+      glowWidth = 7.5.dp.toPx(),
+      glowAlpha = 0.48f,
+      bodyTopAlpha = 0.62f,
+      bodyBottomAlpha = 0.14f,
+      hasWhiteHighlight = true,
     )
   }
 }
