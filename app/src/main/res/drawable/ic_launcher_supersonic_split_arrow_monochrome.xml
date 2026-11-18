@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- V&M Player Material You Monochrome: Supersonic Split Arrow - 87% Scale -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <group
+        android:name="supersonic_split_arrow"
+        android:pivotX="256"
+        android:pivotY="256"
+        android:scaleX="0.87"
+        android:scaleY="0.87">
+
+        <path
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="26"
+            android:strokeLineJoin="round"
+            android:pathData="M 123,102 L 430,256 L 123,410 L 195,256 Z" />
+
+        <path
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="20"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M 154,174 L 246,256 L 154,338" />
+
+        <path
+            android:strokeColor="#FFFFFFFF"
+            android:strokeAlpha="0.5"
+            android:strokeWidth="15"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M 266,195 L 317,256 L 266,317 M 328,225 L 379,256 L 328,287" />
+
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M 236,215 L 328,256 L 236,297 Z" />
+    </group>
+</vector>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- V&M Player Icon: Liquid Acoustic Droplet (Cyber Magenta & Ultraviolet) - 87% Scale -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <group
+        android:name="liquid_acoustic_droplet"
+        android:pivotX="256"
+        android:pivotY="256"
+        android:scaleX="0.87"
+        android:scaleY="0.87">
+
+        <!-- Outer Acoustic Ripple Wave -->
+        <path
+            android:strokeColor="#4DFF007F"
+            android:strokeWidth="4"
+            android:pathData="M 96,310 A 160,80 0 1,0 416,310 A 160,80 0 1,0 96,310 Z" />
+
+        <!-- Mid Acoustic Ripple Wave -->
+        <path
+            android:strokeColor="#80FF007F"
+            android:strokeWidth="5"
+            android:pathData="M 136,310 A 120,60 0 1,0 376,310 A 120,60 0 1,0 136,310 Z" />
+
+        <!-- Inner Acoustic Ripple Wave -->
+        <path
+            android:strokeColor="#CCFF007F"
+            android:strokeWidth="6"
+            android:pathData="M 176,310 A 80,40 0 1,0 336,310 A 80,40 0 1,0 176,310 Z" />
+
+        <!-- Ascending Sound Droplet Nucleus -->
+        <path
+            android:pathData="M 256,120 C 256,120 292,185 292,224 C 292,244 276,260 256,260 C 236,260 220,244 220,224 C 220,185 256,120 256,120 Z">
+            <aapt:attr name="android:fillColor">
+                <gradient
+                    android:startX="256"
+                    android:startY="120"
+                    android:endX="256"
+                    android:endY="260"
+                    android:type="linear">
+                    <item android:offset="0.0" android:color="#FFFF007F" />
+                    <item android:offset="1.0" android:color="#FF9B00E8" />
+                </gradient>
+            </aapt:attr>
+        </path>
+
+        <!-- Specular Highlight on Droplet -->
+        <path
+            android:fillColor="#B3FFFFFF"
+            android:pathData="M 244,190 A 8,16 0 1,0 254,206 A 8,16 0 1,0 244,190 Z" />
+
+        <!-- Splash Corona Core -->
+        <path
+            android:fillColor="#FFFF007F"
+            android:pathData="M 226,310 A 30,15 0 1,0 286,310 A 30,15 0 1,0 226,310 Z" />
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M 248,310 A 8,8 0 1,0 264,310 A 8,8 0 1,0 248,310 Z" />
+    </group>
+</vector>

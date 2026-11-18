@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="288dp"
+    android:height="288dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <group
+        android:name="launcher_bounds"
+        android:pivotX="256"
+        android:pivotY="256"
+        android:scaleX="0.574"
+        android:scaleY="0.574">
+
+        <group
+            android:name="logo_main"
+            android:pivotX="256"
+            android:pivotY="256">
+            <path
+                android:strokeColor="#FF00F0FF"
+                android:strokeWidth="24"
+                android:strokeLineCap="round"
+                android:pathData="M 390,178 A 155,155 0 1,0 390,334" />
+            <path
+                android:fillColor="#FF00F0FF"
+                android:pathData="M 382,256 A 18,18 0 1,0 418,256 A 18,18 0 1,0 382,256 Z" />
+        </group>
+
+        <group
+            android:name="logo_tip"
+            android:pivotX="256"
+            android:pivotY="256">
+            <path
+                android:fillColor="#FF00F0FF"
+                android:pathData="M 220,179 L 333,256 L 220,333 Z" />
+        </group>
+    </group>
+</vector>

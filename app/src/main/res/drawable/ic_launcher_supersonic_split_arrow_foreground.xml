@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- V&M Player Icon: Supersonic Split Arrow (Cyber Magenta Delta & Ripple Monogram) - 87% Scale -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <group
+        android:name="supersonic_split_arrow"
+        android:pivotX="256"
+        android:pivotY="256"
+        android:scaleX="0.87"
+        android:scaleY="0.87">
+
+        <!-- Large Arrowhead Perimeter (Cyber Magenta) -->
+        <path
+            android:strokeColor="#FFFF007F"
+            android:strokeWidth="26"
+            android:strokeLineJoin="round"
+            android:pathData="M 123,102 L 430,256 L 123,410 L 195,256 Z" />
+
+        <!-- Internal 'V' Notch -->
+        <path
+            android:strokeColor="#FFFF007F"
+            android:strokeWidth="20"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M 154,174 L 246,256 L 154,338" />
+
+        <!-- Internal 'M' Vector Ripples -->
+        <path
+            android:strokeColor="#FFFF007F"
+            android:strokeAlpha="0.5"
+            android:strokeWidth="15"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M 266,195 L 317,256 L 266,317 M 328,225 L 379,256 L 328,287" />
+
+        <!-- Solid Play Core -->
+        <path
+            android:fillColor="#FFFF007F"
+            android:pathData="M 236,215 L 328,256 L 236,297 Z" />
+    </group>
+</vector>

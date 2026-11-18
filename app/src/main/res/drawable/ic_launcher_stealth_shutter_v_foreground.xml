@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- V&M Player Icon: Stealth Shutter 'V' (Neon Lime & Cyan on Stealth Carbon) - 87% Scale -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <group
+        android:name="stealth_shutter_v"
+        android:pivotX="256"
+        android:pivotY="256"
+        android:scaleX="0.87"
+        android:scaleY="0.87">
+
+        <!-- Outer 'V' Ray Shutter -->
+        <path
+            android:strokeWidth="36"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M 136,150 L 256,380 L 376,150">
+            <aapt:attr name="android:strokeColor">
+                <gradient
+                    android:startX="136"
+                    android:startY="150"
+                    android:endX="376"
+                    android:endY="380"
+                    android:type="linear">
+                    <item android:offset="0.0" android:color="#FF00FF88" />
+                    <item android:offset="0.5" android:color="#FF00E5FF" />
+                    <item android:offset="1.0" android:color="#FF0077FF" />
+                </gradient>
+            </aapt:attr>
+        </path>
+
+        <!-- Internal Play Chevron -->
+        <path
+            android:fillColor="#FF00FF88"
+            android:pathData="M 236,210 L 296,256 L 236,302 Z" />
+
+        <!-- Specular Highlight Rim -->
+        <path
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="4"
+            android:strokeLineCap="round"
+            android:pathData="M 236,210 L 296,256" />
+    </group>
+</vector>

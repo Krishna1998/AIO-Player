@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- V&M Player Icon: Eclipse Halo (Electric Cyan Ethereal Halo & Floating Core) - 87% Scale -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <group
+        android:name="eclipse_halo_cyan"
+        android:pivotX="256"
+        android:pivotY="256"
+        android:scaleX="0.87"
+        android:scaleY="0.87">
+
+        <!-- Ethereal Halo Ring (Electric Cyan) -->
+        <path
+            android:strokeColor="#FF00F0FF"
+            android:strokeWidth="26"
+            android:pathData="M 256,82 A 174,174 0 1,0 256,430 A 174,174 0 1,0 256,82 Z" />
+
+        <!-- Razor-Sharp Floating Core Playhead (Electric Cyan) -->
+        <path
+            android:fillColor="#FF00F0FF"
+            android:pathData="M 220,184 L 343,256 L 220,328 Z" />
+    </group>
+</vector>

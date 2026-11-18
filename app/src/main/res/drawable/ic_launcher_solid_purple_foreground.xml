@@ -1,29 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- V&M Player Alternate Mark: Continuous Ligature VM (Cyber Magenta) - 87% Scale -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="512"
-    android:viewportHeight="512">
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="512" android:viewportHeight="512">
 
-    <group
-        android:name="continuous_ligature_vm"
-        android:pivotX="256"
-        android:pivotY="256"
-        android:scaleX="0.87"
-        android:scaleY="0.87">
+    <group android:name="continuous_ligature_vm" android:pivotX="256" android:pivotY="256" android:scaleX="0.87" android:scaleY="0.87">
 
         <!-- Unbroken Geometric Monoline Ribbon: V into M (Cyber Magenta) -->
-        <path
-            android:strokeColor="#FFFF007F"
-            android:strokeWidth="28"
-            android:strokeLineCap="round"
-            android:strokeLineJoin="round"
-            android:pathData="M 105,172 L 172,365 L 231,214 L 290,365 L 348,214 L 407,365" />
+        <path android:strokeColor="#FFFF007F" android:strokeWidth="28" android:strokeLineCap="round" android:strokeLineJoin="round" android:pathData="M 105,172 L 172,365 L 231,214 L 290,365 L 348,214 L 407,365" />
 
         <!-- Directional Playhead nestled in M apex (Cyber Magenta) -->
-        <path
-            android:fillColor="#FFFF007F"
-            android:pathData="M 273,147 L 323,180 L 273,214 Z" />
+        <path android:fillColor="#FFFF007F" android:pathData="M 273,147 L 323,180 L 273,214 Z" />
     </group>
 </vector>

@@ -14,6 +14,42 @@
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_white_animated</item>
         <item name="windowSplashScreenBackground">@color/splash_background</item>
     </style>
+    <style name="Theme.videoplayer.Splash.BlackStealthShutterV">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_stealth_shutter_v_animated</item>
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+    </style>
+    <style name="Theme.videoplayer.Splash.BlackKiloHertzMonolith">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_kilo_hertz_monolith_animated</item>
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+    </style>
+    <style name="Theme.videoplayer.Splash.BlackQuantumAperture">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_quantum_aperture_animated</item>
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+    </style>
+    <style name="Theme.videoplayer.Splash.BlackLiquidAcousticDroplet">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_liquid_acoustic_droplet_animated</item>
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+    </style>
+    <style name="Theme.videoplayer.Splash.BlackHorizonAeroBlades">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_horizon_aero_blades_animated</item>
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+    </style>
+    <style name="Theme.videoplayer.Splash.BlackAuraApertureCyan">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_aura_aperture_cyan_animated</item>
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+    </style>
+    <style name="Theme.videoplayer.Splash.BlackEclipseHaloCyan">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_eclipse_halo_cyan_animated</item>
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+    </style>
+    <style name="Theme.videoplayer.Splash.BlackEclipseHaloLime">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_eclipse_halo_lime_animated</item>
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+    </style>
+    <style name="Theme.videoplayer.Splash.BlackSupersonicSplitArrow">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_supersonic_split_arrow_animated</item>
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+    </style>
     <style name="Theme.videoplayer.Splash.WhiteSolid">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_solid_purple_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_white</item>

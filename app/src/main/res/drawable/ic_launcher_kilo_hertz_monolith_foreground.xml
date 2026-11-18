@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- V&M Player Icon: Kilo-Hertz Monolith (Acid Lime Equalizer Pillars) - 87% Scale -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <group
+        android:name="kilo_hertz_monolith"
+        android:pivotX="256"
+        android:pivotY="256"
+        android:scaleX="0.87"
+        android:scaleY="0.87">
+
+        <!-- Pillar 1 (Low Frequency - 40% Acid Lime) -->
+        <path
+            android:fillColor="#66D4FF00"
+            android:pathData="M 121,243 L 121,269 A 18,18 0 0,0 157,269 L 157,243 A 18,18 0 0,0 121,243 Z" />
+
+        <!-- Pillar 2 (Mid Frequency - 70% Acid Lime) -->
+        <path
+            android:fillColor="#B3D4FF00"
+            android:pathData="M 177,192 L 177,320 A 18,18 0 0,0 213,320 L 213,192 A 18,18 0 0,0 177,192 Z" />
+
+        <!-- Pillar 3 (Peak Frequency Monolith - Solid Acid Lime) -->
+        <path
+            android:fillColor="#FFD4FF00"
+            android:pathData="M 233,141 L 233,371 A 18,18 0 0,0 269,371 L 269,141 A 18,18 0 0,0 233,141 Z" />
+
+        <!-- Dominant Play Apex -->
+        <path
+            android:fillColor="#FFD4FF00"
+            android:pathData="M 287,143 L 410,256 L 287,369 Z" />
+    </group>
+</vector>
