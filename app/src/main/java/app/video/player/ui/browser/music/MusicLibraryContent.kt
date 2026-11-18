@@ -1652,26 +1652,6 @@ private fun MusicHeroCarousel(
                   )
                 }
               }
-              val ext = remember(song.path) {
-                song.path.substringAfterLast('.', "").uppercase()
-              }
-              if (ext in listOf("FLAC", "WAV", "ALAC", "OPUS")) {
-                Surface(
-                  shape = RoundedCornerShape(4.dp),
-                  color = Color.Black.copy(alpha = 0.65f),
-                  modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(6.dp),
-                ) {
-                  Text(
-                    text = ext,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
-                  )
-                }
-              }
             }
             Spacer(modifier = Modifier.height(6.dp))
             Text(
