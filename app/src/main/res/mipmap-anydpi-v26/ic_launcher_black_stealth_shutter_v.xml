@@ -4,3 +4,4 @@
     <foreground android:drawable="@drawable/ic_launcher_stealth_shutter_v_foreground" />
     <monochrome android:drawable="@drawable/ic_launcher_stealth_shutter_v_monochrome" />
 </adaptive-icon>
+

@@ -9,20 +9,21 @@ These notes are written in plain English and focus on what changed for real use.
   - Tuned emblem geometry to **87% scale** (`scaleX="0.87" scaleY="0.87"`), delivering balanced optical breathing room on Android home-screen launchers.
   - Anchored on nocturnal **Stealth Carbon** (`#0E1017`) for striking 14:1 contrast ratio, zero noise, and unmistakable Bang & Olufsen luxury aesthetic.
   - Fully synchronized 1:1 across default adaptive launcher icon (`ic_launcher_purple_foreground`), Android 12+ Animated Splash Screen (`ic_splash_purple_foreground`), Android 13+ Material You monochrome silhouette (`ic_launcher_purple_monochrome` with native `evenOdd` transparency cutout), and project documentation branding (`videoplayer_icon.svg`).
-- **In-App Launcher Icon Switcher Restored & Expanded with 9 New Iconic Marks:**
-  - Re-enabled the full **App icon** customization suite in **Settings → Appearance → App icon**, giving users the freedom to switch between different launcher styles and color combinations on demand.
-  - Added 9 high-energy, community-favorite futuristic marks into the launcher icon collection:
-    - **Stealth Shutter 'V':** High-voltage Neon Lime & Cyan apex chevron with internal playhead.
-    - **Kilo-Hertz Monolith:** Stepped equalizer frequency pillars in Acid Lime ascending into a play apex.
-    - **Quantum Aperture:** Single-stroke particle accelerator ring emitting a focused play diamond in Electric Cyan.
-    - **Liquid Acoustic Droplet:** Organic acoustic resonance droplet triggering concentric frosted ripples in Cyber Magenta & Ultraviolet.
-    - **Horizon Aero Blades (Crimson):** Aerodynamic dual media blades gliding together in Hyper Crimson.
-    - **Aura Aperture Disc (Cyan):** Flagship audiophile vinyl disc and aperture silhouette rendered in Electric Cyan.
-    - **Eclipse Halo (Cyan):** Zen architectural glowing halo containing a floating playhead in Electric Cyan.
-    - **Eclipse Halo (Lime):** Zen architectural glowing halo containing a floating playhead in Acid Lime.
-    - **Supersonic Split Arrow:** Forward-pointing delta arrow sliced into an angular 'V' intake and rhythmic 'M' vector ripples in Cyber Magenta.
-  - All 9 marks are tuned to the precise **87% proportional scale** standard, featuring synchronized Android 12+ Animated Splash Screens (`ic_splash_*`), Android 13+ Material You monochrome silhouettes (`ic_launcher_*_monochrome`), and native `<activity-alias>` registration.
-  - Integrated with Settings search indexing so users can easily find "App icon", "Launcher", "Cyan", "Shutter", "Monolith", "Aperture", "Droplet", "Halo", or "Arrow".
+- **In-App Launcher Icon Switcher Streamlined to Exclusive 10-Icon Elite Suite:**
+  - Dedicated the **App icon** switcher in **Settings → Appearance → App icon** exclusively to the 10 premier flagship and futuristic designs, removing all obsolete and legacy icons.
+  - The curated 10-icon collection comprises:
+    1. **Aura Aperture Disc (Acid Lime):** Official default flagship luxury vinyl aperture in Acid Lime (`#D4FF00`).
+    2. **Stealth Shutter 'V':** High-voltage Neon Lime & Cyan apex chevron with internal playhead.
+    3. **Kilo-Hertz Monolith:** Stepped equalizer frequency pillars in Acid Lime ascending into a play apex.
+    4. **Quantum Aperture:** Single-stroke particle accelerator ring emitting a focused play diamond in Electric Cyan.
+    5. **Liquid Acoustic Droplet:** Organic acoustic resonance droplet triggering concentric frosted ripples in Cyber Magenta & Ultraviolet.
+    6. **Horizon Aero Blades (Crimson):** Aerodynamic dual media blades gliding together in Hyper Crimson.
+    7. **Aura Aperture Disc (Cyan):** Flagship audiophile vinyl disc and aperture silhouette rendered in Electric Cyan.
+    8. **Eclipse Halo (Cyan):** Zen architectural glowing halo containing a floating playhead in Electric Cyan.
+    9. **Eclipse Halo (Lime):** Zen architectural glowing halo containing a floating playhead in Acid Lime.
+    10. **Supersonic Split Arrow:** Forward-pointing delta arrow sliced into an angular 'V' intake and rhythmic 'M' vector ripples in Cyber Magenta.
+  - Streamlined the icon picker interface: replaced the 22-background carousel with a direct, responsive 2-column grid of the 10 icons with live 132dp animated previews and instant one-tap switching.
+  - All 10 icons feature synchronized Android 12+ Animated Splash Screens (`ic_splash_*`), Android 13+ Material You monochrome silhouettes (`ic_launcher_*_monochrome`), and native `<activity-alias>` registration.
 - **Video & Audio Player Glass UI Architecture Polish:**
   - **Synchronized Video Player Controls with Top-Right Glass Aesthetic:** Unified bottom-left, bottom-right, and portrait bottom video controls to inherit the exact same Liquid Glass UI as top-right controls: frosted translucent backdrop gradients, top-lit specular rim borders, floating ambient drop shadows, and elastic press feedback (`AdaptiveControlsContainer`, `ControlsButton`).
   - **Frosted Glass UI Seekbar Across Video & Audio Players:** Upgraded both Video Player and Audio Player seekbars to default to the Liquid Glass seekbar (`SeekbarStyle.Liquid`), featuring a frosted glass trough track with top specular highlight rim, optical groove depth, glowing active playback gradient with specular reflection, floating liquid glass thumb with 8dp ambient drop shadow, inner refraction glow, and top-lit white specular border.

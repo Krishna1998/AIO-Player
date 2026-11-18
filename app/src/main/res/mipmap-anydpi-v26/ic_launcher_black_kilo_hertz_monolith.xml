@@ -4,3 +4,4 @@
     <foreground android:drawable="@drawable/ic_launcher_kilo_hertz_monolith_foreground" />
     <monochrome android:drawable="@drawable/ic_launcher_kilo_hertz_monolith_monochrome" />
 </adaptive-icon>
+

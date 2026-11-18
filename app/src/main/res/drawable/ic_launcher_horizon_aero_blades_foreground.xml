@@ -1,31 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- V&M Player Icon: Horizon Aero Blades (Hyper Crimson Dual Media Blades) - 87% Scale -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="512"
-    android:viewportHeight="512">
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="512" android:viewportHeight="512">
 
-    <group
-        android:name="horizon_aero_blades"
-        android:pivotX="256"
-        android:pivotY="256"
-        android:scaleX="0.87"
-        android:scaleY="0.87">
+    <group android:name="horizon_aero_blades" android:pivotX="256" android:pivotY="256" android:scaleX="0.87" android:scaleY="0.87">
 
         <!-- Top Video Aero Blade (Hyper Crimson) -->
-        <path
-            android:fillColor="#FFFF003C"
-            android:pathData="M 133,123 L 389,256 L 287,256 L 133,174 Z" />
+        <path android:fillColor="#FFFF003C" android:pathData="M 133,123 L 389,256 L 287,256 L 133,174 Z" />
 
         <!-- Bottom Audio Aero Blade (Hyper Crimson) -->
-        <path
-            android:fillColor="#FFFF003C"
-            android:pathData="M 133,389 L 389,256 L 287,256 L 133,338 Z" />
+        <path android:fillColor="#FFFF003C" android:pathData="M 133,389 L 389,256 L 287,256 L 133,338 Z" />
 
         <!-- Central Play Apex -->
-        <path
-            android:fillColor="#FFFF3366"
-            android:pathData="M 256,215 L 338,256 L 256,297 Z" />
+        <path android:fillColor="#FFFF3366" android:pathData="M 256,215 L 338,256 L 256,297 Z" />
     </group>
 </vector>
+

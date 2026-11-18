@@ -4,3 +4,4 @@
     <foreground android:drawable="@drawable/ic_launcher_eclipse_halo_lime_foreground" />
     <monochrome android:drawable="@drawable/ic_launcher_eclipse_halo_lime_monochrome" />
 </adaptive-icon>
+

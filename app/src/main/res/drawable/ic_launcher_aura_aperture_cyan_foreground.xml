@@ -1,29 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- V&M Player Icon: Aura Aperture Disc (Electric Cyan on Stealth Carbon) - 87% Scale -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="512"
-    android:viewportHeight="512">
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="512" android:viewportHeight="512">
 
-    <group
-        android:name="aura_aperture_cyan"
-        android:pivotX="256"
-        android:pivotY="256"
-        android:scaleX="0.87"
-        android:scaleY="0.87">
+    <group android:name="aura_aperture_cyan" android:pivotX="256" android:pivotY="256" android:scaleX="0.87" android:scaleY="0.87">
 
         <!-- Outer Dim Aura Ring (Electric Cyan at 35% opacity) -->
-        <path
-            android:strokeColor="#FF00F0FF"
-            android:strokeAlpha="0.35"
-            android:strokeWidth="11"
-            android:pathData="M 256,101 A 155,155 0 1,0 256,411 A 155,155 0 1,0 256,101 Z" />
+        <path android:strokeColor="#FF00F0FF" android:strokeAlpha="0.35" android:strokeWidth="11" android:pathData="M 256,101 A 155,155 0 1,0 256,411 A 155,155 0 1,0 256,101 Z" />
 
         <!-- Inner Solid Disc with Negative Space Playhead Cutout (Electric Cyan) -->
-        <path
-            android:fillColor="#FF00F0FF"
-            android:fillType="evenOdd"
-            android:pathData="M 256,144 A 112,112 0 1,0 256,368 A 112,112 0 1,0 256,144 Z M 222,191 L 325,256 L 222,321 Z" />
+        <path android:fillColor="#FF00F0FF" android:fillType="evenOdd" android:pathData="M 256,144 A 112,112 0 1,0 256,368 A 112,112 0 1,0 256,144 Z M 222,191 L 325,256 L 222,321 Z" />
     </group>
 </vector>
+

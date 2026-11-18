@@ -4,3 +4,4 @@
     <foreground android:drawable="@drawable/ic_launcher_horizon_aero_blades_foreground" />
     <monochrome android:drawable="@drawable/ic_launcher_horizon_aero_blades_monochrome" />
 </adaptive-icon>
+

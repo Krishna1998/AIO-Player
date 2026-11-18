@@ -1522,11 +1522,8 @@ object SearchablePreferences {
         category = "Appearance",
         screen = AppIconPreferencesScreen,
         anchorItemIndex = 0,
-        SearchEntrySpec(R.string.pref_app_icon_title, listOf("app", "launcher", "icon", "logo", "switcher", "purple", "lime", "cyan", "shutter", "monolith", "aperture", "droplet", "halo", "blades", "arrow")),
+        SearchEntrySpec(R.string.pref_app_icon_title, listOf("app", "launcher", "icon", "logo", "switcher", "lime", "cyan", "shutter", "monolith", "aperture", "droplet", "halo", "blades", "arrow")),
         SearchEntrySpec(R.string.app_icon_section_logo, listOf("app", "icon", "logo", "mark"), R.string.pref_app_icon_title),
-        SearchEntrySpec(R.string.app_icon_custom_background, listOf("app", "icon", "custom", "color", "background"), R.string.pref_app_icon_title),
-        SearchEntrySpec(R.string.app_icon_use_wallpaper_colors, listOf("app", "icon", "wallpaper", "colors"), R.string.pref_app_icon_title),
-        SearchEntrySpec(R.string.app_icon_create_custom_shortcut, listOf("app", "icon", "custom", "home", "shortcut"), R.string.pref_app_icon_title),
       )
       addSearchEntries(
         category = "Appearance",

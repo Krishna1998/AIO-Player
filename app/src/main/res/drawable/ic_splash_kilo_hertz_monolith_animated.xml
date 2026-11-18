@@ -4,3 +4,4 @@
     <target android:name="logo_main" android:animation="@animator/videoplayer_splash_main" />
     <target android:name="logo_tip" android:animation="@animator/videoplayer_splash_tip" />
 </animated-vector>
+

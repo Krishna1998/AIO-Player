@@ -1,27 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- V&M Player Material You Monochrome: Aura Aperture Disc (Cyan) - 87% Scale -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="512"
-    android:viewportHeight="512">
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="512" android:viewportHeight="512">
 
-    <group
-        android:name="aura_aperture_cyan"
-        android:pivotX="256"
-        android:pivotY="256"
-        android:scaleX="0.87"
-        android:scaleY="0.87">
+    <group android:name="aura_aperture_cyan" android:pivotX="256" android:pivotY="256" android:scaleX="0.87" android:scaleY="0.87">
 
-        <path
-            android:strokeColor="#FFFFFFFF"
-            android:strokeAlpha="0.4"
-            android:strokeWidth="11"
-            android:pathData="M 256,101 A 155,155 0 1,0 256,411 A 155,155 0 1,0 256,101 Z" />
+        <path android:strokeColor="#FFFFFFFF" android:strokeAlpha="0.4" android:strokeWidth="11" android:pathData="M 256,101 A 155,155 0 1,0 256,411 A 155,155 0 1,0 256,101 Z" />
 
-        <path
-            android:fillColor="#FFFFFFFF"
-            android:fillType="evenOdd"
-            android:pathData="M 256,144 A 112,112 0 1,0 256,368 A 112,112 0 1,0 256,144 Z M 222,191 L 325,256 L 222,321 Z" />
+        <path android:fillColor="#FFFFFFFF" android:fillType="evenOdd" android:pathData="M 256,144 A 112,112 0 1,0 256,368 A 112,112 0 1,0 256,144 Z M 222,191 L 325,256 L 222,321 Z" />
     </group>
 </vector>
+

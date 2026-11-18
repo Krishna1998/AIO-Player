@@ -4,3 +4,4 @@
     <foreground android:drawable="@drawable/ic_launcher_liquid_acoustic_droplet_foreground" />
     <monochrome android:drawable="@drawable/ic_launcher_liquid_acoustic_droplet_monochrome" />
 </adaptive-icon>
+
