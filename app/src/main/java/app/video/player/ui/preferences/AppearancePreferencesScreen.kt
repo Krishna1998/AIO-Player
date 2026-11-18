@@ -344,54 +344,10 @@ object AppearancePreferencesScreen : Screen {
                       preferences.customTheme.set(CustomThemeDefinition.serializeCollection(remainingThemes))
                       if (selectedCustomThemeName == name) preferences.selectedCustomThemeName.set("")
                     },
-                    onRemoveTheme = { position ->
-                      if ((appTheme != AppTheme.Default || selectedCustomThemeName.isNotBlank()) && themeTransition?.isAnimating != true) {
-                        themeTransition?.startTransition(position)
-                        scope.launch {
-                          delay(50)
-                          preferences.appTheme.set(AppTheme.Default)
-                          preferences.selectedCustomThemeName.set("")
-                        }
-                      }
-                    },
                     modifier = Modifier.padding(vertical = 8.dp),
                   )
 
                   PreferenceCard {
-                    val isThemeActive = appTheme != AppTheme.Default || selectedCustomThemeName.isNotBlank()
-                    ExpressivePreferenceItem {
-                      Preference(
-                        modifier = Modifier.settingsSearchTarget(R.string.pref_appearance_remove_theme_title),
-                        title = { Text(stringResource(R.string.pref_appearance_remove_theme_title)) },
-                        summary = {
-                          Text(
-                            stringResource(R.string.pref_appearance_remove_theme_summary),
-                            color = MaterialTheme.colorScheme.outline,
-                          )
-                        },
-                        icon = {
-                          Icon(
-                            imageVector = Icons.RoundedFilled.FormatClear,
-                            contentDescription = null,
-                            tint = if (isThemeActive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                          )
-                        },
-                        enabled = isThemeActive,
-                        onClick = {
-                          if (isThemeActive && themeTransition?.isAnimating != true) {
-                            themeTransition?.startTransition(androidx.compose.ui.geometry.Offset.Zero)
-                            scope.launch {
-                              delay(50)
-                              preferences.appTheme.set(AppTheme.Default)
-                              preferences.selectedCustomThemeName.set("")
-                            }
-                          }
-                        },
-                      )
-                    }
-
-                    PreferenceDivider()
-
                     DevicePreference(R.string.pref_app_icon_title) {
                       ExpressivePreferenceItem {
                         Preference(

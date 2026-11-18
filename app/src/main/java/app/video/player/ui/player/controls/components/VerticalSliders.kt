@@ -49,11 +49,11 @@ fun percentage(
   range: ClosedFloatingPointRange<Float>,
 ): Float = ((value - range.start) / (range.endInclusive - range.start)).coerceIn(0f, 1f)
 
-private val LevelPillWidth = 52.dp
-private val LevelPillHeight = 200.dp
-private val LevelPillInset = 16.dp
-private val LevelPillIconSize = 24.dp
-private val LevelPillLabelHeight = 20.dp
+private val LevelPillWidth = 36.dp
+private val LevelPillHeight = 180.dp
+private val LevelPillInset = 12.dp
+private val LevelPillIconSize = 18.dp
+private val LevelPillLabelHeight = 16.dp
 
 /**
  * Android TV style level indicator: one capsule filled from the bottom with the theme gradient,
@@ -119,14 +119,14 @@ private fun LevelPill(
               effects = {
                 liquidGlassEffects(
                   glassSettings,
+                  with(density) { 10.dp.toPx() },
+                  with(density) { 10.dp.toPx() },
                   with(density) { 16.dp.toPx() },
-                  with(density) { 16.dp.toPx() },
-                  with(density) { 24.dp.toPx() },
                 )
               },
               highlight = { glassSettings.highlight(Highlight.Default) },
-              shadow = { Shadow(color = Color.Black.copy(alpha = 0.25f), radius = 12.dp) },
-              innerShadow = { InnerShadow(color = Color.White.copy(alpha = 0.15f), radius = 2.dp) },
+              shadow = { Shadow(color = Color.Black.copy(alpha = 0.25f), radius = 8.dp) },
+              innerShadow = { InnerShadow(color = Color.White.copy(alpha = 0.15f), radius = 1.5.dp) },
             )
           } else {
             Modifier
@@ -153,7 +153,7 @@ private fun LevelPill(
     }
     Text(
       text = label,
-      style = MaterialTheme.typography.labelLarge.withTabularDigits(),
+      style = MaterialTheme.typography.labelSmall.withTabularDigits(),
       fontWeight = FontWeight.Bold,
       textAlign = TextAlign.Center,
       color = labelColor,

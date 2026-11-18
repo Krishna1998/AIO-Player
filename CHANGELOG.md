@@ -9,11 +9,8 @@ These notes are written in plain English and focus on what changed for real use.
   - Video player gesture controls now disable swipe-down-to-mini-player, maintaining mini player docking exclusively for music/audio playback.
 - **Icon Sizing Refinement:**
   - Scaled **Eclipse Halo (Electric Cyan)**, **Eclipse Halo (Acid Lime)**, and **Supersonic Split Arrow (Cyber Magenta)** down to **75%** scale (`0.75`), providing lighter, sharper optical balance on launchers.
-- **App Theme Remove Option:**
-  - Added a dedicated **Remove theme** action in **Settings → Appearance**:
-    - Quick-action **Remove theme** button in the Theme Picker header when an active theme is applied.
-    - An interactive **Remove theme** card in the horizontal theme carousel.
-    - A **Remove theme** preference item with `FormatClear` icon to instantly reset back to the Default theme and clear custom theme selections.
+- **Slimline Modern Brightness & Volume Sliders:**
+  - Replaced bulky 52dp gesture overlay pills with a thin, sleek 36dp capsule indicator featuring compact 18dp iconography, refined liquid glass blur, and crisp tabular percentage typography.
 - **6 New Futuristic Flagship App Themes:**
   - Added 6 curated themes harmonized with the new launcher icon suite:
     1. **Stealth Acid Lime:** High-contrast sports aesthetic on deep nocturnal carbon with electric Acid Lime accents.

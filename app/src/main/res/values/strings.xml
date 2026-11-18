@@ -132,9 +132,6 @@
   <string name="pref_quick_play_fab_direct_title">Direct Quick Play</string>
   <string name="pref_quick_play_fab_direct_summary">Directly play recently played video when tapping FAB instead of showing options</string>
   <string name="pref_appearance_theme_picker_label">App Theme</string>
-  <string name="pref_appearance_theme_remove">Remove theme</string>
-  <string name="pref_appearance_remove_theme_title">Remove theme</string>
-  <string name="pref_appearance_remove_theme_summary">Reset to default app theme</string>
   <string name="pref_appearance_auto_scroll_title">Auto-scroll to last played</string>
   <string name="pref_appearance_auto_scroll_summary">Automatically scroll to the last played video when opening video lists</string>
   <string name="pref_tree_flatten_depth_title">Tree path compression</string>

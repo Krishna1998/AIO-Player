@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,22 +29,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.video.player.R
 import app.video.player.ui.icons.AppIcon
@@ -74,7 +65,6 @@ fun ThemePicker(
   onEditCustomTheme: (String) -> Unit,
   onDeleteCustomTheme: (String) -> Unit,
   modifier: Modifier = Modifier,
-  onRemoveTheme: ((Offset) -> Unit)? = null,
 ) {
   val listState = rememberLazyListState()
   val initialFocusRequester =
@@ -93,53 +83,15 @@ fun ThemePicker(
     }
   }
 
-  val isThemeActive = selectedCustomThemeName.isNotBlank() || currentTheme != AppTheme.Default
-
   Column(
     modifier = modifier.fillMaxWidth(),
   ) {
-    Row(
-      modifier = Modifier
-        .fillMaxWidth()
-        .padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
-      horizontalArrangement = Arrangement.SpaceBetween,
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      Text(
-        text = stringResource(R.string.pref_appearance_theme_picker_label),
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.primary,
-      )
-      if (isThemeActive && onRemoveTheme != null) {
-        var buttonPosition by remember { mutableStateOf(Offset.Zero) }
-        TextButton(
-          onClick = { onRemoveTheme(buttonPosition) },
-          contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp),
-          modifier = Modifier
-            .height(28.dp)
-            .onGloballyPositioned { coordinates ->
-              val pos = coordinates.positionInWindow()
-              buttonPosition = Offset(
-                pos.x + coordinates.size.width / 2f,
-                pos.y + coordinates.size.height / 2f,
-              )
-            },
-        ) {
-          Icon(
-            imageVector = Icons.RoundedFilled.FormatClear,
-            contentDescription = null,
-            modifier = Modifier.size(16.dp),
-            tint = MaterialTheme.colorScheme.error,
-          )
-          Spacer(modifier = Modifier.width(4.dp))
-          Text(
-            text = stringResource(R.string.pref_appearance_theme_remove),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.error,
-          )
-        }
-      }
-    }
+    Text(
+      text = stringResource(R.string.pref_appearance_theme_picker_label),
+      style = MaterialTheme.typography.labelMedium,
+      color = MaterialTheme.colorScheme.primary,
+      modifier = Modifier.padding(start = 16.dp, bottom = 8.dp),
+    )
 
     LazyRow(
       modifier = Modifier.fillMaxWidth().tvFocusGroup(),
@@ -161,14 +113,6 @@ fun ThemePicker(
               Modifier
             },
         )
-      }
-      if (onRemoveTheme != null) {
-        item(key = "remove_theme") {
-          RemoveThemeCard(
-            enabled = isThemeActive,
-            onClick = { position -> onRemoveTheme(position) },
-          )
-        }
       }
       item(key = "add_custom_theme") {
         AddCustomThemeCard(onClick = onAddCustomTheme)
@@ -236,61 +180,6 @@ private fun AddCustomThemeCard(onClick: () -> Unit) {
       text = stringResource(R.string.pref_appearance_custom_theme_title),
       style = MaterialTheme.typography.bodySmall,
       color = MaterialTheme.colorScheme.onSurface,
-      textAlign = TextAlign.Center,
-      maxLines = 2,
-      modifier = Modifier.fillMaxWidth(),
-    )
-  }
-}
-
-@Composable
-private fun RemoveThemeCard(
-  enabled: Boolean,
-  onClick: (Offset) -> Unit,
-) {
-  var cardPosition by remember { mutableStateOf(Offset.Zero) }
-  Column(
-    modifier =
-      Modifier
-        .width(100.dp)
-        .tvFocusHighlight(RoundedCornerShape(12.dp), focusedScale = 1.05f)
-        .clickable(enabled = enabled, onClick = { onClick(cardPosition) })
-        .onGloballyPositioned { coordinates ->
-          val pos = coordinates.positionInWindow()
-          cardPosition = Offset(
-            pos.x + coordinates.size.width / 2f,
-            pos.y + coordinates.size.height / 2f,
-          )
-        },
-    horizontalAlignment = Alignment.CenterHorizontally,
-  ) {
-    Box(
-      modifier =
-        Modifier
-          .size(width = 90.dp, height = 140.dp)
-          .border(
-            1.dp,
-            if (enabled) MaterialTheme.colorScheme.error.copy(alpha = 0.6f) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
-            RoundedCornerShape(12.dp),
-          )
-          .background(
-            if (enabled) MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.25f) else MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.4f),
-            RoundedCornerShape(12.dp),
-          ),
-      contentAlignment = Alignment.Center,
-    ) {
-      Icon(
-        imageVector = Icons.RoundedFilled.FormatClear,
-        contentDescription = stringResource(R.string.pref_appearance_theme_remove),
-        modifier = Modifier.size(34.dp),
-        tint = if (enabled) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
-      )
-    }
-    Spacer(modifier = Modifier.height(6.dp))
-    Text(
-      text = stringResource(R.string.pref_appearance_theme_remove),
-      style = MaterialTheme.typography.bodySmall,
-      color = if (enabled) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
       textAlign = TextAlign.Center,
       maxLines = 2,
       modifier = Modifier.fillMaxWidth(),
