@@ -5,7 +5,7 @@
 # ⚡ V&M PLAYER ⚡
 ### *Next-Generation, Ultra-Lightweight Video & Audio Engine for Android*
 
-[![Release](https://img.shields.io/badge/Release-v2.0.0-00F5FF?style=for-the-badge&logo=android&logoColor=black)](https://github.com/Krishna1998/Video-Music-Player/releases)
+[![Release](https://img.shields.io/badge/Release-v2.1.0-00F5FF?style=for-the-badge&logo=android&logoColor=black)](https://github.com/Krishna1998/Video-Music-Player/releases)
 [![Android](https://img.shields.io/badge/Android-8.0%2B%20(API%2026%2B)-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com)
 [![Architecture](https://img.shields.io/badge/Arch-arm64--v8a-FF0055?style=for-the-badge&logo=arm&logoColor=white)](https://arm.com)
 [![Engine](https://img.shields.io/badge/Core-mpv%20%2B%20FFmpeg-9D4EDD?style=for-the-badge&logo=cplusplus&logoColor=white)](https://mpv.io)
@@ -40,17 +40,20 @@ Whether decoding 4K HDR10+ anime with complex ASS karaoke subtitles or driving a
 | **Vulkan Video Pipeline** | 🟢 **ACTIVE** | High-throughput Vulkan rasterizer with OpenGL ES fallback |
 | **High-Precision Scalers** | 🟢 **ACTIVE** | Bilinear, Bicubic, Spline36, Lanczos, and EWA Lanczos shaders |
 | **Dynamic Ambient Glow** | 🟢 **ACTIVE** | Real-time letterbox background glow sampled dynamically from video frames |
+| **One UI 9.5 Wavy Visualizer** | 🟢 **ACTIVE** | **NEW:** 3-tier Aurora Frosted Glass Veil flowing live above the elapsed seekbar with real-time Bass, Mid, and Treble audio reactivity & beat pulse |
+| **9 Premier Seekbar Styles** | 🟢 **ACTIVE** | **NEW:** Cyber Neon Laser, Frosted Capsule, Sonic Waveform, Liquid Mercury, Liquid Glass, Wavy, Thick, Slim, and Normal with live preference previews |
 | **Battery Saver Mode** | 🟢 **ACTIVE** | Auto-drops to energy-efficient bilinear passes, limits CPU wakeups, and cuts GPU load when battery &le; 20% |
-| **Pure Audio Mini Player** | 🟢 **ACTIVE** | **NEW:** Video playback cleanly finishes on back navigation; docked mini player is exclusively dedicated to music/audio |
+| **Pure Audio Mini Player** | 🟢 **ACTIVE** | Video playback cleanly finishes on back navigation; docked mini player is exclusively dedicated to music/audio |
 | **Aspect-Preserving PiP** | 🟢 **ACTIVE** | True Picture-in-Picture with locked landscape ratio across queue advancements |
 
 ### 🎚️ Sound, Speed & Acoustics
 | Feature | State | Description |
 | :--- | :---: | :--- |
 | **Graphic Equalizer** | 🟢 **ACTIVE** | Dual-mode tone controls (Bass / Treble) & multi-band graphical EQ |
+| **Smart 'Jump Back In' Ranking** | 🟢 **ACTIVE** | **NEW:** Hero carousel prioritizes most listened songs based on playback history with clean, clutter-free artwork presentation |
 | **Spatializer & Stereo Widening** | 🟢 **ACTIVE** | Low-latency algorithmic stereo expansion for headphones |
 | **Playback Speed Persistence** | 🟢 **ACTIVE** | Granular speed control (0.25x – 4.0x) with state memory across tracks |
-| **Ergonomic Speed Pill** | 🟢 **ACTIVE** | **NEW:** Playback speed button relocated to bottom action row for instant one-handed thumb access |
+| **Ergonomic Speed Pill** | 🟢 **ACTIVE** | Playback speed button relocated to bottom action row for instant one-handed thumb access |
 | **Dynamic Range Compression** | 🟢 **ACTIVE** | Tames explosive volume spikes in movies while boosting subtle whispers |
 | **Volume Boost Cap** | 🟢 **ACTIVE** | Clean digital pre-amplification boost up to +30 dB |
 | **Configurable Volume Step** | 🟢 **ACTIVE** | Discrete volume step multiplier (1 to 10 steps per hardware key press) with proportional boost scaling |

@@ -2,6 +2,32 @@
 
 These notes are written in plain English and focus on what changed for real use.
 
+## 2.1.0
+
+- **Samsung One UI 9.5 Aurora Frosted Glass Veil Wavy Visualizer:**
+  - Implemented a multi-depth 3-tier wave curtain visualizer flowing directly above the elapsed track of the seekbar in both video and audio players.
+  - Three distinct harmonic wave curtains react dynamically in real-time to music frequencies:
+    1. **Ambient Deep Bass Veil (First Wave):** Sweeping, deep backdrop wave with 23.5dp elevated base height and low-frequency resonance.
+    2. **Harmonic Mid Veil (Mid Wave):** Fluid rolling wave with 20.0dp elevated base height reacting to vocal and mid-range energy.
+    3. **Lead Luminous Wave (Last Wave):** Crisp foreground wave with 15.5dp base height, vibrant track-tinted glow, and white liquid specular highlight core.
+  - Features real-time beat pulse impact, smooth spring dampening when paused or scrubbed, and expanded 70dp container clearance preventing any clipping during bass drops.
+  - Tapers gracefully to zero height directly at the seekbar thumb/playhead.
+- **4 Premier Seekbar Styles Added to Player Layout Settings:**
+  - Introduced four new cutting-edge seekbar styles to **Settings → Player Controls & Layout → Seekbar Style**, complete with real-time interactive previews and full scrub/tap support:
+    1. **Cyber Neon Laser (`SeekbarStyle.CyberLaser`):** Ultra-fine photonic laser beam track with an active neon glow aura corridor, dual-ring cyan thumb with dynamic pulse halo during scrubbing, and photonic core highlights.
+    2. **Frosted Capsule (`SeekbarStyle.FrostedCapsule`):** Modern pill-capsule container with a frosted glass backdrop, vibrant inner gradient fill, ambient rim edge illumination, and dynamic thumb bounce physics.
+    3. **Sonic Waveform (`SeekbarStyle.SonicWaveform`):** High-density 50-band acoustic equalizer waveform bars mapped along the seek track, lighting up dynamically with an illuminated needle playhead indicator.
+    4. **Liquid Mercury (`SeekbarStyle.LiquidMercury`):** Metallic silver-chrome liquid fluid track with high-specular reflective sheen and a floating viscous mercury droplet thumb.
+- **Refined Music Library & Clutter-Free "Jump Back In":**
+  - **Dynamic Listening Prioritization:** The "Jump Back In" hero carousel now dynamically ranks and displays your most listened songs first, based on listening frequency, with seamless fallback to library sort order.
+  - **Minimalist Cover Art Presentation:** Removed distracting play count multiplier badges (`2x`, `3x`) and audio codec badges (`FLAC`, `WAV`, `ALAC`, `OPUS`) from Jump Back In cards, keeping the artwork clean, elegant, and uninterrupted.
+  - **Matched Thumbnail Shadows:** Corrected thumbnail shadow geometries to cleanly follow the rounded shape of album cover artwork.
+- **Legacy & Adaptive App Icon Suite Alignment:**
+  - Added legacy density-specific mipmap raster assets (`mdpi`, `hdpi`, `xhdpi`, `xxhdpi`, `xxxhdpi`) featuring the official flagship Aura Aperture design, ensuring crystal-clear presentation on older launchers and third-party launchers.
+  - Removed outdated fastlane screenshots and legacy mipmap assets.
+- **Build System & Kotlin Compiler Reliability:**
+  - Fixed release compilation errors in `Seekbar.kt` by properly importing `kotlin.math.PI` and `kotlin.math.sin` and declaring `secondaryColor` in `SeekbarStylePreview`.
+
 ## 2.0.0
 
 - **Dual-Layer Ambient Cover Art Fill (Audio Player):**
