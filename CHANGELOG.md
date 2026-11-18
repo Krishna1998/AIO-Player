@@ -4,6 +4,24 @@ These notes are written in plain English and focus on what changed for real use.
 
 ## 1.0.6
 
+- **Complete Removal of Mini Player for Video Playback:**
+  - When watching a video and navigating back to the home or browse tabs, video playback cleanly finishes and closes without sliding down or morphing into a docked mini player.
+  - Video player gesture controls now disable swipe-down-to-mini-player, maintaining mini player docking exclusively for music/audio playback.
+- **Icon Sizing Refinement:**
+  - Scaled **Eclipse Halo (Electric Cyan)**, **Eclipse Halo (Acid Lime)**, and **Supersonic Split Arrow (Cyber Magenta)** down to **75%** scale (`0.75`), providing lighter, sharper optical balance on launchers.
+- **App Theme Remove Option:**
+  - Added a dedicated **Remove theme** action in **Settings → Appearance**:
+    - Quick-action **Remove theme** button in the Theme Picker header when an active theme is applied.
+    - An interactive **Remove theme** card in the horizontal theme carousel.
+    - A **Remove theme** preference item with `FormatClear` icon to instantly reset back to the Default theme and clear custom theme selections.
+- **6 New Futuristic Flagship App Themes:**
+  - Added 6 curated themes harmonized with the new launcher icon suite:
+    1. **Stealth Acid Lime:** High-contrast sports aesthetic on deep nocturnal carbon with electric Acid Lime accents.
+    2. **Electric Cyan:** Cyber-glow aesthetic on midnight oceanic void with luminous cyan highlights.
+    3. **Hyper Crimson:** Supersonic track velocity look on obsidian ruby with pure Rosso Corsa crimson.
+    4. **Cyber Magenta:** Synthwave neon energy on velvet void with vibrant laser magenta.
+    5. **Quantum Violet:** Deep luxury cosmic void with soft radiant amethyst violet.
+    6. **Solar Gold:** Warm studio analog aesthetic with liquid pure gold accents.
 - **Composable Compilation Fix in App Icon Switcher:**
   - Resolved a Kotlin compiler error (`@Composable invocations can only happen from the context of a @Composable function`) in `AppIconPreferencesScreen.kt` by evaluating `reduceMotion` safely in the composable body rather than inside non-composable `transitionSpec` lambdas.
 - **Exclusive 10-Icon Elite Launcher Suite:**
