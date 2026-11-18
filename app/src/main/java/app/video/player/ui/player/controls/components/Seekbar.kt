@@ -136,6 +136,8 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.math.PI
+import kotlin.math.sin
 
 /** Precomputed, allocation-free drawing data for a single skip segment overlay. */
 private data class SkipSegmentOverlay(
@@ -2259,6 +2261,7 @@ fun SeekbarStylePreview(
   modifier: Modifier = Modifier,
 ) {
   val primaryColor = MaterialTheme.colorScheme.primary
+  val secondaryColor = MaterialTheme.colorScheme.secondary
   val (readAheadAlpha, emptyAlpha) = rememberSeekbarTrackAlphas()
   val previewProgress = progress
 
