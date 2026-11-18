@@ -48,6 +48,7 @@ internal enum class IconBackground(
   Plum("Plum", R.color.icon_bg_plum, R.string.app_icon_bg_plum),
   Cocoa("Cocoa", R.color.icon_bg_cocoa, R.string.app_icon_bg_cocoa),
   Wallpaper("Wallpaper", R.color.icon_bg_wallpaper, R.string.app_icon_bg_wallpaper),
+  VelvetVoid("VelvetVoid", R.color.icon_bg_velvet_void, R.string.app_icon_bg_velvet_void),
 }
 
 /** The ribbon drawn over a background, as a 108dp adaptive foreground layer. */
@@ -66,6 +67,12 @@ internal enum class IconMark(
   EclipseHaloCyan("EclipseHaloCyan", R.drawable.ic_launcher_eclipse_halo_cyan_foreground, R.string.app_icon_logo_eclipse_halo_cyan),
   EclipseHaloLime("EclipseHaloLime", R.drawable.ic_launcher_eclipse_halo_lime_foreground, R.string.app_icon_logo_eclipse_halo_lime),
   SupersonicSplitArrow("SupersonicSplitArrow", R.drawable.ic_launcher_supersonic_split_arrow_foreground, R.string.app_icon_logo_supersonic_split_arrow),
+  SupersonicSplitArrowLime("SupersonicSplitArrowLime", R.drawable.ic_launcher_supersonic_split_arrow_lime_foreground, R.string.app_icon_logo_supersonic_split_arrow_lime),
+  PulseRotaryDialLime("PulseRotaryDialLime", R.drawable.ic_launcher_pulse_rotary_dial_lime_foreground, R.string.app_icon_logo_pulse_rotary_dial_lime),
+  PulseRotaryDialCrimson("PulseRotaryDialCrimson", R.drawable.ic_launcher_pulse_rotary_dial_crimson_foreground, R.string.app_icon_logo_pulse_rotary_dial_crimson),
+  ContinuousLigatureVMLime("ContinuousLigatureVMLime", R.drawable.ic_launcher_continuous_ligature_vm_lime_foreground, R.string.app_icon_logo_continuous_ligature_vm_lime),
+  QuantumApertureLime("QuantumApertureLime", R.drawable.ic_launcher_quantum_aperture_lime_foreground, R.string.app_icon_logo_quantum_aperture_lime),
+  QuantumApertureWhite("QuantumApertureWhite", R.drawable.ic_launcher_quantum_aperture_white_foreground, R.string.app_icon_logo_quantum_aperture_white),
 }
 
 /**
@@ -96,6 +103,12 @@ internal class LauncherIcon(
       LauncherIcon(IconBackground.Black, IconMark.EclipseHaloCyan, R.mipmap.ic_launcher_black_eclipse_halo_cyan, R.style.Theme_videoplayer_Splash_BlackEclipseHaloCyan),
       LauncherIcon(IconBackground.Black, IconMark.EclipseHaloLime, R.mipmap.ic_launcher_black_eclipse_halo_lime, R.style.Theme_videoplayer_Splash_BlackEclipseHaloLime),
       LauncherIcon(IconBackground.Black, IconMark.SupersonicSplitArrow, R.mipmap.ic_launcher_black_supersonic_split_arrow, R.style.Theme_videoplayer_Splash_BlackSupersonicSplitArrow),
+      LauncherIcon(IconBackground.Black, IconMark.SupersonicSplitArrowLime, R.mipmap.ic_launcher_black_supersonic_split_arrow_lime, R.style.Theme_videoplayer_Splash_BlackSupersonicSplitArrowLime),
+      LauncherIcon(IconBackground.Black, IconMark.PulseRotaryDialLime, R.mipmap.ic_launcher_black_pulse_rotary_dial_lime, R.style.Theme_videoplayer_Splash_BlackPulseRotaryDialLime),
+      LauncherIcon(IconBackground.Black, IconMark.PulseRotaryDialCrimson, R.mipmap.ic_launcher_black_pulse_rotary_dial_crimson, R.style.Theme_videoplayer_Splash_BlackPulseRotaryDialCrimson),
+      LauncherIcon(IconBackground.Black, IconMark.ContinuousLigatureVMLime, R.mipmap.ic_launcher_black_continuous_ligature_vm_lime, R.style.Theme_videoplayer_Splash_BlackContinuousLigatureVMLime),
+      LauncherIcon(IconBackground.Black, IconMark.QuantumApertureLime, R.mipmap.ic_launcher_black_quantum_aperture_lime, R.style.Theme_videoplayer_Splash_BlackQuantumApertureLime),
+      LauncherIcon(IconBackground.VelvetVoid, IconMark.QuantumApertureWhite, R.mipmap.ic_launcher_velvet_void_quantum_aperture_white, R.style.Theme_videoplayer_Splash_VelvetVoidQuantumApertureWhite),
     )
 
     val allKnownAliases: List<String> = listOf(
@@ -110,6 +123,12 @@ internal class LauncherIcon(
       "app.video.player.IconBlackEclipseHaloCyan",
       "app.video.player.IconBlackEclipseHaloLime",
       "app.video.player.IconBlackSupersonicSplitArrow",
+      "app.video.player.IconBlackSupersonicSplitArrowLime",
+      "app.video.player.IconBlackPulseRotaryDialLime",
+      "app.video.player.IconBlackPulseRotaryDialCrimson",
+      "app.video.player.IconBlackContinuousLigatureVMLime",
+      "app.video.player.IconBlackQuantumApertureLime",
+      "app.video.player.IconVelvetVoidQuantumApertureWhite",
       "app.video.player.IconBlackWhite",
       "app.video.player.IconWhiteSolid",
       "app.video.player.IconWhiteGradient",

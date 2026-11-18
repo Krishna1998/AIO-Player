@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- V&M Player Icon: Quantum Aperture (Diamond White) - 87% Scale -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <group
+        android:name="quantum_aperture"
+        android:pivotX="256"
+        android:pivotY="256"
+        android:scaleX="0.87"
+        android:scaleY="0.87">
+
+        <!-- Accelerator Ring with Forward Trajectory Gap -->
+        <path
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="24"
+            android:strokeLineCap="round"
+            android:pathData="M 390,178 A 155,155 0 1,0 390,334" />
+
+        <!-- High-Contrast Playhead Core -->
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M 220,179 L 333,256 L 220,333 Z" />
+
+        <!-- Quantum Satellite Dot -->
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M 382,256 A 18,18 0 1,0 418,256 A 18,18 0 1,0 382,256 Z" />
+    </group>
+</vector>

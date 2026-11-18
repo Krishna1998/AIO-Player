@@ -2592,6 +2592,7 @@
   <string name="app_icon_bg_plum">Plum</string>
   <string name="app_icon_bg_cocoa">Cocoa</string>
   <string name="app_icon_bg_wallpaper">Wallpaper colors</string>
+  <string name="app_icon_bg_velvet_void">Velvet Void</string>
 
   <string name="app_icon_logo_gradient">Aura Aperture</string>
   <string name="app_icon_logo_stealth_shutter_v">Stealth Shutter</string>
@@ -2603,6 +2604,12 @@
   <string name="app_icon_logo_eclipse_halo_cyan">Eclipse Halo</string>
   <string name="app_icon_logo_eclipse_halo_lime">Eclipse Halo</string>
   <string name="app_icon_logo_supersonic_split_arrow">Supersonic Split Arrow</string>
+  <string name="app_icon_logo_supersonic_split_arrow_lime">Supersonic Split Arrow (Acid Lime)</string>
+  <string name="app_icon_logo_pulse_rotary_dial_lime">The Pulse Rotary Dial (Acid Lime)</string>
+  <string name="app_icon_logo_pulse_rotary_dial_crimson">The Pulse Rotary Dial (Hyper Crimson)</string>
+  <string name="app_icon_logo_continuous_ligature_vm_lime">Continuous Ligature VM (Acid Lime)</string>
+  <string name="app_icon_logo_quantum_aperture_lime">Quantum Aperture (Acid Lime)</string>
+  <string name="app_icon_logo_quantum_aperture_white">Quantum Aperture (Diamond White)</string>
   <string name="downloads_all">All downloads</string>
   <string name="downloads_attention_section">Needs attention</string>
   <string name="downloads_search_hint">Search downloads</string>
