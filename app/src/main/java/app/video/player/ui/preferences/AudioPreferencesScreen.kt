@@ -299,21 +299,6 @@ object AudioPreferencesScreen : Screen {
                   )
                 },
               )
-
-              PreferenceDivider()
-              val animatedAlbumArtwork by preferences.animatedAlbumArtwork.collectAsState()
-              SwitchPreference(
-                modifier = Modifier.settingsSearchTarget(R.string.pref_audio_animated_artwork_title),
-                value = animatedAlbumArtwork,
-                onValueChange = { preferences.animatedAlbumArtwork.set(it) },
-                title = { Text(stringResource(R.string.pref_audio_animated_artwork_title)) },
-                summary = {
-                  Text(
-                    stringResource(R.string.pref_audio_animated_artwork_summary),
-                    color = MaterialTheme.colorScheme.outline,
-                  )
-                },
-              )
             }
           }
         }

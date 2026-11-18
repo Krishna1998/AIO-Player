@@ -194,7 +194,6 @@ private val settingsSearchListAnchors: Map<Screen, List<SettingsSearchListAnchor
         SettingsSearchListAnchor(titleRes = R.string.pref_audio_orientation_title, itemIndex = 5),
         SettingsSearchListAnchor(titleRes = R.string.pref_audio_ambient_mode_title, itemIndex = 5),
         SettingsSearchListAnchor(titleRes = R.string.pref_audio_wavy_seekbar_title, itemIndex = 5),
-        SettingsSearchListAnchor(titleRes = R.string.pref_audio_animated_artwork_title, itemIndex = 5),
         SettingsSearchListAnchor(titleRes = R.string.pref_preferred_languages, itemIndex = 7),
         SettingsSearchListAnchor(titleRes = R.string.pref_audio_pitch_correction_title, itemIndex = 7),
         SettingsSearchListAnchor(titleRes = R.string.pref_audio_volume_normalization_title, itemIndex = 7),
