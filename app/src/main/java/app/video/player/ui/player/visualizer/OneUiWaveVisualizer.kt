@@ -314,16 +314,16 @@ internal fun WaveVisualizerOverlay(
     val beatImpact = beatPulse * outputVolume
 
     // One UI 9.5 Aurora Frosted Glass Veil: 3-tier multi-depth wave curtains
-    // Layer 1: Ambient Deep Bass Veil
+    // Layer 1: Ambient Deep Bass Veil (enhanced first wave height)
     drawRibbon(
       filledPath = lowFilledPath,
       contourPath = lowContourPath,
       color = tones.bass,
       wavelength = 112.dp.toPx(),
-      baseLift = 19.5.dp.toPx(),
+      baseLift = 23.5.dp.toPx(),
       phase = lowPhase,
       liftScale = rearLiftScale,
-      beatLift = 4.2.dp.toPx() * beatImpact,
+      beatLift = 4.8.dp.toPx() * beatImpact,
       contourWidth = 1.2.dp.toPx(),
       glowWidth = 5.0.dp.toPx(),
       glowAlpha = 0.28f,
@@ -331,16 +331,16 @@ internal fun WaveVisualizerOverlay(
       bodyBottomAlpha = 0.04f,
     )
 
-    // Layer 2: Harmonic Mid Veil (enhanced height)
+    // Layer 2: Harmonic Mid Veil (enhanced mid wave height)
     drawRibbon(
       filledPath = midFilledPath,
       contourPath = midContourPath,
       color = tones.mid,
       wavelength = 72.dp.toPx(),
-      baseLift = 17.0.dp.toPx(),
+      baseLift = 20.0.dp.toPx(),
       phase = midPhase,
       liftScale = middleLiftScale,
-      beatLift = 4.0.dp.toPx() * beatImpact,
+      beatLift = 4.5.dp.toPx() * beatImpact,
       contourWidth = 1.6.dp.toPx(),
       glowWidth = 6.0.dp.toPx(),
       glowAlpha = 0.38f,
@@ -348,13 +348,13 @@ internal fun WaveVisualizerOverlay(
       bodyBottomAlpha = 0.08f,
     )
 
-    // Layer 3: Vibrant Lead Luminous Wave with Specular Core (enhanced height)
+    // Layer 3: Vibrant Lead Luminous Wave with Specular Core
     drawRibbon(
       filledPath = highFilledPath,
       contourPath = highContourPath,
       color = trackColor,
       wavelength = 46.dp.toPx(),
-      baseLift = 15.0.dp.toPx(),
+      baseLift = 15.5.dp.toPx(),
       phase = highPhase,
       liftScale = frontLiftScale,
       beatLift = 3.5.dp.toPx() * beatImpact,
