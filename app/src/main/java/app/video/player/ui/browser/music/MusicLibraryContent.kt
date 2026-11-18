@@ -1652,24 +1652,6 @@ private fun MusicHeroCarousel(
                   )
                 }
               }
-              val playCount = playStats[song.path]?.playCount ?: 0
-              if (playCount > 1) {
-                Surface(
-                  shape = RoundedCornerShape(4.dp),
-                  color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.90f),
-                  modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(6.dp),
-                ) {
-                  Text(
-                    text = "${playCount}x",
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
-                  )
-                }
-              }
               val ext = remember(song.path) {
                 song.path.substringAfterLast('.', "").uppercase()
               }
