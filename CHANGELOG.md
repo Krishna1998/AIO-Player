@@ -19,6 +19,10 @@ These notes are written in plain English and focus on what changed for real use.
     4. **Cyber Magenta:** Synthwave neon energy on velvet void with vibrant laser magenta.
     5. **Quantum Violet:** Deep luxury cosmic void with soft radiant amethyst violet.
     6. **Solar Gold:** Warm studio analog aesthetic with liquid pure gold accents.
+- **Default Theme & Curated Picker Hierarchy:**
+  - Set **Stealth Acid Lime** as the official default app theme on fresh installs, perfectly harmonizing with the default Aura Aperture launcher icon.
+  - Reordered the theme picker so the 11 premier flagship & glass themes appear first at the front of the carousel (positions 1–11), followed by classic themes.
+  - Removed the obsolete legacy default theme.
 - **Composable Compilation Fix in App Icon Switcher:**
   - Resolved a Kotlin compiler error (`@Composable invocations can only happen from the context of a @Composable function`) in `AppIconPreferencesScreen.kt` by evaluating `reduceMotion` safely in the composable body rather than inside non-composable `transitionSpec` lambdas.
 - **Exclusive 10-Icon Elite Launcher Suite:**
