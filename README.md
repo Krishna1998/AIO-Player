@@ -11,6 +11,7 @@
 [![Engine](https://img.shields.io/badge/Core-mpv%20%2B%20FFmpeg-9D4EDD?style=for-the-badge&logo=cplusplus&logoColor=white)](https://mpv.io)
 [![UI](https://img.shields.io/badge/UI-Jetpack%20Compose%20M3-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
 [![Privacy](https://img.shields.io/badge/Telemetry-ZERO%20%2F%20100%25%20Offline-00E676?style=for-the-badge&logo=shield&logoColor=black)](https://github.com)
+[![CI/CD Build](https://github.com/Krishna1998/AIO-Player/actions/workflows/build.yml/badge.svg)](https://github.com/Krishna1998/AIO-Player/actions/workflows/build.yml)
 
 <p align="center">
   <b>Sleek. Minimalist. Uncompromisingly Fast.</b><br>
