@@ -278,7 +278,19 @@ object PlayerControlsPreferencesScreen : Screen {
                           onClick = { appearancePrefs.seekbarStyle.set(style) },
                         ),
                       ) {
-                        Text(style.name)
+                        val styleLabel = when (style) {
+                          SeekbarStyle.Normal -> stringResource(R.string.pref_seekbar_style_normal)
+                          SeekbarStyle.Standard -> stringResource(R.string.pref_seekbar_style_standard)
+                          SeekbarStyle.Wavy -> stringResource(R.string.pref_seekbar_style_wavy)
+                          SeekbarStyle.Thick -> stringResource(R.string.pref_seekbar_style_thick)
+                          SeekbarStyle.Slim -> stringResource(R.string.pref_seekbar_style_slim)
+                          SeekbarStyle.Liquid -> stringResource(R.string.pref_seekbar_style_liquid)
+                          SeekbarStyle.CyberLaser -> stringResource(R.string.pref_seekbar_style_cyber_laser)
+                          SeekbarStyle.FrostedCapsule -> stringResource(R.string.pref_seekbar_style_frosted_capsule)
+                          SeekbarStyle.SonicWaveform -> stringResource(R.string.pref_seekbar_style_sonic_waveform)
+                          SeekbarStyle.LiquidMercury -> stringResource(R.string.pref_seekbar_style_liquid_mercury)
+                        }
+                        Text(styleLabel)
                       }
                     }
                   }

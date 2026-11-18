@@ -16,4 +16,8 @@ enum class SeekbarStyle {
   Thick,
   Slim,
   Liquid,
+  CyberLaser,
+  FrostedCapsule,
+  SonicWaveform,
+  LiquidMercury,
 }

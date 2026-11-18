@@ -885,6 +885,16 @@
   <string name="pref_section_landscape_controls">Landscape Controls</string>
   <string name="pref_section_portrait_controls">Portrait Controls</string>
   <string name="pref_section_seekbar_style">Seekbar Style</string>
+  <string name="pref_seekbar_style_normal">Normal</string>
+  <string name="pref_seekbar_style_standard">Standard</string>
+  <string name="pref_seekbar_style_wavy">Wavy</string>
+  <string name="pref_seekbar_style_thick">Thick</string>
+  <string name="pref_seekbar_style_slim">Slim</string>
+  <string name="pref_seekbar_style_liquid">Liquid Glass</string>
+  <string name="pref_seekbar_style_cyber_laser">Cyber Neon Laser</string>
+  <string name="pref_seekbar_style_frosted_capsule">Frosted Capsule</string>
+  <string name="pref_seekbar_style_sonic_waveform">Sonic Waveform</string>
+  <string name="pref_seekbar_style_liquid_mercury">Liquid Mercury</string>
   <string name="pref_section_player_controls_appearance">Appearance</string>
   <string name="pref_custom_time_dialog_text">Enter custom hide time in milliseconds</string>
   <string name="pref_custom_time_label">Milliseconds</string>
