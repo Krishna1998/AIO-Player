@@ -220,6 +220,7 @@ fun MusicLibraryContent(
   val viewMode by musicViewModel.viewMode.collectAsState()
   val isLoading by musicViewModel.isLoading.collectAsState()
   LaunchedEffect(musicViewModel) { musicViewModel.ensureLibraryLoaded() }
+  LaunchedEffect(Unit) { SongPlayCountTracker.init(context) }
 
   val songs by musicViewModel.filteredSongs.collectAsState()
   val albums by musicViewModel.filteredAlbums.collectAsState()
@@ -1559,7 +1560,15 @@ private fun MusicHeroCarousel(
   onSongClick: (MusicSong) -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val heroSongs = remember(songs) { songs.take(8) }
+  val context = LocalContext.current
+  LaunchedEffect(Unit) { SongPlayCountTracker.init(context) }
+  val playStats by SongPlayCountTracker.stats.collectAsState()
+  val hasListened = remember(songs, playStats) {
+    SongPlayCountTracker.hasListenedSongs(songs)
+  }
+  val heroSongs = remember(songs, playStats) {
+    SongPlayCountTracker.getHeroSongs(songs, limit = 8)
+  }
   if (heroSongs.isEmpty()) return
 
   Column(
@@ -1588,7 +1597,7 @@ private fun MusicHeroCarousel(
       )
       Spacer(modifier = Modifier.weight(1f))
       Text(
-        text = "Top Rotation",
+        text = if (hasListened) "Most Listened" else "Top Rotation",
         style = MaterialTheme.typography.labelSmall,
         color = MaterialTheme.colorScheme.primary,
         fontWeight = FontWeight.SemiBold,
@@ -1640,6 +1649,24 @@ private fun MusicHeroCarousel(
                     contentDescription = "Play",
                     tint = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.size(18.dp),
+                  )
+                }
+              }
+              val playCount = playStats[song.path]?.playCount ?: 0
+              if (playCount > 1) {
+                Surface(
+                  shape = RoundedCornerShape(4.dp),
+                  color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.90f),
+                  modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(6.dp),
+                ) {
+                  Text(
+                    text = "${playCount}x",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
                   )
                 }
               }

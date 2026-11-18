@@ -358,6 +358,7 @@ class MusicLibraryViewModel : ViewModel(), KoinComponent {
 
   fun playSong(context: Context, song: MusicSong, songList: List<MusicSong> = _songs.value) {
     if (songList.isEmpty()) return
+    SongPlayCountTracker.recordPlay(context, song.path)
     val index = songList.indexOfFirst { it.id == song.id }.coerceAtLeast(0)
 
     val queueItems = songList.map { item ->

@@ -5764,6 +5764,10 @@ private suspend fun restorePlaybackPosition(state: PlaybackStateEntity?, loadGen
         artworkUrl = artworkUrl,
       )
 
+      if (isCurrentPlaybackAudio()) {
+        app.video.player.ui.browser.music.SongPlayCountTracker.recordPlay(applicationContext, filePath)
+      }
+
       Log.d(TAG, "Saved recently played: $filePath")
       Log.d(TAG, "  - fileName: $resolvedFileName")
       Log.d(TAG, "  - videoTitle: $videoTitle")
@@ -8197,6 +8201,10 @@ private suspend fun restorePlaybackPosition(state: PlaybackStateEntity?, loadGen
         launchSource = "playlist",
         playlistId = historyPlaylistId,
       )
+
+      if (isCurrentPlaybackAudio()) {
+        app.video.player.ui.browser.music.SongPlayCountTracker.recordPlay(applicationContext, filePath)
+      }
 
       if (HttpUtils.isNetworkStream(uri) && !isJellyfinLaunchSource(intent)) {
         val streamTitle = videoTitle?.takeIf { !HttpUtils.isLikelyJunkTitle(it) } ?: resolvedName

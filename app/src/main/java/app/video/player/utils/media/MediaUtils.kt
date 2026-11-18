@@ -105,6 +105,7 @@ object MediaUtils {
     PlaybackSession.setPropertyBoolean("pause", false)
     PlaybackSession.markBackground()
     NavigationBarState.isMiniPlayerVisible = true
+    app.video.player.ui.browser.music.SongPlayCountTracker.recordPlay(context, item.originalUri)
 
     val serviceIntent =
       Intent(context, MediaPlaybackService::class.java).apply {
