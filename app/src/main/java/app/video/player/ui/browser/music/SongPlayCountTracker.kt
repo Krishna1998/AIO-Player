@@ -147,3 +147,4 @@ object SongPlayCountTracker {
     return _stats.value[filePath]?.playCount ?: 0
   }
 }
+
