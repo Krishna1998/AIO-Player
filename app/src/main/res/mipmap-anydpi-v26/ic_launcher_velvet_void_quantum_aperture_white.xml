@@ -4,3 +4,4 @@
     <foreground android:drawable="@drawable/ic_launcher_quantum_aperture_white_foreground" />
     <monochrome android:drawable="@drawable/ic_launcher_quantum_aperture_monochrome" />
 </adaptive-icon>
+

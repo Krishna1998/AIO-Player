@@ -4,3 +4,4 @@
     <foreground android:drawable="@drawable/ic_launcher_pulse_rotary_dial_crimson_foreground" />
     <monochrome android:drawable="@drawable/ic_launcher_pulse_rotary_dial_monochrome" />
 </adaptive-icon>
+
