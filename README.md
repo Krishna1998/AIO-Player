@@ -5,7 +5,7 @@
 # ⚡ V&M PLAYER ⚡
 ### *Next-Generation, Ultra-Lightweight Video & Audio Engine for Android*
 
-[![Release](https://img.shields.io/badge/Release-v2.1.0-00F5FF?style=for-the-badge&logo=android&logoColor=black)](https://github.com/Krishna1998/Video-Music-Player/releases)
+[![Release](https://img.shields.io/badge/Release-v1.0.0-00F5FF?style=for-the-badge&logo=android&logoColor=black)](https://github.com/Krishna1998/Video-Music-Player/releases)
 [![Android](https://img.shields.io/badge/Android-8.0%2B%20(API%2026%2B)-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com)
 [![Architecture](https://img.shields.io/badge/Arch-arm64--v8a-FF0055?style=for-the-badge&logo=arm&logoColor=white)](https://arm.com)
 [![Engine](https://img.shields.io/badge/Core-mpv%20%2B%20FFmpeg-9D4EDD?style=for-the-badge&logo=cplusplus&logoColor=white)](https://mpv.io)
