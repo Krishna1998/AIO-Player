@@ -5,7 +5,7 @@
 # ⚡ V&M PLAYER ⚡
 ### *Next-Generation, Ultra-Lightweight Video & Audio Engine for Android*
 
-[![Release](https://img.shields.io/badge/Release-v1.0.6-00F5FF?style=for-the-badge&logo=android&logoColor=black)](https://github.com/Krishna1998/Video-Music-Player/releases)
+[![Release](https://img.shields.io/badge/Release-v2.0.0-00F5FF?style=for-the-badge&logo=android&logoColor=black)](https://github.com/Krishna1998/Video-Music-Player/releases)
 [![Android](https://img.shields.io/badge/Android-8.0%2B%20(API%2026%2B)-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://developer.android.com)
 [![Architecture](https://img.shields.io/badge/Arch-arm64--v8a-FF0055?style=for-the-badge&logo=arm&logoColor=white)](https://arm.com)
 [![Engine](https://img.shields.io/badge/Core-mpv%20%2B%20FFmpeg-9D4EDD?style=for-the-badge&logo=cplusplus&logoColor=white)](https://mpv.io)
@@ -40,6 +40,7 @@ Whether decoding 4K HDR10+ anime with complex ASS karaoke subtitles or driving a
 | **High-Precision Scalers** | 🟢 **ACTIVE** | Bilinear, Bicubic, Spline36, Lanczos, and EWA Lanczos shaders |
 | **Dynamic Ambient Glow** | 🟢 **ACTIVE** | Real-time letterbox background glow sampled dynamically from video frames |
 | **Battery Saver Mode** | 🟢 **ACTIVE** | Auto-drops to energy-efficient bilinear passes, limits CPU wakeups, and cuts GPU load when battery &le; 20% |
+| **Pure Audio Mini Player** | 🟢 **ACTIVE** | **NEW:** Video playback cleanly finishes on back navigation; docked mini player is exclusively dedicated to music/audio |
 | **Aspect-Preserving PiP** | 🟢 **ACTIVE** | True Picture-in-Picture with locked landscape ratio across queue advancements |
 
 ### 🎚️ Sound, Speed & Acoustics
@@ -68,8 +69,10 @@ Whether decoding 4K HDR10+ anime with complex ASS karaoke subtitles or driving a
 | Feature | State | Description |
 | :--- | :---: | :--- |
 | **Material 3 Expressive** | 🟢 **ACTIVE** | Full dynamic color integration, OLED pure black theme, and expressive typography |
-| **Curated 10-Icon Elite Suite** | 🟢 **ACTIVE** | **NEW:** In-app icon switcher dedicated to 10 futuristic designs on Stealth Carbon: Aura Aperture (default), Stealth Shutter, Kilo-Hertz Monolith, Quantum Aperture, Liquid Acoustic Droplet, Horizon Aero Blades, Aura Aperture, Eclipse Halo, Eclipse Halo, and Supersonic Split Arrow, tuned to 87% scale with Android 12+ animated splash screens and Material You dynamic theming |
-| **5 Glass UI App Themes** | 🟢 **ACTIVE** | **NEW:** CyberPrism, RossoPrism, AuroraMint, HoloOpal, and SolarAmber theme engine additions with specular frosted glass styling |
+| **Curated 10-Icon Elite Suite** | 🟢 **ACTIVE** | **NEW:** In-app icon switcher dedicated to 10 futuristic designs on Stealth Carbon: Aura Aperture (default), Stealth Shutter, Kilo-Hertz Monolith, Quantum Aperture, Liquid Acoustic Droplet, Horizon Aero Blades, Aura Aperture, Eclipse Halo (Cyan & Lime @ 75%), and Supersonic Split Arrow (@ 75%), with Android 12+ animated splash screens and Material You dynamic theming |
+| **6 Flagship App Themes** | 🟢 **ACTIVE** | **NEW:** Stealth Acid Lime, Electric Cyan, Hyper Crimson, Cyber Magenta, Quantum Violet, and Solar Gold theme presets |
+| **Slimline HUD Sliders** | 🟢 **ACTIVE** | **NEW:** Ultra-sleek 36dp width brightness and volume vertical pills with 18dp iconography and tabular metrics |
+| **5 Glass UI App Themes** | 🟢 **ACTIVE** | CyberPrism, RossoPrism, AuroraMint, HoloOpal, and SolarAmber theme engine additions with specular frosted glass styling |
 | **Audio Player Liquid Glass** | 🟢 **ACTIVE** | **NEW:** Frosted translucent glass pods, specular top-lit gradient rims, and floating depth shadows across all audio controls |
 | **Top Header Track Counter** | 🟢 **ACTIVE** | **NEW:** Track and chapter counter (`Track X / Y`) relocated to upper side inside top header bar beneath NOW PLAYING |
 | **Material You Themed Icons** | 🟢 **ACTIVE** | Full monochrome silhouette vector layer matching Android 13+ dynamic system color palettes |
