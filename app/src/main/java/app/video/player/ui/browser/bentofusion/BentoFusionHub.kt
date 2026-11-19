@@ -913,15 +913,8 @@ private fun BentoHorizonAudioCard(
   val video = item.video
   val progress = item.progressPercentage
   val originalCodec = remember(video) { getAudioCodec(video) }
-  val remainingSeconds = item.timeRemaining ?: if (progress != null && progress > 0f && video.duration > 0L) {
-    (((1f - progress) * video.duration) / 1000L).toLong().coerceAtLeast(0L)
-  } else null
-  val displayTime = remember(remainingSeconds, video.durationFormatted) {
-    if (remainingSeconds != null && remainingSeconds > 0L) {
-      "-${VideoScanUtils.formatDuration(remainingSeconds * 1000L)}/${video.durationFormatted}"
-    } else {
-      video.durationFormatted
-    }
+  val displayTime = remember(video.durationFormatted) {
+    video.durationFormatted.ifBlank { "00:00" }
   }
 
   Card(
@@ -1093,18 +1086,6 @@ private fun BentoHeroSpotlightCard(
     item.video.durationFormatted.ifBlank { "00:00" }
   }
 
-  // Real-time synced remaining time:
-  val remainingSec = if (isCurrentlyPlayingInSession && livePositionSec != null) {
-    (totalSec - livePositionSec!!).coerceAtLeast(0L)
-  } else {
-    item.timeRemaining ?: if (progress > 0f && totalSec > 0L) {
-      (((1f - progress) * totalSec)).toLong().coerceAtLeast(0L)
-    } else {
-      totalSec
-    }
-  }
-
-  val remainingFormatted = "-${VideoScanUtils.formatDuration(remainingSec * 1000L)}"
 
   val infiniteTransition = rememberInfiniteTransition(label = "bentoPulse")
   val pulseScale by infiniteTransition.animateFloat(
@@ -1371,7 +1352,7 @@ private fun BentoHeroSpotlightCard(
             ) {
               Text(
                 text = if (isAudio) {
-                  "$originalCodec • $remainingFormatted/$totalFormatted"
+                  "$originalCodec • $totalFormatted"
                 } else {
                   "$originalCodec • ${item.video.durationFormatted}"
                 },
