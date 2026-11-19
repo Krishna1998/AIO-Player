@@ -167,7 +167,7 @@ class BrowserPreferences(
   val showFolderThumbnails = preferenceStore.getBoolean("show_folder_thumbnails", false)
 
   // Auto-scroll to last played media preference (like MX Player)
-  val autoScrollToLastPlayed = preferenceStore.getBoolean("auto_scroll_to_last_played", false)
+  val autoScrollToLastPlayed = preferenceStore.getBoolean("auto_scroll_to_last_played", true)
 
   // Maximum single-child folder levels skipped in one Tree View navigation step.
   val treeFlattenDepth = preferenceStore.getEnum("tree_flatten_depth", TreeFlattenDepth.Unlimited)
