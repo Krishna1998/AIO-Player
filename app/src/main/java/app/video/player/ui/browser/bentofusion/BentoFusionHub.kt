@@ -97,11 +97,13 @@ import app.video.player.preferences.preference.collectAsState
 import app.video.player.domain.thumbnail.ThumbnailRepository
 import app.video.player.ui.browser.videolist.VideoWithPlaybackInfo
 import app.video.player.ui.browser.videolist.videoPlaybackIdentifiers
+import app.video.player.ui.player.PlaybackIdentity
 import app.video.player.ui.player.PlaybackItem
 import app.video.player.ui.player.PlaybackSession
 import app.video.player.ui.player.isDefinitelyAudioOnly
 import app.video.player.ui.player.MediaPlaybackService
 import app.video.player.ui.player.PlayerActivity
+import app.video.player.utils.media.MediaUtils
 import app.video.player.ui.icons.Icons
 import app.video.player.ui.icons.Icon
 import app.video.player.utils.history.RecentlyPlayedOps
@@ -237,15 +239,15 @@ fun BentoFusionHeader(
     isAudioPlaybackItem(currentSessionItem)
   }
 
-  val activeAudioFromSession = remember(currentSessionItem, sortedAudioByTitle, allAudioItems, videosWithInfo) {
-    if (currentSessionItem != null) {
+  val activeAudioFromSession = remember(currentSessionItem, isSessionPlayingAudio, sortedAudioByTitle, allAudioItems, videosWithInfo) {
+    if (currentSessionItem != null && isSessionPlayingAudio) {
       sortedAudioByTitle.firstOrNull { matchesPlaybackItem(it.video, currentSessionItem) }
         ?: allAudioItems.firstOrNull { matchesPlaybackItem(it.video, currentSessionItem) }
         ?: videosWithInfo.firstOrNull { it.video.isAudio && matchesPlaybackItem(it.video, currentSessionItem) }
     } else null
   }
 
-  val activeVideoFromSession = remember(currentSessionItem, videoItems, videosWithInfo) {
+  val activeVideoFromSession = remember(currentSessionItem, isSessionPlayingAudio, videoItems, videosWithInfo) {
     if (currentSessionItem != null && !isSessionPlayingAudio) {
       videoItems.firstOrNull { matchesPlaybackItem(it.video, currentSessionItem) }
         ?: videosWithInfo.firstOrNull { !it.video.isAudio && matchesPlaybackItem(it.video, currentSessionItem) }
@@ -287,12 +289,20 @@ fun BentoFusionHeader(
   // Live played file (automatically updates whenever a track is played or auto-advances to next)
   val livePlayingMediaItem = activeAudioFromSession ?: syntheticAudioItem ?: activeVideoFromSession
 
-  // Automatically save live played file to RecentlyPlayed repository whenever song changes
-  LaunchedEffect(currentSessionItem?.stableId, currentSessionItem?.originalUri) {
+  val lastPlayedAudioPathPref by browserPreferences.lastPlayedAudioPath.collectAsState()
+  var rememberedAudioPath by remember { mutableStateOf<String?>(null) }
+
+  // Automatically save live played file to RecentlyPlayed repository whenever song changes (only for audio!)
+  LaunchedEffect(currentSessionItem?.stableId, currentSessionItem?.originalUri, isSessionPlayingAudio) {
     val item = currentSessionItem ?: return@LaunchedEffect
+    if (!isSessionPlayingAudio) return@LaunchedEffect
     val path = item.originalUri.takeIf { it.isNotBlank() } ?: item.playableUri
     if (path.isNotBlank()) {
       val cleanPath = if (path.startsWith("file://")) path.removePrefix("file://") else path
+      rememberedAudioPath = cleanPath
+      if (browserPreferences.lastPlayedAudioPath.get() != cleanPath) {
+        browserPreferences.lastPlayedAudioPath.set(cleanPath)
+      }
       val title = item.title?.takeIf { it.isNotBlank() } ?: cleanPath.substringAfterLast('/')
       val durationMs = (item.durationSeconds ?: 0) * 1000L
       withContext(Dispatchers.IO) {
@@ -312,8 +322,7 @@ fun BentoFusionHeader(
     }
   }
 
-  // 3. Recently Played Rail: Show recent 10 files (audio + video combined, applying video duration cut-out)
-  // Automatically adds and prioritizes the live played file (including when automatically changing songs!)
+  // 3. Recently Played: Show recent 10 files (audio + video combined, applying video duration cut-out)
   val recentlyPlayedItems = remember(
     videosWithInfo,
     recentEntities,
@@ -366,14 +375,50 @@ fun BentoFusionHeader(
   }
 
   // 4. Identify hero candidates: prioritizing active/recently played audio track for Audio Pulsing
+  // Persistent tracking guarantees Audio Pulsing does NOT reset to the first song when playing a video!
   val heroAudio = activeAudioFromSession
     ?: syntheticAudioItem
+    ?: rememberedAudioPath?.let { path ->
+      sortedAudioByTitle.firstOrNull { it.video.path == path || it.video.uri.toString() == path }
+        ?: allAudioItems.firstOrNull { it.video.path == path || it.video.uri.toString() == path }
+    }
+    ?: lastPlayedAudioPathPref.takeIf { it.isNotBlank() }?.let { path ->
+      sortedAudioByTitle.firstOrNull { it.video.path == path || it.video.uri.toString() == path }
+        ?: allAudioItems.firstOrNull { it.video.path == path || it.video.uri.toString() == path }
+    }
     ?: (if (recentlyPlayedFilePath != null) {
-      sortedAudioByTitle.firstOrNull { it.video.path == recentlyPlayedFilePath }
+      sortedAudioByTitle.firstOrNull { it.video.path == recentlyPlayedFilePath || it.video.uri.toString() == recentlyPlayedFilePath }
     } else null)
+    ?: recentEntities.firstNotNullOfOrNull { entity ->
+      val p = entity.filePath
+      sortedAudioByTitle.firstOrNull { it.video.path == p || it.video.uri.toString() == p }
+    }
     ?: recentlyPlayedItems.firstOrNull { it.video.isAudio }
     ?: sortedAudioByTitle.firstOrNull { (it.progressPercentage ?: 0f) > 0f }
     ?: sortedAudioByTitle.firstOrNull()
+
+  fun playAudioInBackground(targetVideo: Video, startPos: Double?) {
+    val audioQueue = sortedAudioByTitle.map { item ->
+      val v = item.video
+      PlaybackItem.fromUri(
+        uri = v.uri.toString(),
+        stableId = if (app.video.player.BuildConfig.SCOPED_STORAGE_ONLY && v.uri.scheme == "content") {
+          videoPlaybackIdentifiers(v).first()
+        } else PlaybackIdentity.forLocalPath(v.path),
+        title = if (v.title.isNotBlank()) v.title else FileTypeUtils.stripExtension(v.displayName),
+        artist = v.artist,
+        mimeType = v.mimeType.ifBlank { "audio/*" },
+        artworkUri = v.artworkUrl,
+        durationSeconds = (v.duration / 1000L).toInt().takeIf { it > 0 },
+        videoWidth = v.width,
+        videoHeight = v.height,
+      )
+    }
+    val targetIdx = sortedAudioByTitle.indexOfFirst { it.video.path == targetVideo.path }.coerceAtLeast(0)
+    rememberedAudioPath = targetVideo.path
+    browserPreferences.lastPlayedAudioPath.set(targetVideo.path)
+    MediaUtils.playInMiniPlayer(context, audioQueue, targetIdx, startPositionSeconds = startPos?.takeIf { it > 0.0 })
+  }
 
   val heroVideo = remember(videoItems, recentlyPlayedFilePath) {
     if (recentlyPlayedFilePath != null) {
@@ -433,7 +478,9 @@ fun BentoFusionHeader(
           ) { item ->
             BentoHorizonAudioCard(
               item = item,
-              onClick = { onPlayMedia(item.video, null) },
+              onClick = {
+                playAudioInBackground(item.video, null)
+              },
             )
           }
         }
@@ -468,7 +515,7 @@ fun BentoFusionHeader(
               val currentPaused = isPaused ?: false
               PlaybackSession.setPropertyBoolean("pause", !currentPaused)
             } else {
-              onPlayMedia(heroToDisplay.video, resumePos.takeIf { it > 0.0 })
+              playAudioInBackground(heroToDisplay.video, resumePos.takeIf { it > 0.0 })
             }
           } else {
             onPlayMedia(heroToDisplay.video, resumePos.takeIf { it > 0.0 })
@@ -495,13 +542,13 @@ fun BentoFusionHeader(
               val currIdx = sortedAudioByTitle.indexOfFirst { matchesPlaybackItem(it.video, currentSessionItem) }
               if (currIdx >= 0) {
                 val prevIdx = (currIdx - 1 + sortedAudioByTitle.size) % sortedAudioByTitle.size
-                onPlayMedia(sortedAudioByTitle[prevIdx].video, null)
+                playAudioInBackground(sortedAudioByTitle[prevIdx].video, null)
               }
             }
           } else if (sortedAudioByTitle.isNotEmpty()) {
             val currIdx = sortedAudioByTitle.indexOfFirst { it.video.path == heroToDisplay.video.path }
             val prevIdx = if (currIdx >= 0) (currIdx - 1 + sortedAudioByTitle.size) % sortedAudioByTitle.size else 0
-            onPlayMedia(sortedAudioByTitle[prevIdx].video, null)
+            playAudioInBackground(sortedAudioByTitle[prevIdx].video, null)
           }
         },
         onPlayPause = {
@@ -509,7 +556,7 @@ fun BentoFusionHeader(
             val currentPaused = isPaused ?: false
             PlaybackSession.setPropertyBoolean("pause", !currentPaused)
           } else {
-            onPlayMedia(heroToDisplay.video, resumePos.takeIf { it > 0.0 })
+            playAudioInBackground(heroToDisplay.video, resumePos.takeIf { it > 0.0 })
           }
         },
         onNext = {
@@ -519,13 +566,13 @@ fun BentoFusionHeader(
               val currIdx = sortedAudioByTitle.indexOfFirst { matchesPlaybackItem(it.video, currentSessionItem) }
               if (currIdx >= 0) {
                 val nextIdx = (currIdx + 1) % sortedAudioByTitle.size
-                onPlayMedia(sortedAudioByTitle[nextIdx].video, null)
+                playAudioInBackground(sortedAudioByTitle[nextIdx].video, null)
               }
             }
           } else if (sortedAudioByTitle.isNotEmpty()) {
             val currIdx = sortedAudioByTitle.indexOfFirst { it.video.path == heroToDisplay.video.path }
             val nextIdx = if (currIdx >= 0) (currIdx + 1) % sortedAudioByTitle.size else 0
-            onPlayMedia(sortedAudioByTitle[nextIdx].video, null)
+            playAudioInBackground(sortedAudioByTitle[nextIdx].video, null)
           }
         },
       )

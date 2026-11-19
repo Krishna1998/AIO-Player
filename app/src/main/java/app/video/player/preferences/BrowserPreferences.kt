@@ -176,6 +176,7 @@ class BrowserPreferences(
   val minimumAudioDurationSeconds = preferenceStore.getInt("minimum_audio_duration_seconds", 0)
   val minimumVideoHorizonDurationMinutes = preferenceStore.getInt("minimum_video_horizon_duration_minutes", 0)
   val mediaLibraryType = preferenceStore.getEnum("media_library_type", MediaLibraryType.All)
+  val lastPlayedAudioPath = preferenceStore.getString("last_played_audio_path", "")
 
   // True once the user finished (or skipped through) the first-run permission flow.
   val onboardingCompleted = preferenceStore.getBoolean(ONBOARDING_COMPLETED_KEY, false)
