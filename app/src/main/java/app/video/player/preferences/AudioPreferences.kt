@@ -31,8 +31,8 @@ class AudioPreferences(
     )
   val audioPitchCorrection = preferenceStore.getBoolean("audio_pitch_correction", true)
   val audioChannels = preferenceStore.getEnum("audio_channels", AudioChannels.AutoSafe)
-  val volumeBoostCap = preferenceStore.getInt("audio_volume_boost_cap", 30)
-  val volumeStep = preferenceStore.getInt("audio_volume_step", 1)
+  val volumeBoostCap = preferenceStore.getInt("audio_volume_boost_cap", 0)
+  val volumeStep = preferenceStore.getInt("audio_volume_step", 10)
   val ignoreAudioFocus = preferenceStore.getBoolean("ignore_audio_focus", false)
   val backgroundPlayback = preferenceStore.getBoolean("automatic_background_playback", false)
   val backgroundPlaybackBehavior = preferenceStore.getEnum("background_playback_behavior", BackgroundPlaybackBehavior.Remember)
@@ -67,15 +67,15 @@ class AudioPreferences(
   val audioWavySeekbar = preferenceStore.getBoolean("audio_wavy_seekbar", true)
   val enabledMusicTabs = preferenceStore.getStringSet(
     "enabled_music_tabs",
-    setOf("SONGS", "ALBUMS", "ARTISTS", "PLAYLISTS", "FOLDERS", "FAVORITES"),
+    setOf("FOLDERS", "SONGS", "FAVORITES", "PLAYLISTS"),
   )
   val musicTabOrder = preferenceStore.getObject(
     key = "music_tab_order",
-    defaultValue = listOf("SONGS", "ALBUMS", "ARTISTS", "PLAYLISTS", "FOLDERS", "FAVORITES"),
+    defaultValue = listOf("FOLDERS", "SONGS", "FAVORITES", "PLAYLISTS", "ALBUMS", "ARTISTS"),
     serializer = { list -> list.joinToString(",") },
     deserializer = { str ->
       val parsed = str.split(",").map { it.trim() }.filter { it.isNotEmpty() }
-      val missing = listOf("SONGS", "ALBUMS", "ARTISTS", "PLAYLISTS", "FOLDERS", "FAVORITES") - parsed.toSet()
+      val missing = listOf("FOLDERS", "SONGS", "FAVORITES", "PLAYLISTS", "ALBUMS", "ARTISTS") - parsed.toSet()
       parsed + missing
     },
   )

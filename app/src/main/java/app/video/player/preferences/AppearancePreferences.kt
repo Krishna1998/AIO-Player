@@ -96,7 +96,7 @@ class AppearancePreferences(
   val liquidGlassHighlightStrength = preferenceStore.getFloat("liquid_glass_highlight_strength", 1f)
   val liquidGlassHighlightWidth = preferenceStore.getFloat("liquid_glass_highlight_width", 1f)
   val liquidGlassHighlightBlur = preferenceStore.getFloat("liquid_glass_highlight_blur", 1f)
-  val navigationBarGlow = preferenceStore.getBoolean("navigation_bar_glow", false)
+  val navigationBarGlow = preferenceStore.getBoolean("navigation_bar_glow", true)
   val hideNavigationBarLabels = preferenceStore.getBoolean("hide_navigation_bar_labels", false)
   // Android 11 and older have no RenderEffect blur for the floating bar.
   val legacyNavigationBar =
@@ -116,7 +116,7 @@ class AppearancePreferences(
   val seekbarOpacity = preferenceStore.getFloat("seekbar_opacity", 1.0f)
   val showUnplayedOldVideoLabel = preferenceStore.getBoolean("show_unplayed_old_video_label", true)
   val unplayedOldVideoDays = preferenceStore.getInt("unplayed_old_video_days", 7)
-  val hideScrollbar = preferenceStore.getBoolean("hide_scrollbar", false)
+  val hideScrollbar = preferenceStore.getBoolean("hide_scrollbar", true)
   val seekbarStyle = preferenceStore.getEnum("seekbar_style", SeekbarStyle.CyberLaser)
   val portraitSeekbarPlacement =
     preferenceStore.getEnum("portrait_seekbar_placement", SeekbarPlacement.AboveButtons)
@@ -129,7 +129,7 @@ class AppearancePreferences(
   // Absolute background level: 0.55 keeps each button's designed tint, 1 is opaque, 0 is clear.
   // A new key, because "player_buttons_opacity" stored a multiplier whose 100% kept buttons translucent.
   val playerButtonsBackgroundOpacity = preferenceStore.getFloat("player_buttons_background_opacity", 0.55f)
-  val showMusicTab = preferenceStore.getBoolean("show_music_tab", true)
+  val showMusicTab = preferenceStore.getBoolean("show_music_tab", false)
   val showProfileTab = preferenceStore.getBoolean("show_profile_tab", true)
   val profileName = preferenceStore.getString("profile_name", "")
   val profileImagePath = preferenceStore.getString("profile_image_path", "")

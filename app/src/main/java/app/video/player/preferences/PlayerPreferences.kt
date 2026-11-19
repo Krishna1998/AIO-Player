@@ -139,8 +139,8 @@ class PlayerPreferences(
   val enableIntroDb = preferenceStore.getBoolean("enable_introdb", true)
   val introSegmentProvider = preferenceStore.getEnum("intro_segment_provider", IntroSegmentProvider.HYBRID)
   val detectIntroOutroFromChapters = preferenceStore.getBoolean("detect_intro_outro_from_chapters", true)
-  val autoSkipIntro = preferenceStore.getBoolean("auto_skip_intro", false)
-  val autoSkipOutro = preferenceStore.getBoolean("auto_skip_outro", false)
+  val autoSkipIntro = preferenceStore.getBoolean("auto_skip_intro", true)
+  val autoSkipOutro = preferenceStore.getBoolean("auto_skip_outro", true)
 
   val customIntroKeywordsEnabled = preferenceStore.getBoolean("custom_intro_keywords_enabled", false)
   val customIntroKeywords = preferenceStore.getString("custom_intro_keywords", "")

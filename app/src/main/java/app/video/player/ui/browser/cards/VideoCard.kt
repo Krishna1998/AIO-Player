@@ -98,8 +98,8 @@ data class VideoCardUiConfig(
   val showDurationField: Boolean = true,
   val centerGridTitles: Boolean = false,
   val thumbnailQuality: ThumbnailQuality = ThumbnailQuality.High,
-  val swipeLeft: VideoSwipeAction = VideoSwipeAction.AddToPlaylist,
-  val swipeRight: VideoSwipeAction = VideoSwipeAction.ToggleWatched,
+  val swipeLeft: VideoSwipeAction = VideoSwipeAction.None,
+  val swipeRight: VideoSwipeAction = VideoSwipeAction.None,
   val thumbnailGenerator: app.video.player.preferences.ThumbnailGenerator = app.video.player.preferences.ThumbnailGenerator.Auto,
 )
 

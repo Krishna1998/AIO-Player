@@ -91,8 +91,8 @@ data class FolderCardUiConfig(
   val showFolderThumbnails: Boolean = false,
   val thumbnailQuality: app.video.player.preferences.ThumbnailQuality = app.video.player.preferences.ThumbnailQuality.High,
   val includeAudio: Boolean = false,
-  val swipeLeft: VideoSwipeAction = VideoSwipeAction.AddToPlaylist,
-  val swipeRight: VideoSwipeAction = VideoSwipeAction.ToggleWatched,
+  val swipeLeft: VideoSwipeAction = VideoSwipeAction.None,
+  val swipeRight: VideoSwipeAction = VideoSwipeAction.None,
   val thumbnailGenerator: app.video.player.preferences.ThumbnailGenerator = app.video.player.preferences.ThumbnailGenerator.Auto,
 )
 

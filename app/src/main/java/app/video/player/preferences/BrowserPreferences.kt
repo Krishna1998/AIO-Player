@@ -53,8 +53,8 @@ class BrowserPreferences(
   // Video sorting preferences
   val videoSortType = preferenceStore.getEnum("video_sort_type", VideoSortType.Title)
   val videoSortOrder = preferenceStore.getEnum("video_sort_order", SortOrder.Ascending)
-  val videoSwipeRight = preferenceStore.getEnum("video_swipe_right", VideoSwipeAction.ToggleWatched)
-  val videoSwipeLeft = preferenceStore.getEnum("video_swipe_left", VideoSwipeAction.AddToPlaylist)
+  val videoSwipeRight = preferenceStore.getEnum("video_swipe_right", VideoSwipeAction.None)
+  val videoSwipeLeft = preferenceStore.getEnum("video_swipe_left", VideoSwipeAction.None)
   val videoSwipeRightZonePercent = preferenceStore.getInt("video_swipe_right_zone_percent", DEFAULT_VIDEO_SWIPE_ZONE_PERCENT)
   val videoSwipeLeftZonePercent = preferenceStore.getInt("video_swipe_left_zone_percent", DEFAULT_VIDEO_SWIPE_ZONE_PERCENT)
 
@@ -171,9 +171,9 @@ class BrowserPreferences(
 
   // Maximum single-child folder levels skipped in one Tree View navigation step.
   val treeFlattenDepth = preferenceStore.getEnum("tree_flatten_depth", TreeFlattenDepth.Unlimited)
-  val includeAudioBrowser = preferenceStore.getBoolean("include_audio_browser", true)
+  val includeAudioBrowser = preferenceStore.getBoolean("include_audio_browser", false)
   val includeImagesInBrowser = preferenceStore.getBoolean("include_images_in_browser", false)
-  val minimumAudioDurationSeconds = preferenceStore.getInt("minimum_audio_duration_seconds", 0)
+  val minimumAudioDurationSeconds = preferenceStore.getInt("minimum_audio_duration_seconds", 120)
   val minimumVideoHorizonDurationMinutes = preferenceStore.getInt("minimum_video_horizon_duration_minutes", 0)
   val mediaLibraryType = preferenceStore.getEnum("media_library_type", MediaLibraryType.All)
   val lastPlayedAudioPath = preferenceStore.getString("last_played_audio_path", "")
