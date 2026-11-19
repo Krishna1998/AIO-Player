@@ -973,7 +973,7 @@ fun PlayerControls(
       onOpenPanel = onOpenPanel,
       viewModel = viewModel,
       activity = playerActivity,
-      buttonSize = LandscapeActionSize,
+      buttonSize = LandscapeActionSize * playerButtonsScale.coerceIn(0.7f, 1.4f),
       // Compact rendering belongs to drawer tiles; player controls retain live labels and expansion.
       compact = false,
     )
@@ -1826,7 +1826,7 @@ fun PlayerControls(
                 onClick = viewModel::unlockControls,
                 title = stringResource(R.string.ui_unlock_controls),
                 color = playerButtonContentColor(),
-                modifier = Modifier.size(48.dp),
+                modifier = Modifier.size(48.dp * playerButtonsScale.coerceIn(0.7f, 1.4f)),
               )
             }
           }
@@ -2529,7 +2529,7 @@ fun PlayerControls(
               onOpenPanel = onOpenPanel,
               viewModel = viewModel,
               activity = playerActivity,
-              buttonSize = 44.dp,
+              buttonSize = 44.dp * playerButtonsScale.coerceIn(0.7f, 1.4f),
               compact = true,
             )
           },

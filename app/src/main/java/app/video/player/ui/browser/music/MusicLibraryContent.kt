@@ -250,8 +250,13 @@ fun MusicLibraryContent(
   LaunchedEffect(isSearchActive) {
     if (isSearchActive) searchFocusRequester.requestFocus()
   }
+  var lastHandledSearchTrigger by rememberSaveable { mutableStateOf(NavigationBarState.searchTriggerRequestId) }
+
   LaunchedEffect(NavigationBarState.searchTriggerRequestId) {
-    if (NavigationBarState.searchTriggerRequestId > 0L) {
+    val currentId = NavigationBarState.searchTriggerRequestId
+    if (currentId > 0L && currentId != lastHandledSearchTrigger) {
+      lastHandledSearchTrigger = currentId
+      NavigationBarState.clearSearchTrigger()
       isSearchActive = true
     }
   }
@@ -450,6 +455,7 @@ fun MusicLibraryContent(
       isSearchActive -> {
         isSearchActive = false
         musicViewModel.setSearchQuery("")
+        NavigationBarState.clearSearchTrigger()
       }
       activeSelectionManager.isInSelectionMode -> activeSelectionManager.clear()
     }
@@ -498,6 +504,7 @@ fun MusicLibraryContent(
               IconButton(onClick = {
                 isSearchActive = false
                 musicViewModel.setSearchQuery("")
+                NavigationBarState.clearSearchTrigger()
               }) {
                 Icon(imageVector = Icons.RoundedFilled.ArrowBack, contentDescription = "Back")
               }
@@ -522,7 +529,13 @@ fun MusicLibraryContent(
               onBackClick = null,
               onCancelSelection = { activeSelectionManager.clear() },
               onSortClick = { isSortMenuExpanded = true },
-              onSearchClick = { isSearchActive = true },
+              onSearchClick = {
+                isSearchActive = !isSearchActive
+                if (!isSearchActive) {
+                  musicViewModel.setSearchQuery("")
+                  NavigationBarState.clearSearchTrigger()
+                }
+              },
               onSettingsClick = {
                 backStack.navigateTo(PreferencesScreen)
               },

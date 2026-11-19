@@ -43,6 +43,7 @@ import app.video.player.preferences.preference.collectAsState
 import app.video.player.ui.icons.Icon
 import app.video.player.ui.icons.Icons
 import app.video.player.ui.liquidglass.LiquidPillButton
+import app.video.player.ui.player.controls.components.LocalPlayerButtonScale
 import app.video.player.ui.player.Panels
 import app.video.player.ui.player.PlayerActivity
 import app.video.player.ui.player.PlayerViewModel
@@ -86,7 +87,7 @@ fun TopPlayerControlsPortrait(
             icon = Icons.RoundedFilled.ArrowBack,
             onClick = onBackPress,
             color = playerButtonContentColor(),
-            modifier = Modifier.size(48.dp),
+            modifier = Modifier.size(48.dp * LocalPlayerButtonScale.current.coerceIn(0.7f, 1.4f)),
           )
 
           if (!hideTitle) {
@@ -266,7 +267,7 @@ fun BottomPlayerControlsPortrait(
             activity = activity,
             decoder = decoder,
             playbackSpeed = playbackSpeed,
-            buttonSize = LandscapeActionSize,
+            buttonSize = LandscapeActionSize * LocalPlayerButtonScale.current.coerceIn(0.7f, 1.4f),
           )
         }
         // Unbounded scroll width would stretch a long title pill across the whole row.
@@ -277,7 +278,7 @@ fun BottomPlayerControlsPortrait(
           icon = Icons.RoundedFilled.Hd,
           onClick = { onOpenSheet(Sheets.VideoQuality) },
           title = stringResource(R.string.player_video_quality_button),
-          modifier = Modifier.size(LandscapeActionSize),
+          modifier = Modifier.size(LandscapeActionSize * LocalPlayerButtonScale.current.coerceIn(0.7f, 1.4f)),
         )
       }
     }

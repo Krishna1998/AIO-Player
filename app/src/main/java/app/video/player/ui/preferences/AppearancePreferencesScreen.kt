@@ -534,36 +534,6 @@ object AppearancePreferencesScreen : Screen {
 
                   PreferenceDivider()
 
-                  val playerButtonsScale by preferences.playerButtonsScale.collectAsState()
-                  ExpressivePreferenceItem {
-                    SliderPreference(
-                      modifier = Modifier.settingsSearchTarget(R.string.pref_player_buttons_scale_title),
-                      value = playerButtonsScale,
-                      onValueChange = { preferences.playerButtonsScale.set(it) },
-                      title = {
-                        Text(stringResource(R.string.pref_player_buttons_scale_title))
-                      },
-                      valueRange = 0.70f..1.40f,
-                      valueSteps = 13,
-                      summary = {
-                        val percent = (playerButtonsScale * 100).roundToInt()
-                        val label = if (percent == 100) {
-                          stringResource(R.string.pref_player_buttons_scale_default)
-                        } else {
-                          "$percent%"
-                        }
-                        Text(
-                          label,
-                          color = MaterialTheme.colorScheme.outline,
-                        )
-                      },
-                      onSliderValueChange = { preferences.playerButtonsScale.set(it) },
-                      sliderValue = playerButtonsScale,
-                    )
-                  }
-
-                  PreferenceDivider()
-
                   val animSpeed by playerPreferences.animationSpeed.collectAsState()
                   ExpressivePreferenceItem {
                     Preference(

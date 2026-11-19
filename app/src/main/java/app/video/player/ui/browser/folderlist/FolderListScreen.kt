@@ -286,8 +286,13 @@ object FolderListScreen : Screen {
       if (internalIsSearching) focusRequester.requestFocus()
     }
 
+    var lastHandledSearchTrigger by rememberSaveable { mutableStateOf(NavigationBarState.searchTriggerRequestId) }
+
     LaunchedEffect(NavigationBarState.searchTriggerRequestId) {
-      if (NavigationBarState.searchTriggerRequestId > 0L && !embedded) {
+      val currentId = NavigationBarState.searchTriggerRequestId
+      if (currentId > 0L && currentId != lastHandledSearchTrigger && !embedded) {
+        lastHandledSearchTrigger = currentId
+        NavigationBarState.clearSearchTrigger()
         internalIsSearching = true
       }
     }
@@ -649,6 +654,7 @@ object FolderListScreen : Screen {
         !embedded && internalIsSearching -> {
           internalIsSearching = false
           internalSearchQuery = ""
+          NavigationBarState.clearSearchTrigger()
         }
         isDualPaneActive && selectedFolderBucketId != null -> {
           selectedFolderBucketId = null
@@ -709,6 +715,7 @@ object FolderListScreen : Screen {
                   onClick = {
                     internalIsSearching = false
                     internalSearchQuery = ""
+                    NavigationBarState.clearSearchTrigger()
                   },
                 ) {
                   Icon(
@@ -734,7 +741,10 @@ object FolderListScreen : Screen {
               onSortClick = { sortDialogOpen.value = true },
               onSearchClick = {
                 internalIsSearching = !internalIsSearching
-                if (!internalIsSearching) internalSearchQuery = ""
+                if (!internalIsSearching) {
+                  internalSearchQuery = ""
+                  NavigationBarState.clearSearchTrigger()
+                }
               },
               onSettingsClick = {
                 backstack.navigateTo(app.video.player.ui.preferences.PreferencesScreen)
@@ -956,8 +966,14 @@ object FolderListScreen : Screen {
                           if (!embedded) {
                             internalIsSearching = false
                             internalSearchQuery = ""
+                            NavigationBarState.clearSearchTrigger()
                           }
                         } else {
+                          if (!embedded) {
+                            internalIsSearching = false
+                            internalSearchQuery = ""
+                            NavigationBarState.clearSearchTrigger()
+                          }
                           backstack.navigateTo(
                             app.video.player.ui.browser.videolist
                               .VideoListScreen(folder.bucketId, folder.name, isAudio = audioOnly),

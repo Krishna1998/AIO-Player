@@ -91,6 +91,7 @@ import app.video.player.ui.player.controls.components.AbLoopIcon
 import app.video.player.ui.player.controls.components.ControlsButton
 import app.video.player.ui.player.controls.components.CurrentChapter
 import app.video.player.ui.player.controls.components.LocalBorderlessPlayerControls
+import app.video.player.ui.player.controls.components.LocalPlayerButtonScale
 import app.video.player.ui.player.controls.components.formatSpeed
 import app.video.player.ui.player.controls.components.playerButtonBorderColor
 import app.video.player.ui.player.controls.components.playerButtonContainerColor
@@ -135,7 +136,7 @@ fun RenderPlayerButton(
   onOpenPanel: (Panels) -> Unit,
   viewModel: PlayerViewModel,
   activity: PlayerActivity,
-  buttonSize: Dp = 44.dp,
+  buttonSize: Dp = LandscapeActionSize * LocalPlayerButtonScale.current.coerceIn(0.7f, 1.4f),
   compact: Boolean = false,
 ) {
   PlayerButtonContentTheme {

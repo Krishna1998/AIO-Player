@@ -308,8 +308,13 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
     }
   }
 
+  var lastHandledSearchTrigger by rememberSaveable { mutableStateOf(NavigationBarState.searchTriggerRequestId) }
+
   LaunchedEffect(NavigationBarState.searchTriggerRequestId) {
-    if (NavigationBarState.searchTriggerRequestId > 0L) {
+    val currentId = NavigationBarState.searchTriggerRequestId
+    if (currentId > 0L && currentId != lastHandledSearchTrigger) {
+      lastHandledSearchTrigger = currentId
+      NavigationBarState.clearSearchTrigger()
       isSearching = true
     }
   }
@@ -392,6 +397,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
       isSearching -> {
         isSearching = false
         searchQuery = ""
+        NavigationBarState.clearSearchTrigger()
       }
     }
   }
@@ -440,6 +446,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
               onClick = {
                 isSearching = false
                 searchQuery = ""
+                NavigationBarState.clearSearchTrigger()
               },
             ) {
               Icon(
@@ -467,7 +474,13 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
           onBackClick = null,
           onCancelSelection = { selectionManager.clear() },
           onSortClick = { sortDialogOpen.value = true },
-          onSearchClick = { isSearching = true },
+          onSearchClick = {
+            isSearching = !isSearching
+            if (!isSearching) {
+              searchQuery = ""
+              NavigationBarState.clearSearchTrigger()
+            }
+          },
           onSettingsClick = {
             backstack.navigateTo(app.video.player.ui.preferences.PreferencesScreen)
           },

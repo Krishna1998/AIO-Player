@@ -21,6 +21,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import app.video.player.ui.browser.fab.FabPlacement
 import app.video.player.ui.browser.fab.FabScrollHelper
+import app.video.player.ui.browser.NavigationBarState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -473,6 +474,17 @@ fun FileSystemBrowserScreen(path: String? = null) {
     }
   }
 
+  var lastHandledSearchTrigger by rememberSaveable { mutableStateOf(NavigationBarState.searchTriggerRequestId) }
+
+  LaunchedEffect(NavigationBarState.searchTriggerRequestId) {
+    val currentId = NavigationBarState.searchTriggerRequestId
+    if (currentId > 0L && currentId != lastHandledSearchTrigger) {
+      lastHandledSearchTrigger = currentId
+      NavigationBarState.clearSearchTrigger()
+      isSearching = true
+    }
+  }
+
   LaunchedEffect(searchQuery, isSearching, isAppRoot, items) {
     if (isSearching && searchQuery.isNotBlank()) {
       delay(250)
@@ -527,6 +539,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
       isSearching -> {
         isSearching = false
         searchQuery = ""
+        NavigationBarState.clearSearchTrigger()
       }
     }
   }
@@ -581,6 +594,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
                 onClick = {
                   isSearching = false
                   searchQuery = ""
+                  NavigationBarState.clearSearchTrigger()
                 },
               ) {
                 Icon(
@@ -616,7 +630,13 @@ fun FileSystemBrowserScreen(path: String? = null) {
             onSortClick = { sortDialogOpen.value = true },
             onSearchClick =
               if (isAppRoot) {
-                { isSearching = !isSearching }
+                {
+                  isSearching = !isSearching
+                  if (!isSearching) {
+                    searchQuery = ""
+                    NavigationBarState.clearSearchTrigger()
+                  }
+                }
               } else {
                 null
               },

@@ -100,16 +100,21 @@ These notes are written in plain English and focus on what changed for real use.
 - **5 Glass UI App Themes:** CyberPrism, RossoPrism, AuroraMint, HoloOpal, and SolarAmber.
 - **Slimline HUD Sliders:** Sleek 36dp capsule brightness and volume indicators with 18dp iconography and tabular metrics.
 - **Global Scrollbar Hide Toggle:** Added "Hide scrollbar" preference in **Settings → Appearance** to completely hide the fast scrollbar across Home, Music, and all media browser screens.
-- **Floating Navigation Bar with Companion Search Button:**
+- **Floating Navigation Bar with Harmonized Companion Search Button:**
   - Integrated a circular liquid glass floating search button beside the floating navigation pill, inspired by modern media player aesthetics.
+  - Automatically matches and animates to the exact height and vertical alignment of the floating navigation pill: expands seamlessly when navigation bar labels are shown, and shrinks smoothly to 48dp when labels are hidden.
   - Automatically triggers search with instantaneous input field focus and soft keyboard display across library tabs (Home & Music).
   - Uncluttered Top Bar in Floating Mode: relocates the primary search entry point to the bottom thumb zone, keeping the top app bar clean and spacious.
   - Classic Legacy Mode Preservation: when "Legacy navigation bar" is enabled, the search button remains at its classic top bar location.
+  - **Single-Shot Search Event Lifecycle:** Fixed an issue where closing search and browsing folders or switching between tabs would cause the search bar to automatically re-open upon returning to the Home tab. Handled search requests are now immediately consumed, cleared upon closing, and neutralized on tab changes.
 - **Hide Navigation Bar Labels Toggle:**
   - Added "Hide navigation bar labels" preference in **Settings → Appearance** to display only icons without text labels across both floating pill and legacy navigation bars for an ultra-clean, minimalist aesthetic.
-- **Player Control Button Size Slider:**
-  - Added a dedicated "Player control button size" slider in both **Settings → Appearance** and **Settings → Player Controls & Layout** to smoothly increase or decrease the size of playback controls.
-  - Granular 70% to 140% dynamic scaling (with 100% default reset indicator) dynamically applied across Video Player controls, Audio Player controls (Play/Pause, Previous/Next, and mode actions), and the live Settings layout preview.
+- **Comprehensive Player Control Button Size Slider (Player Layout):**
+  - Added a dedicated "Player control button size" slider exclusively in **Settings → Player Controls & Layout** to smoothly scale playback controls between 70% and 140% (with 100% default reset indicator).
+  - Full-surface scaling across:
+    - **Video Player:** Center playback controls (Play/Pause, Skip Next/Prev), top-right action buttons, bottom-left & bottom-right control clusters, back button, unlock controls button, and drawer action tiles.
+    - **Audio Player:** Center playback controls, top bar (Back button and Info button), bottom action row (Equalizer, Speed pill, Background Playback, Playlist / Up Next), shuffle/repeat toggles, and metadata action buttons.
+    - **Live Settings Preview:** Dynamic real-time preview scaling in the Player Controls & Layout editor.
 - **Interactive Bento Watch & Listen Analytics:** Clickable 7-day activity chart with separate video vs audio breakdowns, atomic session tracking, and 100% offline privacy (zero telemetry).
 
 ### ⚡ Ultra-Lightweight Architecture & Zero Bloat

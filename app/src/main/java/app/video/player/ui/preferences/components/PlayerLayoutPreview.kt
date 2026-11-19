@@ -218,7 +218,7 @@ private fun PreviewScene(
     if (selected) Modifier.background(highlightColor.copy(alpha = 0.14f), highlightShape)
       .border(2.dp, highlightColor, highlightShape) else Modifier
   val previewLandscapeButton: @Composable (PlayerButton) -> Unit = { button ->
-    PreviewIcon(button.icon, LandscapeActionSize)
+    PreviewIcon(button.icon, LandscapeActionSize * scaleFactor)
   }
   val backdrop = rememberLiquidGlassBackdrop()
   val background = Brush.linearGradient(listOf(Color(0xFF112333), Color(0xFF27434A), Color(0xFF10131D)))
@@ -234,7 +234,7 @@ private fun PreviewScene(
           Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(spacing.small),
         ) {
-          PreviewIcon(Icons.RoundedFilled.ArrowBack, 48.dp)
+          PreviewIcon(Icons.RoundedFilled.ArrowBack, 48.dp * scaleFactor)
           if (!hideTitle) {
             Text(
               stringResource(R.string.ui_video_title), color = Color.White,
@@ -246,8 +246,8 @@ private fun PreviewScene(
           LandscapeActionGroup(
             buttons = topRightButtons,
             modifier = Modifier.widthIn(
-              max = (sceneWidth - spacing.large * 2 - LandscapeActionSize - spacing.extraSmall)
-                .coerceAtLeast(LandscapeActionSize),
+              max = (sceneWidth - spacing.large * 2 - LandscapeActionSize * scaleFactor - spacing.extraSmall)
+                .coerceAtLeast(LandscapeActionSize * scaleFactor),
             ).then(highlightRegion(region == ControlRegion.TOP_RIGHT)),
             endAligned = true,
             fillWidth = false,
@@ -365,20 +365,22 @@ private fun PreviewButtons(
       ),
       verticalAlignment = Alignment.CenterVertically,
     ) {
+      val scaleFactor = LocalPlayerButtonScale.current.coerceIn(0.7f, 1.4f)
+      val scaledButtonSize = 48.dp * scaleFactor
       buttons.forEach { button ->
         AdaptiveControlsContainer(
-          onClick = {}, isInteractive = false, buttonSize = 48.dp,
+          onClick = {}, isInteractive = false, buttonSize = scaledButtonSize,
           color = Color.Unspecified,
-          horizontalPadding = if (button == PlayerButton.VIDEO_TITLE || button == PlayerButton.CURRENT_CHAPTER) 12.dp else 0.dp,
-          modifier = if (button == PlayerButton.VIDEO_TITLE || button == PlayerButton.CURRENT_CHAPTER) Modifier else Modifier.size(48.dp),
+          horizontalPadding = if (button == PlayerButton.VIDEO_TITLE || button == PlayerButton.CURRENT_CHAPTER) 12.dp * scaleFactor else 0.dp,
+          modifier = if (button == PlayerButton.VIDEO_TITLE || button == PlayerButton.CURRENT_CHAPTER) Modifier else Modifier.size(scaledButtonSize),
         ) {
           when (button) {
             PlayerButton.VIDEO_TITLE -> Text(stringResource(R.string.ui_video_title), maxLines = 1)
             PlayerButton.CURRENT_CHAPTER -> Text(stringResource(R.string.ui_1_06_chapter_1), maxLines = 1)
-            PlayerButton.AB_LOOP -> AbLoopIcon(Modifier.size(30.dp))
+            PlayerButton.AB_LOOP -> AbLoopIcon(Modifier.size(30.dp * scaleFactor))
             else -> Icon(
               button.icon, null,
-              Modifier.size(24.dp).then(if (button == PlayerButton.VERTICAL_FLIP) Modifier.rotate(90f) else Modifier),
+              Modifier.size(24.dp * scaleFactor).then(if (button == PlayerButton.VERTICAL_FLIP) Modifier.rotate(90f) else Modifier),
             )
           }
         }

@@ -386,6 +386,7 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
     }
 
     val onTabSelected: (MainScreen.MainTab) -> Unit = { tab ->
+      NavigationBarState.clearSearchTrigger()
       val targetIndex = visibleTabs.indexOf(tab)
       val isAlreadySettled =
         targetIndex >= 0 &&
@@ -911,7 +912,17 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
                     label = "pill_alignment",
                   )
 
-                  val searchButtonSize = if (hideNavBarLabels) 48.dp else 52.dp
+                  val compactIcons = androidx.compose.ui.platform.LocalConfiguration.current.smallestScreenWidthDp >= 600
+                  val labelStyle = if (compactIcons) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelMedium
+                  val labelLineCount = if (density.fontScale > 1f) 2 else 1
+                  val labelHeight = with(density) { labelStyle.lineHeight.toDp() } * labelLineCount
+                  val labelFraction by animateFloatAsState(
+                    targetValue = if (hideNavBarLabels) 0f else NavigationBarState.navLabelVisibility,
+                    animationSpec = if (navStyle == NavigationAnimStyle.None) snap() else tween(300, easing = NavigationBarEasing),
+                    label = "navigation_labels",
+                  )
+
+                  val searchButtonSize = 48.dp + labelHeight * labelFraction
 
                   val navModifier = Modifier
                     .layout { measurable, constraints ->
@@ -957,6 +968,7 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
                       hazeBackdrop = navigationBackdrop,
                       kyantBackdrop = liquidNavigationBackdrop,
                       liquidGlassEnabled = liquidGlassEnabled,
+                      labelFraction = labelFraction,
                       modifier = Modifier.weight(1f, fill = false),
                     )
 
@@ -1037,6 +1049,7 @@ internal fun ExpressivePillNavigationBar(
   hazeBackdrop: HazeState? = null,
   kyantBackdrop: Backdrop? = null,
   liquidGlassEnabled: Boolean = false,
+  labelFraction: Float? = null,
 ) {
   if (visibleTabs.isEmpty()) return
 
@@ -1070,13 +1083,14 @@ internal fun ExpressivePillNavigationBar(
   val labelLineCount = if (density.fontScale > 1f) 2 else 1
   val labelHeight = with(density) { labelStyle.lineHeight.toDp() } * labelLineCount
   val hideNavBarLabels by appearancePreferences.hideNavigationBarLabels.collectAsState()
-  val labelFraction by animateFloatAsState(
+  val animatedLabelFraction by animateFloatAsState(
     targetValue = if (hideNavBarLabels) 0f else NavigationBarState.navLabelVisibility,
     animationSpec = if (reducedMotion) snap() else tween(300, easing = NavigationBarEasing),
     label = "navigation_labels",
   )
+  val effectiveLabelFraction = labelFraction ?: animatedLabelFraction
   val dockProgress = NavigationBarState.dockProgress
-  val standaloneCorner = (48.dp + labelHeight * labelFraction) / 2f
+  val standaloneCorner = (48.dp + labelHeight * effectiveLabelFraction) / 2f
   val joiningCorner = standaloneCorner * (1f - dockProgress) + NavigationBarState.connectedDockCorner * dockProgress
   val outsideCorner = standaloneCorner * (1f - dockProgress) + 20.dp * dockProgress
   val navigationShape = if (dockProgress <= 0f) CircleShape else RoundedCornerShape(
@@ -1132,10 +1146,10 @@ internal fun ExpressivePillNavigationBar(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
               ) {
-                Box(Modifier.size(iconSize).graphicsLayer { translationY = 2.dp.toPx() * labelFraction }) {
+                Box(Modifier.size(iconSize).graphicsLayer { translationY = 2.dp.toPx() * effectiveLabelFraction }) {
                   MainTabIcon(tab, contentColor, null, iconSize)
                 }
-                Box(Modifier.height(labelHeight * labelFraction).fillMaxWidth().clipToBounds().graphicsLayer { alpha = labelFraction }) {
+                Box(Modifier.height(labelHeight * effectiveLabelFraction).fillMaxWidth().clipToBounds().graphicsLayer { alpha = effectiveLabelFraction }) {
                 Text(
                   text = label,
                   style = if (active) activeLabelStyle else labelStyle,
@@ -1158,7 +1172,7 @@ internal fun ExpressivePillNavigationBar(
     modifier
       .widthIn(max = NavigationBarState.navigationPillMaxWidth)
       .fillMaxWidth()
-      .height(48.dp + labelHeight * labelFraction)
+      .height(48.dp + labelHeight * effectiveLabelFraction)
       .onSizeChanged { motion.resize(it.width / density.density, it.height / density.density) }
       .onGloballyPositioned { coordinates ->
         // When not hosted inside outer Row with search button, measure pill for mini-player clearance.

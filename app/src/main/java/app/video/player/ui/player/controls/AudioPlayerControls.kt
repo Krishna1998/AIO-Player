@@ -732,6 +732,7 @@ fun AudioPlayerControls(
   val audioPreferences = koinInject<AudioPreferences>()
   val appearancePreferences = koinInject<AppearancePreferences>()
   val playerButtonsScale by appearancePreferences.playerButtonsScale.collectAsState()
+  val audioButtonScale = playerButtonsScale.coerceIn(0.7f, 1.4f)
   val audioWavySeekbar by audioPreferences.audioWavySeekbar.collectAsState()
   val backgroundPlaybackEnabled by audioPreferences.audioBackgroundPlayback.collectAsState()
   val colorScheme = MaterialTheme.colorScheme
@@ -1198,13 +1199,13 @@ fun AudioPlayerControls(
                 highlightAlpha = 0.28f,
                 elevation = 3.dp,
               )
-              .size(42.dp),
+              .size(42.dp * audioButtonScale),
         ) {
           Icon(
             imageVector = if (showInPlaceLyrics || isLyricsFullscreen) Icons.RoundedFilled.ArrowBack else Icons.RoundedFilled.ExpandMore,
             contentDescription = stringResource(if (showInPlaceLyrics || isLyricsFullscreen) R.string.back else R.string.ui_close),
             tint = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.size(if (showInPlaceLyrics || isLyricsFullscreen) 24.dp else 28.dp),
+            modifier = Modifier.size((if (showInPlaceLyrics || isLyricsFullscreen) 24.dp else 28.dp) * audioButtonScale),
           )
         }
 
@@ -1268,13 +1269,13 @@ fun AudioPlayerControls(
                   highlightAlpha = 0.28f,
                   elevation = 3.dp,
                 )
-                .size(42.dp),
+                .size(42.dp * audioButtonScale),
           ) {
             Icon(
               imageVector = Icons.RoundedFilled.Info,
               contentDescription = stringResource(R.string.player_sheets_more_title),
               tint = MaterialTheme.colorScheme.onSurface,
-              modifier = Modifier.size(24.dp),
+              modifier = Modifier.size(24.dp * audioButtonScale),
             )
           }
         }
@@ -1733,13 +1734,13 @@ fun AudioPlayerControls(
                       highlightAlpha = 0.28f,
                       elevation = 3.dp,
                     )
-                    .size(40.dp),
+                    .size(40.dp * audioButtonScale),
               ) {
                 Icon(
                   imageVector = Icons.RoundedFilled.Timer,
                   contentDescription = stringResource(R.string.timer_title),
                   tint = MaterialTheme.colorScheme.onSurface,
-                  modifier = Modifier.size(22.dp),
+                  modifier = Modifier.size(22.dp * audioButtonScale),
                 )
               }
             }
@@ -1787,7 +1788,7 @@ fun AudioPlayerControls(
                     highlightAlpha = if (isCurrentTrackFavorite) 0.40f else 0.28f,
                     elevation = 3.dp,
                   )
-                  .size(40.dp),
+                  .size(40.dp * audioButtonScale),
             ) {
               AnimatedIcon(
                 imageVector = if (isCurrentTrackFavorite) Icons.RoundedFilled.Favorite else Icons.RoundedFilled.FavoriteBorder,
@@ -1795,7 +1796,7 @@ fun AudioPlayerControls(
                   if (isCurrentTrackFavorite) R.string.generic_remove_from_favorites else R.string.notification_add_to_favorites,
                 ),
                 tint = if (isCurrentTrackFavorite) Color(0xFFFF4081) else MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier.size(24.dp * audioButtonScale),
                 reduceMotion = AppMotion.playerReducedMotion(),
               )
             }
@@ -1810,13 +1811,13 @@ fun AudioPlayerControls(
                     highlightAlpha = 0.28f,
                     elevation = 3.dp,
                   )
-                  .size(40.dp),
+                  .size(40.dp * audioButtonScale),
             ) {
               Icon(
                 imageVector = Icons.RoundedFilled.PlaylistAdd,
                 contentDescription = stringResource(R.string.ui_add_to_playlist),
                 tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.size(24.dp),
+                modifier = Modifier.size(24.dp * audioButtonScale),
               )
             }
           }
@@ -2346,7 +2347,7 @@ fun AudioPlayerControls(
           color = Color.Transparent,
           modifier =
             Modifier
-              .height(36.dp)
+              .height(36.dp * audioButtonScale)
               .clip(CircleShape)
               .combinedClickable(
                 enabled = !speedConfigOwned,
@@ -2387,7 +2388,7 @@ fun AudioPlayerControls(
                 } else {
                   MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (speedConfigOwned) 0.38f else 1f)
                 },
-              modifier = Modifier.size(18.dp),
+              modifier = Modifier.size(18.dp * audioButtonScale),
             )
             val speedText = String.format(java.util.Locale.US, "%.2fx", playbackSpeed ?: 1f)
             Text(
@@ -2420,14 +2421,14 @@ fun AudioPlayerControls(
                 highlightAlpha = 0.35f,
                 elevation = 6.dp,
               )
-              .size(48.dp),
+              .size(48.dp * audioButtonScale),
         ) {
           Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
             Icon(
               imageVector = Icons.RoundedFilled.Equalizer,
               contentDescription = "Equalizer",
               tint = MaterialTheme.colorScheme.onSurface.copy(alpha = if (audioFiltersConfigOwned) 0.38f else 1f),
-              modifier = Modifier.size(24.dp),
+              modifier = Modifier.size(24.dp * audioButtonScale),
             )
           }
         }
@@ -2461,12 +2462,13 @@ fun AudioPlayerControls(
                   audioPreferences.audioBackgroundPlayback.set(!backgroundPlaybackEnabled)
                 }
               },
-              modifier = Modifier.size(40.dp),
+              modifier = Modifier.size(40.dp * audioButtonScale),
             ) {
               Icon(
                 imageVector = Icons.RoundedFilled.Headset,
                 contentDescription = stringResource(R.string.btn_label_background_playback),
                 tint = if (backgroundPlaybackEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(24.dp * audioButtonScale),
               )
             }
           }
@@ -2482,14 +2484,14 @@ fun AudioPlayerControls(
                 highlightAlpha = 0.35f,
                 elevation = 6.dp,
               )
-              .size(48.dp),
+              .size(48.dp * audioButtonScale),
         ) {
           Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
             Icon(
               imageVector = Icons.RoundedFilled.QueueMusic,
               contentDescription = if (isAudiobook) stringResource(R.string.audiobook_chapters) else stringResource(R.string.player_up_next_title),
               tint = MaterialTheme.colorScheme.onSurface,
-              modifier = Modifier.size(24.dp),
+              modifier = Modifier.size(24.dp * audioButtonScale),
             )
           }
         }

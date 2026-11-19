@@ -162,6 +162,18 @@ object NavigationBarState {
     searchTriggerRequestId = System.currentTimeMillis()
   }
 
+  fun consumeSearchTrigger(): Boolean {
+    if (searchTriggerRequestId > 0L) {
+      searchTriggerRequestId = 0L
+      return true
+    }
+    return false
+  }
+
+  fun clearSearchTrigger() {
+    searchTriggerRequestId = 0L
+  }
+
   // Scroll-adaptive nav labels: 1f shows icon + label, 0f collapses to icons only so the pill
   // stays legible on narrow screens and gets out of the way while reading a long list.
   var navLabelVisibility: Float by mutableFloatStateOf(1f)

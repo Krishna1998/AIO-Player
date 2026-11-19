@@ -166,15 +166,6 @@ object SearchablePreferences {
       )
       add(
         SearchablePreference(
-          titleRes = R.string.pref_player_buttons_scale_title,
-          summaryRes = R.string.pref_player_buttons_scale_summary,
-          keywords = listOf("scale", "size", "player", "buttons", "controls", "increase", "decrease", "appearance"),
-          category = "Appearance",
-          screen = AppearancePreferencesScreen,
-        ),
-      )
-      add(
-        SearchablePreference(
           titleRes = R.string.pref_anim_speed_title,
           summaryRes = R.string.pref_anim_speed_normal,
           keywords = listOf("animation", "speed", "transition", "motion", "fast", "slow", "appearance"),

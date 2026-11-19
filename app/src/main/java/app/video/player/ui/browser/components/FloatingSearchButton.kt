@@ -128,7 +128,7 @@ fun FloatingSearchButton(
       }
     }
 
-    val iconSize = if (size <= 48.dp) 22.dp else 24.dp
+    val iconSize = (22.dp * (size / 48.dp)).coerceIn(22.dp, 28.dp)
     Icon(
       imageVector = Icons.RoundedFilled.Search,
       contentDescription = stringResource(R.string.settings_search_title),

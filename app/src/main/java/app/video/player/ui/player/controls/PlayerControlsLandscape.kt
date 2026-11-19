@@ -47,6 +47,7 @@ import app.video.player.ui.liquidglass.LiquidPillButton
 import app.video.player.ui.player.PlayerViewModel
 import app.video.player.ui.player.Sheets
 import app.video.player.ui.player.controls.components.ControlsButton
+import app.video.player.ui.player.controls.components.LocalPlayerButtonScale
 import app.video.player.ui.player.controls.components.LocalBorderlessPlayerControls
 import app.video.player.ui.player.controls.components.playerButtonBorderColor
 import app.video.player.ui.player.controls.components.playerButtonContainerColor
@@ -78,7 +79,7 @@ fun TopLeftPlayerControlsLandscape(
           icon = Icons.RoundedFilled.ArrowBack,
           onClick = onBackPress,
           color = playerButtonContentColor(),
-          modifier = Modifier.size(48.dp),
+          modifier = Modifier.size(48.dp * LocalPlayerButtonScale.current.coerceIn(0.7f, 1.4f)),
         )
 
         if (!hideTitle) {
