@@ -134,7 +134,7 @@ fun BentoFusionHeader(
  * Dual-Horizon Rails component
  * Provides two synchronized horizontal media rails:
  * 1. Upper Rail: Cinematic Video Horizon (16:9 thumbnails, resolution badges, duration, progress)
- * 2. Lower Rail: Sonic Soundstage Horizon (album art, lossless badges, duration, artist)
+ * 2. Lower Rail: Sonic Soundstage Horizon (album art, lossless badges, duration)
  */
 @Composable
 fun DualHorizonRails(
@@ -503,7 +503,7 @@ private fun BentoHorizonAudioCard(
         )
 
         Text(
-          text = video.artist.ifBlank { video.album.ifBlank { "Audio Track" } },
+          text = if (video.durationFormatted.isNotBlank()) video.durationFormatted else "Audio Track",
           style = MaterialTheme.typography.bodySmall.copy(
             fontSize = 10.sp,
           ),
