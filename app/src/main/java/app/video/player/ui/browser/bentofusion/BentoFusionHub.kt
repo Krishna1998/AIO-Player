@@ -1493,43 +1493,43 @@ private fun resolveWaveformColors(
 ): Triple<Color, Color, Color> {
   return when (appTheme) {
     AppTheme.StealthAcidLime -> Triple(
-      Color(0xFF0D3B2E), // Deep pine sub-glow
+      Color(0xFF047857), // Luminous emerald pine sub-glow (lighter & vibrant in dark/AMOLED)
       Color(0xFF10B981), // Emerald mint harmonic
       Color(0xFFD4FF00), // Acid Lime crest
     )
     AppTheme.ElectricCyan -> Triple(
-      Color(0xFF082F49), // Deep abyss
+      Color(0xFF0284C7), // Luminous ocean blue (lighter in dark/AMOLED)
       Color(0xFF00B4D8), // Vibrant cyan
       Color(0xFF00F0FF), // Electric cyan crest
     )
     AppTheme.HyperCrimson -> Triple(
-      Color(0xFF4C0519), // Wine velvet
+      Color(0xFF9F1239), // Luminous rose wine (lighter in dark/AMOLED)
       Color(0xFFF43F5E), // Rose coral
       Color(0xFFFF1744), // Hyper Crimson crest
     )
     AppTheme.CyberMagenta -> Triple(
-      Color(0xFF4A044E), // Deep plum
+      Color(0xFF9333EA), // Luminous neon orchid (lighter in dark/AMOLED)
       Color(0xFFE040FB), // Neon orchid
       Color(0xFFFF007F), // Cyber magenta crest
     )
     AppTheme.QuantumViolet -> Triple(
-      Color(0xFF2E1065), // Deep violet
+      Color(0xFF6D28D9), // Luminous royal violet (lighter in dark/AMOLED)
       Color(0xFF7C4DFF), // Purple harmonic
       Color(0xFFB388FF), // Quantum lavender crest
     )
     AppTheme.SolarGold -> Triple(
-      Color(0xFF451A03), // Deep bronze
+      Color(0xFFB45309), // Warm amber bronze (lighter in dark/AMOLED)
       Color(0xFFF59E0B), // Warm amber
       Color(0xFFFFD600), // Solar gold crest
     )
     AppTheme.CyberPrism -> Triple(
-      Color(0xFF1E1B4B), // Deep indigo
+      Color(0xFF4338CA), // Luminous royal indigo (lighter in dark/AMOLED)
       Color(0xFF8B5CF6), // Electric violet
       Color(0xFF00F5FF), // Prism cyan crest
     )
     AppTheme.RossoPrism,
     AppTheme.Doom -> Triple(
-      Color(0xFF4C0519), // Wine velvet
+      Color(0xFF9F1239), // Luminous crimson wine (lighter in dark/AMOLED)
       Color(0xFFFF2A6D), // Hot pink
       Color(0xFFFF003C), // Rosso neon crest
     )
@@ -1537,18 +1537,18 @@ private fun resolveWaveformColors(
     AppTheme.GreenApple,
     AppTheme.TakoGreen,
     AppTheme.Forest -> Triple(
-      Color(0xFF052E16), // Deep forest
+      Color(0xFF047857), // Luminous emerald jade (lighter in dark/AMOLED)
       Color(0xFF10B981), // Emerald mint
       Color(0xFF00F5D4), // Bright neon jade crest
     )
     AppTheme.HoloOpal,
     AppTheme.Lavender -> Triple(
-      Color(0xFF2E1065), // Deep violet
+      Color(0xFF5B21B6), // Luminous lavender violet (lighter in dark/AMOLED)
       Color(0xFF38BDF8), // Sky blue
       Color(0xFFA855F7), // Opal purple crest
     )
     AppTheme.CottonCandy -> Triple(
-      Color(0xFF3B1238), // Deep berry
+      Color(0xFF86198F), // Luminous berry fuchsia (lighter in dark/AMOLED)
       Color(0xFFDEB0E9), // Orchid mist
       Color(0xFFFFB1D5), // Cotton candy pink crest
     )
@@ -1556,12 +1556,12 @@ private fun resolveWaveformColors(
     AppTheme.Sunset,
     AppTheme.Amber,
     AppTheme.Cloudflare -> Triple(
-      Color(0xFF431407), // Deep amber
+      Color(0xFFC2410C), // Luminous burnt amber (lighter in dark/AMOLED)
       Color(0xFFEA580C), // Blaze orange
       Color(0xFFFDE047), // Radiant gold crest
     )
     AppTheme.CrimsonSonic -> Triple(
-      Color(0xFF3B0764), // Deep indigo
+      Color(0xFF6B21A8), // Luminous royal violet (lighter in dark/AMOLED)
       Color(0xFFFF2A6D), // Sonic crimson
       Color(0xFF00F5FF), // Cyan spark crest
     )
@@ -1573,55 +1573,55 @@ private fun resolveWaveformColors(
     AppTheme.Ocean,
     AppTheme.Tidal,
     AppTheme.Aurora -> Triple(
-      Color(0xFF1E1B4B), // Deep Midnight Indigo (One UI 9 Liquid Aura signature)
+      Color(0xFF4338CA), // One UI 9 Liquid Aura: Luminous Royal Indigo (lighter & visible in dark/AMOLED)
       Color(0xFF8B5CF6), // Electric Violet harmonic
       Color(0xFF38BDF8), // Galaxy Sky Cyan crest
     )
     AppTheme.Monochrome,
     AppTheme.Slate,
     AppTheme.YinYang -> Triple(
-      Color(0xFF1E293B), // Deep slate
+      Color(0xFF475569), // Luminous cool steel slate (lighter in dark/AMOLED)
       Color(0xFF94A3B8), // Cool steel
       Color(0xFFF8FAFC), // Platinum white crest
     )
     AppTheme.Mocha,
     AppTheme.Gruvbox -> Triple(
-      Color(0xFF2E1A11), // Deep roasted espresso
+      Color(0xFF6D4C41), // Luminous warm caramel mocha (lighter in dark/AMOLED)
       Color(0xFFA1887F), // Soft caramel mocha
       Color(0xFFE0BB95), // Warm latte froth crest
     )
     AppTheme.RoseGold,
     AppTheme.RosePine,
     AppTheme.Strawberry -> Triple(
-      Color(0xFF4A102F), // Deep wine berry
+      Color(0xFF9D174D), // Luminous rose berry (lighter in dark/AMOLED)
       Color(0xFFDB2777), // Vibrant rose
       Color(0xFFF472B6), // Light rose gold crest
     )
     AppTheme.Dracula -> Triple(
-      Color(0xFF21222C), // Dracula dark
+      Color(0xFF4D5B86), // Luminous Dracula purple-slate (lighter in dark/AMOLED)
       Color(0xFFBD93F9), // Purple harmonic
       Color(0xFF50FA7B), // Neon green crest
     )
     AppTheme.Coral -> Triple(
-      Color(0xFF431407), // Deep coral brown
+      Color(0xFFBE123C), // Luminous rose coral (lighter in dark/AMOLED)
       Color(0xFFF43F5E), // Rose coral
       Color(0xFFFDA4AF), // Light coral crest
     )
     AppTheme.Violet -> Triple(
-      Color(0xFF2E1065), // Deep violet
+      Color(0xFF6D28D9), // Luminous royal violet (lighter in dark/AMOLED)
       Color(0xFF8B5CF6), // Violet mid
       Color(0xFFD8B4FE), // Light violet crest
     )
     AppTheme.Kanagawa -> Triple(
-      Color(0xFF1E2836), // Kanagawa deep wave
+      Color(0xFF364860), // Luminous Fuji wave slate (lighter in dark/AMOLED)
       Color(0xFF98BB6C), // Spring green
       Color(0xFF7E9CD8), // Fuji blue crest
     )
     else -> {
-      // Dynamic Monet or unlisted: derive directly from runtime ColorScheme
+      // Dynamic Monet or unlisted: derive directly from runtime ColorScheme with lightened contrast
       val w3 = colorScheme.primary
       val w2 = colorScheme.tertiary
-      val w1 = colorScheme.secondary.copy(alpha = 0.50f).compositeOver(Color(0xFF0A0D14))
+      val w1 = colorScheme.secondary
       Triple(w1, w2, w3)
     }
   }
@@ -1637,7 +1637,7 @@ private fun resolveWaveformColors(
 @Composable
 fun OneUi9WaveformVisualizer(
   modifier: Modifier = Modifier,
-  wave1Color: Color = Color(0xFF1E1B4B), // One UI 9 Liquid Aura: Deep Midnight Indigo (1st wave: bass veil)
+  wave1Color: Color = Color(0xFF4338CA), // One UI 9 Liquid Aura: Luminous Royal Indigo (1st wave: bass veil)
   wave2Color: Color = Color(0xFF8B5CF6), // One UI 9 Liquid Aura: Electric Violet (2nd wave: mid veil)
   wave3Color: Color = Color(0xFF38BDF8), // One UI 9 Liquid Aura: Galaxy Sky Cyan (Last wave: lead crest)
 ) {
@@ -1770,17 +1770,17 @@ fun OneUi9WaveformVisualizer(
       }
     }
 
-    // Layer 1: Ambient Deep Bass Veil (soft background rolling harmonic wave - 1st wave)
+    // Layer 1: Ambient Luminous Bass Veil (soft background rolling harmonic wave - 1st wave)
     drawWaveRibbon(
       wavelength = 92.dp.toPx(),
       lift = availableLift * 0.95f,
       phaseOffset = phase1,
-      fillTopColor = wave1Color.copy(alpha = 0.28f),
-      fillBottomColor = wave1Color.copy(alpha = 0.04f),
-      strokeColor = wave1Color.copy(alpha = 0.55f),
-      strokeWidth = 1.2.dp.toPx(),
-      glowColor = wave1Color.copy(alpha = 0.28f),
-      glowWidth = 4.dp.toPx(),
+      fillTopColor = wave1Color.copy(alpha = 0.38f),
+      fillBottomColor = wave1Color.copy(alpha = 0.08f),
+      strokeColor = wave1Color.copy(alpha = 0.78f),
+      strokeWidth = 1.4.dp.toPx(),
+      glowColor = wave1Color.copy(alpha = 0.40f),
+      glowWidth = 5.dp.toPx(),
     )
 
     // Layer 2: Harmonic Mid Veil (vibrant gradient curtain - 2nd wave)
@@ -1788,11 +1788,11 @@ fun OneUi9WaveformVisualizer(
       wavelength = 62.dp.toPx(),
       lift = availableLift * 0.80f,
       phaseOffset = phase2,
-      fillTopColor = wave2Color.copy(alpha = 0.40f),
-      fillBottomColor = wave1Color.copy(alpha = 0.06f),
-      strokeColor = wave2Color.copy(alpha = 0.85f),
+      fillTopColor = wave2Color.copy(alpha = 0.42f),
+      fillBottomColor = wave1Color.copy(alpha = 0.10f),
+      strokeColor = wave2Color.copy(alpha = 0.88f),
       strokeWidth = 1.6.dp.toPx(),
-      glowColor = wave2Color.copy(alpha = 0.35f),
+      glowColor = wave2Color.copy(alpha = 0.38f),
       glowWidth = 5.5.dp.toPx(),
     )
 
