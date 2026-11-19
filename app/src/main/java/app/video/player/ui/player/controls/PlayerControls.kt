@@ -166,6 +166,7 @@ import app.video.player.ui.icons.LocalIconShadow
 import app.video.player.ui.player.controls.components.LocalBorderlessPlayerControls
 import app.video.player.ui.player.controls.components.LocalForceDarkPlayerButtonsBackground
 import app.video.player.ui.player.controls.components.LocalPlayerButtonAlpha
+import app.video.player.ui.player.controls.components.LocalPlayerButtonScale
 import app.video.player.ui.player.controls.components.LocalPlayerButtonsOpacity
 import app.video.player.ui.player.controls.components.asPlayerButtonBackground
 import app.video.player.ui.player.controls.components.MediaScopesOverlay
@@ -420,6 +421,7 @@ fun PlayerControls(
   val hidePlayerButtonsBackground by appearancePreferences.hidePlayerButtonsBackground.collectAsState()
   val hideVideoTitle by appearancePreferences.hideVideoTitle.collectAsState()
   val playerButtonsOpacity by appearancePreferences.playerButtonsOpacity.collectAsState()
+  val playerButtonsScale by appearancePreferences.playerButtonsScale.collectAsState()
   val playerPreferences = koinInject<PlayerPreferences>()
   val gesturePreferences = koinInject<GesturePreferences>()
   val reduceMotion by playerPreferences.reduceMotion.collectAsState()
@@ -819,6 +821,7 @@ fun PlayerControls(
       LocalForceDarkPlayerButtonsBackground provides forceDarkButtonBackground,
       LocalPlayerButtonsOpacity provides playerButtonsBackgroundOpacity.coerceIn(0f, 1f),
       LocalPlayerButtonAlpha provides playerButtonsOpacity.coerceIn(0f, 1f),
+      LocalPlayerButtonScale provides playerButtonsScale.coerceIn(0.7f, 1.4f),
       LocalBorderlessPlayerControls provides hidePlayerButtonsBackground,
       LocalIconShadow provides hidePlayerButtonsBackground,
     ) {
@@ -1023,6 +1026,7 @@ fun PlayerControls(
     LocalForceDarkPlayerButtonsBackground provides forceDarkButtonBackground,
     LocalPlayerButtonsOpacity provides playerButtonsBackgroundOpacity.coerceIn(0f, 1f),
     LocalPlayerButtonAlpha provides playerButtonsOpacity.coerceIn(0f, 1f),
+    LocalPlayerButtonScale provides playerButtonsScale.coerceIn(0.7f, 1.4f),
     LocalBorderlessPlayerControls provides hidePlayerButtonsBackground,
     LocalIconShadow provides hidePlayerButtonsBackground,
   ) {
@@ -1175,9 +1179,10 @@ fun PlayerControls(
             spacing = spacing,
             landscape = sharedLandscapeRow,
           )
-          val playPauseSize = playbackGeometry.playPauseSize
-          val skipButtonSize = playbackGeometry.skipButtonSize
-          val playbackButtonGap = playbackGeometry.buttonGap
+          val buttonScaleFactor = playerButtonsScale.coerceIn(0.7f, 1.4f)
+          val playPauseSize = playbackGeometry.playPauseSize * buttonScaleFactor
+          val skipButtonSize = playbackGeometry.skipButtonSize * buttonScaleFactor
+          val playbackButtonGap = playbackGeometry.buttonGap * buttonScaleFactor
           val playbackShadowRoom = if (enableLiquidGlass) 8.dp else 0.dp
           val fullWidthPlaybackRow = isPortrait && hasPlaylistControls
           val landscapePlaybackWidth =

@@ -1104,7 +1104,7 @@ internal fun ExpressivePillNavigationBar(
   val accentColor = MaterialTheme.colorScheme.primary
   val mutedColor = MaterialTheme.colorScheme.onSurfaceVariant
   val selectedSurface = MaterialTheme.colorScheme.secondaryContainer
-  val selectedContent = MaterialTheme.colorScheme.onSecondaryContainer
+  val selectedContent = MaterialTheme.colorScheme.primary
 
   val tabRow: @Composable (Boolean) -> Unit = { active ->
       Row(

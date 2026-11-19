@@ -107,6 +107,9 @@ These notes are written in plain English and focus on what changed for real use.
   - Classic Legacy Mode Preservation: when "Legacy navigation bar" is enabled, the search button remains at its classic top bar location.
 - **Hide Navigation Bar Labels Toggle:**
   - Added "Hide navigation bar labels" preference in **Settings → Appearance** to display only icons without text labels across both floating pill and legacy navigation bars for an ultra-clean, minimalist aesthetic.
+- **Player Control Button Size Slider:**
+  - Added a dedicated "Player control button size" slider in both **Settings → Appearance** and **Settings → Player Controls & Layout** to smoothly increase or decrease the size of playback controls.
+  - Granular 70% to 140% dynamic scaling (with 100% default reset indicator) dynamically applied across Video Player controls, Audio Player controls (Play/Pause, Previous/Next, and mode actions), and the live Settings layout preview.
 - **Interactive Bento Watch & Listen Analytics:** Clickable 7-day activity chart with separate video vs audio breakdowns, atomic session tracking, and 100% offline privacy (zero telemetry).
 
 ### ⚡ Ultra-Lightweight Architecture & Zero Bloat

@@ -731,6 +731,7 @@ fun AudioPlayerControls(
 
   val audioPreferences = koinInject<AudioPreferences>()
   val appearancePreferences = koinInject<AppearancePreferences>()
+  val playerButtonsScale by appearancePreferences.playerButtonsScale.collectAsState()
   val audioWavySeekbar by audioPreferences.audioWavySeekbar.collectAsState()
   val backgroundPlaybackEnabled by audioPreferences.audioBackgroundPlayback.collectAsState()
   val colorScheme = MaterialTheme.colorScheme
@@ -2198,6 +2199,7 @@ fun AudioPlayerControls(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
       ) {
+        val audioButtonScale = playerButtonsScale.coerceIn(0.7f, 1.4f)
         ReactiveIconButton(
           onClick = {
             if (isAudiobook) viewModel.stepPlaybackChapter(-1) else viewModel.playPrevious()
@@ -2211,7 +2213,7 @@ fun AudioPlayerControls(
                 highlightAlpha = 0.22f,
                 elevation = 2.dp,
               )
-              .size(if (isAudiobook) 48.dp else 56.dp),
+              .size((if (isAudiobook) 48.dp else 56.dp) * audioButtonScale),
         ) {
           Icon(
             imageVector = Icons.RoundedFilled.SkipPrevious,
@@ -2222,11 +2224,16 @@ fun AudioPlayerControls(
               } else {
                 MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
               },
-            modifier = Modifier.size(if (isAudiobook) 28.dp else 38.dp),
+            modifier = Modifier.size((if (isAudiobook) 28.dp else 38.dp) * audioButtonScale),
           )
         }
         if (isAudiobook) {
-          AudioSeekButton(forward = false, seconds = 30, enabled = canSeek) {
+          AudioSeekButton(
+            forward = false,
+            seconds = 30,
+            enabled = canSeek,
+            modifier = Modifier.size(48.dp * audioButtonScale),
+          ) {
             viewModel.seekBy(-30)
             actionHaptics.confirm()
           }
@@ -2250,7 +2257,7 @@ fun AudioPlayerControls(
                 ),
                 CircleShape,
               )
-              .size(if (isPortrait) 76.dp else 64.dp),
+              .size((if (isPortrait) 76.dp else 64.dp) * audioButtonScale),
           shadowElevation = 0.dp,
         ) {
           Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
@@ -2258,13 +2265,18 @@ fun AudioPlayerControls(
               imageVector = if (isPlaying) Icons.RoundedFilled.Pause else Icons.RoundedFilled.PlayArrow,
               contentDescription = stringResource(if (isPlaying) R.string.audiobook_pause else R.string.ui_play),
               tint = MaterialTheme.colorScheme.onPrimary,
-              modifier = Modifier.size(if (isPortrait) 44.dp else 36.dp),
+              modifier = Modifier.size((if (isPortrait) 44.dp else 36.dp) * audioButtonScale),
               reduceMotion = AppMotion.playerReducedMotion(),
             )
           }
         }
         if (isAudiobook) {
-          AudioSeekButton(forward = true, seconds = 30, enabled = canSeek) {
+          AudioSeekButton(
+            forward = true,
+            seconds = 30,
+            enabled = canSeek,
+            modifier = Modifier.size(48.dp * audioButtonScale),
+          ) {
             viewModel.seekBy(30)
             actionHaptics.confirm()
           }
@@ -2282,7 +2294,7 @@ fun AudioPlayerControls(
                 highlightAlpha = 0.22f,
                 elevation = 2.dp,
               )
-              .size(if (isAudiobook) 48.dp else 56.dp),
+              .size((if (isAudiobook) 48.dp else 56.dp) * audioButtonScale),
         ) {
           Icon(
             imageVector = Icons.RoundedFilled.SkipNext,
@@ -2293,28 +2305,30 @@ fun AudioPlayerControls(
               } else {
                 MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
               },
-            modifier = Modifier.size(if (isAudiobook) 28.dp else 38.dp),
+            modifier = Modifier.size((if (isAudiobook) 28.dp else 38.dp) * audioButtonScale),
           )
         }
       }
     }
 
     val playbackModeButtons = @Composable {
+      val audioButtonScale = playerButtonsScale.coerceIn(0.7f, 1.4f)
+      val modeButtonSize = 40.dp * audioButtonScale
       if (isAudiobook) {
-        ReactiveIconButton(onClick = { onOpenSheet(Sheets.AudiobookRewind) }, modifier = Modifier.size(40.dp)) {
+        ReactiveIconButton(onClick = { onOpenSheet(Sheets.AudiobookRewind) }, modifier = Modifier.size(modeButtonSize)) {
           Icon(Icons.RoundedFilled.Replay, stringResource(R.string.audiobook_smart_rewind), tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
       } else {
         ReactiveIconButton(
           onClick = { viewModel.toggleShuffle(); actionHaptics.selection(!shuffleEnabled) },
           enabled = playlistModeEnabled,
-          modifier = Modifier.size(40.dp),
+          modifier = Modifier.size(modeButtonSize),
         ) {
           AnimatedIcon(if (shuffleEnabled) Icons.RoundedFilled.ShuffleOn else Icons.RoundedFilled.Shuffle, null,
             tint = if (shuffleEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             reduceMotion = AppMotion.playerReducedMotion())
         }
-        ReactiveIconButton(onClick = { viewModel.cycleRepeatMode(); actionHaptics.confirm() }, modifier = Modifier.size(40.dp)) {
+        ReactiveIconButton(onClick = { viewModel.cycleRepeatMode(); actionHaptics.confirm() }, modifier = Modifier.size(modeButtonSize)) {
           AnimatedIcon(when (repeatMode) {
             RepeatMode.OFF -> Icons.RoundedFilled.Repeat
             RepeatMode.ONE -> Icons.RoundedFilled.RepeatOne

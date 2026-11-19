@@ -42,6 +42,9 @@ internal val LocalPlayerButtonsOpacity = staticCompositionLocalOf { PlayerButton
 @Suppress("CompositionLocalAllowlist")
 internal val LocalPlayerButtonAlpha = staticCompositionLocalOf { 1.0f }
 
+@Suppress("CompositionLocalAllowlist")
+internal val LocalPlayerButtonScale = staticCompositionLocalOf { 1.0f }
+
 /** This color with its alpha mapped through the player button background-opacity setting. */
 @Composable
 internal fun Color.asPlayerButtonBackground(): Color =
@@ -76,6 +79,7 @@ fun ControlsButton(
   enabled: Boolean = true,
   onLongClickLabel: String? = null,
 ) {
+  val scale = LocalPlayerButtonScale.current.coerceIn(0.7f, 1.4f)
   AdaptiveControlsButton(
     onClick = onClick,
     modifier = modifier,
@@ -87,7 +91,7 @@ fun ControlsButton(
     onLongClickLabel = onLongClickLabel,
     borderless = LocalBorderlessPlayerControls.current,
     useGlass = true,
-    buttonSize = PlayerLiquidTokens.ButtonSize,
+    buttonSize = PlayerLiquidTokens.ButtonSize * scale,
   )
 }
 

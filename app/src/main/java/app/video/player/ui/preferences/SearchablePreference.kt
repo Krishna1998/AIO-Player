@@ -166,6 +166,15 @@ object SearchablePreferences {
       )
       add(
         SearchablePreference(
+          titleRes = R.string.pref_player_buttons_scale_title,
+          summaryRes = R.string.pref_player_buttons_scale_summary,
+          keywords = listOf("scale", "size", "player", "buttons", "controls", "increase", "decrease", "appearance"),
+          category = "Appearance",
+          screen = AppearancePreferencesScreen,
+        ),
+      )
+      add(
+        SearchablePreference(
           titleRes = R.string.pref_anim_speed_title,
           summaryRes = R.string.pref_anim_speed_normal,
           keywords = listOf("animation", "speed", "transition", "motion", "fast", "slow", "appearance"),
@@ -1372,6 +1381,7 @@ object SearchablePreferences {
         screen = PlayerControlsPreferencesScreen,
         anchorItemIndex = 7,
         SearchEntrySpec(R.string.pref_player_buttons_overall_opacity, listOf("opacity", "button", "buttons", "alpha", "transparency", "controls")),
+        SearchEntrySpec(R.string.pref_player_buttons_scale_title, listOf("scale", "size", "button", "buttons", "controls", "player")),
         SearchEntrySpec(R.string.pref_seekbar_opacity, listOf("opacity", "seekbar", "progress", "slider", "alpha", "transparency")),
         SearchEntrySpec(R.string.pref_hide_video_title_title, listOf("title", "filename", "file name", "hide", "video title", "name")),
         SearchEntrySpec(R.string.pref_hide_player_buttons_background_title, listOf("hide", "background", "borderless", "button", "buttons", "circle", "container", "transparent")),

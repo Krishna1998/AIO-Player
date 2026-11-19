@@ -45,6 +45,7 @@ import app.video.player.ui.player.controls.LocalPlayerButtonsClickEvent
 import app.video.player.ui.player.controls.PlayerButtonAlpha
 import app.video.player.ui.player.controls.components.LocalBorderlessPlayerControls
 import app.video.player.ui.player.controls.components.LocalPlayerButtonAlpha
+import app.video.player.ui.player.controls.components.LocalPlayerButtonScale
 import app.video.player.ui.player.controls.components.LocalPlayerButtonsOpacity
 import app.video.player.ui.player.controls.components.asPlayerButtonBackground
 import app.video.player.ui.player.controls.components.playerButtonBorderColor
@@ -74,17 +75,20 @@ fun AdaptiveControlsButton(
   onLongClickLabel: String? = null,
   borderless: Boolean? = null,
 ) {
+  val scale = LocalPlayerButtonScale.current.coerceIn(0.7f, 1.4f)
+  val effectiveButtonSize = if (buttonSize == PlayerLiquidTokens.ButtonSize) buttonSize * scale else buttonSize
+  val effectiveIconSize = PlayerLiquidTokens.IconSize * scale
   AdaptiveControlsContainer(
     onClick = onClick,
-    modifier = modifier.widthIn(min = buttonSize),
+    modifier = modifier.widthIn(min = effectiveButtonSize),
     onLongClick = onLongClick,
     color = color ?: Color.Unspecified,
     surfaceColor = surfaceColor,
     useGlass = useGlass,
     borderless = borderless ?: LocalBorderlessPlayerControls.current,
-    buttonSize = buttonSize,
-    spacing = 4.dp,
-    horizontalPadding = if (text != null) 8.dp else 0.dp,
+    buttonSize = effectiveButtonSize,
+    spacing = 4.dp * scale,
+    horizontalPadding = if (text != null) 8.dp * scale else 0.dp,
     backdrop = backdrop,
     enabled = enabled,
     onLongClickLabel = onLongClickLabel,
@@ -94,7 +98,7 @@ fun AdaptiveControlsButton(
         imageVector = icon,
         contentDescription = title ?: text,
         tint = LocalContentColor.current,
-        modifier = Modifier.size(PlayerLiquidTokens.IconSize),
+        modifier = Modifier.size(effectiveIconSize),
         reduceMotion = AppMotion.shouldReduceMotion(),
       )
     }

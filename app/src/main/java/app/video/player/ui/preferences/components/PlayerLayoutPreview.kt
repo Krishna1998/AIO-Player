@@ -71,6 +71,7 @@ import app.video.player.ui.player.controls.components.AbLoopIcon
 import app.video.player.ui.player.controls.components.LocalBorderlessPlayerControls
 import app.video.player.ui.player.controls.components.LocalForceDarkPlayerButtonsBackground
 import app.video.player.ui.player.controls.components.LocalPlayerButtonAlpha
+import app.video.player.ui.player.controls.components.LocalPlayerButtonScale
 import app.video.player.ui.player.controls.components.LocalPlayerButtonsOpacity
 import app.video.player.ui.player.controls.components.SeekbarStylePreview
 import app.video.player.ui.player.controls.components.fadingHorizontalScroll
@@ -100,6 +101,7 @@ internal fun PlayerLayoutPreview(
   val opacity by appearance.playerButtonsBackgroundOpacity.collectAsState()
   val hideBackground by appearance.hidePlayerButtonsBackground.collectAsState()
   val buttonAlpha by appearance.playerButtonsOpacity.collectAsState()
+  val buttonScale by appearance.playerButtonsScale.collectAsState()
   val seekbarOpacity by appearance.seekbarOpacity.collectAsState()
   val hideTitle by appearance.hideVideoTitle.collectAsState()
   val seekbarStyle by appearance.seekbarStyle.collectAsState()
@@ -149,6 +151,7 @@ internal fun PlayerLayoutPreview(
               LocalForceDarkPlayerButtonsBackground provides forceDark,
               LocalPlayerButtonsOpacity provides opacity,
               LocalPlayerButtonAlpha provides buttonAlpha,
+              LocalPlayerButtonScale provides buttonScale.coerceIn(0.7f, 1.4f),
               LocalBorderlessPlayerControls provides hideBackground,
               LocalIconShadow provides hideBackground,
             ) {
@@ -199,7 +202,13 @@ private fun PreviewScene(
     if (region.isPortrait) portraitBottomButtons.isNotEmpty()
     else bottomRightButtons.isNotEmpty() || bottomLeftButtons.isNotEmpty()
   val sharedLandscapeRow = !region.isPortrait && playbackControlsPlacement != PlaybackControlsPlacement.Center
-  val geometry = resolvePlaybackControlsGeometry(sceneWidth, spacing, landscape = sharedLandscapeRow)
+  val scaleFactor = LocalPlayerButtonScale.current.coerceIn(0.7f, 1.4f)
+  val rawGeometry = resolvePlaybackControlsGeometry(sceneWidth, spacing, landscape = sharedLandscapeRow)
+  val geometry = rawGeometry.copy(
+    playPauseSize = rawGeometry.playPauseSize * scaleFactor,
+    skipButtonSize = rawGeometry.skipButtonSize * scaleFactor,
+    buttonGap = rawGeometry.buttonGap * scaleFactor,
+  )
   val layout = resolveBottomControlsLayout(
     preset.seekbarPlacement, hasActions, playbackControlsPlacement, sharedLandscapeRow = sharedLandscapeRow,
   )

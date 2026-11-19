@@ -310,6 +310,7 @@ object PlayerControlsPreferencesScreen : Screen {
             val hidePlayerButtonsBackground by appearancePrefs.hidePlayerButtonsBackground.collectAsState()
             val hideVideoTitle by appearancePrefs.hideVideoTitle.collectAsState()
             val playerButtonsOpacity by appearancePrefs.playerButtonsOpacity.collectAsState()
+            val playerButtonsScale by appearancePrefs.playerButtonsScale.collectAsState()
             val seekbarOpacity by appearancePrefs.seekbarOpacity.collectAsState()
             val storedPlayerTimeToDisappear by playerPrefs.playerTimeToDisappear.collectAsState()
             val playerTimeToDisappear =
@@ -338,6 +339,35 @@ object PlayerControlsPreferencesScreen : Screen {
                     summary = {
                       Text(
                         text = "${(playerButtonsOpacity.coerceIn(0f, 1f) * 100).roundToInt()}%",
+                        color = MaterialTheme.colorScheme.outline,
+                      )
+                    },
+                  )
+                }
+
+                PreferenceDivider()
+              }
+
+              DevicePreference(R.string.pref_player_buttons_scale_title) {
+                ExpressivePreferenceItem(standalone = true) {
+                  AppSliderPreference(
+                    modifier = Modifier.settingsSearchTarget(R.string.pref_player_buttons_scale_title),
+                    value = playerButtonsScale,
+                    onValueChange = { appearancePrefs.playerButtonsScale.set(it) },
+                    sliderValue = playerButtonsScale,
+                    onSliderValueChange = { appearancePrefs.playerButtonsScale.set(it) },
+                    valueRange = 0.70f..1.40f,
+                    valueSteps = 13,
+                    title = { Text(stringResource(R.string.pref_player_buttons_scale_title)) },
+                    summary = {
+                      val percent = (playerButtonsScale.coerceIn(0.7f, 1.4f) * 100).roundToInt()
+                      val label = if (percent == 100) {
+                        stringResource(R.string.pref_player_buttons_scale_default)
+                      } else {
+                        "$percent%"
+                      }
+                      Text(
+                        text = label,
                         color = MaterialTheme.colorScheme.outline,
                       )
                     },
