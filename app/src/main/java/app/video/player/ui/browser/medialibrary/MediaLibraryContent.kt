@@ -319,6 +319,14 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
     }
   }
 
+  LaunchedEffect(NavigationBarState.dismissSearchRequestId) {
+    if (NavigationBarState.dismissSearchRequestId > 0L) {
+      isSearching = false
+      searchQuery = ""
+      keyboardController?.hide()
+    }
+  }
+
   LaunchedEffect(includeAudioBrowser, savedMediaType, forceAudio) {
     if (!forceAudio && !includeAudioBrowser && savedMediaType != MediaLibraryType.Video) {
       browserPreferences.mediaLibraryType.set(MediaLibraryType.Video)

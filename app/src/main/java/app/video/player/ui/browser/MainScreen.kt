@@ -387,6 +387,9 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
 
     val onTabSelected: (MainScreen.MainTab) -> Unit = { tab ->
       NavigationBarState.clearSearchTrigger()
+      if (tab == MainTab.HOME) {
+        NavigationBarState.dismissSearch()
+      }
       val targetIndex = visibleTabs.indexOf(tab)
       val isAlreadySettled =
         targetIndex >= 0 &&

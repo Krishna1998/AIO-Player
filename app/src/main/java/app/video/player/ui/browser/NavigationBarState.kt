@@ -180,6 +180,15 @@ object NavigationBarState {
     triggerHomeSearch()
   }
 
+  // Signal to dismiss/close search and return to browse content
+  var dismissSearchRequestId: Long by mutableStateOf(0L)
+    private set
+
+  fun dismissSearch() {
+    clearSearchTrigger()
+    dismissSearchRequestId = System.currentTimeMillis()
+  }
+
   fun clearHomeSearchTrigger() {
     homeSearchTriggerRequestId = 0L
   }

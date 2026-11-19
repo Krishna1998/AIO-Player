@@ -297,6 +297,14 @@ object FolderListScreen : Screen {
       }
     }
 
+    LaunchedEffect(NavigationBarState.dismissSearchRequestId) {
+      if (NavigationBarState.dismissSearchRequestId > 0L) {
+        internalIsSearching = false
+        internalSearchQuery = ""
+        keyboardController?.hide()
+      }
+    }
+
     // Rebuilds when folders change so incrementally discovered hidden folders become searchable;
     // chained on the previous job because buildIndex resets the shared index maps.
     LaunchedEffect(effectiveIsSearching, videoFolders, audioOnly) {

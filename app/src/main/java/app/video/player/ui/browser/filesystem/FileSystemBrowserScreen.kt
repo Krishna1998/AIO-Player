@@ -485,6 +485,14 @@ fun FileSystemBrowserScreen(path: String? = null) {
     }
   }
 
+  LaunchedEffect(NavigationBarState.dismissSearchRequestId) {
+    if (NavigationBarState.dismissSearchRequestId > 0L) {
+      isSearching = false
+      searchQuery = ""
+      keyboardController?.hide()
+    }
+  }
+
   LaunchedEffect(searchQuery, isSearching, isAppRoot, items) {
     if (isSearching && searchQuery.isNotBlank()) {
       delay(250)
