@@ -202,6 +202,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   val mediaType = if (forceAudio) MediaLibraryType.Audio else if (includeAudioBrowser) savedMediaType else MediaLibraryType.Video
   val musicCoverArtSize by browserPreferences.musicCoverArtSize.collectAsState()
   var videoSubTab by rememberSaveable { mutableIntStateOf(0) }
+  var audioSubTab by rememberSaveable { mutableIntStateOf(0) }
   val sortedVideos =
     remember(videos, videoSortType, videoSortOrder) {
       SortUtils.sortVideos(videos, videoSortType, videoSortOrder)
@@ -676,7 +677,9 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
           showQuickPlayFab &&
           !selectionManager.isInSelectionMode &&
           isFabVisible.value &&
-          !MainScreen.getPermissionDeniedState()
+          !MainScreen.getPermissionDeniedState() &&
+          !(currentTab == MediaLibraryType.Video && videoSubTab == 0 && !isSearching) &&
+          !(currentTab == MediaLibraryType.Audio && audioSubTab == 0 && !isSearching)
 
       FloatingActionButtonMenu(
         modifier = Modifier.padding(bottom = FabPlacement.scaffoldBottomPadding()),
@@ -1051,6 +1054,88 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                     }
                   }
                 }
+              } else if (pageType == MediaLibraryType.Audio && !isSearching) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                  Row(
+                    modifier = Modifier
+                      .fillMaxWidth()
+                      .padding(horizontal = 16.dp, vertical = 2.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                  ) {
+                    androidx.compose.material3.FilterChip(
+                      selected = audioSubTab == 0,
+                      onClick = { audioSubTab = 0 },
+                      label = { Text("Folders") },
+                      leadingIcon = {
+                        app.video.player.ui.icons.Icon(
+                          imageVector = app.video.player.ui.icons.Icons.RoundedFilled.Folder,
+                          contentDescription = null,
+                          modifier = Modifier.size(16.dp),
+                        )
+                      },
+                      colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                      ),
+                    )
+                    androidx.compose.material3.FilterChip(
+                      selected = audioSubTab == 1,
+                      onClick = { audioSubTab = 1 },
+                      label = { Text("Music Library (${pageVideosWithInfo.size})") },
+                      leadingIcon = {
+                        app.video.player.ui.icons.Icon(
+                          imageVector = app.video.player.ui.icons.Icons.RoundedFilled.Audiotrack,
+                          contentDescription = null,
+                          modifier = Modifier.size(16.dp),
+                        )
+                      },
+                      colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                      ),
+                    )
+                  }
+                  Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                    if (audioSubTab == 0) {
+                      app.video.player.ui.browser.folderlist.FolderListScreen.MediaStoreFolderListContent(
+                        audioOnly = true,
+                        videoOnly = false,
+                        embedded = true,
+                        searchQuery = searchQuery,
+                      )
+                    } else {
+                      VideoListContent(
+                        folderId = "media_library_audio",
+                        videosWithInfo = pageVideosWithInfo,
+                        isLoading = isLoading && videos.isEmpty(),
+                        isRefreshing = isRefreshing,
+                        recentlyPlayedFilePath = recentlyPlayedFilePath,
+                        videosWereDeletedOrMoved = videosWereDeletedOrMoved,
+                        autoScrollToLastPlayed = autoScrollToLastPlayed,
+                        onRefresh = { viewModel.refresh() },
+                        selectionManager = selectionManager,
+                        onVideoClick = { video ->
+                          if (selectionManager.isInSelectionMode) {
+                            selectionManager.toggleFromUser(video)
+                          } else {
+                            playFromMediaLibrary(video)
+                          }
+                        },
+                        onVideoLongClick = { video -> selectionManager.handleLongClick(video) },
+                        isFabVisible = isFabVisible,
+                        modifier = Modifier.fillMaxSize(),
+                        showFloatingBottomBar = showFloatingBottomBar,
+                        mediaLayoutMode = mediaLayoutMode,
+                        isAudio = true,
+                        musicCoverArtSize = musicCoverArtSize,
+                        isFabExpanded = isFabExpanded.value,
+                        onFabExpandedChange = { isFabExpanded.value = it },
+                        headerContent = null,
+                      )
+                    }
+                  }
+                }
               } else {
                 VideoListContent(
                   folderId = "media_library_${pageType.name.lowercase()}",
@@ -1074,6 +1159,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                   modifier = Modifier.fillMaxSize(),
                   showFloatingBottomBar = showFloatingBottomBar,
                   mediaLayoutMode = mediaLayoutMode,
+                  isAudio = pageType == MediaLibraryType.Audio,
                   musicCoverArtSize = musicCoverArtSize,
                   isFabExpanded = isFabExpanded.value,
                   onFabExpandedChange = { isFabExpanded.value = it },
@@ -1183,7 +1269,8 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   }
 
     if (sortDialogOpen.value) {
-      if (currentTab == MediaLibraryType.Video && videoSubTab == 0 && !isSearching) {
+      if (((currentTab == MediaLibraryType.Video && videoSubTab == 0) ||
+          (currentTab == MediaLibraryType.Audio && audioSubTab == 0)) && !isSearching) {
         FolderSortDialog(
           isOpen = sortDialogOpen.value,
           onDismiss = { sortDialogOpen.value = false },
