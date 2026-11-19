@@ -388,7 +388,33 @@ fun BentoFusionHeader(
       .padding(bottom = 12.dp),
     verticalArrangement = Arrangement.spacedBy(14.dp),
   ) {
-    // 1. Music Rail (Now at TOP - ALL songs sorted by title)
+    // 1. Video/Movie Rail
+    if (videoItems.isNotEmpty()) {
+      HorizonRailSection(
+        title = "Video/Movie",
+        icon = "🎬",
+        accentColor = MaterialTheme.colorScheme.primary,
+        count = videoItems.size,
+        onViewAll = { onFilterSelected?.invoke(MediaLibraryType.Video) },
+      ) {
+        LazyRow(
+          contentPadding = PaddingValues(horizontal = 16.dp),
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+          items(
+            items = videoItems.take(20),
+            key = { it.video.path },
+          ) { item ->
+            BentoHorizonVideoCard(
+              item = item,
+              onClick = { onPlayMedia(item.video, null) },
+            )
+          }
+        }
+      }
+    }
+
+    // 2. Music Rail (ALL songs sorted by title)
     if (sortedAudioByTitle.isNotEmpty()) {
       HorizonRailSection(
         title = "Music",
@@ -414,7 +440,7 @@ fun BentoFusionHeader(
       }
     }
 
-    // 2. Audio Pulsing Hero Spotlight Card
+    // 3. Audio Pulsing Hero Spotlight Card
     val heroToDisplay = heroAudio ?: (if (videoItems.isEmpty()) heroVideo else null)
     if (heroToDisplay != null) {
       val isCurrentlyInSession = remember(currentSessionItem, heroToDisplay.video) {
@@ -504,66 +530,6 @@ fun BentoFusionHeader(
         },
       )
     }
-
-    // 3. Video/Movie Rail (Now below Audio Pulsing)
-    if (videoItems.isNotEmpty()) {
-      HorizonRailSection(
-        title = "Video/Movie",
-        icon = "🎬",
-        accentColor = MaterialTheme.colorScheme.primary,
-        count = videoItems.size,
-        onViewAll = { onFilterSelected?.invoke(MediaLibraryType.Video) },
-      ) {
-        LazyRow(
-          contentPadding = PaddingValues(horizontal = 16.dp),
-          horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-          items(
-            items = videoItems.take(20),
-            key = { it.video.path },
-          ) { item ->
-            BentoHorizonVideoCard(
-              item = item,
-              onClick = { onPlayMedia(item.video, null) },
-            )
-          }
-        }
-      }
-    }
-
-    // 4. Recently Played Rail (Recent 10 files audio + video combined)
-    if (recentlyPlayedItems.isNotEmpty()) {
-      HorizonRailSection(
-        title = "Recently Played",
-        icon = "🕒",
-        accentColor = MaterialTheme.colorScheme.secondary,
-        count = recentlyPlayedItems.size,
-        onViewAll = { /* noop */ },
-      ) {
-        LazyRow(
-          contentPadding = PaddingValues(horizontal = 16.dp),
-          horizontalArrangement = Arrangement.spacedBy(12.dp),
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          items(
-            items = recentlyPlayedItems,
-            key = { it.video.path },
-          ) { item ->
-            if (item.video.isAudio) {
-              BentoHorizonAudioCard(
-                item = item,
-                onClick = { onPlayMedia(item.video, null) },
-              )
-            } else {
-              BentoHorizonVideoCard(
-                item = item,
-                onClick = { onPlayMedia(item.video, null) },
-              )
-            }
-          }
-        }
-      }
-    }
   }
 }
 
@@ -581,8 +547,6 @@ fun DualHorizonRails(
   onFilterSelected: ((MediaLibraryType) -> Unit)? = null,
   modifier: Modifier = Modifier,
 ) {
-  val recentlyPlayedRepo = koinInject<RecentlyPlayedRepository>()
-  val recentEntities by recentlyPlayedRepo.observeRecentlyPlayed(limit = 50).collectAsState(initial = emptyList())
   val browserPreferences = koinInject<BrowserPreferences>()
   val minVideoMinutes by browserPreferences.minimumVideoHorizonDurationMinutes.collectAsState()
   val minVideoDurationMs = remember(minVideoMinutes) { (minVideoMinutes * 60 * 1000L).coerceAtLeast(0L) }
@@ -603,67 +567,11 @@ fun DualHorizonRails(
     }
   }
 
-  // Recently Played: recent 10 files (audio + video combined, applying video duration cut-out)
-  val recentlyPlayedItems = remember(videosWithInfo, recentEntities, minVideoDurationMs) {
-    val itemsByPath = videosWithInfo.associateBy { it.video.path }
-    val result = mutableListOf<VideoWithPlaybackInfo>()
-    val addedPaths = mutableSetOf<String>()
-
-    fun canInclude(item: VideoWithPlaybackInfo): Boolean {
-      return item.video.isAudio || minVideoDurationMs <= 0L || item.video.duration >= minVideoDurationMs
-    }
-
-    for (entity in recentEntities) {
-      val item = itemsByPath[entity.filePath]
-      if (item != null && canInclude(item) && addedPaths.add(item.video.path)) {
-        result.add(item)
-        if (result.size >= 10) break
-      }
-    }
-
-    if (result.size < 10) {
-      for (item in videosWithInfo) {
-        if ((item.progressPercentage ?: 0f) > 0f && canInclude(item) && addedPaths.add(item.video.path)) {
-          result.add(item)
-          if (result.size >= 10) break
-        }
-      }
-    }
-
-    result.take(10)
-  }
-
   Column(
     modifier = modifier.fillMaxWidth(),
     verticalArrangement = Arrangement.spacedBy(14.dp),
   ) {
-    // Upper Rail: Music (ALL songs sorted by title)
-    if (sortedAudioByTitle.isNotEmpty()) {
-      HorizonRailSection(
-        title = "Music",
-        icon = "🎵",
-        accentColor = MaterialTheme.colorScheme.tertiary,
-        count = sortedAudioByTitle.size,
-        onViewAll = { onFilterSelected?.invoke(MediaLibraryType.Audio) },
-      ) {
-        LazyRow(
-          contentPadding = PaddingValues(horizontal = 16.dp),
-          horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-          items(
-            items = sortedAudioByTitle,
-            key = { it.video.path },
-          ) { item ->
-            BentoHorizonAudioCard(
-              item = item,
-              onClick = { onPlayMedia(item.video, null) },
-            )
-          }
-        }
-      }
-    }
-
-    // Lower Rail: Video/Movie
+    // 1. Video/Movie
     if (videoItems.isNotEmpty()) {
       HorizonRailSection(
         title = "Video/Movie",
@@ -689,35 +597,27 @@ fun DualHorizonRails(
       }
     }
 
-    // Recently Played Rail: Recent 10 files (audio + video combined)
-    if (recentlyPlayedItems.isNotEmpty()) {
+    // 2. Music (ALL songs sorted by title)
+    if (sortedAudioByTitle.isNotEmpty()) {
       HorizonRailSection(
-        title = "Recently Played",
-        icon = "🕒",
-        accentColor = MaterialTheme.colorScheme.secondary,
-        count = recentlyPlayedItems.size,
-        onViewAll = { /* noop */ },
+        title = "Music",
+        icon = "🎵",
+        accentColor = MaterialTheme.colorScheme.tertiary,
+        count = sortedAudioByTitle.size,
+        onViewAll = { onFilterSelected?.invoke(MediaLibraryType.Audio) },
       ) {
         LazyRow(
           contentPadding = PaddingValues(horizontal = 16.dp),
           horizontalArrangement = Arrangement.spacedBy(12.dp),
-          verticalAlignment = Alignment.CenterVertically,
         ) {
           items(
-            items = recentlyPlayedItems,
+            items = sortedAudioByTitle,
             key = { it.video.path },
           ) { item ->
-            if (item.video.isAudio) {
-              BentoHorizonAudioCard(
-                item = item,
-                onClick = { onPlayMedia(item.video, null) },
-              )
-            } else {
-              BentoHorizonVideoCard(
-                item = item,
-                onClick = { onPlayMedia(item.video, null) },
-              )
-            }
+            BentoHorizonAudioCard(
+              item = item,
+              onClick = { onPlayMedia(item.video, null) },
+            )
           }
         }
       }
