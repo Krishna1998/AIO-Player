@@ -1438,8 +1438,9 @@ private fun BentoHeroSpotlightCard(
                     .fillMaxWidth()
                     .height(24.dp)
                     .padding(top = 2.dp),
-                  primaryColor = MaterialTheme.colorScheme.tertiary,
-                  secondaryColor = MaterialTheme.colorScheme.primary,
+                  wave1Color = Color(0xFF1E1B4B), // One UI 9 Liquid Aura: Deep Midnight Indigo (1st wave)
+                  wave2Color = Color(0xFF8B5CF6), // One UI 9 Liquid Aura: Electric Violet (2nd wave)
+                  wave3Color = Color(0xFF38BDF8), // One UI 9 Liquid Aura: Galaxy Sky Cyan (Last wave)
                 )
               }
 
@@ -1485,8 +1486,9 @@ private fun BentoHeroSpotlightCard(
 @Composable
 fun OneUi9WaveformVisualizer(
   modifier: Modifier = Modifier,
-  primaryColor: Color = MaterialTheme.colorScheme.tertiary,
-  secondaryColor: Color = MaterialTheme.colorScheme.primary,
+  wave1Color: Color = Color(0xFF1E1B4B), // One UI 9 Liquid Aura: Deep Midnight Indigo (1st wave: bass veil)
+  wave2Color: Color = Color(0xFF8B5CF6), // One UI 9 Liquid Aura: Electric Violet (2nd wave: mid veil)
+  wave3Color: Color = Color(0xFF38BDF8), // One UI 9 Liquid Aura: Galaxy Sky Cyan (Last wave: lead crest)
 ) {
   var frameNanos by remember { mutableLongStateOf(0L) }
   var phase1 by remember { mutableFloatStateOf(0f) }
@@ -1617,42 +1619,42 @@ fun OneUi9WaveformVisualizer(
       }
     }
 
-    // Layer 1: Ambient Deep Bass Veil (soft background rolling harmonic wave)
+    // Layer 1: Ambient Deep Bass Veil (soft background rolling harmonic wave - 1st wave)
     drawWaveRibbon(
       wavelength = 92.dp.toPx(),
       lift = availableLift * 0.95f,
       phaseOffset = phase1,
-      fillTopColor = secondaryColor.copy(alpha = 0.20f),
-      fillBottomColor = secondaryColor.copy(alpha = 0.02f),
-      strokeColor = secondaryColor.copy(alpha = 0.40f),
+      fillTopColor = wave1Color.copy(alpha = 0.28f),
+      fillBottomColor = wave1Color.copy(alpha = 0.04f),
+      strokeColor = wave1Color.copy(alpha = 0.55f),
       strokeWidth = 1.2.dp.toPx(),
-      glowColor = secondaryColor.copy(alpha = 0.20f),
+      glowColor = wave1Color.copy(alpha = 0.28f),
       glowWidth = 4.dp.toPx(),
     )
 
-    // Layer 2: Harmonic Mid Veil (vibrant gradient curtain)
+    // Layer 2: Harmonic Mid Veil (vibrant gradient curtain - 2nd wave)
     drawWaveRibbon(
       wavelength = 62.dp.toPx(),
       lift = availableLift * 0.80f,
       phaseOffset = phase2,
-      fillTopColor = primaryColor.copy(alpha = 0.35f),
-      fillBottomColor = secondaryColor.copy(alpha = 0.05f),
-      strokeColor = primaryColor.copy(alpha = 0.75f),
+      fillTopColor = wave2Color.copy(alpha = 0.40f),
+      fillBottomColor = wave1Color.copy(alpha = 0.06f),
+      strokeColor = wave2Color.copy(alpha = 0.85f),
       strokeWidth = 1.6.dp.toPx(),
-      glowColor = primaryColor.copy(alpha = 0.30f),
+      glowColor = wave2Color.copy(alpha = 0.35f),
       glowWidth = 5.5.dp.toPx(),
     )
 
-    // Layer 3: Vibrant Lead Luminous Wave with Specular Core (crisp foreground crest)
+    // Layer 3: Vibrant Lead Luminous Wave with Specular Core (crisp foreground crest - Last wave)
     drawWaveRibbon(
       wavelength = 42.dp.toPx(),
       lift = availableLift * 0.65f,
       phaseOffset = phase3,
-      fillTopColor = primaryColor.copy(alpha = 0.55f),
-      fillBottomColor = primaryColor.copy(alpha = 0.12f),
-      strokeColor = primaryColor.copy(alpha = 0.95f),
+      fillTopColor = wave3Color.copy(alpha = 0.62f),
+      fillBottomColor = wave2Color.copy(alpha = 0.12f),
+      strokeColor = wave3Color.copy(alpha = 0.98f),
       strokeWidth = 2.0.dp.toPx(),
-      glowColor = primaryColor.copy(alpha = 0.45f),
+      glowColor = wave3Color.copy(alpha = 0.50f),
       glowWidth = 7.dp.toPx(),
       hasSpecularHighlight = true,
     )
