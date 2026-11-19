@@ -136,6 +136,7 @@ import app.video.player.presentation.Screen
 import app.video.player.presentation.components.ProvideLiquidGlassBackdrop
 import app.video.player.ui.utils.LocalBackStack
 import app.video.player.ui.utils.navigateTo
+import app.video.player.ui.browser.components.FloatingSearchButton
 import app.video.player.ui.browser.folderlist.FolderListScreen
 import app.video.player.ui.browser.music.MusicLibraryContent
 import app.video.player.ui.browser.music.MusicLibraryViewModel
@@ -282,7 +283,7 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
     val isImeOpen by remember(imeInsets, density) { derivedStateOf { imeInsets.getBottom(density) > 0 } }
     val showBottomNavigation =
       !isTelevision && !hideNavigationBar && navigationTabs.isNotEmpty() && !isPermissionDenied &&
-        !(legacyNavigationBar && isImeOpen)
+        !isImeOpen
     val showTvRail = isTelevision && visibleTabs.isNotEmpty() && !isPermissionDenied
     val tvRailFocusRequester = remember { androidx.compose.ui.focus.FocusRequester() }
     // TV: follows the settled tab page, so the rail and the screen host can send focus into it.
@@ -892,9 +893,10 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
                     modifier = Modifier.fillMaxWidth(),
                   )
                 } else {
+                  val hideNavBarLabels by appearancePreferences.hideNavigationBarLabels.collectAsState()
                   val horizontalMargin by animateDpAsState(
                     targetValue = if (NavigationBarState.isMiniPlayerDocked) NavigationBarState.floatingBarSpacing
-                      else NavigationBarState.navigationPillMaxMargin - 30.dp * NavigationBarState.navLabelVisibility,
+                      else NavigationBarState.navigationPillMaxMargin - 30.dp * (if (hideNavBarLabels) 0f else NavigationBarState.navLabelVisibility),
                     animationSpec = if (navStyle == NavigationAnimStyle.None) snap() else tween(300, easing = NavigationBarEasing),
                     label = "navigation_margin",
                   )
@@ -908,6 +910,8 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
                     animationSpec = if (navStyle == NavigationAnimStyle.None) snap() else tween(duration, easing = FastOutSlowInEasing),
                     label = "pill_alignment",
                   )
+
+                  val searchButtonSize = if (hideNavBarLabels) 48.dp else 52.dp
 
                   val navModifier = Modifier
                     .layout { measurable, constraints ->
@@ -934,16 +938,55 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
                       }
                     }
 
-                  ExpressivePillNavigationBar(
-                    visibleTabs = navigationTabs,
-                    selectedTab = selectedTab,
-                    onTabSelected = onTabSelected,
-                    pagerState = pagerState,
-                    hazeBackdrop = navigationBackdrop,
-                    kyantBackdrop = liquidNavigationBackdrop,
-                    liquidGlassEnabled = liquidGlassEnabled,
-                    modifier = navModifier,
-                  )
+                  Row(
+                    modifier =
+                      navModifier
+                        .onGloballyPositioned { coordinates ->
+                          NavigationBarState.navbarWidth = with(density) { coordinates.size.width.toDp() }
+                          NavigationBarState.navigationPillHeight = with(density) { coordinates.size.height.toDp() }
+                          NavigationBarState.navbarLeftOffset = with(density) { coordinates.positionInRoot().x.toDp() }
+                        },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                  ) {
+                    ExpressivePillNavigationBar(
+                      visibleTabs = navigationTabs,
+                      selectedTab = selectedTab,
+                      onTabSelected = onTabSelected,
+                      pagerState = pagerState,
+                      hazeBackdrop = navigationBackdrop,
+                      kyantBackdrop = liquidNavigationBackdrop,
+                      liquidGlassEnabled = liquidGlassEnabled,
+                      modifier = Modifier.weight(1f, fill = false),
+                    )
+
+                    val glowEnabled by appearancePreferences.navigationBarGlow.collectAsState()
+                    val glowStrength by animateFloatAsState(
+                      targetValue = if (glowEnabled) 1f else 0f,
+                      animationSpec = if (navStyle == NavigationAnimStyle.None) snap() else tween(420, easing = NavigationBarEasing),
+                      label = "search_glow",
+                    )
+
+                    FloatingSearchButton(
+                      onClick = {
+                        when (selectedTab) {
+                          MainTab.HOME, MainTab.MUSIC -> NavigationBarState.triggerSearch()
+                          MainTab.PROFILE -> {
+                            onTabSelected(MainTab.HOME)
+                            coroutineScope.launch {
+                              delay(50L)
+                              NavigationBarState.triggerSearch()
+                            }
+                          }
+                        }
+                      },
+                      hazeBackdrop = navigationBackdrop,
+                      kyantBackdrop = liquidNavigationBackdrop,
+                      liquidGlassEnabled = liquidGlassEnabled,
+                      glowStrength = glowStrength,
+                      size = searchButtonSize,
+                    )
+                  }
                 }
               }
             }
@@ -1026,8 +1069,9 @@ internal fun ExpressivePillNavigationBar(
     if (compactIcons) MaterialTheme.typography.labelSmallEmphasized else MaterialTheme.typography.labelMediumEmphasized
   val labelLineCount = if (density.fontScale > 1f) 2 else 1
   val labelHeight = with(density) { labelStyle.lineHeight.toDp() } * labelLineCount
+  val hideNavBarLabels by appearancePreferences.hideNavigationBarLabels.collectAsState()
   val labelFraction by animateFloatAsState(
-    targetValue = NavigationBarState.navLabelVisibility,
+    targetValue = if (hideNavBarLabels) 0f else NavigationBarState.navLabelVisibility,
     animationSpec = if (reducedMotion) snap() else tween(300, easing = NavigationBarEasing),
     label = "navigation_labels",
   )
@@ -1117,10 +1161,12 @@ internal fun ExpressivePillNavigationBar(
       .height(48.dp + labelHeight * labelFraction)
       .onSizeChanged { motion.resize(it.width / density.density, it.height / density.density) }
       .onGloballyPositioned { coordinates ->
-        // The outer layout fills the screen; measure the real pill for mini-player clearance.
-        NavigationBarState.navbarWidth = with(density) { coordinates.size.width.toDp() }
-        NavigationBarState.navigationPillHeight = with(density) { coordinates.size.height.toDp() }
-        NavigationBarState.navbarLeftOffset = with(density) { coordinates.positionInRoot().x.toDp() }
+        // When not hosted inside outer Row with search button, measure pill for mini-player clearance.
+        if (NavigationBarState.navbarWidth <= 0.dp) {
+          NavigationBarState.navbarWidth = with(density) { coordinates.size.width.toDp() }
+          NavigationBarState.navigationPillHeight = with(density) { coordinates.size.height.toDp() }
+          NavigationBarState.navbarLeftOffset = with(density) { coordinates.positionInRoot().x.toDp() }
+        }
       }
       .then(
         if (reducedMotion) Modifier else Modifier.pointerInput(motion, density, isRtl, navigationHaptics) {
@@ -1274,6 +1320,8 @@ private fun LegacyMaterialNavigationBar(
   onTabSelected: (MainScreen.MainTab) -> Unit,
   modifier: Modifier = Modifier,
 ) {
+  val appearancePreferences = koinInject<AppearancePreferences>()
+  val hideNavBarLabels by appearancePreferences.hideNavigationBarLabels.collectAsState()
   val density = LocalDensity.current
   NavigationBar(
     windowInsets = WindowInsets(0),
@@ -1288,6 +1336,7 @@ private fun LegacyMaterialNavigationBar(
       NavigationBarItem(
         selected = tab == selectedTab,
         onClick = { onTabSelected(tab) },
+        alwaysShowLabel = !hideNavBarLabels,
         icon = {
           MainTabIcon(
             tab = tab,
@@ -1295,7 +1344,7 @@ private fun LegacyMaterialNavigationBar(
             contentDescription = null,
           )
         },
-        label = { Text(mainNavigationLabel(tab)) },
+        label = if (hideNavBarLabels) null else ({ Text(mainNavigationLabel(tab)) }),
       )
     }
   }

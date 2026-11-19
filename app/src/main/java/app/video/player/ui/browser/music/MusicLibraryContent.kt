@@ -147,6 +147,7 @@ import app.video.player.ui.browser.dialogs.FolderSortDialog
 import app.video.player.ui.browser.dialogs.MusicSortDialog
 import app.video.player.ui.player.controls.components.MiniAudioVisualizer
 import app.video.player.ui.browser.folderlist.FolderListScreen
+import app.video.player.ui.browser.NavigationBarState
 import app.video.player.ui.browser.playlist.PlaylistDetailScreen
 import app.video.player.ui.browser.selection.rememberSelectionManager
 import app.video.player.ui.browser.dialogs.rememberSelectionInfoAction
@@ -248,6 +249,11 @@ fun MusicLibraryContent(
   val searchFocusRequester = remember { FocusRequester() }
   LaunchedEffect(isSearchActive) {
     if (isSearchActive) searchFocusRequester.requestFocus()
+  }
+  LaunchedEffect(NavigationBarState.searchTriggerRequestId) {
+    if (NavigationBarState.searchTriggerRequestId > 0L) {
+      isSearchActive = true
+    }
   }
   var isSortMenuExpanded by remember { mutableStateOf(false) }
   var showCreatePlaylistDialog by remember { mutableStateOf(false) }

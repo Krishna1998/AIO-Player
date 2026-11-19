@@ -26,8 +26,10 @@ These notes are written in plain English and focus on what changed for real use.
     9. **Normal (`SeekbarStyle.Normal`):** Classic refined Material seekbar with clean round thumb.
 
 ### 🎵 Audio Player & Ambient Art Architecture
-- **Dual-Layer Ambient Cover Art Fill:**
+- **Dual-Layer Ambient Cover Art Fill & Smart Ambient Arbitration:**
   - Full-screen ambient canvas that magnifies and heavily blurs the current album artwork across the entire display from status bar to navigation bar.
+  - Automatically disables ambient light mesh gradients when Immersive artwork is active to prevent visual clashing and eliminate redundant palette extraction.
+  - Seamless mutual exclusivity in Settings: enabling Immersive artwork automatically turns off Ambient Mode, and enabling Ambient Mode turns off Immersive artwork.
   - Paired with high-contrast vertical darkening scrims to maintain 100% legibility for track titles, lyrics, seekbar, and playback controls.
   - Floating 3D Hero Card: expanded 92% width card with a 24dp 3D drop shadow, top specular gradient highlight rim, and 32dp continuous corners.
 - **Pure Audio Mini Player:**
@@ -98,6 +100,13 @@ These notes are written in plain English and focus on what changed for real use.
 - **5 Glass UI App Themes:** CyberPrism, RossoPrism, AuroraMint, HoloOpal, and SolarAmber.
 - **Slimline HUD Sliders:** Sleek 36dp capsule brightness and volume indicators with 18dp iconography and tabular metrics.
 - **Global Scrollbar Hide Toggle:** Added "Hide scrollbar" preference in **Settings → Appearance** to completely hide the fast scrollbar across Home, Music, and all media browser screens.
+- **Floating Navigation Bar with Companion Search Button:**
+  - Integrated a circular liquid glass floating search button beside the floating navigation pill, inspired by modern media player aesthetics.
+  - Automatically triggers search with instantaneous input field focus and soft keyboard display across library tabs (Home & Music).
+  - Uncluttered Top Bar in Floating Mode: relocates the primary search entry point to the bottom thumb zone, keeping the top app bar clean and spacious.
+  - Classic Legacy Mode Preservation: when "Legacy navigation bar" is enabled, the search button remains at its classic top bar location.
+- **Hide Navigation Bar Labels Toggle:**
+  - Added "Hide navigation bar labels" preference in **Settings → Appearance** to display only icons without text labels across both floating pill and legacy navigation bars for an ultra-clean, minimalist aesthetic.
 - **Interactive Bento Watch & Listen Analytics:** Clickable 7-day activity chart with separate video vs audio breakdowns, atomic session tracking, and 100% offline privacy (zero telemetry).
 
 ### ⚡ Ultra-Lightweight Architecture & Zero Bloat

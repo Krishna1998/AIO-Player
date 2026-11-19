@@ -285,6 +285,12 @@ object FolderListScreen : Screen {
       if (internalIsSearching) focusRequester.requestFocus()
     }
 
+    LaunchedEffect(NavigationBarState.searchTriggerRequestId) {
+      if (NavigationBarState.searchTriggerRequestId > 0L && !embedded) {
+        internalIsSearching = true
+      }
+    }
+
     // Rebuilds when folders change so incrementally discovered hidden folders become searchable;
     // chained on the previous job because buildIndex resets the shared index maps.
     LaunchedEffect(effectiveIsSearching, videoFolders, audioOnly) {

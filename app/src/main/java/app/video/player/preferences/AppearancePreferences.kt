@@ -97,6 +97,7 @@ class AppearancePreferences(
   val liquidGlassHighlightWidth = preferenceStore.getFloat("liquid_glass_highlight_width", 1f)
   val liquidGlassHighlightBlur = preferenceStore.getFloat("liquid_glass_highlight_blur", 1f)
   val navigationBarGlow = preferenceStore.getBoolean("navigation_bar_glow", false)
+  val hideNavigationBarLabels = preferenceStore.getBoolean("hide_navigation_bar_labels", false)
   // Android 11 and older have no RenderEffect blur for the floating bar.
   val legacyNavigationBar =
     preferenceStore.getBoolean("legacy_navigation_bar", Build.VERSION.SDK_INT < Build.VERSION_CODES.S)

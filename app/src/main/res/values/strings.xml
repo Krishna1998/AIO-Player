@@ -2531,6 +2531,8 @@
   <string name="onboarding_configuration_restore_failed">Folder setup could not be completed: %1$s</string>
   <string name="navbar_glow_title">Glass Glow</string>
   <string name="navbar_glow_summary">Show navbar rim lighting and touch glow</string>
+  <string name="pref_hide_navigation_bar_labels_title">Hide navigation bar labels</string>
+  <string name="pref_hide_navigation_bar_labels_summary">Show only icons in the navigation bar without text labels</string>
   <string name="legacy_navigation_bar_title">Legacy navigation bar</string>
   <string name="legacy_navigation_bar_summary">Use a classic full-width navigation bar instead of the floating pill.</string>
   <string name="progressive_navigation_blur_title">Progressive navigation blur</string>
@@ -2859,6 +2861,7 @@
   <string name="pref_audio_visualizer_galaxy_credit">Inspired by Zain Raza on CodePen</string>
   <string name="pref_audio_ambient_mode_title">Ambient Mode</string>
   <string name="pref_audio_ambient_mode_summary">Display dynamic color gradients derived from album cover art in music player (disabled when visualizer is active)</string>
+  <string name="pref_audio_ambient_mode_disabled_by_immersive">Disabled while Immersive artwork is enabled</string>
   <string name="pref_audio_wavy_seekbar_title">Wavy seekbar</string>
   <string name="pref_audio_wavy_seekbar_summary">Display multi-layer fluid wavy visualizer animation above the seekbar</string>
   <string name="pref_audio_language_title">Audio Language</string>

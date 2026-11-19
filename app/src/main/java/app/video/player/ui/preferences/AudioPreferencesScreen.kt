@@ -82,6 +82,8 @@ object AudioPreferencesScreen : Screen {
     val preferences = koinInject<AudioPreferences>()
     val browserPreferences = koinInject<BrowserPreferences>()
     val configOwnedOptions = currentMpvConfigOverrideOptions()
+    val audioAmbientMode by preferences.audioAmbientMode.collectAsState()
+    val immersiveArtwork by preferences.immersiveArtwork.collectAsState()
 
     Scaffold(
       contentWindowInsets = settingsContentWindowInsets(),
@@ -271,15 +273,25 @@ object AudioPreferencesScreen : Screen {
                 PreferenceDivider()
               }
 
-              val audioAmbientMode by preferences.audioAmbientMode.collectAsState()
               SwitchPreference(
                 modifier = Modifier.settingsSearchTarget(R.string.pref_audio_ambient_mode_title),
-                value = audioAmbientMode,
-                onValueChange = { preferences.audioAmbientMode.set(it) },
+                value = audioAmbientMode && !immersiveArtwork,
+                onValueChange = { checked ->
+                  preferences.audioAmbientMode.set(checked)
+                  if (checked && immersiveArtwork) {
+                    preferences.immersiveArtwork.set(false)
+                  }
+                },
                 title = { Text(stringResource(R.string.pref_audio_ambient_mode_title)) },
                 summary = {
                   Text(
-                    stringResource(R.string.pref_audio_ambient_mode_summary),
+                    stringResource(
+                      if (immersiveArtwork) {
+                        R.string.pref_audio_ambient_mode_disabled_by_immersive
+                      } else {
+                        R.string.pref_audio_ambient_mode_summary
+                      }
+                    ),
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
@@ -416,11 +428,15 @@ object AudioPreferencesScreen : Screen {
               }
 
               PreferenceDivider()
-              val immersiveArtwork by preferences.immersiveArtwork.collectAsState()
               SwitchPreference(
                 modifier = Modifier.settingsSearchTarget(R.string.pref_audio_immersive_artwork_title),
                 value = immersiveArtwork,
-                onValueChange = { preferences.immersiveArtwork.set(it) },
+                onValueChange = { checked ->
+                  preferences.immersiveArtwork.set(checked)
+                  if (checked) {
+                    preferences.audioAmbientMode.set(false)
+                  }
+                },
                 title = { Text(stringResource(R.string.pref_audio_immersive_artwork_title)) },
                 summary = {
                   Text(

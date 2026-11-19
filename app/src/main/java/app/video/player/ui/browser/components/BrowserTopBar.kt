@@ -294,6 +294,9 @@ private fun NormalTopBar(
   customTitle: (@Composable () -> Unit)? = null,
 ) {
   val preferences = koinInject<AppearancePreferences>()
+  val isMainTabPage = app.video.player.ui.browser.LocalIsMainTabPage.current
+  val legacyNavigationBar by preferences.legacyNavigationBar.collectAsState()
+  val showTopBarSearch = legacyNavigationBar || !isMainTabPage
   val wallpaperActive = LocalAppWallpaperActive.current
   val darkMode by preferences.darkMode.collectAsState()
   val darkTheme = isSystemInDarkTheme()
@@ -485,7 +488,7 @@ private fun NormalTopBar(
           )
         }
       }
-      if (onSearchClick != null) {
+      if (onSearchClick != null && showTopBarSearch) {
         IconButton(
           onClick = onSearchClick,
           modifier = Modifier.padding(horizontal = 2.dp).browserTopBarFocus(),

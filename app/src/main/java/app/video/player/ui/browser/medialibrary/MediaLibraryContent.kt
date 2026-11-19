@@ -20,6 +20,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import app.video.player.ui.theme.AppMotion
+import app.video.player.ui.browser.NavigationBarState
 import app.video.player.ui.browser.fab.FabPlacement
 import app.video.player.ui.browser.fab.FabScrollHelper
 import app.video.player.ui.components.InlineSearchBar
@@ -304,6 +305,12 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
     if (isSearching) {
       focusRequester.requestFocus()
       keyboardController?.show()
+    }
+  }
+
+  LaunchedEffect(NavigationBarState.searchTriggerRequestId) {
+    if (NavigationBarState.searchTriggerRequestId > 0L) {
+      isSearching = true
     }
   }
 

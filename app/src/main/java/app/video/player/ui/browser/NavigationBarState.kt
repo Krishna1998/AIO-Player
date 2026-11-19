@@ -154,6 +154,14 @@ object NavigationBarState {
     shouldHideNavigationBar = !visible
   }
 
+  // Global search trigger for browser screens
+  var searchTriggerRequestId: Long by mutableStateOf(0L)
+    private set
+
+  fun triggerSearch() {
+    searchTriggerRequestId = System.currentTimeMillis()
+  }
+
   // Scroll-adaptive nav labels: 1f shows icon + label, 0f collapses to icons only so the pill
   // stays legible on narrow screens and gets out of the way while reading a long list.
   var navLabelVisibility: Float by mutableFloatStateOf(1f)

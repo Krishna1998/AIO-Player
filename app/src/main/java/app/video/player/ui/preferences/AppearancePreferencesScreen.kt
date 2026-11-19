@@ -1115,7 +1115,7 @@ object AppearancePreferencesScreen : Screen {
                     )
                   },
                   groupIndex = 0,
-                  groupSize = 5,
+                  groupSize = 6,
                 )
                 val quickPlayFabDirect by preferences.quickPlayFabDirect.collectAsState()
                 SwitchPreference(
@@ -1131,7 +1131,7 @@ object AppearancePreferencesScreen : Screen {
                     )
                   },
                   groupIndex = 1,
-                  groupSize = 5,
+                  groupSize = 6,
                 )
                 val navigationBarGlow by preferences.navigationBarGlow.collectAsState()
                 SwitchPreference(
@@ -1141,7 +1141,17 @@ object AppearancePreferencesScreen : Screen {
                   title = { Text(stringResource(R.string.navbar_glow_title)) },
                   summary = { Text(stringResource(R.string.navbar_glow_summary), color = MaterialTheme.colorScheme.outline) },
                   groupIndex = 2,
-                  groupSize = 5,
+                  groupSize = 6,
+                )
+                val hideNavigationBarLabels by preferences.hideNavigationBarLabels.collectAsState()
+                SwitchPreference(
+                  modifier = Modifier.settingsSearchTarget(R.string.pref_hide_navigation_bar_labels_title),
+                  value = hideNavigationBarLabels,
+                  onValueChange = preferences.hideNavigationBarLabels::set,
+                  title = { Text(stringResource(R.string.pref_hide_navigation_bar_labels_title)) },
+                  summary = { Text(stringResource(R.string.pref_hide_navigation_bar_labels_summary), color = MaterialTheme.colorScheme.outline) },
+                  groupIndex = 3,
+                  groupSize = 6,
                 )
                 val legacyNavigationBar by preferences.legacyNavigationBar.collectAsState()
                 val progressiveNavigationBlur by preferences.progressiveNavigationBlur.collectAsState()
@@ -1159,8 +1169,8 @@ object AppearancePreferencesScreen : Screen {
                   },
                   title = { Text(stringResource(R.string.legacy_navigation_bar_title)) },
                   summary = { Text(stringResource(R.string.legacy_navigation_bar_summary), color = MaterialTheme.colorScheme.outline) },
-                  groupIndex = 3,
-                  groupSize = 5,
+                  groupIndex = 4,
+                  groupSize = 6,
                 )
                 SwitchPreference(
                   modifier = Modifier.settingsSearchTarget(R.string.progressive_navigation_blur_title),
@@ -1169,8 +1179,8 @@ object AppearancePreferencesScreen : Screen {
                   enabled = !legacyNavigationBar,
                   title = { Text(stringResource(R.string.progressive_navigation_blur_title)) },
                   summary = { Text(stringResource(R.string.progressive_navigation_blur_summary), color = MaterialTheme.colorScheme.outline) },
-                  groupIndex = 4,
-                  groupSize = 5,
+                  groupIndex = 5,
+                  groupSize = 6,
                 )
               }
             }

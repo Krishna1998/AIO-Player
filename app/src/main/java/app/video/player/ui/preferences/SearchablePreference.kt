@@ -1325,6 +1325,10 @@ object SearchablePreferences {
         SearchEntrySpec(R.string.pref_nav_profile_title, listOf("profile", "you", "library", "tab", "navigation")),
         SearchEntrySpec(R.string.navbar_glow_title, listOf("glass", "glow", "navbar", "rim", "highlight", "liquid glass")),
         SearchEntrySpec(
+          R.string.pref_hide_navigation_bar_labels_title,
+          listOf("navigation", "navbar", "hide labels", "labels", "text", "names", "icons"),
+        ),
+        SearchEntrySpec(
           R.string.legacy_navigation_bar_title,
           listOf("legacy", "classic", "bottom", "navigation", "mpvex"),
         ),

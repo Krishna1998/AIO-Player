@@ -981,13 +981,14 @@ fun AudioPlayerControls(
 
   val ambientModeEnabled by audioPreferences.audioAmbientMode.collectAsState()
   val immersiveArtworkEnabled by audioPreferences.immersiveArtwork.collectAsState()
+  val effectiveAmbientMode = ambientModeEnabled && !immersiveArtworkEnabled
 
   val ambientColors by produceState<Pair<Color, Color>?>(
     initialValue = null,
     key1 = albumArtBitmap,
-    key2 = ambientModeEnabled,
+    key2 = effectiveAmbientMode,
   ) {
-    if (!ambientModeEnabled || albumArtBitmap == null) {
+    if (!effectiveAmbientMode || albumArtBitmap == null) {
       value = null
       return@produceState
     }
@@ -1015,8 +1016,8 @@ fun AudioPlayerControls(
     }
   }
 
-  val targetTopColor = if (ambientModeEnabled) (ambientColors?.first ?: Color.Transparent) else Color.Transparent
-  val targetBottomColor = if (ambientModeEnabled) (ambientColors?.second ?: Color.Transparent) else Color.Transparent
+  val targetTopColor = if (effectiveAmbientMode) (ambientColors?.first ?: Color.Transparent) else Color.Transparent
+  val targetBottomColor = if (effectiveAmbientMode) (ambientColors?.second ?: Color.Transparent) else Color.Transparent
 
   val animatedAmbientTop: Color by animateColorAsState(
     targetValue = targetTopColor,
@@ -1127,7 +1128,7 @@ fun AudioPlayerControls(
     }
 
     // 2. Dynamic Radial Color Mesh (palette-tinted glow)
-    if (ambientModeEnabled && (animatedAmbientTop != Color.Transparent || animatedAmbientBottom != Color.Transparent)) {
+    if (effectiveAmbientMode && (animatedAmbientTop != Color.Transparent || animatedAmbientBottom != Color.Transparent)) {
       Box(
         modifier =
           Modifier
