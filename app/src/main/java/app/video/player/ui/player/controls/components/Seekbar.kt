@@ -381,7 +381,7 @@ internal fun SeekbarWithTimers(
   chapters: ImmutableList<Segment>,
   skipSegments: ImmutableList<SkipSegment>,
   paused: Boolean,
-  seekbarStyle: SeekbarStyle = SeekbarStyle.Liquid,
+  seekbarStyle: SeekbarStyle = SeekbarStyle.CyberLaser,
   useWavySeekbar: Boolean = true,
   showWavyVisualizer: Boolean = false,
   waveFeatures: AudioFeatures? = null,

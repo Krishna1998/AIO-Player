@@ -98,7 +98,7 @@ fun SeekbarWavyVisualizerOverlay(
   isPaused: Boolean,
   isScrubbing: Boolean,
   trackHeight: Dp = 8.dp,
-  seekbarStyle: SeekbarStyle = SeekbarStyle.Standard,
+  seekbarStyle: SeekbarStyle = SeekbarStyle.CyberLaser,
   modifier: Modifier = Modifier,
 ) {
   val primaryColor = MaterialTheme.colorScheme.primary
