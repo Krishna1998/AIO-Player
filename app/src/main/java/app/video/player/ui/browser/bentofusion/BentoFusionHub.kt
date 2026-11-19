@@ -64,7 +64,7 @@ import androidx.compose.ui.unit.sp
 import app.video.player.domain.media.model.Video
 import app.video.player.preferences.BrowserPreferences
 import app.video.player.preferences.MediaLibraryType
-import app.video.player.repository.ThumbnailRepository
+import app.video.player.domain.thumbnail.ThumbnailRepository
 import app.video.player.ui.browser.videolist.VideoWithPlaybackInfo
 import app.video.player.ui.icons.Icons
 import app.video.player.ui.icons.Icon

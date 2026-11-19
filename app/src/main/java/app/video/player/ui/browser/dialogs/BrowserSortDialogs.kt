@@ -22,6 +22,7 @@ import app.video.player.preferences.AudiobookSortType
 import app.video.player.preferences.FolderSortType
 import app.video.player.preferences.FolderViewMode
 import app.video.player.preferences.MediaLayoutMode
+import app.video.player.preferences.MediaLibraryType
 import app.video.player.preferences.NetworkSortType
 import app.video.player.preferences.PlaylistSortType
 import app.video.player.preferences.RecentSortType
