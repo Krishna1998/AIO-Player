@@ -83,6 +83,7 @@ object MediaUtils {
     context: Context,
     queueItems: List<PlaybackItem>,
     startIndex: Int = 0,
+    startPositionSeconds: Double? = null,
   ) {
     if (queueItems.isEmpty()) return
     val selectedIndex = startIndex.coerceIn(queueItems.indices)
@@ -96,12 +97,21 @@ object MediaUtils {
         .putExtra("is_audio", true)
         .putExtra(PlayerActivity.EXTRA_PREPARED_PLAYBACK_QUEUE, true)
         .putExtra(PlayerActivity.EXTRA_PREPARED_PLAYBACK_TOKEN, token)
-        .putExtra("playlist_index", selectedIndex))
+        .putExtra("playlist_index", selectedIndex)
+        .apply {
+          startPositionSeconds?.takeIf { it.isFinite() && it > 0 }?.let {
+            putExtra(PlayerActivity.EXTRA_START_POSITION_SECONDS, it)
+          }
+        })
       return
     }
     PlaybackSession.replaceQueue(queueItems, selectedIndex, isExplicitQueue = true)
     val item = queueItems[selectedIndex]
-    PlaybackSession.load(item)
+    PlaybackSession.load(
+      item = item,
+      restoreSavedPosition = true,
+      initialPositionSeconds = startPositionSeconds?.takeIf { it.isFinite() && it > 0 },
+    )
     PlaybackSession.setPropertyBoolean("pause", false)
     PlaybackSession.markBackground()
     NavigationBarState.isMiniPlayerVisible = true
@@ -299,7 +309,7 @@ object MediaUtils {
             ),
           )
         }
-      playInMiniPlayer(context, queueItems, playlistIndex)
+      playInMiniPlayer(context, queueItems, playlistIndex, startPositionSeconds = startPositionSeconds)
       return
     }
 

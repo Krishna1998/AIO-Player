@@ -408,10 +408,10 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
     }
   }
 
-  fun playFromMediaLibrary(video: Video) {
+  fun playFromMediaLibrary(video: Video, startPositionSeconds: Double? = null) {
     val playlistVideos = currentVideosWithInfo.map { it.video }
     if (!playerPreferences.shouldBuildAutomaticQueue(video.isAudio) || playlistVideos.size <= 1) {
-      MediaUtils.playFile(video, context, "media_library")
+      MediaUtils.playFile(video, context, "media_library", startPositionSeconds = startPositionSeconds)
       return
     }
 
@@ -433,7 +433,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
     }
     val isAudio = currentTab == MediaLibraryType.Audio || video.isAudio
     if (MediaUtils.shouldPlayInMiniPlayerOnly(isAudio)) {
-      MediaUtils.playInMiniPlayer(context, queueItems, index)
+      MediaUtils.playInMiniPlayer(context, queueItems, index, startPositionSeconds = startPositionSeconds)
       return
     }
 
@@ -461,6 +461,9 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
         putExtra(PlayerActivity.EXTRA_VIDEO_WIDTH, video.width)
         putExtra(PlayerActivity.EXTRA_VIDEO_HEIGHT, video.height)
         putExtra(PlayerActivity.EXTRA_VIDEO_ROTATION, video.rotation)
+        startPositionSeconds?.takeIf { it.isFinite() && it > 0 }?.let {
+          putExtra(PlayerActivity.EXTRA_START_POSITION_SECONDS, it)
+        }
       }
     ContainerGeometryProbe.prefetch(video.path, video.width, video.height, video.rotation, isAudio)
     context.startActivity(intent)
@@ -841,7 +844,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                       app.video.player.ui.browser.bentofusion.BentoFusionHeader(
                         videosWithInfo = pageVideosWithInfo,
                         recentlyPlayedFilePath = recentlyPlayedFilePath,
-                        onPlayMedia = { video -> playFromMediaLibrary(video) },
+                        onPlayMedia = { video, startPos -> playFromMediaLibrary(video, startPos) },
                         onFilterSelected = { type ->
                           val targetIdx = mediaLibraryTabs.indexOf(type)
                           if (targetIdx >= 0) navigateTab(targetIdx)

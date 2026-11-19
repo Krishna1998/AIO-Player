@@ -77,6 +77,7 @@ import app.video.player.preferences.BrowserPreferences
 import app.video.player.preferences.MediaLibraryType
 import app.video.player.domain.thumbnail.ThumbnailRepository
 import app.video.player.ui.browser.videolist.VideoWithPlaybackInfo
+import app.video.player.ui.player.PlaybackSession
 import app.video.player.ui.icons.Icons
 import app.video.player.ui.icons.Icon
 import app.video.player.utils.sort.SortUtils
@@ -116,13 +117,13 @@ fun getAudioCodec(video: Video): String {
 /**
  * Bento Fusion Hub Header
  * Integrates a liquid-glass Hero Spotlight Card (with dynamic audio visualizer / video resume)
- * and dual Bento quick-action tiles for Cinema and Hi-Res Audio.
+ * and synchronized horizon rails for Cinema, Hi-Res Audio, and Recently Played.
  */
 @Composable
 fun BentoFusionHeader(
   videosWithInfo: List<VideoWithPlaybackInfo>,
   recentlyPlayedFilePath: String?,
-  onPlayMedia: (Video) -> Unit,
+  onPlayMedia: (Video, Double?) -> Unit,
   onFilterSelected: ((MediaLibraryType) -> Unit)? = null,
   modifier: Modifier = Modifier,
 ) {
@@ -139,15 +140,24 @@ fun BentoFusionHeader(
     videosWithInfo.filter { it.video.isAudio }
   }
 
-  // 2. Sonic Soundstage Horizon: ONLY show recently played audio files, top 10 max
-  val recentAudioItems = remember(allAudioItems, recentEntities, recentlyPlayedFilePath) {
-    val audioByPath = allAudioItems.associateBy { it.video.path }
+  // 2. Sonic Soundstage Horizon: Show ALL songs sorted by title
+  val sortedAudioByTitle = remember(allAudioItems) {
+    allAudioItems.sortedWith { a, b ->
+      val titleA = if (a.video.title.isNotBlank()) a.video.title else FileTypeUtils.stripExtension(a.video.displayName)
+      val titleB = if (b.video.title.isNotBlank()) b.video.title else FileTypeUtils.stripExtension(b.video.displayName)
+      SortUtils.NaturalOrderComparator.DEFAULT.compare(titleA, titleB)
+    }
+  }
+
+  // 3. Recently Played Rail: Show recent 10 files (audio + video combined)
+  val recentlyPlayedItems = remember(videosWithInfo, recentEntities, recentlyPlayedFilePath) {
+    val itemsByPath = videosWithInfo.associateBy { it.video.path }
     val result = mutableListOf<VideoWithPlaybackInfo>()
     val addedPaths = mutableSetOf<String>()
 
-    // Priority 1: Files in RecentlyPlayed repository in exact order of playback recency
+    // Priority 1: Files from RecentlyPlayed database in exact order of recency
     for (entity in recentEntities) {
-      val item = audioByPath[entity.filePath]
+      val item = itemsByPath[entity.filePath]
       if (item != null && addedPaths.add(item.video.path)) {
         result.add(item)
         if (result.size >= 10) break
@@ -156,15 +166,15 @@ fun BentoFusionHeader(
 
     // Priority 2: Actively played file path if not already added
     if (result.size < 10 && recentlyPlayedFilePath != null) {
-      val lastPlayed = audioByPath[recentlyPlayedFilePath]
+      val lastPlayed = itemsByPath[recentlyPlayedFilePath]
       if (lastPlayed != null && addedPaths.add(lastPlayed.video.path)) {
         result.add(0, lastPlayed)
       }
     }
 
-    // Priority 3: Audio tracks with recorded playback progress
+    // Priority 3: Media with recorded playback progress
     if (result.size < 10) {
-      for (item in allAudioItems) {
+      for (item in videosWithInfo) {
         if ((item.progressPercentage ?: 0f) > 0f && addedPaths.add(item.video.path)) {
           result.add(item)
           if (result.size >= 10) break
@@ -175,15 +185,19 @@ fun BentoFusionHeader(
     result.take(10)
   }
 
-  // 3. Identify hero candidates: prioritizing recently played audio track for Audio Pulsing
-  val heroAudio = remember(recentAudioItems, allAudioItems, recentlyPlayedFilePath) {
-    if (recentlyPlayedFilePath != null) {
-      recentAudioItems.firstOrNull { it.video.path == recentlyPlayedFilePath }
-        ?: allAudioItems.firstOrNull { it.video.path == recentlyPlayedFilePath }
+  // 4. Identify hero candidates: prioritizing active/recently played audio track for Audio Pulsing
+  val playbackSessionState by PlaybackSession.state.collectAsState()
+  val sessionItemPath = playbackSessionState.currentItem?.let { it.stableId ?: it.originalUri }
+  val heroAudio = remember(sessionItemPath, recentlyPlayedItems, sortedAudioByTitle, recentlyPlayedFilePath) {
+    if (sessionItemPath != null) {
+      sortedAudioByTitle.firstOrNull { it.video.path == sessionItemPath || it.video.uri.toString() == sessionItemPath }
     } else null
-  } ?: recentAudioItems.firstOrNull()
-    ?: allAudioItems.firstOrNull { (it.progressPercentage ?: 0f) > 0f }
-    ?: allAudioItems.firstOrNull()
+  } ?: (if (recentlyPlayedFilePath != null) {
+    sortedAudioByTitle.firstOrNull { it.video.path == recentlyPlayedFilePath }
+  } else null)
+    ?: recentlyPlayedItems.firstOrNull { it.video.isAudio }
+    ?: sortedAudioByTitle.firstOrNull { (it.progressPercentage ?: 0f) > 0f }
+    ?: sortedAudioByTitle.firstOrNull()
 
   val heroVideo = remember(videoItems, recentlyPlayedFilePath) {
     if (recentlyPlayedFilePath != null) {
@@ -217,7 +231,7 @@ fun BentoFusionHeader(
           ) { item ->
             BentoHorizonVideoCard(
               item = item,
-              onClick = { onPlayMedia(item.video) },
+              onClick = { onPlayMedia(item.video, null) },
             )
           }
         }
@@ -227,19 +241,49 @@ fun BentoFusionHeader(
     // 2. Audio Pulsing Hero Spotlight Card (Going DOWN - Placed below video horizon rail)
     val heroToDisplay = heroAudio ?: (if (videoItems.isEmpty()) heroVideo else null)
     if (heroToDisplay != null) {
+      val isCurrentlyInSession = remember(playbackSessionState.currentItem, heroToDisplay.video) {
+        val curr = playbackSessionState.currentItem
+        curr != null && (
+          curr.originalUri == heroToDisplay.video.uri.toString() ||
+          curr.originalUri == heroToDisplay.video.path ||
+          curr.stableId == heroToDisplay.video.path ||
+          curr.title == heroToDisplay.video.displayName
+        )
+      }
+      val livePos = PlaybackSession.propInt["time-pos"].collectAsState().value?.toDouble()
+      val savedPos = heroToDisplay.timeRemaining?.let { rem ->
+        ((heroToDisplay.video.duration / 1000L) - rem).coerceAtLeast(0L).toDouble()
+      } ?: if ((heroToDisplay.progressPercentage ?: 0f) > 0f && heroToDisplay.video.duration > 0L) {
+        (((heroToDisplay.progressPercentage!! * heroToDisplay.video.duration) / 1000L).toLong()).toDouble()
+      } else 0.0
+
+      val resumePos = if (isCurrentlyInSession && livePos != null && livePos > 0.0) {
+        livePos
+      } else {
+        savedPos
+      }
+
       BentoHeroSpotlightCard(
         item = heroToDisplay,
-        onClick = { onPlayMedia(heroToDisplay.video) },
+        onClick = {
+          if (isCurrentlyInSession) {
+            if (playbackSessionState.paused) {
+              PlaybackSession.setPropertyBoolean("pause", false)
+            }
+          } else {
+            onPlayMedia(heroToDisplay.video, resumePos.takeIf { it > 0.0 })
+          }
+        },
       )
     }
 
-    // 3. Sonic Soundstage Horizon Rail (Below Audio Pulsing card: ONLY recently played, top 10 max)
-    if (recentAudioItems.isNotEmpty()) {
+    // 3. Sonic Soundstage Horizon Rail (ALL songs sorted by title)
+    if (sortedAudioByTitle.isNotEmpty()) {
       HorizonRailSection(
         title = "Sonic Soundstage Horizon",
         icon = "🎵",
         accentColor = MaterialTheme.colorScheme.tertiary,
-        count = recentAudioItems.size,
+        count = sortedAudioByTitle.size,
         onViewAll = { onFilterSelected?.invoke(MediaLibraryType.Audio) },
       ) {
         LazyRow(
@@ -247,13 +291,47 @@ fun BentoFusionHeader(
           horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
           items(
-            items = recentAudioItems,
+            items = sortedAudioByTitle,
             key = { it.video.path },
           ) { item ->
             BentoHorizonAudioCard(
               item = item,
-              onClick = { onPlayMedia(item.video) },
+              onClick = { onPlayMedia(item.video, null) },
             )
+          }
+        }
+      }
+    }
+
+    // 4. Recently Played Rail (Recent 10 files audio + video combined)
+    if (recentlyPlayedItems.isNotEmpty()) {
+      HorizonRailSection(
+        title = "Recently Played",
+        icon = "🕒",
+        accentColor = MaterialTheme.colorScheme.secondary,
+        count = recentlyPlayedItems.size,
+        onViewAll = { /* noop */ },
+      ) {
+        LazyRow(
+          contentPadding = PaddingValues(horizontal = 16.dp),
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          items(
+            items = recentlyPlayedItems,
+            key = { it.video.path },
+          ) { item ->
+            if (item.video.isAudio) {
+              BentoHorizonAudioCard(
+                item = item,
+                onClick = { onPlayMedia(item.video, null) },
+              )
+            } else {
+              BentoHorizonVideoCard(
+                item = item,
+                onClick = { onPlayMedia(item.video, null) },
+              )
+            }
           }
         }
       }
@@ -263,14 +341,15 @@ fun BentoFusionHeader(
 
 /**
  * Dual-Horizon Rails component
- * Provides two synchronized horizontal media rails:
- * 1. Upper Rail: Cinematic Video Horizon (16:9 thumbnails, resolution badges, duration, progress)
- * 2. Lower Rail: Sonic Soundstage Horizon (album art, lossless badges, duration)
+ * Provides synchronized horizontal media rails:
+ * 1. Upper Rail: Cinematic Video Horizon
+ * 2. Lower Rail: Sonic Soundstage Horizon (ALL songs sorted by title)
+ * 3. Bottom Rail: Recently Played (recent 10 files audio + video combined)
  */
 @Composable
 fun DualHorizonRails(
   videosWithInfo: List<VideoWithPlaybackInfo>,
-  onPlayMedia: (Video) -> Unit,
+  onPlayMedia: (Video, Double?) -> Unit = { v, _ -> },
   onFilterSelected: ((MediaLibraryType) -> Unit)? = null,
   modifier: Modifier = Modifier,
 ) {
@@ -284,14 +363,23 @@ fun DualHorizonRails(
     videosWithInfo.filter { it.video.isAudio }
   }
 
-  // Sonic Soundstage Horizon: ONLY show recently played files, top 10 max
-  val recentAudioItems = remember(allAudioItems, recentEntities) {
-    val audioByPath = allAudioItems.associateBy { it.video.path }
+  // Sonic Soundstage Horizon: ALL songs sorted by title
+  val sortedAudioByTitle = remember(allAudioItems) {
+    allAudioItems.sortedWith { a, b ->
+      val titleA = if (a.video.title.isNotBlank()) a.video.title else FileTypeUtils.stripExtension(a.video.displayName)
+      val titleB = if (b.video.title.isNotBlank()) b.video.title else FileTypeUtils.stripExtension(b.video.displayName)
+      SortUtils.NaturalOrderComparator.DEFAULT.compare(titleA, titleB)
+    }
+  }
+
+  // Recently Played: recent 10 files (audio + video combined)
+  val recentlyPlayedItems = remember(videosWithInfo, recentEntities) {
+    val itemsByPath = videosWithInfo.associateBy { it.video.path }
     val result = mutableListOf<VideoWithPlaybackInfo>()
     val addedPaths = mutableSetOf<String>()
 
     for (entity in recentEntities) {
-      val item = audioByPath[entity.filePath]
+      val item = itemsByPath[entity.filePath]
       if (item != null && addedPaths.add(item.video.path)) {
         result.add(item)
         if (result.size >= 10) break
@@ -299,7 +387,7 @@ fun DualHorizonRails(
     }
 
     if (result.size < 10) {
-      for (item in allAudioItems) {
+      for (item in videosWithInfo) {
         if ((item.progressPercentage ?: 0f) > 0f && addedPaths.add(item.video.path)) {
           result.add(item)
           if (result.size >= 10) break
@@ -333,20 +421,20 @@ fun DualHorizonRails(
           ) { item ->
             BentoHorizonVideoCard(
               item = item,
-              onClick = { onPlayMedia(item.video) },
+              onClick = { onPlayMedia(item.video, null) },
             )
           }
         }
       }
     }
 
-    // Lower Rail: Sonic Soundstage Horizon (Recently played audio only, top 10 max)
-    if (recentAudioItems.isNotEmpty()) {
+    // Lower Rail: Sonic Soundstage Horizon (ALL songs sorted by title)
+    if (sortedAudioByTitle.isNotEmpty()) {
       HorizonRailSection(
         title = "Sonic Soundstage Horizon",
         icon = "🎵",
         accentColor = MaterialTheme.colorScheme.tertiary,
-        count = recentAudioItems.size,
+        count = sortedAudioByTitle.size,
         onViewAll = { onFilterSelected?.invoke(MediaLibraryType.Audio) },
       ) {
         LazyRow(
@@ -354,13 +442,47 @@ fun DualHorizonRails(
           horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
           items(
-            items = recentAudioItems,
+            items = sortedAudioByTitle,
             key = { it.video.path },
           ) { item ->
             BentoHorizonAudioCard(
               item = item,
-              onClick = { onPlayMedia(item.video) },
+              onClick = { onPlayMedia(item.video, null) },
             )
+          }
+        }
+      }
+    }
+
+    // Recently Played Rail: Recent 10 files (audio + video combined)
+    if (recentlyPlayedItems.isNotEmpty()) {
+      HorizonRailSection(
+        title = "Recently Played",
+        icon = "🕒",
+        accentColor = MaterialTheme.colorScheme.secondary,
+        count = recentlyPlayedItems.size,
+        onViewAll = { /* noop */ },
+      ) {
+        LazyRow(
+          contentPadding = PaddingValues(horizontal = 16.dp),
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          items(
+            items = recentlyPlayedItems,
+            key = { it.video.path },
+          ) { item ->
+            if (item.video.isAudio) {
+              BentoHorizonAudioCard(
+                item = item,
+                onClick = { onPlayMedia(item.video, null) },
+              )
+            } else {
+              BentoHorizonVideoCard(
+                item = item,
+                onClick = { onPlayMedia(item.video, null) },
+              )
+            }
           }
         }
       }
@@ -712,20 +834,40 @@ private fun BentoHeroSpotlightCard(
   val isAudio = item.video.isAudio
   val progress = item.progressPercentage ?: 0f
 
+  val playbackSessionState by PlaybackSession.state.collectAsState()
+  val livePositionSec by PlaybackSession.propInt["time-pos"].collectAsState()
+  val liveDurationSec by PlaybackSession.propInt["duration"].collectAsState()
+
+  val isCurrentlyPlayingInSession = remember(playbackSessionState.currentItem, item.video) {
+    val curr = playbackSessionState.currentItem
+    curr != null && (
+      curr.originalUri == item.video.uri.toString() ||
+      curr.originalUri == item.video.path ||
+      curr.stableId == item.video.path ||
+      curr.title == item.video.displayName
+    )
+  }
+
   val originalCodec = remember(item.video) {
     if (isAudio) getAudioCodec(item.video) else item.video.resolution.ifBlank { "HD" }
   }
-  val remainingSec = item.timeRemaining ?: if (progress > 0f && item.video.duration > 0L) {
-    (((1f - progress) * item.video.duration) / 1000L).toLong().coerceAtLeast(0L)
+
+  // Real-time synced remaining time:
+  val remainingSec = if (isCurrentlyPlayingInSession && livePositionSec != null) {
+    val totalDur = liveDurationSec?.takeIf { it > 0 } ?: (item.video.duration / 1000L).toInt()
+    (totalDur - livePositionSec!!).coerceAtLeast(0).toLong()
   } else {
-    (item.video.duration / 1000L).coerceAtLeast(0L)
-  }
-  val remainingFormatted = remember(remainingSec, item.video.durationFormatted) {
-    if (remainingSec > 0L) {
-      "-${VideoScanUtils.formatDuration(remainingSec * 1000L)}"
+    item.timeRemaining ?: if (progress > 0f && item.video.duration > 0L) {
+      (((1f - progress) * item.video.duration) / 1000L).toLong().coerceAtLeast(0L)
     } else {
-      item.video.durationFormatted
+      (item.video.duration / 1000L).coerceAtLeast(0L)
     }
+  }
+
+  val remainingFormatted = if (remainingSec > 0L) {
+    "-${VideoScanUtils.formatDuration(remainingSec * 1000L)}"
+  } else {
+    item.video.durationFormatted
   }
 
   val infiniteTransition = rememberInfiniteTransition(label = "bentoPulse")
@@ -905,43 +1047,16 @@ private fun BentoHeroSpotlightCard(
               overflow = TextOverflow.Ellipsis,
             )
 
-            // One UI 9 Fluid Wavy Waveform Visualizer & Remaining Time Progress Track
+            // One UI 9 Fluid Wavy Waveform Visualizer (No seek bar in audio pulsing)
             if (isAudio) {
               OneUi9WaveformVisualizer(
                 modifier = Modifier
                   .fillMaxWidth()
-                  .height(22.dp)
+                  .height(24.dp)
                   .padding(top = 2.dp),
                 primaryColor = MaterialTheme.colorScheme.tertiary,
                 secondaryColor = MaterialTheme.colorScheme.primary,
               )
-              if (progress > 0f) {
-                Row(
-                  modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 4.dp),
-                  verticalAlignment = Alignment.CenterVertically,
-                  horizontalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                  LinearProgressIndicator(
-                    progress = { progress },
-                    modifier = Modifier
-                      .weight(1f)
-                      .height(4.dp)
-                      .clip(RoundedCornerShape(999.dp)),
-                    color = MaterialTheme.colorScheme.tertiary,
-                    trackColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
-                  )
-                  Text(
-                    text = remainingFormatted,
-                    style = MaterialTheme.typography.labelSmall.copy(
-                      fontWeight = FontWeight.Bold,
-                      fontSize = 10.sp,
-                    ),
-                    color = MaterialTheme.colorScheme.tertiary,
-                  )
-                }
-              }
             } else if (progress > 0f) {
               Row(
                 modifier = Modifier
