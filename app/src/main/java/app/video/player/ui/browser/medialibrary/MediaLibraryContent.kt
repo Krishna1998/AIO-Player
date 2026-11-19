@@ -692,18 +692,17 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
       }
     },
     floatingActionButton = {
-      if (currentTab == MediaLibraryType.All) return@floatingActionButton
+      if (currentTab != MediaLibraryType.All) {
+        val isFabShouldBeVisible =
+          currentVideosWithInfo.isNotEmpty() &&
+            showQuickPlayFab &&
+            !selectionManager.isInSelectionMode &&
+            isFabVisible.value &&
+            !MainScreen.getPermissionDeniedState() &&
+            !(currentTab == MediaLibraryType.Video && videoSubTab == 0 && !isSearching) &&
+            !(currentTab == MediaLibraryType.Audio && (audioSubTab == 0 || audioSubTab == 3) && !isSearching)
 
-      val isFabShouldBeVisible =
-        currentVideosWithInfo.isNotEmpty() &&
-          showQuickPlayFab &&
-          !selectionManager.isInSelectionMode &&
-          isFabVisible.value &&
-          !MainScreen.getPermissionDeniedState() &&
-          !(currentTab == MediaLibraryType.Video && videoSubTab == 0 && !isSearching) &&
-          !(currentTab == MediaLibraryType.Audio && (audioSubTab == 0 || audioSubTab == 3) && !isSearching)
-
-      FloatingActionButtonMenu(
+        FloatingActionButtonMenu(
         modifier = Modifier.padding(bottom = FabPlacement.scaffoldBottomPadding()),
         expanded = isFabExpanded.value && !quickPlayFabDirect,
         button = {
@@ -834,7 +833,8 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
             )
           }
         }
-      },
+      }
+    },
     ) { padding ->
       val autoScrollToLastPlayed by browserPreferences.autoScrollToLastPlayed.collectAsState()
       val videosWereDeletedOrMoved = false

@@ -11,7 +11,7 @@ package app.video.player.ui.player.visualizer
 
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
-import app.video.player.preferences.AppTheme
+import app.video.player.ui.theme.AppTheme
 
 /**
  * Dynamically resolves 3-tier One UI 9 wavy visualizer colors based on active [AppTheme] and [ColorScheme]:
