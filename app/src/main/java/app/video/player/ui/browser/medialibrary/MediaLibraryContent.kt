@@ -239,7 +239,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
 
   val currentVideosWithInfo =
     remember(sortedVideosWithInfo, currentTab, isSearching, searchQuery, videoSortType, videoSortOrder) {
-      val base = when (currentTab) {
+      val base = if (isSearching) sortedVideosWithInfo else when (currentTab) {
         MediaLibraryType.All -> sortedVideosWithInfo
         MediaLibraryType.Video -> sortedVideosWithInfo.filter { !it.video.isAudio }
         MediaLibraryType.Audio -> {
@@ -271,7 +271,9 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
       if (isSearching && searchQuery.isNotBlank()) {
         base.filter { item ->
           item.video.displayName.contains(searchQuery, ignoreCase = true) ||
-            item.video.path.contains(searchQuery, ignoreCase = true)
+            item.video.path.contains(searchQuery, ignoreCase = true) ||
+            item.video.title.contains(searchQuery, ignoreCase = true) ||
+            item.video.artist.contains(searchQuery, ignoreCase = true)
         }
       } else {
         base
@@ -415,6 +417,12 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
       lastHandledSearchTrigger = currentId
       NavigationBarState.clearHomeSearchTrigger()
       isSearching = true
+      if (!forceAudio) {
+        val allMediaIndex = mediaLibraryTabs.indexOf(MediaLibraryType.All)
+        if (allMediaIndex >= 0 && pagerState.currentPage != allMediaIndex) {
+          pagerState.scrollToPage(allMediaIndex)
+        }
+      }
     }
   }
 
@@ -537,13 +545,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
               .padding(horizontal = 16.dp, vertical = 8.dp),
           inputFieldModifier = Modifier.focusRequester(focusRequester),
           placeholder = {
-            Text(
-              when (currentTab) {
-                MediaLibraryType.All -> androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_search_media)
-                MediaLibraryType.Audio -> androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_search_audio)
-                MediaLibraryType.Video -> androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_search_videos)
-              },
-            )
+            Text(androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_search_media))
           },
           leadingIcon = {
             Icon(
@@ -592,6 +594,13 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
             if (!isSearching) {
               searchQuery = ""
               NavigationBarState.clearHomeSearchTrigger()
+            } else if (!forceAudio) {
+              coroutineScope.launch {
+                val allMediaIndex = mediaLibraryTabs.indexOf(MediaLibraryType.All)
+                if (allMediaIndex >= 0 && pagerState.currentPage != allMediaIndex) {
+                  pagerState.scrollToPage(allMediaIndex)
+                }
+              }
             }
           },
           onSettingsClick = {
@@ -808,7 +817,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
             ) { page ->
               val pageType = mediaLibraryTabs.getOrNull(page) ?: MediaLibraryType.All
               val pageVideosWithInfo = remember(sortedVideosWithInfo, pageType, isSearching, searchQuery, videoSortType, videoSortOrder) {
-                val base = when (pageType) {
+                val base = if (isSearching) sortedVideosWithInfo else when (pageType) {
                   MediaLibraryType.All -> sortedVideosWithInfo
                   MediaLibraryType.Video -> sortedVideosWithInfo.filter { !it.video.isAudio }
                   MediaLibraryType.Audio -> {
@@ -840,7 +849,9 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                 if (isSearching && searchQuery.isNotBlank()) {
                   base.filter { item ->
                     item.video.displayName.contains(searchQuery, ignoreCase = true) ||
-                      item.video.path.contains(searchQuery, ignoreCase = true)
+                      item.video.path.contains(searchQuery, ignoreCase = true) ||
+                      item.video.title.contains(searchQuery, ignoreCase = true) ||
+                      item.video.artist.contains(searchQuery, ignoreCase = true)
                   }
                 } else {
                   base
@@ -854,12 +865,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                 ) {
                   EmptyState(
                     icon = Icons.RoundedFilled.Search,
-                    title =
-                      when (pageType) {
-                        MediaLibraryType.All -> androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_no_media_found)
-                        MediaLibraryType.Audio -> androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_no_audio_found)
-                        MediaLibraryType.Video -> androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_no_videos_found)
-                      },
+                    title = androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_no_media_found),
                     message = "Try a different search term",
                   )
                 }

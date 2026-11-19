@@ -48,6 +48,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -491,6 +493,13 @@ fun BentoFusionHeader(
             val currIdx = sortedAudioByTitle.indexOfFirst { it.video.path == heroToDisplay.video.path }
             val nextIdx = if (currIdx >= 0) (currIdx + 1) % sortedAudioByTitle.size else 0
             onPlayMedia(sortedAudioByTitle[nextIdx].video, null)
+          }
+        },
+        onSeek = { targetSec ->
+          if (isCurrentlyInSession) {
+            PlaybackSession.command("seek", targetSec.toString(), "absolute+exact")
+          } else {
+            onPlayMedia(heroToDisplay.video, targetSec.toDouble())
           }
         },
       )
@@ -1088,6 +1097,7 @@ private fun BentoHeroSpotlightCard(
   onPrevious: () -> Unit = {},
   onPlayPause: () -> Unit = {},
   onNext: () -> Unit = {},
+  onSeek: ((Float) -> Unit)? = null,
   modifier: Modifier = Modifier,
 ) {
   val isAudio = item.video.isAudio
@@ -1119,6 +1129,21 @@ private fun BentoHeroSpotlightCard(
   } else {
     item.video.durationFormatted.ifBlank { "00:00" }
   }
+
+  // Current position:
+  val currentPosSec = if (isCurrentlyPlayingInSession && livePositionSec != null) {
+    livePositionSec!!.toLong().coerceIn(0L, totalSec.coerceAtLeast(1L))
+  } else if (progress > 0f && totalSec > 0L) {
+    (progress * totalSec).toLong().coerceIn(0L, totalSec)
+  } else {
+    0L
+  }
+
+  var isScrubbing by remember { mutableStateOf(false) }
+  var scrubPositionSec by remember { mutableFloatStateOf(0f) }
+
+  val displayPositionSec = if (isScrubbing) scrubPositionSec.toLong() else currentPosSec
+  val currentPosFormatted = VideoScanUtils.formatDuration(displayPositionSec * 1000L)
 
   // Real-time synced remaining time:
   val remainingSec = if (isCurrentlyPlayingInSession && livePositionSec != null) {
@@ -1180,7 +1205,7 @@ private fun BentoHeroSpotlightCard(
         modifier = Modifier
           .fillMaxWidth()
           .padding(14.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
       ) {
         // Top Header Row: Status Badge & Format Chip
         Row(
@@ -1337,6 +1362,57 @@ private fun BentoHeroSpotlightCard(
 
         // Wavy Seekbar Row with Middle Playback Controls and Right-Side Remaining Time
         if (isAudio) {
+          // Interactive Seekbar Row
+          Row(
+            modifier = Modifier
+              .fillMaxWidth()
+              .padding(horizontal = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+          ) {
+            Text(
+              text = currentPosFormatted,
+              style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 11.sp,
+              ),
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            Slider(
+              value = if (isScrubbing) scrubPositionSec else currentPosSec.toFloat(),
+              onValueChange = {
+                isScrubbing = true
+                scrubPositionSec = it
+              },
+              onValueChangeFinished = {
+                val targetSec = scrubPositionSec
+                isScrubbing = false
+                if (onSeek != null) {
+                  onSeek(targetSec)
+                } else if (isCurrentlyPlayingInSession) {
+                  PlaybackSession.command("seek", targetSec.toString(), "absolute+exact")
+                }
+              },
+              valueRange = 0f..(if (totalSec > 0L) totalSec.toFloat() else 1f),
+              modifier = Modifier.weight(1f),
+              colors = SliderDefaults.colors(
+                thumbColor = MaterialTheme.colorScheme.tertiary,
+                activeTrackColor = MaterialTheme.colorScheme.tertiary,
+                inactiveTrackColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.22f),
+              ),
+            )
+
+            Text(
+              text = totalFormatted,
+              style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 11.sp,
+              ),
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
+
           Box(
             modifier = Modifier
               .fillMaxWidth()
