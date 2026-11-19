@@ -1086,6 +1086,19 @@ private fun BentoHeroSpotlightCard(
     item.video.durationFormatted.ifBlank { "00:00" }
   }
 
+  // Real-time synced remaining time:
+  val remainingSec = if (isCurrentlyPlayingInSession && livePositionSec != null) {
+    (totalSec - livePositionSec!!).coerceAtLeast(0L)
+  } else {
+    item.timeRemaining ?: if (progress > 0f && totalSec > 0L) {
+      (((1f - progress) * totalSec)).toLong().coerceAtLeast(0L)
+    } else {
+      totalSec
+    }
+  }
+
+  val remainingFormatted = "-${VideoScanUtils.formatDuration(remainingSec * 1000L)}"
+
 
   val infiniteTransition = rememberInfiniteTransition(label = "bentoPulse")
   val pulseScale by infiniteTransition.animateFloat(
@@ -1352,7 +1365,7 @@ private fun BentoHeroSpotlightCard(
             ) {
               Text(
                 text = if (isAudio) {
-                  "$originalCodec • $totalFormatted"
+                  "$originalCodec • $remainingFormatted/$totalFormatted"
                 } else {
                   "$originalCodec • ${item.video.durationFormatted}"
                 },
