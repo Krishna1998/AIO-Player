@@ -93,7 +93,10 @@ import app.video.player.ui.player.MediaPlaybackService
 import app.video.player.ui.player.PlayerActivity
 import app.video.player.ui.icons.Icons
 import app.video.player.ui.icons.Icon
+import app.video.player.utils.history.RecentlyPlayedOps
 import app.video.player.utils.sort.SortUtils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import app.video.player.utils.storage.FileTypeUtils
 import app.video.player.utils.storage.VideoScanUtils
 import org.koin.compose.koinInject
@@ -213,47 +216,7 @@ fun BentoFusionHeader(
     }
   }
 
-  // 3. Recently Played Rail: Show recent 10 files (audio + video combined, applying video duration cut-out)
-  val recentlyPlayedItems = remember(videosWithInfo, recentEntities, recentlyPlayedFilePath, minVideoDurationMs) {
-    val itemsByPath = videosWithInfo.associateBy { it.video.path }
-    val result = mutableListOf<VideoWithPlaybackInfo>()
-    val addedPaths = mutableSetOf<String>()
-
-    fun canInclude(item: VideoWithPlaybackInfo): Boolean {
-      return item.video.isAudio || minVideoDurationMs <= 0L || item.video.duration >= minVideoDurationMs
-    }
-
-    // Priority 1: Files from RecentlyPlayed database in exact order of recency
-    for (entity in recentEntities) {
-      val item = itemsByPath[entity.filePath]
-      if (item != null && canInclude(item) && addedPaths.add(item.video.path)) {
-        result.add(item)
-        if (result.size >= 10) break
-      }
-    }
-
-    // Priority 2: Actively played file path if not already added
-    if (result.size < 10 && recentlyPlayedFilePath != null) {
-      val lastPlayed = itemsByPath[recentlyPlayedFilePath]
-      if (lastPlayed != null && canInclude(lastPlayed) && addedPaths.add(lastPlayed.video.path)) {
-        result.add(0, lastPlayed)
-      }
-    }
-
-    // Priority 3: Media with recorded playback progress
-    if (result.size < 10) {
-      for (item in videosWithInfo) {
-        if ((item.progressPercentage ?: 0f) > 0f && canInclude(item) && addedPaths.add(item.video.path)) {
-          result.add(item)
-          if (result.size >= 10) break
-        }
-      }
-    }
-
-    result.take(10)
-  }
-
-  // 4. Identify hero candidates: prioritizing active/recently played audio track for Audio Pulsing
+  // Live session tracking (active/auto-changed song or video)
   val playbackSessionState by PlaybackSession.state.collectAsState()
   val currentSessionItem = playbackSessionState.currentItem
   val isSessionPlayingAudio = remember(currentSessionItem) {
@@ -265,6 +228,13 @@ fun BentoFusionHeader(
       sortedAudioByTitle.firstOrNull { matchesPlaybackItem(it.video, currentSessionItem) }
         ?: allAudioItems.firstOrNull { matchesPlaybackItem(it.video, currentSessionItem) }
         ?: videosWithInfo.firstOrNull { it.video.isAudio && matchesPlaybackItem(it.video, currentSessionItem) }
+    } else null
+  }
+
+  val activeVideoFromSession = remember(currentSessionItem, videoItems, videosWithInfo) {
+    if (currentSessionItem != null && !isSessionPlayingAudio) {
+      videoItems.firstOrNull { matchesPlaybackItem(it.video, currentSessionItem) }
+        ?: videosWithInfo.firstOrNull { !it.video.isAudio && matchesPlaybackItem(it.video, currentSessionItem) }
     } else null
   }
 
@@ -300,6 +270,88 @@ fun BentoFusionHeader(
     } else null
   }
 
+  // Live played file (automatically updates whenever a track is played or auto-advances to next)
+  val livePlayingMediaItem = activeAudioFromSession ?: syntheticAudioItem ?: activeVideoFromSession
+
+  // Automatically save live played file to RecentlyPlayed repository whenever song changes
+  LaunchedEffect(currentSessionItem?.stableId, currentSessionItem?.originalUri) {
+    val item = currentSessionItem ?: return@LaunchedEffect
+    val path = item.originalUri.takeIf { it.isNotBlank() } ?: item.playableUri
+    if (path.isNotBlank()) {
+      val cleanPath = if (path.startsWith("file://")) path.removePrefix("file://") else path
+      val title = item.title?.takeIf { it.isNotBlank() } ?: cleanPath.substringAfterLast('/')
+      val durationMs = (item.durationSeconds ?: 0) * 1000L
+      withContext(Dispatchers.IO) {
+        runCatching {
+          RecentlyPlayedOps.addRecentlyPlayed(
+            filePath = cleanPath,
+            fileName = title,
+            videoTitle = item.title,
+            duration = durationMs,
+            width = item.videoWidth,
+            height = item.videoHeight,
+            launchSource = "live_playback",
+            artworkUrl = item.artworkUri,
+          )
+        }
+      }
+    }
+  }
+
+  // 3. Recently Played Rail: Show recent 10 files (audio + video combined, applying video duration cut-out)
+  // Automatically adds and prioritizes the live played file (including when automatically changing songs!)
+  val recentlyPlayedItems = remember(
+    videosWithInfo,
+    recentEntities,
+    recentlyPlayedFilePath,
+    livePlayingMediaItem,
+    minVideoDurationMs,
+  ) {
+    val itemsByPath = videosWithInfo.associateBy { it.video.path }
+    val result = mutableListOf<VideoWithPlaybackInfo>()
+    val addedPaths = mutableSetOf<String>()
+
+    fun canInclude(item: VideoWithPlaybackInfo): Boolean {
+      return item.video.isAudio || minVideoDurationMs <= 0L || item.video.duration >= minVideoDurationMs
+    }
+
+    // Priority 1: LIVE currently played file (e.g. when track starts or automatically changes song!)
+    if (livePlayingMediaItem != null && canInclude(livePlayingMediaItem)) {
+      result.add(livePlayingMediaItem)
+      addedPaths.add(livePlayingMediaItem.video.path)
+    }
+
+    // Priority 2: Files from RecentlyPlayed database in exact order of recency
+    for (entity in recentEntities) {
+      val item = itemsByPath[entity.filePath]
+      if (item != null && canInclude(item) && addedPaths.add(item.video.path)) {
+        result.add(item)
+        if (result.size >= 10) break
+      }
+    }
+
+    // Priority 3: Actively played file path if not already added
+    if (result.size < 10 && recentlyPlayedFilePath != null) {
+      val lastPlayed = itemsByPath[recentlyPlayedFilePath]
+      if (lastPlayed != null && canInclude(lastPlayed) && addedPaths.add(lastPlayed.video.path)) {
+        result.add(lastPlayed)
+      }
+    }
+
+    // Priority 4: Media with recorded playback progress
+    if (result.size < 10) {
+      for (item in videosWithInfo) {
+        if ((item.progressPercentage ?: 0f) > 0f && canInclude(item) && addedPaths.add(item.video.path)) {
+          result.add(item)
+          if (result.size >= 10) break
+        }
+      }
+    }
+
+    result.take(10)
+  }
+
+  // 4. Identify hero candidates: prioritizing active/recently played audio track for Audio Pulsing
   val heroAudio = activeAudioFromSession
     ?: syntheticAudioItem
     ?: (if (recentlyPlayedFilePath != null) {

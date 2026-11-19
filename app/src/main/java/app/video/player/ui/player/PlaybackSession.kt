@@ -2013,7 +2013,29 @@ internal fun userScriptsNeedReload(currentKey: String): Boolean {
             loadedPlaybackItem = current.currentItem
             loadedAudiobookEnded = false
             loadedAudiobookDurationMs = ((MPVLib.getPropertyDouble("duration") ?: 0.0) * 1000).toLong().coerceAtLeast(0)
-            current.currentItem?.let { AudiobookPlayback.onFileLoaded(it, current.generation) }
+            current.currentItem?.let { item ->
+              AudiobookPlayback.onFileLoaded(item, current.generation)
+              val rawPath = item.originalUri.ifBlank { item.playableUri }
+              val path = if (rawPath.startsWith("file://")) rawPath.removePrefix("file://") else rawPath
+              if (path.isNotBlank()) {
+                val title = item.title?.takeIf { it.isNotBlank() } ?: path.substringAfterLast('/')
+                val durationMs = loadedAudiobookDurationMs.takeIf { it > 0 } ?: ((item.durationSeconds ?: 0) * 1000L)
+                nativeEvents.launch(Dispatchers.IO) {
+                  runCatching {
+                    app.video.player.utils.history.RecentlyPlayedOps.addRecentlyPlayed(
+                      filePath = path,
+                      fileName = title,
+                      videoTitle = item.title,
+                      duration = durationMs,
+                      width = item.videoWidth,
+                      height = item.videoHeight,
+                      launchSource = "session",
+                      artworkUrl = item.artworkUri,
+                    )
+                  }
+                }
+              }
+            }
             val restoringPosition = pendingPositionRestoreGeneration == current.generation
             val appliedPaused = restoringPosition || desiredPaused
             // Track/decoder replacement is now complete. Apply the latest user/service intent

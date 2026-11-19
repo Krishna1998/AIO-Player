@@ -57,6 +57,7 @@ import app.video.player.preferences.GesturePreferences
 import app.video.player.preferences.PlayerPreferences
 import app.video.player.ui.icons.Icons
 import app.video.player.utils.media.PlaybackStateEvents
+import app.video.player.utils.history.RecentlyPlayedOps
 import app.video.player.utils.storage.FileTypeUtils
 import `is`.xyz.mpv.MPVLib
 import `is`.xyz.mpv.MPVNode
@@ -952,6 +953,23 @@ class MediaPlaybackService :
     updateNotification()
     loadSessionArtwork(item)
     refreshFavoriteState(item)
+
+    val rawPath = item.originalUri.ifBlank { item.playableUri }
+    val path = if (rawPath.startsWith("file://")) rawPath.removePrefix("file://") else rawPath
+    if (path.isNotBlank()) {
+      val title = item.title?.takeIf { it.isNotBlank() } ?: mediaTitle
+      val durationMs = (item.durationSeconds ?: 0) * 1000L
+      serviceScope.launch(Dispatchers.IO) {
+        RecentlyPlayedOps.addRecentlyPlayed(
+          filePath = path,
+          fileName = title,
+          videoTitle = item.title,
+          duration = durationMs,
+          artworkUrl = item.artworkUri,
+          launchSource = "service",
+        )
+      }
+    }
   }
 
   private fun refreshFavoriteState(item: PlaybackItem) {
