@@ -130,7 +130,7 @@ fun FloatingSearchButton(
 
     val iconSize = if (size <= 48.dp) 22.dp else 24.dp
     Icon(
-      icon = Icons.RoundedFilled.Search,
+      imageVector = Icons.RoundedFilled.Search,
       contentDescription = stringResource(R.string.settings_search_title),
       tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.92f),
       modifier = Modifier.size(iconSize),
