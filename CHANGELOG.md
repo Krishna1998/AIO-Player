@@ -86,6 +86,19 @@ These notes are written in plain English and focus on what changed for real use.
   - Responsive 2-column grid picker with live 132dp animated previews and instant one-tap switching.
 
 ### 💎 Interface & Fluid Aesthetics
+- **Bento Fusion Interface (Futuristic Unified Studio):**
+  - **Flagship Hero Spotlight Bento Card:**
+    - Ambient liquid-glass card highlighting the latest active or in-progress media item.
+    - Pulsing status indicator (`✦ NOW PULSING` for audio / `🎬 RESUME PLAYING` for videos).
+    - Media thumbnail preview with specular play button overlay, title, and metadata chips.
+    - **Live Harmonic Equalizer Waveform:** 20-band fluid sine-wave animated equalizer bars reacting in real time across primary and tertiary neon accents.
+    - Integrated seek ribbon showing exact resume position and playback progress.
+  - **Quick Fusion Dual Rail Tiles:**
+    - **🎬 Cinema Vault Tile:** Direct access to recent/unwatched cinema with progress bar and one-tap playback.
+    - **🎵 Hi-Res Deck Tile:** Direct access to recent music tracks with FLAC / lossless badges and instant playback.
+  - **New View Mode Option (`FolderViewMode.BentoFusion`):**
+    - Added "Bento" as a top-level view mode option alongside "Folder", "Tree", and "Library" in the View Options dialog.
+    - One-tap activation sets the home layout directly to the unified Bento Fusion experience.
 - **Unified Video & Music Canvas (All-in-One Studio Page):**
   - Seamlessly unified Video and Music on the same screen within Media Library with instant category filtering:
     - **✦ All Media (`MediaLibraryType.All`):** Unified timeline displaying both video cards (with 16:9 thumbnails, duration chips, resolution, FPS) and music cards (with album cover art, lossless tags, audio track indicators) side-by-side.

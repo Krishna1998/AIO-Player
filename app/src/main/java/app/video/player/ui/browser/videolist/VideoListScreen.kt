@@ -808,6 +808,7 @@ internal fun VideoListContent(
   onFabExpandedChange: (Boolean) -> Unit = {},
   isDualPane: Boolean = false,
   pinnedVideoPaths: Set<String> = emptySet(),
+  headerContent: @Composable (() -> Unit)? = null,
 ) {
   val archiveFolder = remember(folderId) { ZipArchiveMedia.isBrowserPath(folderId) }
   val swipeScope = rememberCoroutineScope()
@@ -1102,6 +1103,14 @@ internal fun VideoListContent(
                 horizontalArrangement = Arrangement.spacedBy(MediaSelectionGridGap),
                 verticalArrangement = Arrangement.spacedBy(MediaSelectionGridGap),
               ) {
+                if (headerContent != null) {
+                  item(
+                    span = { androidx.compose.foundation.lazy.grid.GridItemSpan(columns) },
+                    contentType = "header_item",
+                  ) {
+                    headerContent()
+                  }
+                }
                 items(
                   count = videosWithInfo.size,
                   key = { index -> videosWithInfo[index].video.stableListKey },
@@ -1146,7 +1155,8 @@ internal fun VideoListContent(
                 ExpressiveScrollBar(
                   gridState = gridState,
                   dragLabelProvider = { index ->
-                    fastScrollGlyph(videosWithInfo.getOrNull(index)?.video?.displayName)
+                    val resolvedIndex = if (headerContent != null) (index - 1).coerceAtLeast(0) else index
+                    fastScrollGlyph(videosWithInfo.getOrNull(resolvedIndex)?.video?.displayName)
                   },
                   modifier =
                     Modifier
@@ -1174,6 +1184,11 @@ internal fun VideoListContent(
                     bottom = bottomPadding,
                   ),
               ) {
+                if (headerContent != null) {
+                  item(contentType = "header_item") {
+                    headerContent()
+                  }
+                }
                 items(
                   count = videosWithInfo.size,
                   key = { index -> videosWithInfo[index].video.stableListKey },
@@ -1218,7 +1233,8 @@ internal fun VideoListContent(
                 ExpressiveScrollBar(
                   listState = listState,
                   dragLabelProvider = { index ->
-                    fastScrollGlyph(videosWithInfo.getOrNull(index)?.video?.displayName)
+                    val resolvedIndex = if (headerContent != null) (index - 1).coerceAtLeast(0) else index
+                    fastScrollGlyph(videosWithInfo.getOrNull(resolvedIndex)?.video?.displayName)
                   },
                   modifier =
                     Modifier

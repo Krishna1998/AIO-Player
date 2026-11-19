@@ -575,6 +575,17 @@ fun FolderSortDialog(
                 isSelected = folderViewMode == FolderViewMode.MediaLibrary,
                 onClick = { browserPreferences.folderViewMode.set(FolderViewMode.MediaLibrary) },
               ),
+              ViewModeOption(
+                label = "Bento",
+                icon = Icons.RoundedFilled.ViewQuilt,
+                isSelected = folderViewMode == FolderViewMode.BentoFusion,
+                onClick = {
+                  browserPreferences.includeAudioBrowser.set(true)
+                  browserPreferences.mediaLibraryType.set(MediaLibraryType.All)
+                  browserPreferences.folderViewMode.set(FolderViewMode.BentoFusion)
+                  app.video.player.utils.media.MediaLibraryEvents.notifyChanged()
+                },
+              ),
             ),
         )
       },
@@ -929,6 +940,17 @@ fun VideoSortDialog(
                 icon = Icons.RoundedFilled.VideoLibrary,
                 isSelected = folderViewMode == FolderViewMode.MediaLibrary,
                 onClick = { browserPreferences.folderViewMode.set(FolderViewMode.MediaLibrary) },
+              ),
+              ViewModeOption(
+                label = "Bento",
+                icon = Icons.RoundedFilled.ViewQuilt,
+                isSelected = folderViewMode == FolderViewMode.BentoFusion,
+                onClick = {
+                  browserPreferences.includeAudioBrowser.set(true)
+                  browserPreferences.mediaLibraryType.set(MediaLibraryType.All)
+                  browserPreferences.folderViewMode.set(FolderViewMode.BentoFusion)
+                  app.video.player.utils.media.MediaLibraryEvents.notifyChanged()
+                },
               ),
             ),
         )

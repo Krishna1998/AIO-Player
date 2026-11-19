@@ -741,6 +741,18 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                 musicCoverArtSize = musicCoverArtSize,
                 isFabExpanded = isFabExpanded.value,
                 onFabExpandedChange = { isFabExpanded.value = it },
+                headerContent = if (!isSearching && mediaType == MediaLibraryType.All && filteredVideosWithInfo.isNotEmpty()) {
+                  {
+                    app.video.player.ui.browser.bentofusion.BentoFusionHeader(
+                      videosWithInfo = filteredVideosWithInfo,
+                      recentlyPlayedFilePath = recentlyPlayedFilePath,
+                      onPlayMedia = { video -> playFromMediaLibrary(video) },
+                      onFilterSelected = { type ->
+                        browserPreferences.mediaLibraryType.set(type)
+                      },
+                    )
+                  }
+                } else null,
               )
             }
           }

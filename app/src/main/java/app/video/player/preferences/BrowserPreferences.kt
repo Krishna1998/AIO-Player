@@ -388,6 +388,7 @@ enum class FolderViewMode {
   AlbumView,
   FileManager,
   MediaLibrary,
+  BentoFusion,
   ;
 
   val displayName: String
@@ -396,6 +397,7 @@ enum class FolderViewMode {
         AlbumView -> "Folder View"
         FileManager -> "Tree View"
         MediaLibrary -> "Media Library"
+        BentoFusion -> "Bento Fusion"
       }
 }
 
