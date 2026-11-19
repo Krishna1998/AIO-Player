@@ -97,6 +97,7 @@ These notes are written in plain English and focus on what changed for real use.
   - **Solar Gold:** Warm studio analog aesthetic with liquid pure gold accents.
 - **5 Glass UI App Themes:** CyberPrism, RossoPrism, AuroraMint, HoloOpal, and SolarAmber.
 - **Slimline HUD Sliders:** Sleek 36dp capsule brightness and volume indicators with 18dp iconography and tabular metrics.
+- **Global Scrollbar Hide Toggle:** Added "Hide scrollbar" preference in **Settings → Appearance** to completely hide the fast scrollbar across Home, Music, and all media browser screens.
 - **Interactive Bento Watch & Listen Analytics:** Clickable 7-day activity chart with separate video vs audio breakdowns, atomic session tracking, and 100% offline privacy (zero telemetry).
 
 ### ⚡ Ultra-Lightweight Architecture & Zero Bloat

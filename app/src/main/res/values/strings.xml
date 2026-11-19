@@ -134,6 +134,8 @@
   <string name="pref_appearance_theme_picker_label">App Theme</string>
   <string name="pref_appearance_auto_scroll_title">Auto-scroll to last played</string>
   <string name="pref_appearance_auto_scroll_summary">Automatically scroll to the last played video when opening video lists</string>
+  <string name="pref_appearance_hide_scrollbar_title">Hide scrollbar</string>
+  <string name="pref_appearance_hide_scrollbar_summary">Completely hide the fast scrollbar across Home, Music, and all media lists</string>
   <string name="pref_tree_flatten_depth_title">Tree path compression</string>
   <string name="pref_tree_flatten_depth_summary">%1$s skipped per navigation step for single-child folders</string>
   <string name="player_video_quality">Video Quality</string>

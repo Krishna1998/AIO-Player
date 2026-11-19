@@ -114,6 +114,7 @@ class AppearancePreferences(
   val seekbarOpacity = preferenceStore.getFloat("seekbar_opacity", 1.0f)
   val showUnplayedOldVideoLabel = preferenceStore.getBoolean("show_unplayed_old_video_label", true)
   val unplayedOldVideoDays = preferenceStore.getInt("unplayed_old_video_days", 7)
+  val hideScrollbar = preferenceStore.getBoolean("hide_scrollbar", false)
   val seekbarStyle = preferenceStore.getEnum("seekbar_style", SeekbarStyle.Liquid)
   val portraitSeekbarPlacement =
     preferenceStore.getEnum("portrait_seekbar_placement", SeekbarPlacement.AboveButtons)

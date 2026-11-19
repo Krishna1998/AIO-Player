@@ -623,7 +623,7 @@ object AppearancePreferencesScreen : Screen {
 
           item {
             ExpressivePreferenceGroup {
-              val itemCount = 7
+              val itemCount = 8
               val unlimitedNameLines by preferences.unlimitedNameLines.collectAsState()
               SwitchPreference(
                 modifier = Modifier.settingsSearchTarget(R.string.pref_appearance_unlimited_name_lines_title),
@@ -724,7 +724,25 @@ object AppearancePreferencesScreen : Screen {
                 groupSize = itemCount,
               )
 
-              ExpressivePreferenceTile(index = 4, itemCount = itemCount) {
+              val hideScrollbar by preferences.hideScrollbar.collectAsState()
+              SwitchPreference(
+                modifier = Modifier.settingsSearchTarget(R.string.pref_appearance_hide_scrollbar_title),
+                value = hideScrollbar,
+                onValueChange = { preferences.hideScrollbar.set(it) },
+                title = {
+                  Text(text = stringResource(R.string.pref_appearance_hide_scrollbar_title))
+                },
+                summary = {
+                  Text(
+                    text = stringResource(R.string.pref_appearance_hide_scrollbar_summary),
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+                groupIndex = 4,
+                groupSize = itemCount,
+              )
+
+              ExpressivePreferenceTile(index = 5, itemCount = itemCount) {
                 ListPreference(
                   modifier = Modifier.settingsSearchTarget(R.string.pref_tree_flatten_depth_title),
                   value = treeFlattenDepth,
@@ -765,7 +783,7 @@ object AppearancePreferencesScreen : Screen {
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
-                groupIndex = 5,
+                groupIndex = 6,
                 groupSize = itemCount,
               )
 
@@ -792,7 +810,7 @@ object AppearancePreferencesScreen : Screen {
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
-                groupIndex = 6,
+                groupIndex = 7,
                 groupSize = itemCount,
               )
             }

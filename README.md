@@ -76,6 +76,7 @@ Whether decoding 4K HDR10+ anime with complex ASS karaoke subtitles or driving a
 | **Curated 10-Icon Elite Suite** | 🟢 **ACTIVE** | **NEW:** In-app icon switcher dedicated to 10 futuristic designs on Stealth Carbon: Aura Aperture (default), Stealth Shutter, Kilo-Hertz Monolith, Quantum Aperture, Liquid Acoustic Droplet, Horizon Aero Blades, Aura Aperture, Eclipse Halo (Cyan & Lime @ 75%), and Supersonic Split Arrow (@ 75%), with Android 12+ animated splash screens and Material You dynamic theming |
 | **6 Flagship App Themes** | 🟢 **ACTIVE** | **NEW:** Stealth Acid Lime, Electric Cyan, Hyper Crimson, Cyber Magenta, Quantum Violet, and Solar Gold theme presets |
 | **Slimline HUD Sliders** | 🟢 **ACTIVE** | **NEW:** Ultra-sleek 36dp width brightness and volume vertical pills with 18dp iconography and tabular metrics |
+| **Global Scrollbar Hide Toggle** | 🟢 **ACTIVE** | **NEW:** Dedicated toggle in Appearance preferences to completely hide the scrollbar across Home, Music, and all media lists |
 | **5 Glass UI App Themes** | 🟢 **ACTIVE** | CyberPrism, RossoPrism, AuroraMint, HoloOpal, and SolarAmber theme engine additions with specular frosted glass styling |
 | **Audio Player Liquid Glass** | 🟢 **ACTIVE** | **NEW:** Frosted translucent glass pods, specular top-lit gradient rims, and floating depth shadows across all audio controls |
 | **Top Header Track Counter** | 🟢 **ACTIVE** | **NEW:** Track and chapter counter (`Track X / Y`) relocated to upper side inside top header bar beneath NOW PLAYING |

@@ -37,6 +37,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -63,8 +64,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import app.video.player.preferences.AppearancePreferences
 import app.video.player.ui.icons.Icon
 import app.video.player.ui.icons.Icons
+import org.koin.compose.koinInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
@@ -261,7 +264,13 @@ fun ExpressiveScrollBar(
   dragLabelGap: Dp = 10.dp,
   autoHideDelayMillis: Long = 700L,
   onDragStateChanged: (Boolean) -> Unit = {},
+  hideScrollbar: Boolean? = null,
 ) {
+  val appearancePreferences = koinInject<AppearancePreferences>()
+  val prefHideScrollbar by appearancePreferences.hideScrollbar.collectAsState()
+  val shouldHide = hideScrollbar ?: prefHideScrollbar
+  if (shouldHide) return
+
   val listMetricsTracker = remember(listState) { AxisObservationTracker() }
   val gridMetricsTracker = remember(gridState) { AxisObservationTracker() }
   var isPressed by remember { mutableStateOf(false) }

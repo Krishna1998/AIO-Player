@@ -210,6 +210,15 @@ object SearchablePreferences {
       )
       add(
         SearchablePreference(
+          titleRes = R.string.pref_appearance_hide_scrollbar_title,
+          summaryRes = R.string.pref_appearance_hide_scrollbar_summary,
+          keywords = listOf("scroll", "scrollbar", "fastscroll", "hide", "thumb", "track", "music", "home"),
+          category = "Appearance",
+          screen = AppearancePreferencesScreen,
+        ),
+      )
+      add(
+        SearchablePreference(
           titleRes = R.string.pref_appearance_show_video_thumbnails_title,
           summaryRes = R.string.pref_appearance_show_video_thumbnails_summary,
           keywords = listOf("thumbnail", "thumbnails", "preview", "poster", "video"),
