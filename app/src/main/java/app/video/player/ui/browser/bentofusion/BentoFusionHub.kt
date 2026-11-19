@@ -216,10 +216,10 @@ fun BentoFusionHeader(
       .padding(bottom = 12.dp),
     verticalArrangement = Arrangement.spacedBy(14.dp),
   ) {
-    // 1. Sonic Soundstage Horizon Rail (Now at TOP - ALL songs sorted by title)
+    // 1. Music Rail (Now at TOP - ALL songs sorted by title)
     if (sortedAudioByTitle.isNotEmpty()) {
       HorizonRailSection(
-        title = "Sonic Soundstage Horizon",
+        title = "Music",
         icon = "🎵",
         accentColor = MaterialTheme.colorScheme.tertiary,
         count = sortedAudioByTitle.size,
@@ -322,10 +322,10 @@ fun BentoFusionHeader(
       )
     }
 
-    // 3. Cinematic Video Horizon Rail (Now below Audio Pulsing)
+    // 3. Video/Movie Rail (Now below Audio Pulsing)
     if (videoItems.isNotEmpty()) {
       HorizonRailSection(
-        title = "Cinematic Video Horizon",
+        title = "Video/Movie",
         icon = "🎬",
         accentColor = MaterialTheme.colorScheme.primary,
         count = videoItems.size,
@@ -387,8 +387,8 @@ fun BentoFusionHeader(
 /**
  * Dual-Horizon Rails component
  * Provides synchronized horizontal media rails:
- * 1. Upper Rail: Sonic Soundstage Horizon (ALL songs sorted by title)
- * 2. Lower Rail: Cinematic Video Horizon
+ * 1. Upper Rail: Music (ALL songs sorted by title)
+ * 2. Lower Rail: Video/Movie
  * 3. Bottom Rail: Recently Played (recent 10 files audio + video combined)
  */
 @Composable
@@ -408,7 +408,7 @@ fun DualHorizonRails(
     videosWithInfo.filter { it.video.isAudio }
   }
 
-  // Sonic Soundstage Horizon: ALL songs sorted by title
+  // Music Rail: ALL songs sorted by title
   val sortedAudioByTitle = remember(allAudioItems) {
     allAudioItems.sortedWith { a, b ->
       val titleA = if (a.video.title.isNotBlank()) a.video.title else FileTypeUtils.stripExtension(a.video.displayName)
@@ -447,10 +447,10 @@ fun DualHorizonRails(
     modifier = modifier.fillMaxWidth(),
     verticalArrangement = Arrangement.spacedBy(14.dp),
   ) {
-    // Upper Rail: Sonic Soundstage Horizon (ALL songs sorted by title)
+    // Upper Rail: Music (ALL songs sorted by title)
     if (sortedAudioByTitle.isNotEmpty()) {
       HorizonRailSection(
-        title = "Sonic Soundstage Horizon",
+        title = "Music",
         icon = "🎵",
         accentColor = MaterialTheme.colorScheme.tertiary,
         count = sortedAudioByTitle.size,
@@ -473,10 +473,10 @@ fun DualHorizonRails(
       }
     }
 
-    // Lower Rail: Cinematic Video Horizon
+    // Lower Rail: Video/Movie
     if (videoItems.isNotEmpty()) {
       HorizonRailSection(
-        title = "Cinematic Video Horizon",
+        title = "Video/Movie",
         icon = "🎬",
         accentColor = MaterialTheme.colorScheme.primary,
         count = videoItems.size,
@@ -555,45 +555,75 @@ private fun HorizonRailSection(
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp),
-      ) {
-        Text(
-          text = "$icon $title",
-          style = MaterialTheme.typography.labelLarge.copy(
-            fontWeight = FontWeight.ExtraBold,
-            letterSpacing = 0.5.sp,
+      // Glass UI Title Capsule
+      Surface(
+        shape = RoundedCornerShape(999.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.45f),
+        border = BorderStroke(
+          width = 1.dp,
+          brush = Brush.linearGradient(
+            colors = listOf(
+              accentColor.copy(alpha = 0.65f),
+              Color.White.copy(alpha = 0.25f),
+              accentColor.copy(alpha = 0.15f),
+            ),
           ),
-          color = accentColor,
-        )
-        Surface(
-          shape = RoundedCornerShape(999.dp),
-          color = accentColor.copy(alpha = 0.15f),
+        ),
+        shadowElevation = 2.dp,
+      ) {
+        Row(
+          modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(7.dp),
         ) {
           Text(
-            text = "$count",
-            style = MaterialTheme.typography.labelSmall.copy(
-              fontWeight = FontWeight.Bold,
-              fontSize = 10.sp,
-            ),
-            color = accentColor,
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+            text = icon,
+            style = MaterialTheme.typography.labelMedium,
           )
+          Text(
+            text = title,
+            style = MaterialTheme.typography.labelLarge.copy(
+              fontWeight = FontWeight.ExtraBold,
+              letterSpacing = 0.5.sp,
+            ),
+            color = MaterialTheme.colorScheme.onSurface,
+          )
+          Surface(
+            shape = RoundedCornerShape(999.dp),
+            color = accentColor.copy(alpha = 0.20f),
+            border = BorderStroke(0.5.dp, accentColor.copy(alpha = 0.45f)),
+          ) {
+            Text(
+              text = "$count",
+              style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Bold,
+                fontSize = 10.sp,
+              ),
+              color = accentColor,
+              modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+            )
+          }
         }
       }
 
-      Text(
-        text = "Swipe Deck →",
-        style = MaterialTheme.typography.labelSmall.copy(
-          fontWeight = FontWeight.SemiBold,
-        ),
-        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+      // Glass UI Action Pill
+      Surface(
+        shape = RoundedCornerShape(999.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.35f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.30f)),
         modifier = Modifier
-          .clip(RoundedCornerShape(8.dp))
-          .clickable(onClick = onViewAll)
-          .padding(horizontal = 6.dp, vertical = 2.dp),
-      )
+          .clip(RoundedCornerShape(999.dp))
+          .clickable(onClick = onViewAll),
+      ) {
+        Text(
+          text = "Swipe Deck →",
+          style = MaterialTheme.typography.labelSmall.copy(
+            fontWeight = FontWeight.SemiBold,
+          ),
+          color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.9f),
+          modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+        )
+      }
     }
 
     content()
@@ -985,28 +1015,27 @@ private fun BentoHeroSpotlightCard(
         ) {
           Surface(
             shape = RoundedCornerShape(999.dp),
-            color = if (isAudio) {
-              MaterialTheme.colorScheme.tertiary.copy(alpha = 0.18f)
-            } else {
-              MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
-            },
+            color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.45f),
             border = BorderStroke(
               width = 1.dp,
-              color = if (isAudio) {
-                MaterialTheme.colorScheme.tertiary.copy(alpha = 0.4f)
-              } else {
-                MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
-              },
+              brush = Brush.linearGradient(
+                colors = listOf(
+                  (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.65f),
+                  Color.White.copy(alpha = 0.25f),
+                  (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.15f),
+                ),
+              ),
             ),
+            shadowElevation = 2.dp,
           ) {
             Row(
-              modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+              modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.5.dp),
               verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(5.dp),
+              horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
               Box(
                 modifier = Modifier
-                  .size(6.dp)
+                  .size(7.dp)
                   .scale(pulseScale)
                   .clip(CircleShape)
                   .background(if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary),
@@ -1022,17 +1051,28 @@ private fun BentoHeroSpotlightCard(
             }
           }
 
-          Text(
-            text = if (isAudio) {
-              "$originalCodec • $remainingFormatted/$totalFormatted"
-            } else {
-              "$originalCodec • ${item.video.durationFormatted}"
-            },
-            style = MaterialTheme.typography.labelSmall.copy(
-              fontWeight = FontWeight.SemiBold,
+          Surface(
+            shape = RoundedCornerShape(999.dp),
+            color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.40f),
+            border = BorderStroke(
+              width = 0.8.dp,
+              color = (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.35f),
             ),
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
-          )
+          ) {
+            Text(
+              text = if (isAudio) {
+                "$originalCodec • $remainingFormatted/$totalFormatted"
+              } else {
+                "$originalCodec • ${item.video.durationFormatted}"
+              },
+              style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 11.sp,
+              ),
+              color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.90f),
+              modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+            )
+          }
         }
 
         // Middle Row: Thumbnail Preview & Metadata

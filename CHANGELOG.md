@@ -5,6 +5,9 @@ These notes are written in plain English and focus on what changed for real use.
 ## 1.0.0
 
 ### 🌌 Dual-Horizon Rails & Smart Audio Architecture
+- **Glass UI Section Titles & Streamlined Rail Naming:**
+  - Added frosted Glass UI capsule styling to all section titles (**Music**, **Video/Movie**, **Recently Played**, **AUDIO PULSING**) featuring translucent backdrops, glowing specular rims, and embedded count badges.
+  - Simplified and streamlined rail titles: renamed `Sonic Soundstage Horizon` to **Music**, and `Cinematic Video Horizon` to **Video/Movie**.
 - **Exclusive All Media Horizon Layout:**
   - Removed vertical redundant list of media under **Media Library > All Media** so the tab exclusively showcases the Bento Horizon Hub (Sonic Soundstage Horizon, Audio Pulsing, Cinematic Video Horizon, Recently Played).
 - **Audio Pulsing Dedicated Controls & Clean Thumbnail:**
