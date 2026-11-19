@@ -16,6 +16,8 @@ import app.video.player.ui.utils.NavigationBackHandler as BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -56,6 +58,7 @@ import androidx.compose.material3.ToggleFloatingActionButtonDefaults.animateIcon
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material3.TooltipDefaults
@@ -845,101 +848,122 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                 .padding(padding),
           ) {
           if (!forceAudio) {
-            Surface(
-              shape = RoundedCornerShape(999.dp),
-              color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.45f),
-              border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f)),
+            Row(
               modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 6.dp),
+                .padding(horizontal = 14.dp, vertical = 6.dp),
+              horizontalArrangement = Arrangement.spacedBy(8.dp),
+              verticalAlignment = Alignment.CenterVertically,
             ) {
-              Row(
-                modifier = Modifier
-                  .fillMaxWidth()
-                  .padding(3.5.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-              ) {
-                MediaLibraryType.entries.forEachIndexed { index, type ->
-                  val isSelected = currentTab == type
-                  val count = when (type) {
-                    MediaLibraryType.All -> sortedVideosWithInfo.size
-                    MediaLibraryType.Video -> sortedVideosWithInfo.count { !it.video.isAudio }
-                    MediaLibraryType.Audio -> sortedVideosWithInfo.count { it.video.isAudio }
-                  }
-                  val label = when (type) {
-                    MediaLibraryType.All -> stringResource(R.string.ui_all_media)
-                    MediaLibraryType.Video -> stringResource(R.string.ui_videos)
-                    MediaLibraryType.Audio -> stringResource(R.string.ui_music)
-                  }
-                  val iconVector = when (type) {
-                    MediaLibraryType.All -> Icons.RoundedFilled.GridView
-                    MediaLibraryType.Video -> Icons.RoundedFilled.VideoLibrary
-                    MediaLibraryType.Audio -> Icons.RoundedFilled.Audiotrack
-                  }
+              MediaLibraryType.entries.forEachIndexed { index, type ->
+                val isSelected = currentTab == type
+                val count = when (type) {
+                  MediaLibraryType.All -> sortedVideosWithInfo.size
+                  MediaLibraryType.Video -> sortedVideosWithInfo.count { !it.video.isAudio }
+                  MediaLibraryType.Audio -> sortedVideosWithInfo.count { it.video.isAudio }
+                }
+                val label = when (type) {
+                  MediaLibraryType.All -> stringResource(R.string.ui_all_media)
+                  MediaLibraryType.Video -> stringResource(R.string.ui_videos)
+                  MediaLibraryType.Audio -> stringResource(R.string.ui_music)
+                }
+                val iconVector = when (type) {
+                  MediaLibraryType.All -> Icons.RoundedFilled.GridView
+                  MediaLibraryType.Video -> Icons.RoundedFilled.VideoLibrary
+                  MediaLibraryType.Audio -> Icons.RoundedFilled.Audiotrack
+                }
 
-                  Surface(
-                    onClick = {
-                      if (currentTab != type) {
-                        navigateTab(index)
-                      }
-                    },
-                    shape = RoundedCornerShape(999.dp),
+                val bounceScale by animateFloatAsState(
+                  targetValue = if (isSelected) 1.05f else 0.96f,
+                  animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessMediumLow,
+                  ),
+                  label = "glassTabBounce_${type.name}",
+                )
+                val contentAlpha by animateFloatAsState(
+                  targetValue = if (isSelected) 1f else 0.72f,
+                  animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioNoBouncy,
+                    stiffness = Spring.StiffnessMedium,
+                  ),
+                  label = "glassTabAlpha_${type.name}",
+                )
+
+                Surface(
+                  onClick = {
+                    if (currentTab != type) {
+                      navigateTab(index)
+                    }
+                  },
+                  shape = RoundedCornerShape(999.dp),
+                  color = if (isSelected) {
+                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.85f)
+                  } else {
+                    MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.38f)
+                  },
+                  border = BorderStroke(
+                    width = if (isSelected) 1.2.dp else 1.dp,
                     color = if (isSelected) {
-                      MaterialTheme.colorScheme.primaryContainer
+                      MaterialTheme.colorScheme.primary.copy(alpha = 0.55f)
                     } else {
-                      Color.Transparent
+                      MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.22f)
                     },
-                    border = if (isSelected) {
-                      BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
-                    } else null,
-                    modifier = Modifier.weight(1f),
+                  ),
+                  shadowElevation = if (isSelected) 4.dp else 0.dp,
+                  tonalElevation = if (isSelected) 6.dp else 0.dp,
+                  modifier = Modifier
+                    .weight(1f)
+                    .graphicsLayer {
+                      scaleX = bounceScale
+                      scaleY = bounceScale
+                    },
+                ) {
+                  Row(
+                    modifier = Modifier
+                      .fillMaxWidth()
+                      .padding(vertical = 9.dp, horizontal = 4.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
                   ) {
-                    Row(
-                      modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp, horizontal = 4.dp),
-                      horizontalArrangement = Arrangement.Center,
-                      verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                      Icon(
-                        imageVector = iconVector,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = if (isSelected) {
-                          MaterialTheme.colorScheme.onPrimaryContainer
-                        } else {
-                          MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
-                        },
-                      )
-                      Spacer(modifier = Modifier.width(5.dp))
+                    Icon(
+                      imageVector = iconVector,
+                      contentDescription = null,
+                      modifier = Modifier.size(16.dp),
+                      tint = if (isSelected) {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                      } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = contentAlpha)
+                      },
+                    )
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text(
+                      text = label,
+                      style = MaterialTheme.typography.labelMedium.copy(
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                      ),
+                      color = if (isSelected) {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                      } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = contentAlpha)
+                      },
+                      maxLines = 1,
+                      overflow = TextOverflow.Ellipsis,
+                    )
+                    if (count > 0) {
+                      Spacer(modifier = Modifier.width(3.dp))
                       Text(
-                        text = label,
-                        style = MaterialTheme.typography.labelMedium.copy(
-                          fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                        text = "($count)",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                          fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
                         ),
                         color = if (isSelected) {
-                          MaterialTheme.colorScheme.onPrimaryContainer
+                          MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f)
                         } else {
-                          MaterialTheme.colorScheme.onSurfaceVariant
+                          MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = contentAlpha * 0.85f)
                         },
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
                       )
-                      if (count > 0) {
-                        Spacer(modifier = Modifier.width(3.dp))
-                        Text(
-                          text = "($count)",
-                          style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                          ),
-                          color = if (isSelected) {
-                            MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f)
-                          } else {
-                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f)
-                          },
-                          maxLines = 1,
-                        )
-                      }
                     }
                   }
                 }
