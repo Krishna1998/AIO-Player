@@ -11,12 +11,14 @@ package app.video.player.ui.browser.bentofusion
 
 import android.graphics.Bitmap
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -58,7 +60,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
@@ -77,6 +83,8 @@ import app.video.player.utils.sort.SortUtils
 import app.video.player.utils.storage.FileTypeUtils
 import app.video.player.utils.storage.VideoScanUtils
 import org.koin.compose.koinInject
+import kotlin.math.PI
+import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.sin
 
@@ -897,13 +905,15 @@ private fun BentoHeroSpotlightCard(
               overflow = TextOverflow.Ellipsis,
             )
 
-            // Animated Visualizer Waveform & Remaining Time Progress Track
+            // One UI 9 Fluid Wavy Waveform Visualizer & Remaining Time Progress Track
             if (isAudio) {
-              BentoEqualizerWaveform(
+              OneUi9WaveformVisualizer(
                 modifier = Modifier
                   .fillMaxWidth()
-                  .height(18.dp)
+                  .height(22.dp)
                   .padding(top = 2.dp),
+                primaryColor = MaterialTheme.colorScheme.tertiary,
+                secondaryColor = MaterialTheme.colorScheme.primary,
               )
               if (progress > 0f) {
                 Row(
@@ -964,46 +974,175 @@ private fun BentoHeroSpotlightCard(
 }
 
 /**
- * Animated harmonic equalizer bars reacting with fluid sine frequencies
+ * Samsung One UI 9 / 9.5 style fluid wavy waveform visualizer
+ * Features 3-tier multi-depth aurora liquid glass ribbons:
+ * 1. Ambient Deep Bass Veil (soft background rolling harmonic wave)
+ * 2. Harmonic Mid Veil (vibrant gradient curtain down to baseline)
+ * 3. Lead Luminous Crest with Specular Highlight Core (crisp foreground wave with white liquid reflection)
  */
 @Composable
-private fun BentoEqualizerWaveform(
+fun OneUi9WaveformVisualizer(
   modifier: Modifier = Modifier,
+  primaryColor: Color = MaterialTheme.colorScheme.tertiary,
+  secondaryColor: Color = MaterialTheme.colorScheme.primary,
 ) {
-  val transition = rememberInfiniteTransition(label = "eqWave")
-  val phase by transition.animateFloat(
+  val infiniteTransition = rememberInfiniteTransition(label = "oneUiWaveTransition")
+  val phase by infiniteTransition.animateFloat(
     initialValue = 0f,
-    targetValue = 6.28318f,
+    targetValue = (2.0 * PI).toFloat(),
     animationSpec = infiniteRepeatable(
-      animation = tween(1800, easing = FastOutSlowInEasing),
+      animation = tween(2400, easing = LinearEasing),
       repeatMode = RepeatMode.Restart,
     ),
-    label = "eqPhase",
+    label = "oneUiWavePhase",
   )
 
-  Row(
-    modifier = modifier,
-    horizontalArrangement = Arrangement.spacedBy(2.5.dp),
-    verticalAlignment = Alignment.Bottom,
-  ) {
-    val barCount = 20
-    for (i in 0 until barCount) {
-      val normalized = (sin(phase + i * 0.45f) * 0.5f + 0.5f).coerceIn(0.15f, 1f)
-      val barHeight = (normalized * 16).dp.coerceAtLeast(3.dp)
-      val barColor = if (i % 2 == 0) {
-        MaterialTheme.colorScheme.tertiary
-      } else {
-        MaterialTheme.colorScheme.primary
+  val filledPath = remember { Path() }
+  val contourPath = remember { Path() }
+
+  Canvas(modifier = modifier) {
+    val width = size.width
+    val height = size.height
+    if (width <= 0f || height <= 0f) return@Canvas
+
+    val baselineY = height - 1.5.dp.toPx()
+    val availableLift = (baselineY - 1.dp.toPx()).coerceAtLeast(0f)
+    val twoPi = (2.0 * PI).toFloat()
+    val step = 2.dp.toPx().coerceAtLeast(1f)
+    val taperInset = 16.dp.toPx().coerceAtMost(width / 4f)
+
+    fun smoothstep(v: Float): Float {
+      val c = v.coerceIn(0f, 1f)
+      return c * c * (3f - 2f * c)
+    }
+
+    fun drawWaveRibbon(
+      wavelength: Float,
+      lift: Float,
+      phaseOffset: Float,
+      fillTopColor: Color,
+      fillBottomColor: Color,
+      strokeColor: Color,
+      strokeWidth: Float,
+      glowColor: Color? = null,
+      glowWidth: Float = 0f,
+      hasSpecularHighlight: Boolean = false,
+    ) {
+      if (lift <= 0.5f) return
+
+      filledPath.reset()
+      contourPath.reset()
+
+      fun ribbonY(x: Float): Float {
+        val edgeIn = if (taperInset > 0f) smoothstep(x / taperInset) else 1f
+        val edgeOut = if (taperInset > 0f) smoothstep((width - x) / taperInset) else 1f
+        val envelope = edgeIn * edgeOut
+        val undulation = 0.50f + 0.50f * sin((x / wavelength) * twoPi - phaseOffset)
+        return baselineY - lift * undulation * envelope
       }
 
-      Box(
-        modifier = Modifier
-          .weight(1f)
-          .height(barHeight)
-          .clip(RoundedCornerShape(999.dp))
-          .background(barColor.copy(alpha = 0.85f)),
+      val startY = ribbonY(0f)
+      filledPath.moveTo(0f, baselineY)
+      filledPath.lineTo(0f, startY)
+      contourPath.moveTo(0f, startY)
+
+      var x = 0f
+      while (x < width) {
+        x = min(x + step, width)
+        val y = ribbonY(x)
+        filledPath.lineTo(x, y)
+        contourPath.lineTo(x, y)
+      }
+      filledPath.lineTo(width, baselineY)
+      filledPath.close()
+
+      // 1. One UI 9 Frosted Glass Gradient Body Fill (curtain down to baseline)
+      drawPath(
+        path = filledPath,
+        brush = Brush.verticalGradient(
+          colors = listOf(fillTopColor, fillBottomColor),
+          startY = baselineY - lift,
+          endY = baselineY,
+        ),
       )
+
+      // 2. Diffused Luminous Glow Halo along wave crests
+      if (glowColor != null && glowWidth > 0f) {
+        drawPath(
+          path = contourPath,
+          color = glowColor,
+          style = Stroke(
+            width = glowWidth,
+            cap = StrokeCap.Round,
+            join = StrokeJoin.Round,
+          ),
+        )
+      }
+
+      // 3. Crisp Luminous Crest Contour Stroke
+      drawPath(
+        path = contourPath,
+        color = strokeColor,
+        style = Stroke(
+          width = strokeWidth,
+          cap = StrokeCap.Round,
+          join = StrokeJoin.Round,
+        ),
+      )
+
+      // 4. Foreground White Specular Highlight Core for crisp liquid glass reflection
+      if (hasSpecularHighlight) {
+        drawPath(
+          path = contourPath,
+          color = Color.White.copy(alpha = 0.75f),
+          style = Stroke(
+            width = 1.0.dp.toPx(),
+            cap = StrokeCap.Round,
+            join = StrokeJoin.Round,
+          ),
+        )
+      }
     }
+
+    // Layer 1: Ambient Deep Bass Veil (soft background rolling harmonic wave)
+    drawWaveRibbon(
+      wavelength = 92.dp.toPx(),
+      lift = availableLift * 0.95f,
+      phaseOffset = phase * 1.0f,
+      fillTopColor = secondaryColor.copy(alpha = 0.20f),
+      fillBottomColor = secondaryColor.copy(alpha = 0.02f),
+      strokeColor = secondaryColor.copy(alpha = 0.40f),
+      strokeWidth = 1.2.dp.toPx(),
+      glowColor = secondaryColor.copy(alpha = 0.20f),
+      glowWidth = 4.dp.toPx(),
+    )
+
+    // Layer 2: Harmonic Mid Veil (vibrant gradient curtain)
+    drawWaveRibbon(
+      wavelength = 62.dp.toPx(),
+      lift = availableLift * 0.80f,
+      phaseOffset = phase * 1.45f + 1.2f,
+      fillTopColor = primaryColor.copy(alpha = 0.35f),
+      fillBottomColor = secondaryColor.copy(alpha = 0.05f),
+      strokeColor = primaryColor.copy(alpha = 0.75f),
+      strokeWidth = 1.6.dp.toPx(),
+      glowColor = primaryColor.copy(alpha = 0.30f),
+      glowWidth = 5.5.dp.toPx(),
+    )
+
+    // Layer 3: Vibrant Lead Luminous Wave with Specular Core (crisp foreground crest)
+    drawWaveRibbon(
+      wavelength = 42.dp.toPx(),
+      lift = availableLift * 0.65f,
+      phaseOffset = phase * 2.1f + 2.4f,
+      fillTopColor = primaryColor.copy(alpha = 0.55f),
+      fillBottomColor = primaryColor.copy(alpha = 0.12f),
+      strokeColor = primaryColor.copy(alpha = 0.95f),
+      strokeWidth = 2.0.dp.toPx(),
+      glowColor = primaryColor.copy(alpha = 0.45f),
+      glowWidth = 7.dp.toPx(),
+      hasSpecularHighlight = true,
+    )
   }
 }
 
