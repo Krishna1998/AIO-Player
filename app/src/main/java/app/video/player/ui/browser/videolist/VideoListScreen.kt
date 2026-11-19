@@ -141,6 +141,7 @@ data class VideoListScreen(
   @kotlinx.serialization.Transient val onBack: (() -> Unit)? = null,
   val isDualPane: Boolean = false,
   val isAudio: Boolean = false,
+  val videoOnly: Boolean = false,
 ) : Screen {
   @OptIn(ExperimentalMaterial3ExpressiveApi::class)
   @Composable
@@ -157,8 +158,8 @@ data class VideoListScreen(
     // ViewModel
     val viewModel: VideoListViewModel =
       viewModel(
-        key = "VideoListViewModel_${bucketId}_${isAudio}",
-        factory = VideoListViewModel.factory(context.applicationContext as android.app.Application, bucketId, isAudio),
+        key = "VideoListViewModel_${bucketId}_${isAudio}_${videoOnly}",
+        factory = VideoListViewModel.factory(context.applicationContext as android.app.Application, bucketId, isAudio, videoOnly),
       )
     androidx.lifecycle.compose.LifecycleResumeEffect(viewModel) {
       if (app.video.player.utils.media.ScopedHiddenFolderScanner.isScopedFolder(bucketId)) {

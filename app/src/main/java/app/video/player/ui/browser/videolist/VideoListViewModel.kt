@@ -130,6 +130,7 @@ class VideoListViewModel(
   application: Application,
   private val bucketId: String,
   private val includeAudio: Boolean = false,
+  private val videoOnly: Boolean = false,
 ) : BaseBrowserViewModel(application),
   KoinComponent {
   private val playbackStateRepository: PlaybackStateRepository by inject()
@@ -197,7 +198,7 @@ class VideoListViewModel(
     super.onCleared()
   }
 
-  private val cacheKey = "$bucketId|audio=$includeAudio"
+  private val cacheKey = "$bucketId|audio=$includeAudio|videoOnly=$videoOnly"
 
   init {
     // Show the last known contents instantly; loadVideos() revalidates in the background.
@@ -260,9 +261,11 @@ class VideoListViewModel(
             getApplication(),
             bucketId,
             forceFileSystemCheck = forceFileSystemCheck,
-            includeAudioOverride = if (includeAudio) true else null,
+            includeAudioOverride = if (videoOnly) false else if (includeAudio) true else null,
           )
-        if (includeAudio) {
+        if (videoOnly) {
+          videoList = videoList.filter { !it.isAudio }
+        } else if (includeAudio) {
           videoList = videoList.filter { it.isAudio }
         }
         val scopedFolder = ScopedHiddenFolderScanner.isScopedFolder(bucketId)
@@ -312,9 +315,11 @@ class VideoListViewModel(
               getApplication(),
               bucketId,
               forceFileSystemCheck = true,
-              includeAudioOverride = if (includeAudio) true else null,
+              includeAudioOverride = if (videoOnly) false else if (includeAudio) true else null,
             )
-          if (includeAudio) {
+          if (videoOnly) {
+            retryVideoList = retryVideoList.filter { !it.isAudio }
+          } else if (includeAudio) {
             retryVideoList = retryVideoList.filter { it.isAudio }
           }
 
@@ -591,10 +596,11 @@ class VideoListViewModel(
       application: Application,
       bucketId: String,
       includeAudio: Boolean = false,
+      videoOnly: Boolean = false,
     ) = object : ViewModelProvider.Factory {
       @Suppress("UNCHECKED_CAST")
       override fun <T : ViewModel> create(modelClass: Class<T>): T =
-        VideoListViewModel(application, bucketId, includeAudio) as T
+        VideoListViewModel(application, bucketId, includeAudio, videoOnly) as T
     }
   }
 }

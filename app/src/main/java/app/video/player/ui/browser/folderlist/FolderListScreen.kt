@@ -195,6 +195,7 @@ object FolderListScreen : Screen {
   @Composable
   internal fun MediaStoreFolderListContent(
     audioOnly: Boolean = false,
+    videoOnly: Boolean = false,
     embedded: Boolean = false,
     searchQuery: String = "",
   ) {
@@ -207,8 +208,8 @@ object FolderListScreen : Screen {
     // ViewModels and preferences
     val viewModel: FolderListViewModel =
       viewModel(
-        key = if (audioOnly) "MusicListViewModel" else "FolderListViewModel",
-        factory = FolderListViewModel.factory(context.applicationContext as android.app.Application, audioOnly),
+        key = if (audioOnly) "MusicListViewModel" else if (videoOnly) "VideoFolderListViewModel" else "FolderListViewModel",
+        factory = FolderListViewModel.factory(context.applicationContext as android.app.Application, audioOnly, videoOnly),
       )
     val browserPreferences = koinInject<BrowserPreferences>()
     val gesturePreferences = koinInject<GesturePreferences>()
@@ -986,7 +987,7 @@ object FolderListScreen : Screen {
                           }
                           backstack.navigateTo(
                             app.video.player.ui.browser.videolist
-                              .VideoListScreen(folder.bucketId, folder.name, isAudio = audioOnly),
+                              .VideoListScreen(folder.bucketId, folder.name, isAudio = audioOnly, videoOnly = videoOnly),
                           )
                         }
                       },
@@ -1026,7 +1027,7 @@ object FolderListScreen : Screen {
                       } else {
                         backstack.navigateTo(
                           app.video.player.ui.browser.videolist
-                            .VideoListScreen(folder.bucketId, folder.name, isAudio = audioOnly),
+                            .VideoListScreen(folder.bucketId, folder.name, isAudio = audioOnly, videoOnly = videoOnly),
                         )
                       }
                     }
@@ -1160,6 +1161,7 @@ object FolderListScreen : Screen {
             folderName = selectedFolderName.orEmpty(),
             isDualPane = true,
             isAudio = audioOnly,
+            videoOnly = videoOnly,
             onBack = {
               selectedFolderBucketId = null
               selectedFolderName = null

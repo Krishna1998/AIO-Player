@@ -9,7 +9,9 @@
 
 package app.video.player.ui.browser.bentofusion
 
+import android.content.Intent
 import android.graphics.Bitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -87,6 +89,8 @@ import app.video.player.ui.browser.videolist.videoPlaybackIdentifiers
 import app.video.player.ui.player.PlaybackItem
 import app.video.player.ui.player.PlaybackSession
 import app.video.player.ui.player.isDefinitelyAudioOnly
+import app.video.player.ui.player.MediaPlaybackService
+import app.video.player.ui.player.PlayerActivity
 import app.video.player.ui.icons.Icons
 import app.video.player.ui.icons.Icon
 import app.video.player.utils.sort.SortUtils
@@ -183,6 +187,8 @@ fun BentoFusionHeader(
   modifier: Modifier = Modifier,
 ) {
   if (videosWithInfo.isEmpty()) return
+
+  val context = LocalContext.current
 
   val recentlyPlayedRepo = koinInject<RecentlyPlayedRepository>()
   val recentEntities by recentlyPlayedRepo.observeRecentlyPlayed(limit = 50).collectAsState(initial = emptyList())
@@ -365,9 +371,31 @@ fun BentoFusionHeader(
       BentoHeroSpotlightCard(
         item = heroToDisplay,
         onClick = {
-          if (isCurrentlyInSession) {
-            if (isPaused == true) {
-              PlaybackSession.setPropertyBoolean("pause", false)
+          if (heroToDisplay.video.isAudio) {
+            if (isCurrentlyInSession) {
+              if (isPaused == true) {
+                PlaybackSession.setPropertyBoolean("pause", false)
+              }
+              val intent = Intent(context, PlayerActivity::class.java).apply {
+                action = MediaPlaybackService.ACTION_OPEN_PLAYER
+                putExtra("is_audio", true)
+                putExtra("internal_launch", true)
+                putExtra("launch_source", "audio_pulsing")
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+              }
+              context.startActivity(intent)
+            } else {
+              onPlayMedia(heroToDisplay.video, resumePos.takeIf { it > 0.0 })
+              val intent = Intent(context, PlayerActivity::class.java).apply {
+                action = MediaPlaybackService.ACTION_OPEN_PLAYER
+                putExtra("is_audio", true)
+                putExtra("internal_launch", true)
+                putExtra("launch_source", "audio_pulsing")
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+              }
+              try {
+                context.startActivity(intent)
+              } catch (_: Exception) {}
             }
           } else {
             onPlayMedia(heroToDisplay.video, resumePos.takeIf { it > 0.0 })
@@ -1156,7 +1184,7 @@ private fun BentoHeroSpotlightCard(
           ) {
             Text(
               text = if (isAudio) {
-                "$originalCodec • $remainingFormatted/$totalFormatted"
+                originalCodec
               } else {
                 "$originalCodec • ${item.video.durationFormatted}"
               },
@@ -1228,17 +1256,7 @@ private fun BentoHeroSpotlightCard(
               overflow = TextOverflow.Ellipsis,
             )
 
-            // One UI 9 Fluid Wavy Waveform Visualizer (No seek bar in audio pulsing)
-            if (isAudio) {
-              OneUi9WaveformVisualizer(
-                modifier = Modifier
-                  .fillMaxWidth()
-                  .height(24.dp)
-                  .padding(top = 2.dp),
-                primaryColor = MaterialTheme.colorScheme.tertiary,
-                secondaryColor = MaterialTheme.colorScheme.primary,
-              )
-            } else if (progress > 0f) {
+            if (!isAudio && progress > 0f) {
               Row(
                 modifier = Modifier
                   .fillMaxWidth()
@@ -1265,60 +1283,97 @@ private fun BentoHeroSpotlightCard(
           }
         }
 
-        // Playback Controls Row (Previous - Play/Pause - Next) for Audio Pulsing
+        // Wavy Seekbar Row with Middle Playback Controls and Right-Side Remaining Time
         if (isAudio) {
-          Row(
+          Box(
             modifier = Modifier
               .fillMaxWidth()
-              .padding(top = 2.dp),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
+              .height(46.dp)
+              .clip(RoundedCornerShape(16.dp))
+              .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.22f)),
+            contentAlignment = Alignment.Center,
           ) {
-            IconButton(
-              onClick = onPrevious,
-              modifier = Modifier.size(36.dp),
-            ) {
-              Icon(
-                imageVector = Icons.RoundedFilled.SkipPrevious,
-                contentDescription = "Previous",
-                modifier = Modifier.size(22.dp),
-                tint = MaterialTheme.colorScheme.tertiary,
-              )
-            }
+            // One UI 9 Fluid Wavy Waveform Visualizer across the full wavy bar
+            OneUi9WaveformVisualizer(
+              modifier = Modifier
+                .fillMaxWidth()
+                .height(34.dp)
+                .align(Alignment.Center),
+              primaryColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.55f),
+              secondaryColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
+            )
 
-            Spacer(modifier = Modifier.width(18.dp))
-
-            Surface(
-              onClick = onPlayPause,
-              modifier = Modifier.size(40.dp),
-              shape = CircleShape,
-              color = MaterialTheme.colorScheme.tertiary,
-              shadowElevation = 3.dp,
+            // Playback Controls (Previous - Play/Pause - Next) in the Middle of Wavy Seekbar
+            Row(
+              modifier = Modifier.align(Alignment.Center),
+              horizontalArrangement = Arrangement.spacedBy(10.dp),
+              verticalAlignment = Alignment.CenterVertically,
             ) {
-              Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.fillMaxSize(),
+              IconButton(
+                onClick = onPrevious,
+                modifier = Modifier.size(34.dp),
               ) {
                 Icon(
-                  imageVector = if (isPlaying) Icons.RoundedFilled.Pause else Icons.RoundedFilled.PlayArrow,
-                  contentDescription = if (isPlaying) "Pause" else "Play",
-                  modifier = Modifier.size(22.dp),
-                  tint = MaterialTheme.colorScheme.onTertiary,
+                  imageVector = Icons.RoundedFilled.SkipPrevious,
+                  contentDescription = "Previous",
+                  modifier = Modifier.size(20.dp),
+                  tint = MaterialTheme.colorScheme.tertiary,
+                )
+              }
+
+              Surface(
+                onClick = onPlayPause,
+                modifier = Modifier.size(36.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.tertiary,
+                shadowElevation = 3.dp,
+              ) {
+                Box(
+                  contentAlignment = Alignment.Center,
+                  modifier = Modifier.fillMaxSize(),
+                ) {
+                  Icon(
+                    imageVector = if (isPlaying) Icons.RoundedFilled.Pause else Icons.RoundedFilled.PlayArrow,
+                    contentDescription = if (isPlaying) "Pause" else "Play",
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onTertiary,
+                  )
+                }
+              }
+
+              IconButton(
+                onClick = onNext,
+                modifier = Modifier.size(34.dp),
+              ) {
+                Icon(
+                  imageVector = Icons.RoundedFilled.SkipNext,
+                  contentDescription = "Next",
+                  modifier = Modifier.size(20.dp),
+                  tint = MaterialTheme.colorScheme.tertiary,
                 )
               }
             }
 
-            Spacer(modifier = Modifier.width(18.dp))
-
-            IconButton(
-              onClick = onNext,
-              modifier = Modifier.size(36.dp),
+            // Remaining Time badge on the Right Side of the Wavy Seekbar
+            Surface(
+              modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(end = 8.dp),
+              shape = RoundedCornerShape(999.dp),
+              color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.65f),
+              border = BorderStroke(
+                width = 0.8.dp,
+                color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.35f),
+              ),
             ) {
-              Icon(
-                imageVector = Icons.RoundedFilled.SkipNext,
-                contentDescription = "Next",
-                modifier = Modifier.size(22.dp),
-                tint = MaterialTheme.colorScheme.tertiary,
+              Text(
+                text = "$remainingFormatted/$totalFormatted",
+                style = MaterialTheme.typography.labelSmall.copy(
+                  fontWeight = FontWeight.SemiBold,
+                  fontSize = 11.sp,
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.5.dp),
               )
             }
           }

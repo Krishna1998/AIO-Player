@@ -53,6 +53,13 @@ object NavigationBarState {
   var isMiniPlayerVisible: Boolean by mutableStateOf(false)
   var isAllMediaTabActive: Boolean by mutableStateOf(false)
 
+  var allMediaTabRequestId: Long by mutableStateOf(0L)
+    private set
+
+  fun requestAllMediaTab() {
+    allMediaTabRequestId = System.currentTimeMillis()
+  }
+
   internal var miniPlayerConnectionEnabled: Boolean by mutableStateOf(false)
   internal var isMiniPlayerDocked: Boolean by mutableStateOf(false)
   internal var dockProgress: Float by mutableFloatStateOf(0f)

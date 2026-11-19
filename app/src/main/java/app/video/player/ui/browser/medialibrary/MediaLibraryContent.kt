@@ -97,6 +97,7 @@ import app.video.player.ui.browser.dialogs.toPlaylistCandidates
 import app.video.player.ui.browser.dialogs.DeleteConfirmationDialog
 import app.video.player.ui.browser.dialogs.FileOperationProgressDialog
 import app.video.player.ui.browser.dialogs.FolderPickerDialog
+import app.video.player.ui.browser.dialogs.FolderSortDialog
 import app.video.player.ui.browser.dialogs.RenameDialog
 import app.video.player.ui.browser.dialogs.rememberSelectionInfoAction
 import app.video.player.ui.browser.dialogs.VideoSortDialog
@@ -149,11 +150,14 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
 
   val videoSortType by browserPreferences.videoSortType.collectAsState()
   val videoSortOrder by browserPreferences.videoSortOrder.collectAsState()
+  val folderSortType by browserPreferences.folderSortType.collectAsState()
+  val folderSortOrder by browserPreferences.folderSortOrder.collectAsState()
   val mediaLayoutMode by browserPreferences.mediaLayoutMode.collectAsState()
   val includeAudioBrowser by browserPreferences.includeAudioBrowser.collectAsState()
   val savedMediaType by browserPreferences.mediaLibraryType.collectAsState()
   val mediaType = if (forceAudio) MediaLibraryType.Audio else if (includeAudioBrowser) savedMediaType else MediaLibraryType.Video
   val musicCoverArtSize by browserPreferences.musicCoverArtSize.collectAsState()
+  var videoSubTab by rememberSaveable { mutableIntStateOf(0) }
   val sortedVideos =
     remember(videos, videoSortType, videoSortOrder) {
       SortUtils.sortVideos(videos, videoSortType, videoSortOrder)
@@ -175,6 +179,19 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
     mediaLibraryTabs.size
   }
   val navigateTab = rememberTabNavigation(pagerState)
+
+  LaunchedEffect(NavigationBarState.allMediaTabRequestId) {
+    if (NavigationBarState.allMediaTabRequestId != 0L && !forceAudio) {
+      if (!includeAudioBrowser) {
+        browserPreferences.includeAudioBrowser.set(true)
+      }
+      browserPreferences.mediaLibraryType.set(MediaLibraryType.All)
+      val targetIndex = mediaLibraryTabs.indexOf(MediaLibraryType.All)
+      if (targetIndex >= 0 && pagerState.currentPage != targetIndex) {
+        navigateTab(targetIndex)
+      }
+    }
+  }
 
   LaunchedEffect(pagerState, mediaLibraryTabs) {
     snapshotFlow { pagerState.settledPage to pagerState.isScrollInProgress }
@@ -226,16 +243,28 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
         MediaLibraryType.All -> sortedVideosWithInfo
         MediaLibraryType.Video -> sortedVideosWithInfo.filter { !it.video.isAudio }
         MediaLibraryType.Audio -> {
-          if (videoSortType == app.video.player.preferences.VideoSortType.Title) {
-            sortedVideosWithInfo.filter { it.video.isAudio }
-              .sortedWith { a, b ->
-                val titleA = if (a.video.title.isNotBlank()) a.video.title else FileTypeUtils.stripExtension(a.video.displayName)
-                val titleB = if (b.video.title.isNotBlank()) b.video.title else FileTypeUtils.stripExtension(b.video.displayName)
-                val res = SortUtils.NaturalOrderComparator.DEFAULT.compare(titleA, titleB)
-                if (videoSortOrder.isAscending) res else -res
-              }
-          } else {
-            sortedVideosWithInfo.filter { it.video.isAudio }
+          when (videoSortType) {
+            app.video.player.preferences.VideoSortType.Title -> {
+              sortedVideosWithInfo.filter { it.video.isAudio }
+                .sortedWith { a, b ->
+                  val titleA = if (a.video.title.isNotBlank()) a.video.title else FileTypeUtils.stripExtension(a.video.displayName)
+                  val titleB = if (b.video.title.isNotBlank()) b.video.title else FileTypeUtils.stripExtension(b.video.displayName)
+                  val res = SortUtils.NaturalOrderComparator.DEFAULT.compare(titleA, titleB)
+                  if (videoSortOrder.isAscending) res else -res
+                }
+            }
+            app.video.player.preferences.VideoSortType.Duration -> {
+              val list = sortedVideosWithInfo.filter { it.video.isAudio }.sortedBy { it.video.duration }
+              if (videoSortOrder.isAscending) list else list.reversed()
+            }
+            app.video.player.preferences.VideoSortType.Date -> {
+              val list = sortedVideosWithInfo.filter { it.video.isAudio }.sortedBy { it.video.dateModified }
+              if (videoSortOrder.isAscending) list else list.reversed()
+            }
+            app.video.player.preferences.VideoSortType.Size -> {
+              val list = sortedVideosWithInfo.filter { it.video.isAudio }.sortedBy { it.video.size }
+              if (videoSortOrder.isAscending) list else list.reversed()
+            }
           }
         }
       }
@@ -783,16 +812,28 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                   MediaLibraryType.All -> sortedVideosWithInfo
                   MediaLibraryType.Video -> sortedVideosWithInfo.filter { !it.video.isAudio }
                   MediaLibraryType.Audio -> {
-                    if (videoSortType == app.video.player.preferences.VideoSortType.Title) {
-                      sortedVideosWithInfo.filter { it.video.isAudio }
-                        .sortedWith { a, b ->
-                          val titleA = if (a.video.title.isNotBlank()) a.video.title else FileTypeUtils.stripExtension(a.video.displayName)
-                          val titleB = if (b.video.title.isNotBlank()) b.video.title else FileTypeUtils.stripExtension(b.video.displayName)
-                          val res = SortUtils.NaturalOrderComparator.DEFAULT.compare(titleA, titleB)
-                          if (videoSortOrder.isAscending) res else -res
-                        }
-                    } else {
-                      sortedVideosWithInfo.filter { it.video.isAudio }
+                    when (videoSortType) {
+                      app.video.player.preferences.VideoSortType.Title -> {
+                        sortedVideosWithInfo.filter { it.video.isAudio }
+                          .sortedWith { a, b ->
+                            val titleA = if (a.video.title.isNotBlank()) a.video.title else FileTypeUtils.stripExtension(a.video.displayName)
+                            val titleB = if (b.video.title.isNotBlank()) b.video.title else FileTypeUtils.stripExtension(b.video.displayName)
+                            val res = SortUtils.NaturalOrderComparator.DEFAULT.compare(titleA, titleB)
+                            if (videoSortOrder.isAscending) res else -res
+                          }
+                      }
+                      app.video.player.preferences.VideoSortType.Duration -> {
+                        val list = sortedVideosWithInfo.filter { it.video.isAudio }.sortedBy { it.video.duration }
+                        if (videoSortOrder.isAscending) list else list.reversed()
+                      }
+                      app.video.player.preferences.VideoSortType.Date -> {
+                        val list = sortedVideosWithInfo.filter { it.video.isAudio }.sortedBy { it.video.dateModified }
+                        if (videoSortOrder.isAscending) list else list.reversed()
+                      }
+                      app.video.player.preferences.VideoSortType.Size -> {
+                        val list = sortedVideosWithInfo.filter { it.video.isAudio }.sortedBy { it.video.size }
+                        if (videoSortOrder.isAscending) list else list.reversed()
+                      }
                     }
                   }
                 }
@@ -823,7 +864,6 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                   )
                 }
               } else if (pageType == MediaLibraryType.Video && !isSearching) {
-                var videoSubTab by rememberSaveable { mutableIntStateOf(0) }
                 Column(modifier = Modifier.fillMaxSize()) {
                   Row(
                     modifier = Modifier
@@ -869,6 +909,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                     if (videoSubTab == 0) {
                       app.video.player.ui.browser.folderlist.FolderListScreen.MediaStoreFolderListContent(
                         audioOnly = false,
+                        videoOnly = true,
                         embedded = true,
                         searchQuery = searchQuery,
                       )
@@ -1008,18 +1049,30 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   }
 
     if (sortDialogOpen.value) {
-      VideoSortDialog(
-        isOpen = sortDialogOpen.value,
-        onDismiss = { sortDialogOpen.value = false },
-        sortType = videoSortType,
-        sortOrder = videoSortOrder,
-        onSortTypeChange = { browserPreferences.videoSortType.set(it) },
-        onSortOrderChange = { browserPreferences.videoSortOrder.set(it) },
-        isFolderView = false,
-        enableViewModeOptions = !forceAudio,
-        isAudio = mediaType == MediaLibraryType.Audio,
-        onMetadataFieldEnabled = viewModel::refresh,
-      )
+      if (currentTab == MediaLibraryType.Video && videoSubTab == 0 && !isSearching) {
+        FolderSortDialog(
+          isOpen = sortDialogOpen.value,
+          onDismiss = { sortDialogOpen.value = false },
+          sortType = folderSortType,
+          sortOrder = folderSortOrder,
+          onSortTypeChange = { browserPreferences.folderSortType.set(it) },
+          onSortOrderChange = { browserPreferences.folderSortOrder.set(it) },
+          embeddedAlbumView = true,
+        )
+      } else {
+        VideoSortDialog(
+          isOpen = sortDialogOpen.value,
+          onDismiss = { sortDialogOpen.value = false },
+          sortType = videoSortType,
+          sortOrder = videoSortOrder,
+          onSortTypeChange = { browserPreferences.videoSortType.set(it) },
+          onSortOrderChange = { browserPreferences.videoSortOrder.set(it) },
+          isFolderView = false,
+          enableViewModeOptions = !forceAudio,
+          isAudio = currentTab == MediaLibraryType.Audio,
+          onMetadataFieldEnabled = viewModel::refresh,
+        )
+      }
     }
 
     if (deleteDialogOpen.value) {

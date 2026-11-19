@@ -124,6 +124,8 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 import app.video.player.R
 import app.video.player.preferences.AppearancePreferences
+import app.video.player.preferences.BrowserPreferences
+import app.video.player.preferences.MediaLibraryType
 import app.video.player.preferences.MediaServerPreferences
 import app.video.player.preferences.MusicSourceProvider
 import app.video.player.preferences.PlayerPreferences
@@ -228,6 +230,7 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
   override fun Content() {
     val backStack = LocalBackStack.current
     val appearancePreferences = koinInject<AppearancePreferences>()
+    val browserPreferences = koinInject<BrowserPreferences>()
     val playerPreferences = koinInject<PlayerPreferences>()
     val navStyle by playerPreferences.appNavStyle.collectAsState()
     val animSpeed by playerPreferences.animationSpeed.collectAsState()
@@ -389,6 +392,9 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
       NavigationBarState.clearSearchTrigger()
       if (tab == MainTab.HOME) {
         NavigationBarState.dismissSearch()
+        browserPreferences.includeAudioBrowser.set(true)
+        browserPreferences.mediaLibraryType.set(MediaLibraryType.All)
+        NavigationBarState.requestAllMediaTab()
       }
       val targetIndex = visibleTabs.indexOf(tab)
       val isAlreadySettled =

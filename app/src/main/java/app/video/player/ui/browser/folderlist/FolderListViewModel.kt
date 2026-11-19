@@ -62,6 +62,7 @@ data class FolderWithNewCount(
 class FolderListViewModel(
   application: Application,
   private val audioOnly: Boolean = false,
+  private val videoOnly: Boolean = false,
 ) : BaseBrowserViewModel(application),
   KoinComponent {
   private val foldersPreferences: FoldersPreferences by inject()
@@ -123,9 +124,10 @@ class FolderListViewModel(
     fun factory(
       application: Application,
       audioOnly: Boolean = false,
+      videoOnly: Boolean = false,
     ) = object : ViewModelProvider.Factory {
       @Suppress("UNCHECKED_CAST")
-      override fun <T : ViewModel> create(modelClass: Class<T>): T = FolderListViewModel(application, audioOnly) as T
+      override fun <T : ViewModel> create(modelClass: Class<T>): T = FolderListViewModel(application, audioOnly, videoOnly) as T
     }
   }
 
@@ -318,7 +320,7 @@ class FolderListViewModel(
   }
 
   private fun currentFolderCacheKey(): String =
-    "folders_v3_${if (audioOnly) "audioOnly" else "video"}" +
+    "folders_v3_${if (audioOnly) "audioOnly" else if (videoOnly) "videoOnly" else "video"}" +
       "_${if (foldersPreferences.includeNoMediaFolders.get()) "with_nomedia" else "exclude_nomedia"}" +
       "_enabled${foldersPreferences.foldersHiddenScanEnabled.get()}" +
       "_m${foldersPreferences.sharedScanMarkedFolders.get()}_d${foldersPreferences.sharedScanDotFolders.get()}" +
@@ -732,7 +734,7 @@ class FolderListViewModel(
                   if (!hasExistingData && !silent) _scanStatus.value = "Found $count folders"
                 },
                 forceFileSystemCheck = forceFileSystemCheck,
-                includeAudioOverride = browserPreferences.includeAudioBrowser.get(),
+                includeAudioOverride = if (videoOnly) false else if (audioOnly) true else browserPreferences.includeAudioBrowser.get(),
               )
             }
           ensureActive()
@@ -748,7 +750,7 @@ class FolderListViewModel(
           val scopedFolders = if (skipMediaStoreScan) {
             ScopedHiddenFolderScanner.withoutLocalDuplicates(
               mediaStoreFolders + indexedFolders,
-              MediaFileRepository.getScopedHiddenVideoFolders(getApplication(), includeAudioOverride = if (audioOnly) true else null),
+              MediaFileRepository.getScopedHiddenVideoFolders(getApplication(), includeAudioOverride = if (videoOnly) false else if (audioOnly) true else null),
             )
           } else {
             emptyList()
