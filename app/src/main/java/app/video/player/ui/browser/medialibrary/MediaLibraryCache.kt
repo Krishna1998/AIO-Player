@@ -76,6 +76,7 @@ internal object MediaLibraryCache {
       video.videoCodec,
       video.videoCodecMimeType,
       video.artworkUrl.orEmpty(),
+      video.artist,
     ).joinToString(FIELD_SEPARATOR) { sanitize(it) }
 
   /**
@@ -141,7 +142,7 @@ internal object MediaLibraryCache {
 
   internal fun decode(record: String): Video? {
     val parts = record.split(FIELD_SEPARATOR)
-    if (parts.size != FIELD_COUNT) return null
+    if (parts.size < FIELD_COUNT) return null
     val id = parts[0].toLongOrNull() ?: return null
     val duration = parts[5].toLongOrNull() ?: return null
     val size = parts[6].toLongOrNull() ?: return null
@@ -180,6 +181,7 @@ internal object MediaLibraryCache {
       videoCodecMimeType = parts[21],
       isAudio = isAudio,
       artworkUrl = parts[22].ifBlank { null },
+      artist = if (parts.size > 23) parts[23] else "",
     )
   }
 

@@ -258,6 +258,7 @@ object MediaFileRepository : KoinComponent {
             val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)
             val durationColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
             val dateColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_MODIFIED)
+            val artistColumn = cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)
             while (cursor.moveToNext()) {
               val path = cursor.getString(dataColumn)
               if (path == null) continue
@@ -351,6 +352,7 @@ object MediaFileRepository : KoinComponent {
             val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)
             val durationColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
             val dateColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATE_MODIFIED)
+            val artistColumn = cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)
             var guard = 0
             while (cursor.moveToNext() && guard < limit) {
               guard++
@@ -388,6 +390,7 @@ object MediaFileRepository : KoinComponent {
                   fps = 0f,
                   resolution = "",
                   isAudio = true,
+                  artist = if (artistColumn >= 0) cursor.getString(artistColumn).orEmpty() else "",
                 )
             }
           }

@@ -4,6 +4,19 @@ These notes are written in plain English and focus on what changed for real use.
 
 ## 1.0.0
 
+### 🌌 Dual-Horizon Rails & Smart Audio Architecture
+- **Cinematic Video Horizon Up & Audio Pulsing Down:**
+  - Re-architected All Media / Horizon layout: **Cinematic Video Horizon rail** is placed at the top of the screen ("going up") featuring 16:9 widescreen previews, resolution badges (4K HDR, 1080p, 720p), duration, and playback progress indicators.
+  - Placed the **Audio Pulsing hero card** directly below the video horizon rail ("going down") with real-time reactive animated equalizer waves, lossless audio tags, and quick playback actions.
+  - Followed by the **Sonic Soundstage Horizon rail** showcasing square album art cards, lossless badges, and artist metadata.
+- **Music Sorting by Artist Name to Title Name:**
+  - In All Media and Music views, audio tracks are intelligently sorted primarily by artist name, then by title name.
+  - Supports MediaStore audio tags with fallback to intelligent `Artist - Title` filename extraction and album bucket categorization.
+- **Default Horizon View Mode & Bento Cleanup:**
+  - Made **Dual Horizon ("Horizon")** the primary default view mode in `BrowserPreferences` for instant unified video and audio immersion on launch.
+  - Streamlined View Mode options dialog: removed "Bento" in favor of the unified "Horizon" view mode alongside Folder, Tree, and Library.
+
+
 ### 🌊 Visualizer & Seekbar Innovations
 - **Samsung One UI 9.5 Aurora Frosted Glass Veil Wavy Visualizer:**
   - Implemented a multi-depth 3-tier wave curtain visualizer flowing directly above the elapsed track of the seekbar in both video and audio players.

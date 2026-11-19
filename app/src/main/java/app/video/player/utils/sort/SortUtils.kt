@@ -15,6 +15,7 @@ import app.video.player.domain.media.model.VideoFolder
 import app.video.player.preferences.FolderSortType
 import app.video.player.preferences.SortOrder
 import app.video.player.preferences.VideoSortType
+import app.video.player.utils.storage.FileTypeUtils
 import java.util.Locale
 
 object SortUtils {
@@ -29,17 +30,71 @@ object SortUtils {
     val sorted =
       when (sortType) {
         VideoSortType.Title ->
-          videos.sortedWith {
-            t1,
-            t2,
-            ->
-            NaturalOrderComparator.DEFAULT.compare(t1.displayName, t2.displayName)
+          videos.sortedWith { t1, t2 ->
+            val key1 = if (t1.isAudio) {
+              val (artist, title) = getAudioArtistAndTitle(t1)
+              if (artist.isNotBlank() && !artist.equals("Unknown Artist", ignoreCase = true)) {
+                "$artist - $title"
+              } else {
+                title
+              }
+            } else {
+              t1.displayName
+            }
+            val key2 = if (t2.isAudio) {
+              val (artist, title) = getAudioArtistAndTitle(t2)
+              if (artist.isNotBlank() && !artist.equals("Unknown Artist", ignoreCase = true)) {
+                "$artist - $title"
+              } else {
+                title
+              }
+            } else {
+              t2.displayName
+            }
+            NaturalOrderComparator.DEFAULT.compare(key1, key2)
           }
         VideoSortType.Duration -> videos.sortedBy { it.duration }
         VideoSortType.Date -> videos.sortedBy { it.dateModified }
         VideoSortType.Size -> videos.sortedBy { it.size }
       }
     return if (sortOrder.isAscending) sorted else sorted.reversed()
+  }
+
+  /**
+   * Resolves artist and title pair for audio media.
+   * Priority:
+   * 1. Video model's explicit artist (from MediaStore audio tags / MusicSong)
+   * 2. Parsed "Artist - Title" string from displayName or title
+   * 3. Album / folder bucket name or "Unknown Artist"
+   */
+  fun getAudioArtistAndTitle(video: Video): Pair<String, String> {
+    val rawArtist = video.artist.trim()
+    val hasValidArtist = rawArtist.isNotBlank() &&
+      !rawArtist.equals("<unknown>", ignoreCase = true) &&
+      !rawArtist.equals("Unknown Artist", ignoreCase = true)
+
+    if (hasValidArtist) {
+      val title = if (video.title.isNotBlank()) video.title.trim() else FileTypeUtils.stripExtension(video.displayName)
+      return Pair(rawArtist, title)
+    }
+
+    val cleanName = FileTypeUtils.stripExtension(video.displayName)
+    if (cleanName.contains(" - ")) {
+      val parts = cleanName.split(" - ", limit = 2)
+      val parsedArtist = parts[0].trim()
+      val parsedTitle = parts[1].trim()
+      if (parsedArtist.isNotBlank() && parsedTitle.isNotBlank()) {
+        return Pair(parsedArtist, parsedTitle)
+      }
+    }
+
+    val title = if (video.title.isNotBlank()) video.title.trim() else cleanName
+    val fallbackArtist = if (video.bucketDisplayName.isNotBlank() && !video.bucketDisplayName.equals("Audio", ignoreCase = true)) {
+      video.bucketDisplayName.trim()
+    } else {
+      "Unknown Artist"
+    }
+    return Pair(fallbackArtist, title)
   }
 
   /**

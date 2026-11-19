@@ -212,11 +212,24 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   val focusRequester = remember { FocusRequester() }
 
   val currentVideosWithInfo =
-    remember(sortedVideosWithInfo, currentTab, isSearching, searchQuery) {
+    remember(sortedVideosWithInfo, currentTab, isSearching, searchQuery, videoSortType, videoSortOrder) {
       val base = when (currentTab) {
         MediaLibraryType.All -> sortedVideosWithInfo
         MediaLibraryType.Video -> sortedVideosWithInfo.filter { !it.video.isAudio }
-        MediaLibraryType.Audio -> sortedVideosWithInfo.filter { it.video.isAudio }
+        MediaLibraryType.Audio -> {
+          if (videoSortType == app.video.player.preferences.VideoSortType.Title) {
+            sortedVideosWithInfo.filter { it.video.isAudio }
+              .sortedWith { a, b ->
+                val (artistA, titleA) = SortUtils.getAudioArtistAndTitle(a.video)
+                val (artistB, titleB) = SortUtils.getAudioArtistAndTitle(b.video)
+                val cmp = SortUtils.NaturalOrderComparator.DEFAULT.compare(artistA, artistB)
+                val res = if (cmp != 0) cmp else SortUtils.NaturalOrderComparator.DEFAULT.compare(titleA, titleB)
+                if (videoSortOrder.isAscending) res else -res
+              }
+          } else {
+            sortedVideosWithInfo.filter { it.video.isAudio }
+          }
+        }
       }
       if (isSearching && searchQuery.isNotBlank()) {
         base.filter { item ->
@@ -754,11 +767,24 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
               userScrollEnabled = !selectionManager.isInSelectionMode,
             ) { page ->
               val pageType = mediaLibraryTabs.getOrNull(page) ?: MediaLibraryType.All
-              val pageVideosWithInfo = remember(sortedVideosWithInfo, pageType, isSearching, searchQuery) {
+              val pageVideosWithInfo = remember(sortedVideosWithInfo, pageType, isSearching, searchQuery, videoSortType, videoSortOrder) {
                 val base = when (pageType) {
                   MediaLibraryType.All -> sortedVideosWithInfo
                   MediaLibraryType.Video -> sortedVideosWithInfo.filter { !it.video.isAudio }
-                  MediaLibraryType.Audio -> sortedVideosWithInfo.filter { it.video.isAudio }
+                  MediaLibraryType.Audio -> {
+                    if (videoSortType == app.video.player.preferences.VideoSortType.Title) {
+                      sortedVideosWithInfo.filter { it.video.isAudio }
+                        .sortedWith { a, b ->
+                          val (artistA, titleA) = SortUtils.getAudioArtistAndTitle(a.video)
+                          val (artistB, titleB) = SortUtils.getAudioArtistAndTitle(b.video)
+                          val cmp = SortUtils.NaturalOrderComparator.DEFAULT.compare(artistA, artistB)
+                          val res = if (cmp != 0) cmp else SortUtils.NaturalOrderComparator.DEFAULT.compare(titleA, titleB)
+                          if (videoSortOrder.isAscending) res else -res
+                        }
+                    } else {
+                      sortedVideosWithInfo.filter { it.video.isAudio }
+                    }
+                  }
                 }
                 if (isSearching && searchQuery.isNotBlank()) {
                   base.filter { item ->

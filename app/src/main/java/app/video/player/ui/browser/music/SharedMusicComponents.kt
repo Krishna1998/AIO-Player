@@ -848,5 +848,6 @@ private fun MusicSong.toVideo(): Video {
     fps = 0f,
     resolution = "",
     isAudio = true,
+    artist = artist,
   )
 }

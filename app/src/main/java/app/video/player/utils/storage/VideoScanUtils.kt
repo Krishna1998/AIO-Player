@@ -280,6 +280,7 @@ object VideoScanUtils : KoinComponent {
         MediaStore.Audio.Media._ID,
         MediaStore.Audio.Media.DISPLAY_NAME,
         MediaStore.Audio.Media.TITLE,
+        MediaStore.Audio.Media.ARTIST,
         MediaStore.Audio.Media.DATA,
         MediaStore.Audio.Media.SIZE,
         MediaStore.Audio.Media.DURATION,
@@ -303,6 +304,7 @@ object VideoScanUtils : KoinComponent {
           val idColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
           val nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME)
           val titleColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
+          val artistColumn = cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)
           val dataColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
           val sizeColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)
           val durationColumn = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
@@ -325,6 +327,7 @@ object VideoScanUtils : KoinComponent {
             val id = cursor.getLong(idColumn)
             val displayName = cursor.getString(nameColumn) ?: file.name
             val title = cursor.getString(titleColumn)?.takeIf { it.isNotBlank() } ?: file.nameWithoutExtension
+            val artist = if (artistColumn >= 0) cursor.getString(artistColumn).orEmpty() else ""
             val size = cursor.getLong(sizeColumn)
             val uri = Uri.withAppendedPath(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id.toString())
             videosMap[keyResolver.key(normalizedPath) ?: normalizedPath] =
@@ -349,6 +352,7 @@ object VideoScanUtils : KoinComponent {
                 fps = 0f,
                 resolution = "--",
                 isAudio = true,
+                artist = artist,
               )
           }
         }

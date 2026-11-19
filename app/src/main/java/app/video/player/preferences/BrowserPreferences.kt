@@ -111,7 +111,7 @@ class BrowserPreferences(
   val navidromeSortField = preferenceStore.getEnum("navidrome_sort_field", MusicSortField.TITLE)
   val navidromeSortOrder = preferenceStore.getEnum("navidrome_sort_order", MusicSortOrder.ASCENDING)
 
-  val folderViewMode = preferenceStore.getEnum("folder_view_mode", FolderViewMode.BentoFusion)
+  val folderViewMode = preferenceStore.getEnum("folder_view_mode", FolderViewMode.DualHorizon)
   val dualPaneForTablet = preferenceStore.getBoolean("dual_pane_for_tablet", true)
 
   val folderGridColumnsPortrait = preferenceStore.getInt("folder_grid_columns_portrait", 0)
@@ -385,21 +385,22 @@ enum class AudiobookSortType {
  * Folder view mode options
  */
 enum class FolderViewMode {
-  BentoFusion,
   DualHorizon,
   AlbumView,
   FileManager,
   MediaLibrary,
+  @Deprecated("Replaced by DualHorizon")
+  BentoFusion,
   ;
 
   val displayName: String
     get() =
       when (this) {
+        DualHorizon -> "Horizon"
         AlbumView -> "Folder View"
         FileManager -> "Tree View"
         MediaLibrary -> "Media Library"
-        BentoFusion -> "Bento Fusion"
-        DualHorizon -> "Dual Horizon"
+        BentoFusion -> "Horizon"
       }
 }
 

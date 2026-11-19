@@ -71,6 +71,7 @@ import app.video.player.domain.thumbnail.ThumbnailRepository
 import app.video.player.ui.browser.videolist.VideoWithPlaybackInfo
 import app.video.player.ui.icons.Icons
 import app.video.player.ui.icons.Icon
+import app.video.player.utils.sort.SortUtils
 import app.video.player.utils.storage.FileTypeUtils
 import org.koin.compose.koinInject
 import kotlin.math.roundToInt
@@ -91,23 +92,33 @@ fun BentoFusionHeader(
 ) {
   if (videosWithInfo.isEmpty()) return
 
-  // 1. Identify hero media: prioritize recently played file, then in-progress, then first available
-  val heroMedia = remember(videosWithInfo, recentlyPlayedFilePath) {
-    if (recentlyPlayedFilePath != null) {
-      videosWithInfo.firstOrNull { it.video.path == recentlyPlayedFilePath }
-    } else {
-      null
-    } ?: videosWithInfo.firstOrNull { it.progressPercentage != null && it.progressPercentage > 0f && !it.isWatched }
-      ?: videosWithInfo.firstOrNull()
-  } ?: return
+  // 1. Separate video items and audio items (with music sorted by artist name to title name)
+  val videoItems = remember(videosWithInfo) {
+    videosWithInfo.filter { !it.video.isAudio }
+  }
+  val audioItems = remember(videosWithInfo) {
+    videosWithInfo.filter { it.video.isAudio }
+      .sortedWith { a, b ->
+        val (artistA, titleA) = SortUtils.getAudioArtistAndTitle(a.video)
+        val (artistB, titleB) = SortUtils.getAudioArtistAndTitle(b.video)
+        val cmp = SortUtils.NaturalOrderComparator.DEFAULT.compare(artistA, artistB)
+        if (cmp != 0) cmp else SortUtils.NaturalOrderComparator.DEFAULT.compare(titleA, titleB)
+      }
+  }
 
-  // 2. Identify latest video and latest audio candidates for dual quick rail
-  val latestVideo = remember(videosWithInfo) {
-    videosWithInfo.firstOrNull { !it.video.isAudio }
-  }
-  val latestAudio = remember(videosWithInfo) {
-    videosWithInfo.firstOrNull { it.video.isAudio }
-  }
+  // 2. Identify hero candidates: prioritizing audio track for audio pulsing, or fallback to hero media
+  val heroAudio = remember(audioItems, recentlyPlayedFilePath) {
+    if (recentlyPlayedFilePath != null) {
+      audioItems.firstOrNull { it.video.path == recentlyPlayedFilePath }
+    } else null
+  } ?: audioItems.firstOrNull()
+
+  val heroVideo = remember(videoItems, recentlyPlayedFilePath) {
+    if (recentlyPlayedFilePath != null) {
+      videoItems.firstOrNull { it.video.path == recentlyPlayedFilePath }
+    } else null
+  } ?: videoItems.firstOrNull { it.progressPercentage != null && it.progressPercentage > 0f && !it.isWatched }
+    ?: videoItems.firstOrNull()
 
   Column(
     modifier = modifier
@@ -115,18 +126,66 @@ fun BentoFusionHeader(
       .padding(bottom = 12.dp),
     verticalArrangement = Arrangement.spacedBy(14.dp),
   ) {
-    // Flagship Bento Spotlight Hero Card
-    BentoHeroSpotlightCard(
-      item = heroMedia,
-      onClick = { onPlayMedia(heroMedia.video) },
-    )
+    // 1. Cinematic Video Horizon Rail (Going UP - Top of screen)
+    if (videoItems.isNotEmpty()) {
+      HorizonRailSection(
+        title = "Cinematic Video Horizon",
+        icon = "🎬",
+        accentColor = MaterialTheme.colorScheme.primary,
+        count = videoItems.size,
+        onViewAll = { onFilterSelected?.invoke(MediaLibraryType.Video) },
+      ) {
+        LazyRow(
+          contentPadding = PaddingValues(horizontal = 16.dp),
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+          items(
+            items = videoItems.take(20),
+            key = { it.video.path },
+          ) { item ->
+            BentoHorizonVideoCard(
+              item = item,
+              onClick = { onPlayMedia(item.video) },
+            )
+          }
+        }
+      }
+    }
 
-    // Dual-Horizon Rails (Cinematic Video Rail + Sonic Soundstage Rail)
-    DualHorizonRails(
-      videosWithInfo = videosWithInfo,
-      onPlayMedia = onPlayMedia,
-      onFilterSelected = onFilterSelected,
-    )
+    // 2. Audio Pulsing Hero Spotlight Card (Going DOWN - Placed below video horizon rail)
+    val heroToDisplay = heroAudio ?: (if (videoItems.isEmpty()) heroVideo else null)
+    if (heroToDisplay != null) {
+      BentoHeroSpotlightCard(
+        item = heroToDisplay,
+        onClick = { onPlayMedia(heroToDisplay.video) },
+      )
+    }
+
+    // 3. Sonic Soundstage Horizon Rail (Below Audio Pulsing card)
+    if (audioItems.isNotEmpty()) {
+      HorizonRailSection(
+        title = "Sonic Soundstage Horizon",
+        icon = "🎵",
+        accentColor = MaterialTheme.colorScheme.tertiary,
+        count = audioItems.size,
+        onViewAll = { onFilterSelected?.invoke(MediaLibraryType.Audio) },
+      ) {
+        LazyRow(
+          contentPadding = PaddingValues(horizontal = 16.dp),
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+          items(
+            items = audioItems.take(20),
+            key = { it.video.path },
+          ) { item ->
+            BentoHorizonAudioCard(
+              item = item,
+              onClick = { onPlayMedia(item.video) },
+            )
+          }
+        }
+      }
+    }
   }
 }
 
@@ -148,6 +207,12 @@ fun DualHorizonRails(
   }
   val audioItems = remember(videosWithInfo) {
     videosWithInfo.filter { it.video.isAudio }
+      .sortedWith { a, b ->
+        val (artistA, titleA) = SortUtils.getAudioArtistAndTitle(a.video)
+        val (artistB, titleB) = SortUtils.getAudioArtistAndTitle(b.video)
+        val cmp = SortUtils.NaturalOrderComparator.DEFAULT.compare(artistA, artistB)
+        if (cmp != 0) cmp else SortUtils.NaturalOrderComparator.DEFAULT.compare(titleA, titleB)
+      }
   }
 
   Column(
@@ -492,8 +557,9 @@ private fun BentoHorizonAudioCard(
           .padding(horizontal = 8.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
       ) {
+        val (artist, title) = SortUtils.getAudioArtistAndTitle(video)
         Text(
-          text = video.title.ifBlank { FileTypeUtils.stripExtension(video.displayName) },
+          text = title,
           style = MaterialTheme.typography.labelMedium.copy(
             fontWeight = FontWeight.Bold,
           ),
@@ -503,7 +569,11 @@ private fun BentoHorizonAudioCard(
         )
 
         Text(
-          text = if (video.durationFormatted.isNotBlank()) video.durationFormatted else "Audio Track",
+          text = if (artist.isNotBlank() && !artist.equals("Unknown Artist", ignoreCase = true)) {
+            "$artist • ${if (video.durationFormatted.isNotBlank()) video.durationFormatted else "Audio"}"
+          } else {
+            if (video.durationFormatted.isNotBlank()) video.durationFormatted else "Audio Track"
+          },
           style = MaterialTheme.typography.bodySmall.copy(
             fontSize = 10.sp,
           ),
@@ -653,12 +723,14 @@ private fun BentoHeroSpotlightCard(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(4.dp),
           ) {
+            val (artist, title) = if (isAudio) {
+              SortUtils.getAudioArtistAndTitle(item.video)
+            } else {
+              Pair("", if (item.video.title.isNotBlank()) item.video.title else FileTypeUtils.stripExtension(item.video.displayName))
+            }
+
             Text(
-              text = if (isAudio && item.video.title.isNotBlank()) {
-                item.video.title
-              } else {
-                FileTypeUtils.stripExtension(item.video.displayName)
-              },
+              text = title,
               style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
               color = MaterialTheme.colorScheme.onSurface,
               maxLines = 1,
@@ -667,7 +739,11 @@ private fun BentoHeroSpotlightCard(
 
             Text(
               text = if (isAudio) {
-                item.video.bucketDisplayName.ifBlank { "Lossless Audio" }
+                if (artist.isNotBlank() && !artist.equals("Unknown Artist", ignoreCase = true)) {
+                  "$artist • ${item.video.bucketDisplayName.ifBlank { "Lossless Audio" }}"
+                } else {
+                  item.video.bucketDisplayName.ifBlank { "Lossless Audio" }
+                }
               } else {
                 "${item.video.sizeFormatted} • ${item.video.bucketDisplayName}"
               },
