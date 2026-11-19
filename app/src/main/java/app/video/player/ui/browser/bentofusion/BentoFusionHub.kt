@@ -12,18 +12,23 @@ package app.video.player.ui.browser.bentofusion
 import android.content.Intent
 import android.graphics.Bitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +42,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -45,11 +51,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -60,6 +63,8 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
@@ -73,10 +78,14 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.video.player.domain.media.model.Video
@@ -98,11 +107,14 @@ import app.video.player.ui.icons.Icon
 import app.video.player.utils.history.RecentlyPlayedOps
 import app.video.player.utils.sort.SortUtils
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import app.video.player.utils.storage.FileTypeUtils
 import app.video.player.utils.storage.VideoScanUtils
 import org.koin.compose.koinInject
 import kotlin.math.PI
+import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.sin
@@ -427,32 +439,27 @@ fun BentoFusionHeader(
         onClick = {
           if (heroToDisplay.video.isAudio) {
             if (isCurrentlyInSession) {
-              if (isPaused == true) {
-                PlaybackSession.setPropertyBoolean("pause", false)
-              }
-              val intent = Intent(context, PlayerActivity::class.java).apply {
-                action = MediaPlaybackService.ACTION_OPEN_PLAYER
-                putExtra("is_audio", true)
-                putExtra("internal_launch", true)
-                putExtra("launch_source", "audio_pulsing")
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
-              }
-              context.startActivity(intent)
+              val currentPaused = isPaused ?: false
+              PlaybackSession.setPropertyBoolean("pause", !currentPaused)
             } else {
               onPlayMedia(heroToDisplay.video, resumePos.takeIf { it > 0.0 })
-              val intent = Intent(context, PlayerActivity::class.java).apply {
-                action = MediaPlaybackService.ACTION_OPEN_PLAYER
-                putExtra("is_audio", true)
-                putExtra("internal_launch", true)
-                putExtra("launch_source", "audio_pulsing")
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
-              }
-              try {
-                context.startActivity(intent)
-              } catch (_: Exception) {}
             }
           } else {
             onPlayMedia(heroToDisplay.video, resumePos.takeIf { it > 0.0 })
+          }
+        },
+        onLongClick = {
+          if (heroToDisplay.video.isAudio) {
+            val intent = Intent(context, PlayerActivity::class.java).apply {
+              action = MediaPlaybackService.ACTION_OPEN_PLAYER
+              putExtra("is_audio", true)
+              putExtra("internal_launch", true)
+              putExtra("launch_source", "audio_pulsing")
+              flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            try {
+              context.startActivity(intent)
+            } catch (_: Exception) {}
           }
         },
         onPrevious = {
@@ -493,13 +500,6 @@ fun BentoFusionHeader(
             val currIdx = sortedAudioByTitle.indexOfFirst { it.video.path == heroToDisplay.video.path }
             val nextIdx = if (currIdx >= 0) (currIdx + 1) % sortedAudioByTitle.size else 0
             onPlayMedia(sortedAudioByTitle[nextIdx].video, null)
-          }
-        },
-        onSeek = { targetSec ->
-          if (isCurrentlyInSession) {
-            PlaybackSession.command("seek", targetSec.toString(), "absolute+exact")
-          } else {
-            onPlayMedia(heroToDisplay.video, targetSec.toDouble())
           }
         },
       )
@@ -1086,18 +1086,26 @@ private fun BentoHorizonAudioCard(
   }
 }
 
+private enum class BentoCardGesture {
+  None,
+  Tap,
+  VerticalScroll,
+  Drag,
+  Cancelled,
+}
+
 /**
  * Hero Spotlight Card displaying active/resuming video or pulsing audio track
- * with dynamic visualizer waves and specular highlights.
+ * with dynamic visualizer waves, specular highlights, and touch gestures.
  */
 @Composable
 private fun BentoHeroSpotlightCard(
   item: VideoWithPlaybackInfo,
   onClick: () -> Unit,
+  onLongClick: () -> Unit = {},
   onPrevious: () -> Unit = {},
   onPlayPause: () -> Unit = {},
   onNext: () -> Unit = {},
-  onSeek: ((Float) -> Unit)? = null,
   modifier: Modifier = Modifier,
 ) {
   val isAudio = item.video.isAudio
@@ -1106,13 +1114,10 @@ private fun BentoHeroSpotlightCard(
   val playbackSessionState by PlaybackSession.state.collectAsState()
   val livePositionSec by PlaybackSession.propInt["time-pos"].collectAsState()
   val liveDurationSec by PlaybackSession.propInt["duration"].collectAsState()
-  val isPaused by PlaybackSession.propBoolean["pause"].collectAsState()
 
   val isCurrentlyPlayingInSession = remember(playbackSessionState.currentItem, item.video) {
     matchesPlaybackItem(item.video, playbackSessionState.currentItem)
   }
-
-  val isPlaying = isCurrentlyPlayingInSession && (isPaused == false)
 
   val originalCodec = remember(item.video) {
     if (isAudio) getAudioCodec(item.video) else item.video.resolution.ifBlank { "HD" }
@@ -1129,21 +1134,6 @@ private fun BentoHeroSpotlightCard(
   } else {
     item.video.durationFormatted.ifBlank { "00:00" }
   }
-
-  // Current position:
-  val currentPosSec = if (isCurrentlyPlayingInSession && livePositionSec != null) {
-    livePositionSec!!.toLong().coerceIn(0L, totalSec.coerceAtLeast(1L))
-  } else if (progress > 0f && totalSec > 0L) {
-    (progress * totalSec).toLong().coerceIn(0L, totalSec)
-  } else {
-    0L
-  }
-
-  var isScrubbing by remember { mutableStateOf(false) }
-  var scrubPositionSec by remember { mutableFloatStateOf(0f) }
-
-  val displayPositionSec = if (isScrubbing) scrubPositionSec.toLong() else currentPosSec
-  val currentPosFormatted = VideoScanUtils.formatDuration(displayPositionSec * 1000L)
 
   // Real-time synced remaining time:
   val remainingSec = if (isCurrentlyPlayingInSession && livePositionSec != null) {
@@ -1169,340 +1159,367 @@ private fun BentoHeroSpotlightCard(
     label = "pulseScale",
   )
 
-  Card(
-    modifier = modifier
-      .fillMaxWidth()
-      .padding(horizontal = 16.dp)
-      .clip(RoundedCornerShape(24.dp))
-      .clickable(onClick = onClick),
-    shape = RoundedCornerShape(24.dp),
-    colors = CardDefaults.cardColors(
-      containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-    ),
-    border = BorderStroke(
-      width = 1.dp,
-      color = if (isAudio) {
-        MaterialTheme.colorScheme.tertiary.copy(alpha = 0.35f)
-      } else {
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
-      },
-    ),
-  ) {
-    Box(
-      modifier = Modifier
-        .fillMaxWidth()
-        .background(
-          Brush.linearGradient(
-            colors = listOf(
-              (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.12f),
-              MaterialTheme.colorScheme.surfaceContainerLow,
-              MaterialTheme.colorScheme.surfaceContainerLowest,
-            ),
-          ),
-        ),
-    ) {
-      Column(
-        modifier = Modifier
-          .fillMaxWidth()
-          .padding(14.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-      ) {
-        // Top Header Row: Status Badge & Format Chip
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          Surface(
-            shape = RoundedCornerShape(999.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.45f),
-            border = BorderStroke(
-              width = 1.dp,
-              brush = Brush.linearGradient(
-                colors = listOf(
-                  (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.65f),
-                  Color.White.copy(alpha = 0.25f),
-                  (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.15f),
-                ),
-              ),
-            ),
-            shadowElevation = 2.dp,
-          ) {
-            Row(
-              modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.5.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-              Box(
-                modifier = Modifier
-                  .size(7.dp)
-                  .scale(pulseScale)
-                  .clip(CircleShape)
-                  .background(if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary),
-              )
-              Text(
-                text = if (isAudio) "AUDIO PULSING" else if (progress > 0f) "RESUME PLAYING" else "SPOTLIGHT",
-                style = MaterialTheme.typography.labelSmall.copy(
-                  fontWeight = FontWeight.Bold,
-                  letterSpacing = 1.sp,
-                ),
-                color = if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
-              )
+  val haptics = LocalHapticFeedback.current
+  val density = LocalDensity.current
+  val coroutineScope = rememberCoroutineScope()
+  val swipeOffset = remember { Animatable(0f) }
+
+  val onClickState by rememberUpdatedState(onClick)
+  val onLongClickState by rememberUpdatedState(onLongClick)
+  val onPlayPauseState by rememberUpdatedState(onPlayPause)
+  val onPreviousState by rememberUpdatedState(onPrevious)
+  val onNextState by rememberUpdatedState(onNext)
+
+  val thresholdPx = with(density) { 56.dp.toPx() }
+  val maxDragPx = with(density) { 120.dp.toPx() }
+
+  val gestureModifier = Modifier.pointerInput(isAudio) {
+    val touchSlop = viewConfiguration.touchSlop
+    val longPressTimeout = viewConfiguration.longPressTimeoutMillis
+
+    awaitEachGesture {
+      val down = awaitFirstDown(requireUnconsumed = false)
+      val pointerId = down.id
+      val downPosition = down.position
+      var initialDeltaX = 0f
+
+      val gesture = withTimeoutOrNull(longPressTimeout) {
+        while (true) {
+          val event = awaitPointerEvent()
+          val change = event.changes.firstOrNull { it.id == pointerId } ?: return@withTimeoutOrNull BentoCardGesture.Cancelled
+          if (!change.pressed) {
+            return@withTimeoutOrNull BentoCardGesture.Tap
+          }
+          val diff = change.position - downPosition
+          if (abs(diff.y) > touchSlop && abs(diff.y) > abs(diff.x)) {
+            return@withTimeoutOrNull BentoCardGesture.VerticalScroll
+          }
+          if (isAudio && abs(diff.x) > touchSlop) {
+            initialDeltaX = diff.x
+            return@withTimeoutOrNull BentoCardGesture.Drag
+          }
+        }
+        BentoCardGesture.None
+      }
+
+      when (gesture) {
+        BentoCardGesture.VerticalScroll -> {
+          // Allow parent to scroll vertically naturally
+        }
+        BentoCardGesture.Tap -> {
+          if (isAudio) {
+            onPlayPauseState()
+          } else {
+            onClickState()
+          }
+        }
+        null -> {
+          // Long press triggered
+          haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+          onLongClickState()
+          while (true) {
+            val event = awaitPointerEvent()
+            val change = event.changes.firstOrNull { it.id == pointerId } ?: break
+            if (!change.pressed) break
+          }
+        }
+        BentoCardGesture.Drag -> {
+          var currentDeltaX = initialDeltaX
+          var thresholdHapticGiven = false
+          coroutineScope.launch { swipeOffset.snapTo(currentDeltaX.coerceIn(-maxDragPx, maxDragPx)) }
+
+          while (true) {
+            val event = awaitPointerEvent()
+            val change = event.changes.firstOrNull { it.id == pointerId } ?: break
+            if (!change.pressed) {
+              if (currentDeltaX <= -thresholdPx) {
+                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                onNextState()
+              } else if (currentDeltaX >= thresholdPx) {
+                haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                onPreviousState()
+              }
+              break
             }
+            change.consume()
+            val deltaX = change.position.x - change.previousPosition.x
+            currentDeltaX += deltaX
+
+            if (abs(currentDeltaX) >= thresholdPx && !thresholdHapticGiven) {
+              haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+              thresholdHapticGiven = true
+            } else if (abs(currentDeltaX) < thresholdPx) {
+              thresholdHapticGiven = false
+            }
+
+            coroutineScope.launch { swipeOffset.snapTo(currentDeltaX.coerceIn(-maxDragPx, maxDragPx)) }
           }
 
-          Surface(
-            shape = RoundedCornerShape(999.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.40f),
-            border = BorderStroke(
-              width = 0.8.dp,
-              color = (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.35f),
-            ),
-          ) {
-            Text(
-              text = if (isAudio) {
-                originalCodec
-              } else {
-                "$originalCodec • ${item.video.durationFormatted}"
-              },
-              style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 11.sp,
+          coroutineScope.launch {
+            swipeOffset.animateTo(
+              targetValue = 0f,
+              animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessLow,
               ),
-              color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.90f),
-              modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+            )
+          }
+        }
+        else -> {}
+      }
+    }
+  }
+
+  Box(
+    modifier = modifier
+      .fillMaxWidth()
+      .padding(horizontal = 16.dp),
+    contentAlignment = Alignment.Center,
+  ) {
+    // Gesture Hint Icons (revealed behind card while swiping horizontally)
+    if (isAudio && abs(swipeOffset.value) > 8f) {
+      Row(
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Surface(
+          shape = CircleShape,
+          color = MaterialTheme.colorScheme.tertiary.copy(
+            alpha = (abs(swipeOffset.value) / thresholdPx).coerceIn(0.2f, 0.95f),
+          ),
+          modifier = Modifier.size(36.dp),
+        ) {
+          Box(contentAlignment = Alignment.Center) {
+            Icon(
+              imageVector = Icons.RoundedFilled.SkipPrevious,
+              contentDescription = "Previous Song",
+              modifier = Modifier.size(20.dp),
+              tint = MaterialTheme.colorScheme.onTertiary,
             )
           }
         }
 
-        // Middle Row: Thumbnail Preview & Metadata
-        Row(
-          modifier = Modifier.fillMaxWidth(),
-          horizontalArrangement = Arrangement.spacedBy(12.dp),
-          verticalAlignment = Alignment.CenterVertically,
+        Surface(
+          shape = CircleShape,
+          color = MaterialTheme.colorScheme.tertiary.copy(
+            alpha = (abs(swipeOffset.value) / thresholdPx).coerceIn(0.2f, 0.95f),
+          ),
+          modifier = Modifier.size(36.dp),
         ) {
-          // Media Thumbnail Box (clean thumbnail: NO play button overlay, NO codec badge)
-          Box {
-            BentoMediaThumbnail(
-              video = item.video,
-              modifier = Modifier
-                .size(width = if (isAudio) 70.dp else 108.dp, height = 66.dp)
-                .clip(RoundedCornerShape(16.dp)),
-              showPlayOverlay = !isAudio,
+          Box(contentAlignment = Alignment.Center) {
+            Icon(
+              imageVector = Icons.RoundedFilled.SkipNext,
+              contentDescription = "Next Song",
+              modifier = Modifier.size(20.dp),
+              tint = MaterialTheme.colorScheme.onTertiary,
             )
           }
+        }
+      }
+    }
 
-          // Information & Visualizer
-          Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+    Card(
+      modifier = Modifier
+        .fillMaxWidth()
+        .offset { IntOffset(swipeOffset.value.roundToInt(), 0) }
+        .clip(RoundedCornerShape(24.dp))
+        .then(gestureModifier),
+      shape = RoundedCornerShape(24.dp),
+      colors = CardDefaults.cardColors(
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+      ),
+      border = BorderStroke(
+        width = 1.dp,
+        color = if (isAudio) {
+          MaterialTheme.colorScheme.tertiary.copy(alpha = 0.35f)
+        } else {
+          MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+        },
+      ),
+    ) {
+      Box(
+        modifier = Modifier
+          .fillMaxWidth()
+          .background(
+            Brush.linearGradient(
+              colors = listOf(
+                (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.12f),
+                MaterialTheme.colorScheme.surfaceContainerLow,
+                MaterialTheme.colorScheme.surfaceContainerLowest,
+              ),
+            ),
+          ),
+      ) {
+        Column(
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(14.dp),
+          verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+          // Top Header Row: Status Badge & Format Chip
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
           ) {
-            val (artist, title) = if (isCurrentlyPlayingInSession && playbackSessionState.currentItem != null) {
-              val cur = playbackSessionState.currentItem!!
-              val displayTitle = cur.title?.takeIf { it.isNotBlank() }
-                ?: (if (item.video.title.isNotBlank()) item.video.title else FileTypeUtils.stripExtension(item.video.displayName))
-              val displayArtist = cur.artist?.takeIf { it.isNotBlank() } ?: item.video.artist
-              Pair(displayArtist, displayTitle)
-            } else if (isAudio) {
-              SortUtils.getAudioArtistAndTitle(item.video)
-            } else {
-              Pair("", if (item.video.title.isNotBlank()) item.video.title else FileTypeUtils.stripExtension(item.video.displayName))
-            }
-
-            Text(
-              text = title,
-              style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-              color = MaterialTheme.colorScheme.onSurface,
-              maxLines = 1,
-              overflow = TextOverflow.Ellipsis,
-            )
-
-            Text(
-              text = if (isAudio) {
-                if (artist.isNotBlank() && !artist.equals("Unknown Artist", ignoreCase = true)) {
-                  "$artist • ${item.video.bucketDisplayName.ifBlank { "Lossless Audio" }}"
-                } else {
-                  item.video.bucketDisplayName.ifBlank { "Lossless Audio" }
-                }
-              } else {
-                "${item.video.sizeFormatted} • ${item.video.bucketDisplayName}"
-              },
-              style = MaterialTheme.typography.bodySmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-              maxLines = 1,
-              overflow = TextOverflow.Ellipsis,
-            )
-
-            if (!isAudio && progress > 0f) {
+            Surface(
+              shape = RoundedCornerShape(999.dp),
+              color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.45f),
+              border = BorderStroke(
+                width = 1.dp,
+                brush = Brush.linearGradient(
+                  colors = listOf(
+                    (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.65f),
+                    Color.White.copy(alpha = 0.25f),
+                    (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.15f),
+                  ),
+                ),
+              ),
+              shadowElevation = 2.dp,
+            ) {
               Row(
-                modifier = Modifier
-                  .fillMaxWidth()
-                  .padding(top = 4.dp),
+                modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.5.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
               ) {
-                LinearProgressIndicator(
-                  progress = { progress },
+                Box(
                   modifier = Modifier
-                    .weight(1f)
-                    .height(4.dp)
-                    .clip(RoundedCornerShape(999.dp)),
-                  color = MaterialTheme.colorScheme.primary,
-                  trackColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                    .size(7.dp)
+                    .scale(pulseScale)
+                    .clip(CircleShape)
+                    .background(if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary),
                 )
                 Text(
-                  text = "${(progress * 100).toInt()}%",
-                  style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                  color = MaterialTheme.colorScheme.primary,
-                )
-              }
-            }
-          }
-        }
-
-        // Wavy Seekbar Row with Middle Playback Controls and Right-Side Remaining Time
-        if (isAudio) {
-          // Interactive Seekbar Row
-          Row(
-            modifier = Modifier
-              .fillMaxWidth()
-              .padding(horizontal = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-          ) {
-            Text(
-              text = currentPosFormatted,
-              style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 11.sp,
-              ),
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-
-            Slider(
-              value = if (isScrubbing) scrubPositionSec else currentPosSec.toFloat(),
-              onValueChange = {
-                isScrubbing = true
-                scrubPositionSec = it
-              },
-              onValueChangeFinished = {
-                val targetSec = scrubPositionSec
-                isScrubbing = false
-                if (onSeek != null) {
-                  onSeek(targetSec)
-                } else if (isCurrentlyPlayingInSession) {
-                  PlaybackSession.command("seek", targetSec.toString(), "absolute+exact")
-                }
-              },
-              valueRange = 0f..(if (totalSec > 0L) totalSec.toFloat() else 1f),
-              modifier = Modifier.weight(1f),
-              colors = SliderDefaults.colors(
-                thumbColor = MaterialTheme.colorScheme.tertiary,
-                activeTrackColor = MaterialTheme.colorScheme.tertiary,
-                inactiveTrackColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.22f),
-              ),
-            )
-
-            Text(
-              text = totalFormatted,
-              style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 11.sp,
-              ),
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-          }
-
-          Box(
-            modifier = Modifier
-              .fillMaxWidth()
-              .height(46.dp)
-              .clip(RoundedCornerShape(16.dp))
-              .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.22f)),
-            contentAlignment = Alignment.Center,
-          ) {
-            // One UI 9 Fluid Wavy Waveform Visualizer across the full wavy bar
-            OneUi9WaveformVisualizer(
-              modifier = Modifier
-                .fillMaxWidth()
-                .height(34.dp)
-                .align(Alignment.Center),
-              primaryColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.55f),
-              secondaryColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f),
-            )
-
-            // Playback Controls (Previous - Play/Pause - Next) in the Middle of Wavy Seekbar
-            Row(
-              modifier = Modifier.align(Alignment.Center),
-              horizontalArrangement = Arrangement.spacedBy(10.dp),
-              verticalAlignment = Alignment.CenterVertically,
-            ) {
-              IconButton(
-                onClick = onPrevious,
-                modifier = Modifier.size(34.dp),
-              ) {
-                Icon(
-                  imageVector = Icons.RoundedFilled.SkipPrevious,
-                  contentDescription = "Previous",
-                  modifier = Modifier.size(20.dp),
-                  tint = MaterialTheme.colorScheme.tertiary,
-                )
-              }
-
-              Surface(
-                onClick = onPlayPause,
-                modifier = Modifier.size(36.dp),
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.tertiary,
-                shadowElevation = 3.dp,
-              ) {
-                Box(
-                  contentAlignment = Alignment.Center,
-                  modifier = Modifier.fillMaxSize(),
-                ) {
-                  Icon(
-                    imageVector = if (isPlaying) Icons.RoundedFilled.Pause else Icons.RoundedFilled.PlayArrow,
-                    contentDescription = if (isPlaying) "Pause" else "Play",
-                    modifier = Modifier.size(20.dp),
-                    tint = MaterialTheme.colorScheme.onTertiary,
-                  )
-                }
-              }
-
-              IconButton(
-                onClick = onNext,
-                modifier = Modifier.size(34.dp),
-              ) {
-                Icon(
-                  imageVector = Icons.RoundedFilled.SkipNext,
-                  contentDescription = "Next",
-                  modifier = Modifier.size(20.dp),
-                  tint = MaterialTheme.colorScheme.tertiary,
+                  text = if (isAudio) "AUDIO PULSING" else if (progress > 0f) "RESUME PLAYING" else "SPOTLIGHT",
+                  style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp,
+                  ),
+                  color = if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
                 )
               }
             }
 
-            // Remaining Time badge on the Right Side of the Wavy Seekbar
             Surface(
-              modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 8.dp),
               shape = RoundedCornerShape(999.dp),
-              color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.65f),
+              color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.40f),
               border = BorderStroke(
                 width = 0.8.dp,
-                color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.35f),
+                color = (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.35f),
               ),
             ) {
               Text(
-                text = "$remainingFormatted/$totalFormatted",
+                text = if (isAudio) {
+                  "$originalCodec • $remainingFormatted/$totalFormatted"
+                } else {
+                  "$originalCodec • ${item.video.durationFormatted}"
+                },
                 style = MaterialTheme.typography.labelSmall.copy(
                   fontWeight = FontWeight.SemiBold,
                   fontSize = 11.sp,
                 ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.5.dp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.90f),
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
               )
+            }
+          }
+
+          // Middle Row: Thumbnail Preview & Metadata
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            // Media Thumbnail Box (clean thumbnail: NO play button overlay, NO codec badge)
+            Box {
+              BentoMediaThumbnail(
+                video = item.video,
+                modifier = Modifier
+                  .size(width = if (isAudio) 70.dp else 108.dp, height = 66.dp)
+                  .clip(RoundedCornerShape(16.dp)),
+                showPlayOverlay = !isAudio,
+              )
+            }
+
+            // Information & Visualizer
+            Column(
+              modifier = Modifier.weight(1f),
+              verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+              val (artist, title) = if (isCurrentlyPlayingInSession && playbackSessionState.currentItem != null) {
+                val cur = playbackSessionState.currentItem!!
+                val displayTitle = cur.title?.takeIf { it.isNotBlank() }
+                  ?: (if (item.video.title.isNotBlank()) item.video.title else FileTypeUtils.stripExtension(item.video.displayName))
+                val displayArtist = cur.artist?.takeIf { it.isNotBlank() } ?: item.video.artist
+                Pair(displayArtist, displayTitle)
+              } else if (isAudio) {
+                SortUtils.getAudioArtistAndTitle(item.video)
+              } else {
+                Pair("", if (item.video.title.isNotBlank()) item.video.title else FileTypeUtils.stripExtension(item.video.displayName))
+              }
+
+              Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+              )
+
+              Text(
+                text = if (isAudio) {
+                  if (artist.isNotBlank() && !artist.equals("Unknown Artist", ignoreCase = true)) {
+                    "$artist • ${item.video.bucketDisplayName.ifBlank { "Lossless Audio" }}"
+                  } else {
+                    item.video.bucketDisplayName.ifBlank { "Lossless Audio" }
+                  }
+                } else {
+                  "${item.video.sizeFormatted} • ${item.video.bucketDisplayName}"
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+              )
+
+              if (isAudio) {
+                OneUi9WaveformVisualizer(
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .height(24.dp)
+                    .padding(top = 2.dp),
+                  primaryColor = MaterialTheme.colorScheme.tertiary,
+                  secondaryColor = MaterialTheme.colorScheme.primary,
+                )
+              }
+
+              if (!isAudio && progress > 0f) {
+                Row(
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                  LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier
+                      .weight(1f)
+                      .height(4.dp)
+                      .clip(RoundedCornerShape(999.dp)),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                  )
+                  Text(
+                    text = "${(progress * 100).toInt()}%",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.primary,
+                  )
+                }
+              }
             }
           }
         }
