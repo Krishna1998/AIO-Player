@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -35,6 +36,7 @@ import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.IconButton
 import app.video.player.presentation.components.AppTextField as OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -133,6 +135,20 @@ object PlaylistScreen : Screen {
   )
   @Composable
   override fun Content() {
+    PlaylistScreenContent(audioOnly = false, embedded = false)
+  }
+
+  @OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalMaterial3ExpressiveApi::class,
+    com.google.accompanist.permissions.ExperimentalPermissionsApi::class,
+  )
+  @Composable
+  internal fun PlaylistScreenContent(
+    audioOnly: Boolean = false,
+    embedded: Boolean = false,
+    searchQuery: String = "",
+  ) {
     val context = LocalContext.current
     val browserPreferences = koinInject<BrowserPreferences>()
     val backStack = LocalBackStack.current
@@ -162,15 +178,15 @@ object PlaylistScreen : Screen {
     val favoriteAudioLabel = stringResource(R.string.playlist_favorite_songs)
     val favoriteVideosLabel = stringResource(R.string.playlist_favorite_videos)
 
-    var libraryType by rememberSaveable { mutableStateOf(MediaLibraryType.Video) }
+    var libraryType by rememberSaveable { mutableStateOf(if (audioOnly) MediaLibraryType.Audio else MediaLibraryType.Video) }
     val pagerState = rememberPagerState(initialPage = libraryType.ordinal) { MediaLibraryType.entries.size }
     val navigateTab = rememberTabNavigation(pagerState)
 
-    var searchQuery by rememberSaveable { mutableStateOf("") }
-    var isSearching by rememberSaveable { mutableStateOf(false) }
+    var internalSearchQuery by rememberSaveable { mutableStateOf("") }
+    var internalIsSearching by rememberSaveable { mutableStateOf(false) }
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusRequester = remember { FocusRequester() }
-    val activeQuery = if (isSearching) searchQuery.trim() else ""
+    val activeQuery = if (embedded) searchQuery.trim() else if (internalIsSearching) internalSearchQuery.trim() else ""
 
     val playlistsByType =
       remember(playlistsWithCount, sortType, sortOrder) {
@@ -219,14 +235,14 @@ object PlaylistScreen : Screen {
     val deletableSelection = selectedPlaylists.filterNot { viewModel.isProtectedPlaylist(it.playlist) }
     val singleRenamable = selectedPlaylists.singleOrNull()?.takeUnless { viewModel.isProtectedPlaylist(it.playlist) }
 
-    LaunchedEffect(isSearching) {
-      if (isSearching) {
+    LaunchedEffect(internalIsSearching) {
+      if (internalIsSearching) {
         focusRequester.requestFocus()
         keyboardController?.show()
       }
     }
     LaunchedEffect(pagerState.settledPage, pagerState.isScrollInProgress) {
-      if (!pagerState.isScrollInProgress) {
+      if (!audioOnly && !pagerState.isScrollInProgress) {
         MediaLibraryType.entries.getOrNull(pagerState.settledPage)?.let { type ->
           if (libraryType != type) {
             selectionManager.clear()
@@ -235,7 +251,9 @@ object PlaylistScreen : Screen {
         }
       }
     }
-    LaunchedEffect(libraryType) { navigateTab(libraryType.ordinal) }
+    LaunchedEffect(libraryType) {
+      if (!audioOnly) navigateTab(libraryType.ordinal)
+    }
 
     val listStates = remember { MediaLibraryType.entries.associateWith { LazyListState() } }
     val gridStates = remember { MediaLibraryType.entries.associateWith { LazyGridState() } }
@@ -248,12 +266,12 @@ object PlaylistScreen : Screen {
     var showPlaylistActionSheet by remember { mutableStateOf(false) }
     var showCreateAudioDialog by rememberSaveable { mutableStateOf(false) }
 
-    BackHandler(enabled = selectionManager.isInSelectionMode || isSearching) {
+    BackHandler(enabled = !embedded && (selectionManager.isInSelectionMode || internalIsSearching)) {
       when {
         selectionManager.isInSelectionMode -> selectionManager.clear()
         else -> {
-          isSearching = false
-          searchQuery = ""
+          internalIsSearching = false
+          internalSearchQuery = ""
         }
       }
     }
@@ -266,20 +284,25 @@ object PlaylistScreen : Screen {
       onExpandedChange = {},
     )
 
-    PlaylistSortDialog(
-      isOpen = showSortDialog,
-      onDismiss = { showSortDialog = false },
-      isLibrary = true,
-      availableWidthDp = contentWidthDp,
-    )
+    if (!embedded) {
+      PlaylistSortDialog(
+        isOpen = showSortDialog,
+        onDismiss = { showSortDialog = false },
+        isLibrary = true,
+        availableWidthDp = contentWidthDp,
+      )
+    }
 
     Scaffold(
       containerColor = wallpaperAwareBackgroundColor(),
+      contentWindowInsets = if (embedded) WindowInsets(0, 0, 0, 0) else ScaffoldDefaults.contentWindowInsets,
       topBar = {
-        if (isSearching) {
+        if (embedded) {
+          // Embedded inside parent screen (e.g. MediaLibraryContent Music tab) which manages its own top bar
+        } else if (internalIsSearching) {
           InlineSearchBar(
-            query = searchQuery,
-            onQueryChange = { searchQuery = it },
+            query = internalSearchQuery,
+            onQueryChange = { internalSearchQuery = it },
             onSearch = { },
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
             inputFieldModifier = Modifier.focusRequester(focusRequester),
@@ -290,8 +313,8 @@ object PlaylistScreen : Screen {
             trailingIcon = {
               IconButton(
                 onClick = {
-                  isSearching = false
-                  searchQuery = ""
+                  internalIsSearching = false
+                  internalSearchQuery = ""
                 },
               ) {
                 Icon(Icons.RoundedFilled.Close, contentDescription = stringResource(R.string.generic_cancel))
@@ -310,7 +333,7 @@ object PlaylistScreen : Screen {
             onCancelSelection = { selectionManager.clear() },
             isSingleSelection = selectionManager.isSingleSelection,
             onSortClick = { showSortDialog = true },
-            onSearchClick = { isSearching = true },
+            onSearchClick = { internalIsSearching = true },
             onSettingsClick = { backStack.navigateTo(app.video.player.ui.preferences.PreferencesScreen) },
             onRenameClick = singleRenamable?.let { target -> { renameTarget = target.playlist } },
             onDeleteClick = if (deletableSelection.isEmpty()) null else ({ showDeleteDialog = true }),
@@ -322,13 +345,18 @@ object PlaylistScreen : Screen {
       },
       floatingActionButton = {
         if (!selectionManager.isInSelectionMode && isFabVisible.value) {
+          val bottomPad = if (embedded) {
+            maxOf(LocalNavigationBarHeight.current, NavigationBarState.miniPlayerClearance) + 16.dp
+          } else {
+            FabPlacement.scaffoldBottomPadding()
+          }
           ExtendedFloatingActionButton(
             onClick = {
               if (libraryType == MediaLibraryType.Audio) showCreateAudioDialog = true else showPlaylistActionSheet = true
             },
             icon = { Icon(Icons.RoundedFilled.Add, contentDescription = null) },
             text = { Text(stringResource(R.string.ui_create_playlist)) },
-            modifier = Modifier.padding(bottom = FabPlacement.scaffoldBottomPadding()),
+            modifier = Modifier.padding(bottom = bottomPad),
           )
         }
       },
@@ -340,35 +368,31 @@ object PlaylistScreen : Screen {
             .padding(paddingValues)
             .onSizeChanged { contentWidthDp = with(density) { it.width.toDp().value.toInt() } },
       ) {
-        SingleChoiceSegmentedButtonRow(
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-        ) {
-          MediaLibraryType.entries.forEachIndexed { index, type ->
-            SegmentedButton(
-              selected = libraryType == type,
-              onClick = {
-                if (libraryType != type) {
-                  selectionManager.clear()
-                  libraryType = type
-                }
-              },
-              shape = SegmentedButtonDefaults.itemShape(index, MediaLibraryType.entries.size),
-              colors = themedSegmentedButtonColors(),
-            ) {
-              Text(stringResource(if (type == MediaLibraryType.Audio) R.string.ui_audio_tab else R.string.ui_videos))
+        if (!audioOnly) {
+          SingleChoiceSegmentedButtonRow(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+          ) {
+            MediaLibraryType.entries.forEachIndexed { index, type ->
+              SegmentedButton(
+                selected = libraryType == type,
+                onClick = {
+                  if (libraryType != type) {
+                    selectionManager.clear()
+                    libraryType = type
+                  }
+                },
+                shape = SegmentedButtonDefaults.itemShape(index, MediaLibraryType.entries.size),
+                colors = themedSegmentedButtonColors(),
+              ) {
+                Text(stringResource(if (type == MediaLibraryType.Audio) R.string.ui_audio_tab else R.string.ui_videos))
+              }
             }
           }
         }
 
-        NavigationPager(
-          state = pagerState,
-          modifier = Modifier.fillMaxWidth().weight(1f),
-          allowNestedSwipes = true,
-          userScrollEnabled = !selectionManager.isInSelectionMode,
-        ) { page ->
-          val pageType = MediaLibraryType.entries.getOrNull(page) ?: MediaLibraryType.Video
-          val allForType = playlistsByType.getValue(pageType)
-          val visibleForType = visiblePlaylistsByType.getValue(pageType)
+        if (audioOnly) {
+          val allForType = playlistsByType.getValue(MediaLibraryType.Audio)
+          val visibleForType = visiblePlaylistsByType.getValue(MediaLibraryType.Audio)
           when {
             allForType.isEmpty() && (isLoading || !hasCompletedInitialLoad) ->
               Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
@@ -376,16 +400,9 @@ object PlaylistScreen : Screen {
             allForType.isEmpty() ->
               Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 EmptyState(
-                  icon = if (pageType == MediaLibraryType.Audio) Icons.RoundedFilled.QueueMusic else Icons.RoundedFilled.PlaylistAdd,
+                  icon = Icons.RoundedFilled.QueueMusic,
                   title = stringResource(R.string.ui_no_playlists_yet),
-                  message =
-                    stringResource(
-                      if (pageType == MediaLibraryType.Audio) {
-                        R.string.playlist_audio_empty_description
-                      } else {
-                        R.string.playlist_empty_description
-                      },
-                    ),
+                  message = stringResource(R.string.playlist_audio_empty_description),
                 )
               }
 
@@ -401,8 +418,8 @@ object PlaylistScreen : Screen {
             else ->
               PlaylistListContent(
                 playlistsWithCount = visibleForType,
-                listState = listStates.getValue(pageType),
-                gridState = gridStates.getValue(pageType),
+                listState = listStates.getValue(MediaLibraryType.Audio),
+                gridState = gridStates.getValue(MediaLibraryType.Audio),
                 isRefreshing = isRefreshing,
                 onRefresh = { viewModel.refresh(scanLocalFiles = true).join() },
                 selectionManager = selectionManager,
@@ -419,6 +436,68 @@ object PlaylistScreen : Screen {
                 isPlaylistProtected = { item -> viewModel.isProtectedPlaylist(item.playlist) },
                 isInSelectionMode = selectionManager.isInSelectionMode,
               )
+          }
+        } else {
+          NavigationPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxWidth().weight(1f),
+            allowNestedSwipes = true,
+            userScrollEnabled = !selectionManager.isInSelectionMode,
+          ) { page ->
+            val pageType = MediaLibraryType.entries.getOrNull(page) ?: MediaLibraryType.Video
+            val allForType = playlistsByType.getValue(pageType)
+            val visibleForType = visiblePlaylistsByType.getValue(pageType)
+            when {
+              allForType.isEmpty() && (isLoading || !hasCompletedInitialLoad) ->
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+
+              allForType.isEmpty() ->
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                  EmptyState(
+                    icon = if (pageType == MediaLibraryType.Audio) Icons.RoundedFilled.QueueMusic else Icons.RoundedFilled.PlaylistAdd,
+                    title = stringResource(R.string.ui_no_playlists_yet),
+                    message =
+                      stringResource(
+                        if (pageType == MediaLibraryType.Audio) {
+                          R.string.playlist_audio_empty_description
+                        } else {
+                          R.string.playlist_empty_description
+                        },
+                      ),
+                  )
+                }
+
+              visibleForType.isEmpty() ->
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                  EmptyState(
+                    icon = Icons.RoundedFilled.Search,
+                    title = stringResource(R.string.ui_no_playlists_found),
+                    message = stringResource(R.string.ui_try_a_different_search_term),
+                  )
+                }
+
+              else ->
+                PlaylistListContent(
+                  playlistsWithCount = visibleForType,
+                  listState = listStates.getValue(pageType),
+                  gridState = gridStates.getValue(pageType),
+                  isRefreshing = isRefreshing,
+                  onRefresh = { viewModel.refresh(scanLocalFiles = true).join() },
+                  selectionManager = selectionManager,
+                  onPlaylistClick = { item ->
+                    if (selectionManager.isInSelectionMode) {
+                      selectionManager.toggleFromUser(item)
+                    } else {
+                      backStack.navigateTo(PlaylistDetailScreen(item.playlist.id))
+                    }
+                  },
+                  onPlaylistLongClick = { item -> selectionManager.handleLongClick(item) },
+                  onPlaylistRename = { item -> renameTarget = item.playlist },
+                  onPlaylistDelete = { item -> directDeleteTarget = item },
+                  isPlaylistProtected = { item -> viewModel.isProtectedPlaylist(item.playlist) },
+                  isInSelectionMode = selectionManager.isInSelectionMode,
+                )
+            }
           }
         }
       }

@@ -25,6 +25,7 @@ import app.video.player.ui.browser.fab.FabPlacement
 import app.video.player.ui.browser.fab.FabScrollHelper
 import app.video.player.ui.components.InlineSearchBar
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +37,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.snapshotFlow
 import app.video.player.ui.utils.NavigationPager
@@ -108,11 +110,13 @@ import app.video.player.ui.browser.dialogs.DeleteConfirmationDialog
 import app.video.player.ui.browser.dialogs.FileOperationProgressDialog
 import app.video.player.ui.browser.dialogs.FolderPickerDialog
 import app.video.player.ui.browser.dialogs.FolderSortDialog
+import app.video.player.ui.browser.dialogs.PlaylistSortDialog
 import app.video.player.ui.browser.dialogs.RenameDialog
 import app.video.player.ui.browser.dialogs.rememberSelectionInfoAction
 import app.video.player.ui.browser.dialogs.VideoSortDialog
 import app.video.player.ui.browser.dialogs.rememberBrowserSortDialogOpen
 import app.video.player.ui.browser.playlist.ALL_VIDEOS_PLAYLIST_ID
+import app.video.player.database.repository.PlaylistRepository
 import app.video.player.ui.browser.selection.rememberSelectionManager
 import app.video.player.ui.browser.states.EmptyState
 import app.video.player.ui.browser.videolist.VideoListContent
@@ -148,6 +152,9 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   val appearancePreferences = koinInject<app.video.player.preferences.AppearancePreferences>()
   val showQuickPlayFab by appearancePreferences.showQuickPlayFab.collectAsState()
   val playerPreferences = koinInject<PlayerPreferences>()
+  val playlistRepository = koinInject<PlaylistRepository>()
+  val favoriteAudioPaths by playlistRepository.observeFavoriteAudioPaths().collectAsState(initial = emptySet())
+  val audioPlaylists by playlistRepository.observeAllPlaylists(isAudio = true).collectAsState(initial = emptyList())
   val navigationBarHeight = LocalNavigationBarHeight.current
 
   val viewModel: MediaLibraryViewModel =
@@ -214,6 +221,12 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
         infoById[video.path] ?: VideoWithPlaybackInfo(video)
       }
     }
+  val audioVideosWithInfo = remember(sortedVideosWithInfo) {
+    sortedVideosWithInfo.filter { it.video.isAudio }
+  }
+  val favoriteAudioVideos = remember(audioVideosWithInfo, favoriteAudioPaths) {
+    audioVideosWithInfo.filter { favoriteAudioPaths.contains(it.video.path) }
+  }
   val mediaLibraryTabs = remember(forceAudio) {
     if (forceAudio) listOf(MediaLibraryType.Audio) else MediaLibraryType.entries.toList()
   }
@@ -499,8 +512,12 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
     }
   }
 
-  fun playFromMediaLibrary(video: Video, startPositionSeconds: Double? = null) {
-    val playlistVideos = currentVideosWithInfo.map { it.video }
+  fun playFromMediaLibrary(
+    video: Video,
+    startPositionSeconds: Double? = null,
+    customPlaylist: List<Video>? = null,
+  ) {
+    val playlistVideos = customPlaylist ?: currentVideosWithInfo.map { it.video }
     if (!playerPreferences.shouldBuildAutomaticQueue(video.isAudio) || playlistVideos.size <= 1) {
       MediaUtils.playFile(video, context, "media_library", startPositionSeconds = startPositionSeconds)
       return
@@ -679,7 +696,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
           isFabVisible.value &&
           !MainScreen.getPermissionDeniedState() &&
           !(currentTab == MediaLibraryType.Video && videoSubTab == 0 && !isSearching) &&
-          !(currentTab == MediaLibraryType.Audio && audioSubTab == 0 && !isSearching)
+          !(currentTab == MediaLibraryType.Audio && (audioSubTab == 0 || audioSubTab == 3) && !isSearching)
 
       FloatingActionButtonMenu(
         modifier = Modifier.padding(bottom = FabPlacement.scaffoldBottomPadding()),
@@ -713,16 +730,25 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                 onCheckedChange = {
                   if (quickPlayFabDirect) {
                     coroutineScope.launch {
+                      val effectiveVideos = if (currentTab == MediaLibraryType.Audio && audioSubTab == 2) {
+                        favoriteAudioVideos
+                      } else {
+                        currentVideosWithInfo
+                      }
+                      if (effectiveVideos.isEmpty()) return@launch
                       val recentlyPlayedVideos = RecentlyPlayedOps.getRecentlyPlayed(limit = 1)
                       val lastPlayed = recentlyPlayedVideos.firstOrNull()
                       val targetVideo =
                         if (lastPlayed != null) {
-                          currentVideosWithInfo.firstOrNull { it.video.path == lastPlayed.filePath }?.video
+                          effectiveVideos.firstOrNull { it.video.path == lastPlayed.filePath }?.video
                         } else {
                           null
                         }
 
-                      playFromMediaLibrary(targetVideo ?: currentVideosWithInfo.first().video)
+                      playFromMediaLibrary(
+                        video = targetVideo ?: effectiveVideos.first().video,
+                        customPlaylist = if (currentTab == MediaLibraryType.Audio && audioSubTab == 2) favoriteAudioVideos.map { it.video } else null,
+                      )
                     }
                   } else {
                     isFabExpanded.value = !isFabExpanded.value
@@ -768,16 +794,25 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
               onClick = {
                 isFabExpanded.value = false
                 coroutineScope.launch {
+                  val effectiveVideos = if (currentTab == MediaLibraryType.Audio && audioSubTab == 2) {
+                    favoriteAudioVideos
+                  } else {
+                    currentVideosWithInfo
+                  }
+                  if (effectiveVideos.isEmpty()) return@launch
                   val recentlyPlayedVideos = RecentlyPlayedOps.getRecentlyPlayed(limit = 1)
                   val lastPlayed = recentlyPlayedVideos.firstOrNull()
                   val targetVideo =
                     if (lastPlayed != null) {
-                      currentVideosWithInfo.firstOrNull { it.video.path == lastPlayed.filePath }?.video
+                      effectiveVideos.firstOrNull { it.video.path == lastPlayed.filePath }?.video
                     } else {
                       null
                     }
 
-                  playFromMediaLibrary(targetVideo ?: currentVideosWithInfo.first().video)
+                  playFromMediaLibrary(
+                    video = targetVideo ?: effectiveVideos.first().video,
+                    customPlaylist = if (currentTab == MediaLibraryType.Audio && audioSubTab == 2) favoriteAudioVideos.map { it.video } else null,
+                  )
                 }
               },
               icon = { Icon(Icons.RoundedFilled.PlayArrow, contentDescription = null) },
@@ -1055,10 +1090,14 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                   }
                 }
               } else if (pageType == MediaLibraryType.Audio && !isSearching) {
+                val pageFavoriteAudioVideos = remember(pageVideosWithInfo, favoriteAudioPaths) {
+                  pageVideosWithInfo.filter { favoriteAudioPaths.contains(it.video.path) }
+                }
                 Column(modifier = Modifier.fillMaxSize()) {
                   Row(
                     modifier = Modifier
                       .fillMaxWidth()
+                      .horizontalScroll(rememberScrollState())
                       .padding(horizontal = 16.dp, vertical = 2.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -1095,44 +1134,127 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                         selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
                       ),
                     )
+                    androidx.compose.material3.FilterChip(
+                      selected = audioSubTab == 2,
+                      onClick = { audioSubTab = 2 },
+                      label = { Text(if (pageFavoriteAudioVideos.isNotEmpty()) "Favorite (${pageFavoriteAudioVideos.size})" else "Favorite") },
+                      leadingIcon = {
+                        app.video.player.ui.icons.Icon(
+                          imageVector = app.video.player.ui.icons.Icons.RoundedFilled.Favorite,
+                          contentDescription = null,
+                          modifier = Modifier.size(16.dp),
+                          tint = if (audioSubTab == 2) Color(0xFFFF4081) else MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                      },
+                      colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                      ),
+                    )
+                    androidx.compose.material3.FilterChip(
+                      selected = audioSubTab == 3,
+                      onClick = { audioSubTab = 3 },
+                      label = { Text(if (audioPlaylists.isNotEmpty()) "Playlist (${audioPlaylists.size})" else "Playlist") },
+                      leadingIcon = {
+                        app.video.player.ui.icons.Icon(
+                          imageVector = app.video.player.ui.icons.Icons.RoundedFilled.QueueMusic,
+                          contentDescription = null,
+                          modifier = Modifier.size(16.dp),
+                        )
+                      },
+                      colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                      ),
+                    )
                   }
                   Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                    if (audioSubTab == 0) {
-                      app.video.player.ui.browser.folderlist.FolderListScreen.MediaStoreFolderListContent(
-                        audioOnly = true,
-                        videoOnly = false,
-                        embedded = true,
-                        searchQuery = searchQuery,
-                      )
-                    } else {
-                      VideoListContent(
-                        folderId = "media_library_audio",
-                        videosWithInfo = pageVideosWithInfo,
-                        isLoading = isLoading && videos.isEmpty(),
-                        isRefreshing = isRefreshing,
-                        recentlyPlayedFilePath = recentlyPlayedFilePath,
-                        videosWereDeletedOrMoved = videosWereDeletedOrMoved,
-                        autoScrollToLastPlayed = autoScrollToLastPlayed,
-                        onRefresh = { viewModel.refresh() },
-                        selectionManager = selectionManager,
-                        onVideoClick = { video ->
-                          if (selectionManager.isInSelectionMode) {
-                            selectionManager.toggleFromUser(video)
-                          } else {
-                            playFromMediaLibrary(video)
+                    when (audioSubTab) {
+                      0 -> {
+                        app.video.player.ui.browser.folderlist.FolderListScreen.MediaStoreFolderListContent(
+                          audioOnly = true,
+                          videoOnly = false,
+                          embedded = true,
+                          searchQuery = searchQuery,
+                        )
+                      }
+                      1 -> {
+                        VideoListContent(
+                          folderId = "media_library_audio",
+                          videosWithInfo = pageVideosWithInfo,
+                          isLoading = isLoading && videos.isEmpty(),
+                          isRefreshing = isRefreshing,
+                          recentlyPlayedFilePath = recentlyPlayedFilePath,
+                          videosWereDeletedOrMoved = videosWereDeletedOrMoved,
+                          autoScrollToLastPlayed = autoScrollToLastPlayed,
+                          onRefresh = { viewModel.refresh() },
+                          selectionManager = selectionManager,
+                          onVideoClick = { video ->
+                            if (selectionManager.isInSelectionMode) {
+                              selectionManager.toggleFromUser(video)
+                            } else {
+                              playFromMediaLibrary(video)
+                            }
+                          },
+                          onVideoLongClick = { video -> selectionManager.handleLongClick(video) },
+                          isFabVisible = isFabVisible,
+                          modifier = Modifier.fillMaxSize(),
+                          showFloatingBottomBar = showFloatingBottomBar,
+                          mediaLayoutMode = mediaLayoutMode,
+                          isAudio = true,
+                          musicCoverArtSize = musicCoverArtSize,
+                          isFabExpanded = isFabExpanded.value,
+                          onFabExpandedChange = { isFabExpanded.value = it },
+                          headerContent = null,
+                        )
+                      }
+                      2 -> {
+                        if (pageFavoriteAudioVideos.isEmpty()) {
+                          Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            app.video.player.ui.browser.states.EmptyState(
+                              icon = app.video.player.ui.icons.Icons.RoundedFilled.Favorite,
+                              title = "No Favorite Songs",
+                              message = "Songs you mark as favorite will appear here",
+                            )
                           }
-                        },
-                        onVideoLongClick = { video -> selectionManager.handleLongClick(video) },
-                        isFabVisible = isFabVisible,
-                        modifier = Modifier.fillMaxSize(),
-                        showFloatingBottomBar = showFloatingBottomBar,
-                        mediaLayoutMode = mediaLayoutMode,
-                        isAudio = true,
-                        musicCoverArtSize = musicCoverArtSize,
-                        isFabExpanded = isFabExpanded.value,
-                        onFabExpandedChange = { isFabExpanded.value = it },
-                        headerContent = null,
-                      )
+                        } else {
+                          VideoListContent(
+                            folderId = "media_library_audio_favorites",
+                            videosWithInfo = pageFavoriteAudioVideos,
+                            isLoading = false,
+                            isRefreshing = isRefreshing,
+                            recentlyPlayedFilePath = recentlyPlayedFilePath,
+                            videosWereDeletedOrMoved = videosWereDeletedOrMoved,
+                            autoScrollToLastPlayed = autoScrollToLastPlayed,
+                            onRefresh = { viewModel.refresh() },
+                            selectionManager = selectionManager,
+                            onVideoClick = { video ->
+                              if (selectionManager.isInSelectionMode) {
+                                selectionManager.toggleFromUser(video)
+                              } else {
+                                playFromMediaLibrary(video, customPlaylist = pageFavoriteAudioVideos.map { it.video })
+                              }
+                            },
+                            onVideoLongClick = { video -> selectionManager.handleLongClick(video) },
+                            isFabVisible = isFabVisible,
+                            modifier = Modifier.fillMaxSize(),
+                            showFloatingBottomBar = showFloatingBottomBar,
+                            mediaLayoutMode = mediaLayoutMode,
+                            isAudio = true,
+                            musicCoverArtSize = musicCoverArtSize,
+                            isFabExpanded = isFabExpanded.value,
+                            onFabExpandedChange = { isFabExpanded.value = it },
+                            headerContent = null,
+                          )
+                        }
+                      }
+                      3 -> {
+                        app.video.player.ui.browser.playlist.PlaylistScreen.PlaylistScreenContent(
+                          audioOnly = true,
+                          embedded = true,
+                          searchQuery = searchQuery,
+                        )
+                      }
                     }
                   }
                 }
@@ -1279,6 +1401,13 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
           onSortTypeChange = { browserPreferences.folderSortType.set(it) },
           onSortOrderChange = { browserPreferences.folderSortOrder.set(it) },
           embeddedAlbumView = true,
+        )
+      } else if (currentTab == MediaLibraryType.Audio && audioSubTab == 3 && !isSearching) {
+        PlaylistSortDialog(
+          isOpen = sortDialogOpen.value,
+          onDismiss = { sortDialogOpen.value = false },
+          isLibrary = true,
+          isAudio = true,
         )
       } else {
         VideoSortDialog(
