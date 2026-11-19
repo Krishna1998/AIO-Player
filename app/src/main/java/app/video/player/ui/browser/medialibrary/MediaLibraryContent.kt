@@ -689,6 +689,8 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
       }
     },
     floatingActionButton = {
+      if (currentTab == MediaLibraryType.All) return@floatingActionButton
+
       val isFabShouldBeVisible =
         currentVideosWithInfo.isNotEmpty() &&
           showQuickPlayFab &&
