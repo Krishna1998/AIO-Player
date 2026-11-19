@@ -573,13 +573,9 @@ fun FolderSortDialog(
               ViewModeOption(
                 label = "Library",
                 icon = Icons.RoundedFilled.VideoLibrary,
-                isSelected = folderViewMode == FolderViewMode.MediaLibrary,
-                onClick = { browserPreferences.folderViewMode.set(FolderViewMode.MediaLibrary) },
-              ),
-              ViewModeOption(
-                label = "Horizon",
-                icon = Icons.RoundedFilled.ViewArray,
-                isSelected = folderViewMode == FolderViewMode.DualHorizon || folderViewMode == FolderViewMode.BentoFusion,
+                isSelected = folderViewMode == FolderViewMode.MediaLibrary ||
+                  folderViewMode == FolderViewMode.DualHorizon ||
+                  folderViewMode == FolderViewMode.BentoFusion,
                 onClick = {
                   browserPreferences.includeAudioBrowser.set(true)
                   browserPreferences.mediaLibraryType.set(MediaLibraryType.All)
@@ -939,13 +935,9 @@ fun VideoSortDialog(
               ViewModeOption(
                 label = "Library",
                 icon = Icons.RoundedFilled.VideoLibrary,
-                isSelected = folderViewMode == FolderViewMode.MediaLibrary,
-                onClick = { browserPreferences.folderViewMode.set(FolderViewMode.MediaLibrary) },
-              ),
-              ViewModeOption(
-                label = "Horizon",
-                icon = Icons.RoundedFilled.ViewArray,
-                isSelected = folderViewMode == FolderViewMode.DualHorizon || folderViewMode == FolderViewMode.BentoFusion,
+                isSelected = folderViewMode == FolderViewMode.MediaLibrary ||
+                  folderViewMode == FolderViewMode.DualHorizon ||
+                  folderViewMode == FolderViewMode.BentoFusion,
                 onClick = {
                   browserPreferences.includeAudioBrowser.set(true)
                   browserPreferences.mediaLibraryType.set(MediaLibraryType.All)
@@ -1338,8 +1330,15 @@ fun FileSystemSortDialog(
             ViewModeOption(
               label = "Library",
               icon = Icons.RoundedFilled.VideoLibrary,
-              isSelected = folderViewMode == FolderViewMode.MediaLibrary,
-              onClick = { browserPreferences.folderViewMode.set(FolderViewMode.MediaLibrary) },
+              isSelected = folderViewMode == FolderViewMode.MediaLibrary ||
+                folderViewMode == FolderViewMode.DualHorizon ||
+                folderViewMode == FolderViewMode.BentoFusion,
+              onClick = {
+                browserPreferences.includeAudioBrowser.set(true)
+                browserPreferences.mediaLibraryType.set(MediaLibraryType.All)
+                browserPreferences.folderViewMode.set(FolderViewMode.DualHorizon)
+                app.video.player.utils.media.MediaLibraryEvents.notifyChanged()
+              },
             ),
           ),
       ),

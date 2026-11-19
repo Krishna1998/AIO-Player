@@ -397,11 +397,11 @@ enum class FolderViewMode {
   val displayName: String
     get() =
       when (this) {
-        DualHorizon -> "Horizon"
+        DualHorizon -> "Library"
         AlbumView -> "Folder View"
         FileManager -> "Tree View"
-        MediaLibrary -> "Media Library"
-        BentoFusion -> "Horizon"
+        MediaLibrary -> "Library"
+        BentoFusion -> "Library"
       }
 }
 

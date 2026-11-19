@@ -580,8 +580,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
             if (forceAudio) {
               androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_music)
             } else {
-              androidx.compose.ui.res
-                .stringResource(app.video.player.R.string.pref_media_library_section)
+              androidx.compose.ui.res.stringResource(app.video.player.R.string.app_name)
             },
           isInSelectionMode = selectionManager.isInSelectionMode,
           selectedCount = selectionManager.selectedCount,
