@@ -75,6 +75,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -290,7 +291,7 @@ private fun DrawScope.drawSeekbarTrackSegments(
   }
 
   // Base pill always owns the true outer shape. Progress and cache are overlays.
-  val baseColor = if (isGlass) Color.White.copy(alpha = 0.16f) else unplayedColor
+  val baseColor = unplayedColor
   drawRange(0f, size.width, baseColor)
 
   // Cache/read-ahead gets a rounded terminal cap while the base remains visible
@@ -1682,6 +1683,7 @@ private fun LiquidSeekbar(
   val density = LocalDensity.current
   val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
   val animationScope = rememberCoroutineScope()
+  val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
   val safeDuration = duration.takeIf { it.isFinite() && it > 0f } ?: 0f
   val animationRange = 0f..safeDuration.coerceAtLeast(0.1f)
   val initialPosition =
@@ -1759,7 +1761,7 @@ private fun LiquidSeekbar(
           trackHeight = heightPx,
           playedColor = accentColor,
           bufferedColor = accentColor.copy(alpha = readAheadAlpha),
-          unplayedColor = Color.White.copy(alpha = 0.16f),
+          unplayedColor = if (isDark) Color.White.copy(alpha = 0.16f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
           isGlass = true,
         )
 

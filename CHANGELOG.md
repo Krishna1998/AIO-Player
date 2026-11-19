@@ -4,6 +4,18 @@ These notes are written in plain English and focus on what changed for real use.
 
 ## 1.0.0
 
+### ☀️ Light Mode Audio Player Contrast & Readability
+- **Dynamic Luminance-Aware Atmospheric Scrim:**
+  - Resolved unreadable text and icons in Light Mode by dynamically adapting the full-screen atmospheric canvas overlay over blurred cover art based on theme luminance (`surface.luminance() < 0.5f`).
+  - In Light Mode, replaced the hardcoded dark black scrim (`Color.Black` 0.42f–0.85f) with a luminous frosted light surface gradient (`surface` 0.55f–0.94f) ensuring dark charcoal typography (`#1C1B1F` and `#49454F`) has 100% crystal-clear contrast and WCAG AAA compliance.
+- **Adaptive Ambient Color Mesh & Watercolor Glow:**
+  - In Light Mode, ambient color extraction now selects light vibrant and light muted palette tones with softened translucency (0.25f / 0.15f), providing an airy watercolor glow over the light surface without darkening or muddying the canvas.
+- **Theme-Aware Glass UI Pills & Drop Shadows:**
+  - Glass capsules (`audioGlassSurface`) in Light Mode now utilize elevated surface containers with enhanced contrast specular outlines (`outlineVariant`), giving transport buttons, track pills, and speed controls clean floating tactile depth.
+  - Adapted album art card shadows and borders for Light Mode, replacing aggressive 60% black drop shadows with natural, soft 22% ambient shadows and luminous white top specular rims.
+- **Seekbar Track Legibility in Light Mode:**
+  - Liquid seekbar and standard seekbar base tracks now automatically evaluate surface luminance, ensuring unplayed tracks retain subtle, distinct contrast in Light Mode rather than blending invisibly into white backgrounds.
+
 ### 🌌 Dual-Horizon Rails & Smart Audio Architecture
 - **Glass UI Section Titles & Streamlined Rail Naming:**
   - Added frosted Glass UI capsule styling to all section titles (**Music**, **Video/Movie**, **Recently Played**, **AUDIO PULSING**) featuring translucent backdrops, glowing specular rims, and embedded count badges.

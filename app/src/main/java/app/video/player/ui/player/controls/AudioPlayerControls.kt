@@ -156,6 +156,7 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -984,11 +985,13 @@ fun AudioPlayerControls(
   val ambientModeEnabled by audioPreferences.audioAmbientMode.collectAsState()
   val immersiveArtworkEnabled by audioPreferences.immersiveArtwork.collectAsState()
   val effectiveAmbientMode = ambientModeEnabled && !immersiveArtworkEnabled
+  val isDarkTheme = MaterialTheme.colorScheme.surface.luminance() < 0.5f
 
   val ambientColors by produceState<Pair<Color, Color>?>(
     initialValue = null,
     key1 = albumArtBitmap,
     key2 = effectiveAmbientMode,
+    key3 = isDarkTheme,
   ) {
     if (!effectiveAmbientMode || albumArtBitmap == null) {
       value = null
@@ -1005,10 +1008,26 @@ fun AudioPlayerControls(
         val darkVibrant = palette.getDarkVibrantColor(
           palette.getDarkMutedColor(vibrant)
         )
-        if (vibrant == 0 && darkVibrant == 0) return@runCatching null
+        val lightVibrant = palette.getLightVibrantColor(0)
+        val lightMuted = palette.getLightMutedColor(0)
 
-        val topColor = Color(if (vibrant != 0) vibrant else darkVibrant).copy(alpha = 0.50f)
-        val bottomColor = Color(if (darkVibrant != 0) darkVibrant else vibrant).copy(alpha = 0.30f)
+        val primaryColorInt = if (isDarkTheme) {
+          if (vibrant != 0) vibrant else darkVibrant
+        } else {
+          if (lightVibrant != 0) lightVibrant else if (vibrant != 0) vibrant else lightMuted
+        }
+        val secondaryColorInt = if (isDarkTheme) {
+          if (darkVibrant != 0) darkVibrant else vibrant
+        } else {
+          if (lightMuted != 0) lightMuted else palette.getMutedColor(primaryColorInt)
+        }
+
+        if (primaryColorInt == 0 && secondaryColorInt == 0) return@runCatching null
+
+        val topAlpha = if (isDarkTheme) 0.50f else 0.25f
+        val bottomAlpha = if (isDarkTheme) 0.30f else 0.15f
+        val topColor = Color(if (primaryColorInt != 0) primaryColorInt else secondaryColorInt).copy(alpha = topAlpha)
+        val bottomColor = Color(if (secondaryColorInt != 0) secondaryColorInt else primaryColorInt).copy(alpha = bottomAlpha)
         Pair(topColor, bottomColor)
       }.onSuccess { colors ->
         value = colors
@@ -1109,20 +1128,20 @@ fun AudioPlayerControls(
               }
               .blur(56.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded),
         )
-        // High-contrast atmospheric darkening scrims for 100% text and icon legibility
+        // High-contrast atmospheric scrim: dark tone in dark mode, light frosted tone in light mode
+        val scrimBase = if (isDarkTheme) Color.Black else MaterialTheme.colorScheme.surface
+        val scrimAlphas = if (isDarkTheme) {
+          listOf(0.42f, 0.25f, 0.65f, 0.85f)
+        } else {
+          listOf(0.55f, 0.40f, 0.82f, 0.94f)
+        }
         Box(
           modifier =
             Modifier
               .fillMaxSize()
               .background(
                 Brush.verticalGradient(
-                  colors =
-                    listOf(
-                      Color.Black.copy(alpha = 0.42f),
-                      Color.Black.copy(alpha = 0.25f),
-                      Color.Black.copy(alpha = 0.65f),
-                      Color.Black.copy(alpha = 0.85f),
-                    ),
+                  colors = scrimAlphas.map { scrimBase.copy(alpha = it) },
                 ),
               ),
         )
@@ -1234,7 +1253,7 @@ fun AudioPlayerControls(
           Text(
             text = stringResource(R.string.ui_now_playing),
             style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (isDarkTheme) 0.7f else 0.88f),
             letterSpacing = 2.sp,
           )
           if (trackText != null) {
@@ -1407,6 +1426,25 @@ fun AudioPlayerControls(
               },
             contentAlignment = Alignment.Center,
           ) {
+            val cardShadowAlpha = if (isDarkTheme) 0.60f else 0.22f
+            val cardBorderBrush = if (isDarkTheme) {
+              Brush.verticalGradient(
+                listOf(
+                  Color.White.copy(alpha = 0.35f),
+                  Color.White.copy(alpha = 0.10f),
+                  Color.Transparent,
+                ),
+              )
+            } else {
+              Brush.verticalGradient(
+                listOf(
+                  Color.White.copy(alpha = 0.70f),
+                  MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
+                  Color.Transparent,
+                ),
+              )
+            }
+
             // 1. Previous Cover Art Card (Visible when dragging right -> currentOffset > 0)
             if (currentOffset > 0f) {
               Surface(
@@ -1417,19 +1455,13 @@ fun AudioPlayerControls(
                     elevation = 24.dp,
                     shape = coverShape,
                     clip = false,
-                    ambientColor = Color.Black.copy(alpha = 0.60f),
-                    spotColor = Color.Black.copy(alpha = 0.60f),
+                    ambientColor = Color.Black.copy(alpha = cardShadowAlpha),
+                    spotColor = Color.Black.copy(alpha = cardShadowAlpha),
                   )
                   .clip(coverShape)
                   .border(
                     1.dp,
-                    Brush.verticalGradient(
-                      listOf(
-                        Color.White.copy(alpha = 0.35f),
-                        Color.White.copy(alpha = 0.10f),
-                        Color.Transparent,
-                      ),
-                    ),
+                    cardBorderBrush,
                     coverShape,
                   ),
                 shape = coverShape,
@@ -1453,19 +1485,13 @@ fun AudioPlayerControls(
                     elevation = 24.dp,
                     shape = coverShape,
                     clip = false,
-                    ambientColor = Color.Black.copy(alpha = 0.60f),
-                    spotColor = Color.Black.copy(alpha = 0.60f),
+                    ambientColor = Color.Black.copy(alpha = cardShadowAlpha),
+                    spotColor = Color.Black.copy(alpha = cardShadowAlpha),
                   )
                   .clip(coverShape)
                   .border(
                     1.dp,
-                    Brush.verticalGradient(
-                      listOf(
-                        Color.White.copy(alpha = 0.35f),
-                        Color.White.copy(alpha = 0.10f),
-                        Color.Transparent,
-                      ),
-                    ),
+                    cardBorderBrush,
                     coverShape,
                   ),
                 shape = coverShape,
@@ -1489,19 +1515,13 @@ fun AudioPlayerControls(
                     elevation = 24.dp,
                     shape = coverShape,
                     clip = false,
-                    ambientColor = Color.Black.copy(alpha = 0.60f),
-                    spotColor = Color.Black.copy(alpha = 0.60f),
+                    ambientColor = Color.Black.copy(alpha = cardShadowAlpha),
+                    spotColor = Color.Black.copy(alpha = cardShadowAlpha),
                   )
                   .clip(coverShape)
                   .border(
                     1.dp,
-                    Brush.verticalGradient(
-                      listOf(
-                        Color.White.copy(alpha = 0.35f),
-                        Color.White.copy(alpha = 0.10f),
-                        Color.Transparent,
-                      ),
-                    ),
+                    cardBorderBrush,
                     coverShape,
                   ),
               shape = coverShape,
@@ -2104,7 +2124,7 @@ fun AudioPlayerControls(
                   fontWeight = FontWeight.Normal,
                   fontFamily = fontFamilyForText(emptyLine),
                 ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (isDarkTheme) 0.7f else 0.88f),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Start,
@@ -3290,19 +3310,38 @@ private fun Modifier.audioGlassSurface(
   borderWidth: Dp = 1.dp,
   elevation: Dp = 4.dp,
 ): Modifier {
+  val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+  val adjustedContainerColor = if (isDark) {
+    containerColor
+  } else {
+    MaterialTheme.colorScheme.surfaceContainerHighest.copy(
+      alpha = (containerColor.alpha * 1.35f).coerceIn(0.55f, 0.90f),
+    )
+  }
   val fill = Brush.verticalGradient(
-    0f to containerColor.copy(alpha = (containerColor.alpha * 1.15f).coerceIn(0f, 1f)),
-    0.4f to containerColor.copy(alpha = (containerColor.alpha * 0.85f).coerceIn(0f, 1f)),
-    1f to containerColor.copy(alpha = (containerColor.alpha * 1.05f).coerceIn(0f, 1f)),
+    0f to adjustedContainerColor.copy(alpha = (adjustedContainerColor.alpha * 1.15f).coerceIn(0f, 1f)),
+    0.4f to adjustedContainerColor.copy(alpha = (adjustedContainerColor.alpha * 0.85f).coerceIn(0f, 1f)),
+    1f to adjustedContainerColor.copy(alpha = (adjustedContainerColor.alpha * 1.05f).coerceIn(0f, 1f)),
   )
-  val specularBorder = Brush.verticalGradient(
-    listOf(
-      Color.White.copy(alpha = highlightAlpha),
-      Color.White.copy(alpha = highlightAlpha * 0.25f),
-      Color.White.copy(alpha = highlightAlpha * 0.05f),
-      containerColor.copy(alpha = 0.20f),
-    ),
-  )
+  val specularBorder = if (isDark) {
+    Brush.verticalGradient(
+      listOf(
+        Color.White.copy(alpha = highlightAlpha),
+        Color.White.copy(alpha = highlightAlpha * 0.25f),
+        Color.White.copy(alpha = highlightAlpha * 0.05f),
+        adjustedContainerColor.copy(alpha = 0.20f),
+      ),
+    )
+  } else {
+    Brush.verticalGradient(
+      listOf(
+        Color.White.copy(alpha = (highlightAlpha * 1.5f).coerceIn(0f, 1f)),
+        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.40f),
+        MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f),
+        MaterialTheme.colorScheme.outline.copy(alpha = 0.15f),
+      ),
+    )
+  }
   return this
     .outsideShadow(shape, radius = elevation)
     .clip(shape)
