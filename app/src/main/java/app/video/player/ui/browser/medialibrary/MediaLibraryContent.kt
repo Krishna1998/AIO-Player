@@ -24,35 +24,38 @@ import app.video.player.ui.browser.NavigationBarState
 import app.video.player.ui.browser.fab.FabPlacement
 import app.video.player.ui.browser.fab.FabScrollHelper
 import app.video.player.ui.components.InlineSearchBar
-import app.video.player.ui.components.themedSegmentedButtonColors
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.snapshotFlow
 import app.video.player.ui.utils.NavigationPager
 import app.video.player.ui.utils.rememberTabNavigation
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButtonMenu
 import androidx.compose.material3.FloatingActionButtonMenuItem
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.ToggleFloatingActionButton
 import androidx.compose.material3.ToggleFloatingActionButtonDefaults.animateIcon
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.material3.rememberTooltipState
@@ -802,44 +805,101 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                 .padding(padding),
           ) {
           if (!forceAudio) {
-            SingleChoiceSegmentedButtonRow(
-              modifier =
-                Modifier
-                  .fillMaxWidth()
-                  .padding(horizontal = 16.dp, vertical = 8.dp),
+            Surface(
+              shape = RoundedCornerShape(999.dp),
+              color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.45f),
+              border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f)),
+              modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 6.dp),
             ) {
-              MediaLibraryType.entries.forEachIndexed { index, type ->
-                SegmentedButton(
-                  selected = currentTab == type,
-                  onClick = {
-                    if (currentTab != type) {
-                      navigateTab(index)
-                    }
-                  },
-                  shape = SegmentedButtonDefaults.itemShape(index, MediaLibraryType.entries.size),
-                  colors = themedSegmentedButtonColors(),
-                ) {
+              Row(
+                modifier = Modifier
+                  .fillMaxWidth()
+                  .padding(3.5.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+              ) {
+                MediaLibraryType.entries.forEachIndexed { index, type ->
+                  val isSelected = currentTab == type
                   val count = when (type) {
                     MediaLibraryType.All -> sortedVideosWithInfo.size
                     MediaLibraryType.Video -> sortedVideosWithInfo.count { !it.video.isAudio }
                     MediaLibraryType.Audio -> sortedVideosWithInfo.count { it.video.isAudio }
                   }
                   val label = when (type) {
-                    MediaLibraryType.All -> androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_all_media)
-                    MediaLibraryType.Video -> androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_videos)
-                    MediaLibraryType.Audio -> androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_music)
+                    MediaLibraryType.All -> stringResource(R.string.ui_all_media)
+                    MediaLibraryType.Video -> stringResource(R.string.ui_videos)
+                    MediaLibraryType.Audio -> stringResource(R.string.ui_music)
                   }
-                  Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                  val iconVector = when (type) {
+                    MediaLibraryType.All -> Icons.RoundedFilled.GridView
+                    MediaLibraryType.Video -> Icons.RoundedFilled.VideoLibrary
+                    MediaLibraryType.Audio -> Icons.RoundedFilled.Audiotrack
+                  }
+
+                  Surface(
+                    onClick = {
+                      if (currentTab != type) {
+                        navigateTab(index)
+                      }
+                    },
+                    shape = RoundedCornerShape(999.dp),
+                    color = if (isSelected) {
+                      MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                      Color.Transparent
+                    },
+                    border = if (isSelected) {
+                      BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
+                    } else null,
+                    modifier = Modifier.weight(1f),
                   ) {
-                    Text(label)
-                    if (count > 0) {
-                      Text(
-                        text = "($count)",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+                    Row(
+                      modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp, horizontal = 4.dp),
+                      horizontalArrangement = Arrangement.Center,
+                      verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                      Icon(
+                        imageVector = iconVector,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = if (isSelected) {
+                          MaterialTheme.colorScheme.onPrimaryContainer
+                        } else {
+                          MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
+                        },
                       )
+                      Spacer(modifier = Modifier.width(5.dp))
+                      Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelMedium.copy(
+                          fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                        ),
+                        color = if (isSelected) {
+                          MaterialTheme.colorScheme.onPrimaryContainer
+                        } else {
+                          MaterialTheme.colorScheme.onSurfaceVariant
+                        },
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                      )
+                      if (count > 0) {
+                        Spacer(modifier = Modifier.width(3.dp))
+                        Text(
+                          text = "($count)",
+                          style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                          ),
+                          color = if (isSelected) {
+                            MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f)
+                          } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f)
+                          },
+                          maxLines = 1,
+                        )
+                      }
                     }
                   }
                 }
