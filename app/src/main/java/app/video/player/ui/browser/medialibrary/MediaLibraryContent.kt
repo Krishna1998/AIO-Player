@@ -1034,33 +1034,34 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
               }
             }
           }
-        } else if (isPermissionSetupCompleted) {
-          Box(
-            modifier = Modifier
-              .fillMaxSize()
-              .padding(padding),
-          ) {
-            StoragePermissionPrompt(
-              onRequestPermission = { permissionState.launchPermissionRequest() },
-            )
-          }
-        } else {
-          Box(
-            modifier = Modifier
-              .fillMaxSize()
-              .padding(padding),
-          ) {
-            PermissionDeniedState(
-              onRequestPermission = { permissionState.launchPermissionRequest() },
-              onNext = {
-                isPermissionSetupCompleted = true
-                browserPreferences.onboardingCompleted.set(true)
-                viewModel.refresh()
-              },
-              modifier = Modifier,
-            )
-          }
         }
+      } else if (isPermissionSetupCompleted) {
+        Box(
+          modifier = Modifier
+            .fillMaxSize()
+            .padding(padding),
+        ) {
+          StoragePermissionPrompt(
+            onRequestPermission = { permissionState.launchPermissionRequest() },
+          )
+        }
+      } else {
+        Box(
+          modifier = Modifier
+            .fillMaxSize()
+            .padding(padding),
+        ) {
+          PermissionDeniedState(
+            onRequestPermission = { permissionState.launchPermissionRequest() },
+            onNext = {
+              isPermissionSetupCompleted = true
+              browserPreferences.onboardingCompleted.set(true)
+              viewModel.refresh()
+            },
+            modifier = Modifier,
+          )
+        }
+      }
 
         FabScrollHelper.FabScrim(
           visible = isFabExpanded.value && !quickPlayFabDirect,
