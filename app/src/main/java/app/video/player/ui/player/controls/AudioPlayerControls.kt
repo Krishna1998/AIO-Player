@@ -218,6 +218,7 @@ import app.video.player.ui.player.controls.components.tvFocusHighlight
 import app.video.player.ui.player.controls.components.tvInitialFocus
 import app.video.player.ui.player.visualizer.AudioFeatures
 import app.video.player.ui.player.visualizer.VisualizerPalette
+import app.video.player.ui.player.visualizer.resolveWaveformColors
 import app.video.player.ui.player.visualizer.rememberAudioVisualizerFeatures
 import app.video.player.ui.theme.fontFamilyForText
 import app.video.player.ui.utils.isMpvOptionOwnedByConfig
@@ -737,13 +738,17 @@ fun AudioPlayerControls(
   val audioWavySeekbar by audioPreferences.audioWavySeekbar.collectAsState()
   val backgroundPlaybackEnabled by audioPreferences.audioBackgroundPlayback.collectAsState()
   val colorScheme = MaterialTheme.colorScheme
+  val currentAppTheme by appearancePreferences.appTheme.collectAsState()
+  val (pulsingWave1, pulsingWave2, pulsingWave3) = remember(currentAppTheme, colorScheme) {
+    resolveWaveformColors(currentAppTheme, colorScheme)
+  }
   val palette =
-    remember(colorScheme) {
+    remember(colorScheme, pulsingWave1, pulsingWave2, pulsingWave3) {
       VisualizerPalette(
         background = colorScheme.surface.toArgb(),
-        primary = colorScheme.primary.toArgb(),
-        secondary = colorScheme.secondary.toArgb(),
-        tertiary = colorScheme.tertiary.toArgb(),
+        primary = pulsingWave3.toArgb(),
+        secondary = pulsingWave1.toArgb(),
+        tertiary = pulsingWave2.toArgb(),
       )
     }
   val artworkPalette by produceState(

@@ -28,6 +28,7 @@ import app.video.player.ui.components.AppSlider as Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
@@ -49,9 +50,13 @@ import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import app.video.player.preferences.AppearancePreferences
 import app.video.player.preferences.SeekbarStyle
+import app.video.player.preferences.preference.collectAsState
 import app.video.player.ui.player.controls.LocalPlayerButtonsClickEvent
+import app.video.player.ui.player.visualizer.resolveWaveformColors
 import app.video.player.ui.theme.AppMotion
+import org.koin.compose.koinInject
 import dev.vivvvek.seeker.Segment
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -101,53 +106,48 @@ fun SeekbarWavyVisualizerOverlay(
   seekbarStyle: SeekbarStyle = SeekbarStyle.CyberLaser,
   modifier: Modifier = Modifier,
 ) {
-  val primaryColor = MaterialTheme.colorScheme.primary
-  val secondaryColor = MaterialTheme.colorScheme.secondary
-  val tertiaryColor = MaterialTheme.colorScheme.tertiary
-
-  // Pre-calculated tonal palette (zero allocation in draw loop)
-  val layer1Light = remember(tertiaryColor) { tertiaryColor.shiftTonal(lightnessDelta = +0.18f, saturationScale = 0.85f) }
-  val layer1Dark = remember(tertiaryColor) { tertiaryColor.shiftTonal(lightnessDelta = -0.15f, saturationScale = 1.30f) }
-  val layer2Dark = remember(secondaryColor) { secondaryColor.shiftTonal(lightnessDelta = -0.16f, saturationScale = 1.30f) }
-  val layer2Light = remember(secondaryColor) { secondaryColor.shiftTonal(lightnessDelta = +0.18f, saturationScale = 0.85f) }
-  val layer3Light = remember(primaryColor) { primaryColor.shiftTonal(lightnessDelta = +0.20f, saturationScale = 0.90f) }
-  val layer3Dark = remember(primaryColor) { primaryColor.shiftTonal(lightnessDelta = -0.14f, saturationScale = 1.35f) }
-
-  // Pre-allocated gradient color lists to eliminate garbage collection churn during frame rendering (PR #9)
-  val gradient1Colors = remember(layer1Light, layer1Dark) {
-    listOf(layer1Light.copy(alpha = 0.30f), layer1Dark.copy(alpha = 0.08f))
-  }
-  val gradient2Colors = remember(layer2Light, layer2Dark) {
-    listOf(layer2Light.copy(alpha = 0.38f), layer2Dark.copy(alpha = 0.12f))
-  }
-  val gradient3Colors = remember(layer3Light, layer3Dark) {
-    listOf(layer3Light.copy(alpha = 0.56f), layer3Dark.copy(alpha = 0.22f))
-  }
-  val gradient3HorizontalColors = remember(layer3Light, layer3Dark, secondaryColor) {
-    listOf(layer3Light.copy(alpha = 0.32f), secondaryColor.copy(alpha = 0.22f), layer3Dark.copy(alpha = 0.38f))
+  val appearancePreferences = koinInject<AppearancePreferences>()
+  val currentAppTheme by appearancePreferences.appTheme.collectAsState()
+  val colorScheme = MaterialTheme.colorScheme
+  val (wave1Color, wave2Color, wave3Color) = remember(currentAppTheme, colorScheme) {
+    resolveWaveformColors(currentAppTheme, colorScheme)
   }
 
-  val contour1Colors = remember(layer1Light, layer1Dark) {
-    listOf(layer1Light.copy(alpha = 0.18f), layer1Dark.copy(alpha = 0.12f))
+  // Pre-allocated gradient color lists matching the One UI 9 Audio Pulsing visualizer:
+  val gradient1Colors = remember(wave1Color) {
+    listOf(wave1Color.copy(alpha = 0.38f), wave1Color.copy(alpha = 0.08f))
   }
-  val contour2Colors = remember(layer2Light, layer2Dark) {
-    listOf(layer2Dark.copy(alpha = 0.24f), layer2Light.copy(alpha = 0.18f))
+  val gradient2Colors = remember(wave2Color, wave1Color) {
+    listOf(wave2Color.copy(alpha = 0.42f), wave1Color.copy(alpha = 0.10f))
   }
-  val contour3OuterColors = remember(layer3Light, layer3Dark) {
-    listOf(layer3Light.copy(alpha = 0.32f), layer3Dark.copy(alpha = 0.22f))
+  val gradient3Colors = remember(wave3Color, wave2Color) {
+    listOf(wave3Color.copy(alpha = 0.62f), wave2Color.copy(alpha = 0.12f))
   }
-  val contour3InnerColors = remember(layer3Light, layer3Dark) {
-    listOf(layer3Light.copy(alpha = 0.52f), layer3Dark.copy(alpha = 0.40f))
+  val gradient3HorizontalColors = remember(wave3Color, wave2Color) {
+    listOf(wave3Color.copy(alpha = 0.45f), wave2Color.copy(alpha = 0.30f), wave3Color.copy(alpha = 0.50f))
   }
 
-  val crispContour1Colors = remember(layer1Light, layer1Dark) {
-    listOf(layer1Light.copy(alpha = 0.45f), layer1Dark.copy(alpha = 0.32f))
+  val contour1Colors = remember(wave1Color) {
+    listOf(wave1Color.copy(alpha = 0.40f), wave1Color.copy(alpha = 0.25f))
   }
-  val crispContour2Colors = remember(layer2Light, layer2Dark) {
-    listOf(layer2Dark.copy(alpha = 0.72f), layer2Light.copy(alpha = 0.62f))
+  val contour2Colors = remember(wave2Color) {
+    listOf(wave2Color.copy(alpha = 0.38f), wave2Color.copy(alpha = 0.25f))
   }
-  val crispContour3Colors = remember(layer3Light, layer3Dark) {
-    listOf(layer3Light.copy(alpha = 0.98f), layer3Dark.copy(alpha = 0.92f))
+  val contour3OuterColors = remember(wave3Color) {
+    listOf(wave3Color.copy(alpha = 0.50f), wave3Color.copy(alpha = 0.35f))
+  }
+  val contour3InnerColors = remember(wave3Color) {
+    listOf(wave3Color.copy(alpha = 0.75f), wave3Color.copy(alpha = 0.60f))
+  }
+
+  val crispContour1Colors = remember(wave1Color) {
+    listOf(wave1Color.copy(alpha = 0.78f), wave1Color.copy(alpha = 0.65f))
+  }
+  val crispContour2Colors = remember(wave2Color) {
+    listOf(wave2Color.copy(alpha = 0.88f), wave2Color.copy(alpha = 0.78f))
+  }
+  val crispContour3Colors = remember(wave3Color) {
+    listOf(wave3Color.copy(alpha = 0.98f), wave3Color.copy(alpha = 0.92f))
   }
 
   // Dynamic seekbar track thickness that tracks the underlying seekbar's exact height
@@ -429,7 +429,7 @@ fun SeekbarWavyVisualizerOverlay(
           startX = 0f,
           endX = activeWidth,
         ),
-        style = Stroke(width = 1.0.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
+        style = Stroke(width = 1.4.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
       )
 
       // Layer 2: Medium harmonic contour stroke
@@ -440,10 +440,10 @@ fun SeekbarWavyVisualizerOverlay(
           startX = 0f,
           endX = activeWidth,
         ),
-        style = Stroke(width = 1.2.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
+        style = Stroke(width = 1.6.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
       )
 
-      // Layer 3: Vibrant primary contour stroke (1.8dp in PR #9)
+      // Layer 3: Vibrant primary contour stroke (Lead crest)
       drawPath(
         path = pathContour3,
         brush = Brush.horizontalGradient(
@@ -451,8 +451,17 @@ fun SeekbarWavyVisualizerOverlay(
           startX = 0f,
           endX = activeWidth,
         ),
-        style = Stroke(width = 1.8.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
+        style = Stroke(width = 2.0.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
       )
+
+      // Foreground White Specular Highlight Core for liquid glass reflection
+      if (maxAmp > 2.dp.toPx()) {
+        drawPath(
+          path = pathContour3,
+          color = Color.White.copy(alpha = 0.70f),
+          style = Stroke(width = 1.0.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round),
+        )
+      }
     }
   }
 }

@@ -13,8 +13,10 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
@@ -30,6 +32,9 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import app.video.player.preferences.AppearancePreferences
+import app.video.player.preferences.preference.collectAsState
+import org.koin.compose.koinInject
 import kotlin.math.PI
 import kotlin.math.exp
 import kotlin.math.min
@@ -80,6 +85,13 @@ internal fun WaveVisualizerOverlay(
   trackColor: Color,
   modifier: Modifier = Modifier,
 ) {
+  val appearancePreferences = koinInject<AppearancePreferences>()
+  val currentAppTheme by appearancePreferences.appTheme.collectAsState()
+  val colorScheme = MaterialTheme.colorScheme
+  val (wave1Color, wave2Color, wave3Color) = remember(currentAppTheme, colorScheme) {
+    resolveWaveformColors(currentAppTheme, colorScheme)
+  }
+
   // Each ribbon owns a frequency-band envelope; system volume remains a separate live gain.
   var frameNanos by remember { mutableLongStateOf(0L) }
   var lowPhase by remember { mutableFloatStateOf(0f) }
@@ -318,24 +330,24 @@ internal fun WaveVisualizerOverlay(
     drawRibbon(
       filledPath = lowFilledPath,
       contourPath = lowContourPath,
-      color = tones.bass,
+      color = wave1Color,
       wavelength = 112.dp.toPx(),
       baseLift = 23.5.dp.toPx(),
       phase = lowPhase,
       liftScale = rearLiftScale,
       beatLift = 4.8.dp.toPx() * beatImpact,
-      contourWidth = 1.2.dp.toPx(),
+      contourWidth = 1.4.dp.toPx(),
       glowWidth = 5.0.dp.toPx(),
-      glowAlpha = 0.28f,
-      bodyTopAlpha = 0.28f,
-      bodyBottomAlpha = 0.04f,
+      glowAlpha = 0.40f,
+      bodyTopAlpha = 0.38f,
+      bodyBottomAlpha = 0.08f,
     )
 
     // Layer 2: Harmonic Mid Veil (enhanced mid wave height)
     drawRibbon(
       filledPath = midFilledPath,
       contourPath = midContourPath,
-      color = tones.mid,
+      color = wave2Color,
       wavelength = 72.dp.toPx(),
       baseLift = 20.0.dp.toPx(),
       phase = midPhase,
@@ -345,14 +357,14 @@ internal fun WaveVisualizerOverlay(
       glowWidth = 6.0.dp.toPx(),
       glowAlpha = 0.38f,
       bodyTopAlpha = 0.42f,
-      bodyBottomAlpha = 0.08f,
+      bodyBottomAlpha = 0.10f,
     )
 
     // Layer 3: Vibrant Lead Luminous Wave with Specular Core
     drawRibbon(
       filledPath = highFilledPath,
       contourPath = highContourPath,
-      color = trackColor,
+      color = wave3Color,
       wavelength = 46.dp.toPx(),
       baseLift = 15.5.dp.toPx(),
       phase = highPhase,
@@ -360,9 +372,9 @@ internal fun WaveVisualizerOverlay(
       beatLift = 3.5.dp.toPx() * beatImpact,
       contourWidth = 2.0.dp.toPx(),
       glowWidth = 7.5.dp.toPx(),
-      glowAlpha = 0.48f,
+      glowAlpha = 0.50f,
       bodyTopAlpha = 0.62f,
-      bodyBottomAlpha = 0.14f,
+      bodyBottomAlpha = 0.12f,
       hasWhiteHighlight = true,
     )
   }
