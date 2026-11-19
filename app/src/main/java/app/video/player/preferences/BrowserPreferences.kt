@@ -174,6 +174,7 @@ class BrowserPreferences(
   val includeAudioBrowser = preferenceStore.getBoolean("include_audio_browser", true)
   val includeImagesInBrowser = preferenceStore.getBoolean("include_images_in_browser", false)
   val minimumAudioDurationSeconds = preferenceStore.getInt("minimum_audio_duration_seconds", 0)
+  val minimumVideoHorizonDurationMinutes = preferenceStore.getInt("minimum_video_horizon_duration_minutes", 0)
   val mediaLibraryType = preferenceStore.getEnum("media_library_type", MediaLibraryType.All)
 
   // True once the user finished (or skipped through) the first-run permission flow.

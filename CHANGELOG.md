@@ -4,6 +4,21 @@ These notes are written in plain English and focus on what changed for real use.
 
 ## 1.0.0
 
+### 🎵 Live Audio Pulsing Sync, All Media Mini-Player Coordination, Duration Cut-Out Slider & Videos Folder View
+- **Real-Time Audio Pulsing Live Sync:**
+  - Resolved track sync delay when changing music in the audio player (next, previous, or auto-advancing queue).
+  - Implemented multi-criteria session matching (`originalUri`, `playableUri`, `stableId`, `title`, and local path variants) with dynamic synthesis of active session items so Audio Pulsing instantly reflects the currently playing song title, artist, codec, live duration, and real-time remaining time without requiring a manual refresh.
+  - Linked interactive Previous, Play/Pause, and Next buttons on the Audio Pulsing hero card to live `PlaybackSession` queue commands with seamless fallback to alphabetical library traversal.
+- **Contextual Music Mini-Player Suppression on All Media:**
+  - Integrated `NavigationBarState.isAllMediaTabActive` coordination via `DisposableEffect` on `MediaLibraryContent`: the bottom floating music mini-player bar automatically and smoothly hides whenever the user is browsing the **All Media** tab, preventing UI overlap and redundancy with the Audio Pulsing hero card.
+- **Video Duration Cut-Out Timing Slider (0 to 2 Hours, 15-Minute Intervals):**
+  - Added new configurable setting `minimumVideoHorizonDurationMinutes` (range: 0 to 120 minutes with 15-minute discrete steps: 0m, 15m, 30m, 45m, 60m, 75m, 90m, 105m, 120m).
+  - Integrated a dedicated Material 3 Slider card in **Settings > Media library** (Folders & files) and indexed it under Settings Search for instant discovery.
+  - Applied the duration cut-out threshold across both the **All Media Video/Movie rail** and the **Recently Played rail**, automatically filtering out short video clips while fully preserving audio tracks and songs.
+- **Folder View in Videos Tab (Media Library):**
+  - Added folder browsing support to the **Videos** tab in Media Library via interactive filter chips (`[ Folders ]` and `[ All Videos ]`), defaulted to Folders.
+  - Tapping a video folder seamlessly navigates into the folder and displays all contained video files with thumbnail previews and playback info, matching the music tab's intuitive folder browsing experience.
+
 ### ☀️ Light Mode Audio Player Contrast & Readability
 - **Dynamic Luminance-Aware Atmospheric Scrim:**
   - Resolved unreadable text and icons in Light Mode by dynamically adapting the full-screen atmospheric canvas overlay over blurred cover art based on theme luminance (`surface.luminance() < 0.5f`).

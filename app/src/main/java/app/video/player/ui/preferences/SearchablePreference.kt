@@ -883,6 +883,15 @@ object SearchablePreferences {
       )
       add(
         SearchablePreference(
+          titleRes = R.string.pref_all_media_video_cutout_title,
+          summaryRes = R.string.pref_all_media_video_cutout_summary,
+          keywords = listOf("cut out", "timing slider", "slider", "duration", "all media", "video", "horizon", "recently played", "short videos"),
+          category = "Folders",
+          screen = FoldersPreferencesScreen,
+        ),
+      )
+      add(
+        SearchablePreference(
           titleRes = R.string.pref_whitelist_title,
           summaryRes = R.string.pref_whitelist_summary,
           keywords = listOf("include", "allow", "folder", "whitelist", "only"),

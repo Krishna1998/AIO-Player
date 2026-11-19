@@ -193,6 +193,7 @@ fun MiniPlayer(modifier: Modifier = Modifier) {
 
   val hasActiveMedia = (isServiceRunning || collapseHoldId != null || expansionHoldId != null) && currentItem != null &&
     !isSettingsScreen &&
+    !NavigationBarState.isAllMediaTabActive &&
     isMiniPlayerAllowed &&
     sessionState.phase != PlaybackPhase.IDLE &&
     sessionState.phase != PlaybackPhase.STOPPING &&

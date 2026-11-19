@@ -108,8 +108,11 @@ import app.video.player.BuildConfig
 import app.video.player.domain.media.model.VideoFolder
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Slider
 import app.video.player.preferences.BlacklistScope
+import app.video.player.preferences.BrowserPreferences
 import app.video.player.preferences.FoldersPreferences
+import kotlin.math.roundToInt
 import app.video.player.preferences.preference.collectAsState
 import app.video.player.presentation.Screen
 import app.video.player.presentation.components.AppPickerSheet
@@ -157,11 +160,13 @@ object FoldersPreferencesScreen : Screen {
   @Composable
   override fun Content() {
     val preferences = koinInject<FoldersPreferences>()
+    val browserPreferences = koinInject<BrowserPreferences>()
     val backstack = LocalBackStack.current
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val minVideoSeconds by preferences.minimumVideoDurationSeconds.collectAsState()
     val minFileBytes by preferences.minimumMediaFileSizeBytes.collectAsState()
+    val minHorizonVideoMinutes by browserPreferences.minimumVideoHorizonDurationMinutes.collectAsState()
     val whitelist by preferences.whitelistedFolders.collectAsState()
     val whitelistEnabled by preferences.whitelistEnabled.collectAsState()
     val noLimitLabel = stringResource(R.string.pref_filter_no_limit)
@@ -374,7 +379,7 @@ object FoldersPreferencesScreen : Screen {
             title = stringResource(R.string.pref_filter_short_videos),
             summary = stringResource(R.string.pref_filter_short_videos_summary) + " · " +
               scanDurationLabel(minVideoSeconds, noLimitLabel),
-            shape = rememberConnectedShape(mediaGroupSize - 2, mediaGroupSize, ConnectedLayout.Vertical),
+            shape = rememberConnectedShape(mediaGroupSize - 3, mediaGroupSize, ConnectedLayout.Vertical),
             onClick = { scanFilterDialog = ScanFilterDialog.VideoDuration },
             showChevron = false,
             modifier = Modifier.settingsSearchTarget(R.string.pref_filter_short_videos),
@@ -383,11 +388,57 @@ object FoldersPreferencesScreen : Screen {
             title = stringResource(R.string.pref_filter_small_files),
             summary = stringResource(R.string.pref_filter_small_files_summary) + " · " +
               scanSizeLabel(minFileBytes, noLimitLabel),
-            shape = rememberConnectedShape(mediaGroupSize - 1, mediaGroupSize, ConnectedLayout.Vertical),
+            shape = rememberConnectedShape(mediaGroupSize - 2, mediaGroupSize, ConnectedLayout.Vertical),
             onClick = { scanFilterDialog = ScanFilterDialog.FileSize },
             showChevron = false,
             modifier = Modifier.settingsSearchTarget(R.string.pref_filter_small_files),
           )
+          Card(
+            modifier = Modifier
+              .fillMaxWidth()
+              .settingsSearchTarget(R.string.pref_all_media_video_cutout_title),
+            shape = rememberConnectedShape(mediaGroupSize - 1, mediaGroupSize, ConnectedLayout.Vertical),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+          ) {
+            Column(
+              modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+              verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+              val minDurationLabel = when {
+                minHorizonVideoMinutes <= 0 -> "Off (Show all videos)"
+                minHorizonVideoMinutes < 60 -> "$minHorizonVideoMinutes min and longer"
+                minHorizonVideoMinutes % 60 == 0 -> "${minHorizonVideoMinutes / 60} hour${if (minHorizonVideoMinutes >= 120) "s" else ""} and longer"
+                else -> "${minHorizonVideoMinutes / 60}h ${minHorizonVideoMinutes % 60}m and longer"
+              }
+
+              Text(
+                text = stringResource(R.string.pref_all_media_video_cutout_title),
+                style = MaterialTheme.typography.bodyLarge,
+              )
+              Text(
+                text = minDurationLabel,
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+              )
+              Slider(
+                value = minHorizonVideoMinutes.toFloat().coerceIn(0f, 120f),
+                onValueChange = { rawMinutes ->
+                  val snapped = (rawMinutes / 15f).roundToInt() * 15
+                  browserPreferences.minimumVideoHorizonDurationMinutes.set(snapped.coerceIn(0, 120))
+                },
+                valueRange = 0f..120f,
+                steps = 7,
+                modifier = Modifier.fillMaxWidth().padding(top = 2.dp),
+              )
+              Text(
+                text = stringResource(R.string.pref_all_media_video_cutout_summary),
+                color = MaterialTheme.colorScheme.outline,
+                style = MaterialTheme.typography.bodySmall,
+              )
+            }
+          }
               }
           if (BuildConfig.SCOPED_STORAGE_ONLY) {
             // Connected section under the scan settings: each folder the user granted is one row.
@@ -1839,7 +1890,7 @@ private val FileSizeFilterBytes = listOf(0L, 500L * 1024L, 1024L * 1024L, 5L * 1
 
 // Rows drawn by HiddenScanSettingsCard, and the scan-filter rows that complete its group.
 private const val HIDDEN_SCAN_ROW_COUNT = 4
-private const val SCAN_FILTER_ROW_COUNT = 2
+private const val SCAN_FILTER_ROW_COUNT = 3
 
 private fun scanDurationLabel(seconds: Int, noLimit: String): String = if (seconds == 0) noLimit else "${seconds}s"
 

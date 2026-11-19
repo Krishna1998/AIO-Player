@@ -77,11 +77,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.video.player.domain.media.model.Video
 import app.video.player.domain.recentlyplayed.repository.RecentlyPlayedRepository
+import android.net.Uri
 import app.video.player.preferences.BrowserPreferences
 import app.video.player.preferences.MediaLibraryType
 import app.video.player.domain.thumbnail.ThumbnailRepository
 import app.video.player.ui.browser.videolist.VideoWithPlaybackInfo
+import app.video.player.ui.browser.videolist.videoPlaybackIdentifiers
+import app.video.player.ui.player.PlaybackItem
 import app.video.player.ui.player.PlaybackSession
+import app.video.player.ui.player.isDefinitelyAudioOnly
 import app.video.player.ui.icons.Icons
 import app.video.player.ui.icons.Icon
 import app.video.player.utils.sort.SortUtils
@@ -92,6 +96,52 @@ import kotlin.math.PI
 import kotlin.math.min
 import kotlin.math.roundToInt
 import kotlin.math.sin
+
+private fun isAudioPlaybackItem(item: PlaybackItem?): Boolean {
+  if (item == null) return false
+  if (item.audiobook != null) return true
+  if (item.isDefinitelyAudioOnly()) return true
+  if (item.mimeType?.startsWith("audio/", ignoreCase = true) == true) return true
+  val candidates = sequenceOf(item.originalUri, item.playableUri, item.title, item.stableId).filterNotNull()
+  return candidates.any { s ->
+    val ext = s.substringAfterLast('.', "").lowercase()
+    ext in FileTypeUtils.AUDIO_EXTENSIONS ||
+      s.contains("/audio/", ignoreCase = true) ||
+      s.contains("audio%3A", ignoreCase = true)
+  }
+}
+
+private fun matchesPlaybackItem(video: Video, item: PlaybackItem?): Boolean {
+  if (item == null) return false
+  val itemUri = item.originalUri
+  val playable = item.playableUri
+  val stableId = item.stableId
+  val videoUriStr = video.uri.toString()
+  val videoPath = video.path
+
+  if (videoPlaybackIdentifiers(video).any { id -> id == stableId || id == itemUri || id == playable }) {
+    return true
+  }
+
+  if (itemUri.isNotBlank()) {
+    if (itemUri == videoUriStr || itemUri == videoPath || itemUri.endsWith(videoPath) || videoPath.endsWith(itemUri)) return true
+  }
+  if (playable.isNotBlank()) {
+    if (playable == videoUriStr || playable == videoPath || playable.endsWith(videoPath) || videoPath.endsWith(playable)) return true
+  }
+  if (stableId.isNotBlank()) {
+    if (stableId == videoPath || stableId == videoUriStr) return true
+  }
+  if (!item.title.isNullOrBlank()) {
+    val cleanName = FileTypeUtils.stripExtension(video.displayName)
+    if (item.title.equals(video.displayName, ignoreCase = true) ||
+        item.title.equals(video.title, ignoreCase = true) ||
+        item.title.equals(cleanName, ignoreCase = true)) {
+      return true
+    }
+  }
+  return false
+}
 
 /**
  * Resolves the original audio codec tag (e.g. FLAC, MP3, M4A, WAV, AAC, OPUS)
@@ -135,10 +185,13 @@ fun BentoFusionHeader(
 
   val recentlyPlayedRepo = koinInject<RecentlyPlayedRepository>()
   val recentEntities by recentlyPlayedRepo.observeRecentlyPlayed(limit = 50).collectAsState(initial = emptyList())
+  val browserPreferences = koinInject<BrowserPreferences>()
+  val minVideoMinutes by browserPreferences.minimumVideoHorizonDurationMinutes.collectAsState()
+  val minVideoDurationMs = remember(minVideoMinutes) { (minVideoMinutes * 60 * 1000L).coerceAtLeast(0L) }
 
-  // 1. Separate video items and audio items
-  val videoItems = remember(videosWithInfo) {
-    videosWithInfo.filter { !it.video.isAudio }
+  // 1. Separate video items and audio items (applying video duration cut-out)
+  val videoItems = remember(videosWithInfo, minVideoDurationMs) {
+    videosWithInfo.filter { !it.video.isAudio && (minVideoDurationMs <= 0L || it.video.duration >= minVideoDurationMs) }
   }
   val allAudioItems = remember(videosWithInfo) {
     videosWithInfo.filter { it.video.isAudio }
@@ -153,16 +206,20 @@ fun BentoFusionHeader(
     }
   }
 
-  // 3. Recently Played Rail: Show recent 10 files (audio + video combined)
-  val recentlyPlayedItems = remember(videosWithInfo, recentEntities, recentlyPlayedFilePath) {
+  // 3. Recently Played Rail: Show recent 10 files (audio + video combined, applying video duration cut-out)
+  val recentlyPlayedItems = remember(videosWithInfo, recentEntities, recentlyPlayedFilePath, minVideoDurationMs) {
     val itemsByPath = videosWithInfo.associateBy { it.video.path }
     val result = mutableListOf<VideoWithPlaybackInfo>()
     val addedPaths = mutableSetOf<String>()
 
+    fun canInclude(item: VideoWithPlaybackInfo): Boolean {
+      return item.video.isAudio || minVideoDurationMs <= 0L || item.video.duration >= minVideoDurationMs
+    }
+
     // Priority 1: Files from RecentlyPlayed database in exact order of recency
     for (entity in recentEntities) {
       val item = itemsByPath[entity.filePath]
-      if (item != null && addedPaths.add(item.video.path)) {
+      if (item != null && canInclude(item) && addedPaths.add(item.video.path)) {
         result.add(item)
         if (result.size >= 10) break
       }
@@ -171,7 +228,7 @@ fun BentoFusionHeader(
     // Priority 2: Actively played file path if not already added
     if (result.size < 10 && recentlyPlayedFilePath != null) {
       val lastPlayed = itemsByPath[recentlyPlayedFilePath]
-      if (lastPlayed != null && addedPaths.add(lastPlayed.video.path)) {
+      if (lastPlayed != null && canInclude(lastPlayed) && addedPaths.add(lastPlayed.video.path)) {
         result.add(0, lastPlayed)
       }
     }
@@ -179,7 +236,7 @@ fun BentoFusionHeader(
     // Priority 3: Media with recorded playback progress
     if (result.size < 10) {
       for (item in videosWithInfo) {
-        if ((item.progressPercentage ?: 0f) > 0f && addedPaths.add(item.video.path)) {
+        if ((item.progressPercentage ?: 0f) > 0f && canInclude(item) && addedPaths.add(item.video.path)) {
           result.add(item)
           if (result.size >= 10) break
         }
@@ -191,14 +248,56 @@ fun BentoFusionHeader(
 
   // 4. Identify hero candidates: prioritizing active/recently played audio track for Audio Pulsing
   val playbackSessionState by PlaybackSession.state.collectAsState()
-  val sessionItemPath = playbackSessionState.currentItem?.let { it.stableId ?: it.originalUri }
-  val heroAudio = remember(sessionItemPath, recentlyPlayedItems, sortedAudioByTitle, recentlyPlayedFilePath) {
-    if (sessionItemPath != null) {
-      sortedAudioByTitle.firstOrNull { it.video.path == sessionItemPath || it.video.uri.toString() == sessionItemPath }
+  val currentSessionItem = playbackSessionState.currentItem
+  val isSessionPlayingAudio = remember(currentSessionItem) {
+    isAudioPlaybackItem(currentSessionItem)
+  }
+
+  val activeAudioFromSession = remember(currentSessionItem, sortedAudioByTitle, allAudioItems, videosWithInfo) {
+    if (currentSessionItem != null) {
+      sortedAudioByTitle.firstOrNull { matchesPlaybackItem(it.video, currentSessionItem) }
+        ?: allAudioItems.firstOrNull { matchesPlaybackItem(it.video, currentSessionItem) }
+        ?: videosWithInfo.firstOrNull { it.video.isAudio && matchesPlaybackItem(it.video, currentSessionItem) }
     } else null
-  } ?: (if (recentlyPlayedFilePath != null) {
-    sortedAudioByTitle.firstOrNull { it.video.path == recentlyPlayedFilePath }
-  } else null)
+  }
+
+  val syntheticAudioItem = remember(currentSessionItem, isSessionPlayingAudio, activeAudioFromSession) {
+    if (currentSessionItem != null && isSessionPlayingAudio && activeAudioFromSession == null) {
+      val uri = runCatching { Uri.parse(currentSessionItem.playableUri.ifBlank { currentSessionItem.originalUri }) }.getOrNull() ?: Uri.EMPTY
+      val displayTitle = currentSessionItem.title?.takeIf { it.isNotBlank() } ?: currentSessionItem.originalUri.substringAfterLast('/')
+      val durSec = currentSessionItem.durationSeconds?.toLong() ?: 0L
+      val syntheticVideo = Video(
+        id = currentSessionItem.queueEntryId,
+        title = displayTitle,
+        displayName = displayTitle,
+        path = currentSessionItem.originalUri,
+        uri = uri,
+        duration = durSec * 1000L,
+        durationFormatted = if (durSec > 0) VideoScanUtils.formatDuration(durSec * 1000L) else "",
+        size = 0L,
+        sizeFormatted = "",
+        dateModified = 0L,
+        dateAdded = 0L,
+        mimeType = currentSessionItem.mimeType ?: "audio/*",
+        bucketId = "current_session",
+        bucketDisplayName = "Now Playing",
+        width = currentSessionItem.videoWidth,
+        height = currentSessionItem.videoHeight,
+        fps = 0f,
+        resolution = "",
+        isAudio = true,
+        artworkUrl = currentSessionItem.artworkUri,
+        artist = currentSessionItem.artist ?: "",
+      )
+      VideoWithPlaybackInfo(syntheticVideo)
+    } else null
+  }
+
+  val heroAudio = activeAudioFromSession
+    ?: syntheticAudioItem
+    ?: (if (recentlyPlayedFilePath != null) {
+      sortedAudioByTitle.firstOrNull { it.video.path == recentlyPlayedFilePath }
+    } else null)
     ?: recentlyPlayedItems.firstOrNull { it.video.isAudio }
     ?: sortedAudioByTitle.firstOrNull { (it.progressPercentage ?: 0f) > 0f }
     ?: sortedAudioByTitle.firstOrNull()
@@ -245,14 +344,8 @@ fun BentoFusionHeader(
     // 2. Audio Pulsing Hero Spotlight Card
     val heroToDisplay = heroAudio ?: (if (videoItems.isEmpty()) heroVideo else null)
     if (heroToDisplay != null) {
-      val isCurrentlyInSession = remember(playbackSessionState.currentItem, heroToDisplay.video) {
-        val curr = playbackSessionState.currentItem
-        curr != null && (
-          curr.originalUri == heroToDisplay.video.uri.toString() ||
-          curr.originalUri == heroToDisplay.video.path ||
-          curr.stableId == heroToDisplay.video.path ||
-          curr.title == heroToDisplay.video.displayName
-        )
+      val isCurrentlyInSession = remember(currentSessionItem, heroToDisplay.video) {
+        matchesPlaybackItem(heroToDisplay.video, currentSessionItem)
       }
       val isPaused by PlaybackSession.propBoolean["pause"].collectAsState()
       val livePos = PlaybackSession.propInt["time-pos"].collectAsState().value?.toDouble()
@@ -283,7 +376,7 @@ fun BentoFusionHeader(
           if (isCurrentlyInSession) {
             val prev = PlaybackSession.playPrevious()
             if (prev == null && sortedAudioByTitle.isNotEmpty()) {
-              val currIdx = sortedAudioByTitle.indexOfFirst { it.video.path == heroToDisplay.video.path }
+              val currIdx = sortedAudioByTitle.indexOfFirst { matchesPlaybackItem(it.video, currentSessionItem) }
               if (currIdx >= 0) {
                 val prevIdx = (currIdx - 1 + sortedAudioByTitle.size) % sortedAudioByTitle.size
                 onPlayMedia(sortedAudioByTitle[prevIdx].video, null)
@@ -307,7 +400,7 @@ fun BentoFusionHeader(
           if (isCurrentlyInSession) {
             val next = PlaybackSession.playNext()
             if (next == null && sortedAudioByTitle.isNotEmpty()) {
-              val currIdx = sortedAudioByTitle.indexOfFirst { it.video.path == heroToDisplay.video.path }
+              val currIdx = sortedAudioByTitle.indexOfFirst { matchesPlaybackItem(it.video, currentSessionItem) }
               if (currIdx >= 0) {
                 val nextIdx = (currIdx + 1) % sortedAudioByTitle.size
                 onPlayMedia(sortedAudioByTitle[nextIdx].video, null)
@@ -400,9 +493,12 @@ fun DualHorizonRails(
 ) {
   val recentlyPlayedRepo = koinInject<RecentlyPlayedRepository>()
   val recentEntities by recentlyPlayedRepo.observeRecentlyPlayed(limit = 50).collectAsState(initial = emptyList())
+  val browserPreferences = koinInject<BrowserPreferences>()
+  val minVideoMinutes by browserPreferences.minimumVideoHorizonDurationMinutes.collectAsState()
+  val minVideoDurationMs = remember(minVideoMinutes) { (minVideoMinutes * 60 * 1000L).coerceAtLeast(0L) }
 
-  val videoItems = remember(videosWithInfo) {
-    videosWithInfo.filter { !it.video.isAudio }
+  val videoItems = remember(videosWithInfo, minVideoDurationMs) {
+    videosWithInfo.filter { !it.video.isAudio && (minVideoDurationMs <= 0L || it.video.duration >= minVideoDurationMs) }
   }
   val allAudioItems = remember(videosWithInfo) {
     videosWithInfo.filter { it.video.isAudio }
@@ -417,15 +513,19 @@ fun DualHorizonRails(
     }
   }
 
-  // Recently Played: recent 10 files (audio + video combined)
-  val recentlyPlayedItems = remember(videosWithInfo, recentEntities) {
+  // Recently Played: recent 10 files (audio + video combined, applying video duration cut-out)
+  val recentlyPlayedItems = remember(videosWithInfo, recentEntities, minVideoDurationMs) {
     val itemsByPath = videosWithInfo.associateBy { it.video.path }
     val result = mutableListOf<VideoWithPlaybackInfo>()
     val addedPaths = mutableSetOf<String>()
 
+    fun canInclude(item: VideoWithPlaybackInfo): Boolean {
+      return item.video.isAudio || minVideoDurationMs <= 0L || item.video.duration >= minVideoDurationMs
+    }
+
     for (entity in recentEntities) {
       val item = itemsByPath[entity.filePath]
-      if (item != null && addedPaths.add(item.video.path)) {
+      if (item != null && canInclude(item) && addedPaths.add(item.video.path)) {
         result.add(item)
         if (result.size >= 10) break
       }
@@ -433,7 +533,7 @@ fun DualHorizonRails(
 
     if (result.size < 10) {
       for (item in videosWithInfo) {
-        if ((item.progressPercentage ?: 0f) > 0f && addedPaths.add(item.video.path)) {
+        if ((item.progressPercentage ?: 0f) > 0f && canInclude(item) && addedPaths.add(item.video.path)) {
           result.add(item)
           if (result.size >= 10) break
         }
@@ -918,13 +1018,7 @@ private fun BentoHeroSpotlightCard(
   val isPaused by PlaybackSession.propBoolean["pause"].collectAsState()
 
   val isCurrentlyPlayingInSession = remember(playbackSessionState.currentItem, item.video) {
-    val curr = playbackSessionState.currentItem
-    curr != null && (
-      curr.originalUri == item.video.uri.toString() ||
-      curr.originalUri == item.video.path ||
-      curr.stableId == item.video.path ||
-      curr.title == item.video.displayName
-    )
+    matchesPlaybackItem(item.video, playbackSessionState.currentItem)
   }
 
   val isPlaying = isCurrentlyPlayingInSession && (isPaused == false)
@@ -1097,7 +1191,13 @@ private fun BentoHeroSpotlightCard(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(4.dp),
           ) {
-            val (artist, title) = if (isAudio) {
+            val (artist, title) = if (isCurrentlyPlayingInSession && playbackSessionState.currentItem != null) {
+              val cur = playbackSessionState.currentItem!!
+              val displayTitle = cur.title?.takeIf { it.isNotBlank() }
+                ?: (if (item.video.title.isNotBlank()) item.video.title else FileTypeUtils.stripExtension(item.video.displayName))
+              val displayArtist = cur.artist?.takeIf { it.isNotBlank() } ?: item.video.artist
+              Pair(displayArtist, displayTitle)
+            } else if (isAudio) {
               SortUtils.getAudioArtistAndTitle(item.video)
             } else {
               Pair("", if (item.video.title.isNotBlank()) item.video.title else FileTypeUtils.stripExtension(item.video.displayName))

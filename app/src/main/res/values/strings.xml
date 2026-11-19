@@ -2803,6 +2803,8 @@
   <string name="pref_filter_short_videos_summary">Ignore videos shorter than the selected duration during scanning</string>
   <string name="pref_filter_small_files">Filter small files</string>
   <string name="pref_filter_small_files_summary">Ignore files smaller than the selected size during scanning</string>
+  <string name="pref_all_media_video_cutout_title">All Media video duration cut-out</string>
+  <string name="pref_all_media_video_cutout_summary">Filter out short videos from the All Media Video rail and Recently Played section (0 to 2 hours)</string>
   <string name="pref_filter_no_limit">No limit</string>
   <string name="pref_storage_exclusions">Storage &amp; Exclusions</string>
   <string name="pref_blacklist_title">Blacklist</string>

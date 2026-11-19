@@ -56,6 +56,7 @@ import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -204,6 +205,13 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
     MediaLibraryType.Audio
   } else {
     mediaLibraryTabs.getOrNull(pagerState.currentPage) ?: mediaType
+  }
+
+  DisposableEffect(currentTab) {
+    NavigationBarState.isAllMediaTabActive = (currentTab == MediaLibraryType.All)
+    onDispose {
+      NavigationBarState.isAllMediaTabActive = false
+    }
   }
 
   var searchQuery by rememberSaveable { mutableStateOf("") }
@@ -812,6 +820,87 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                       },
                     message = "Try a different search term",
                   )
+                }
+              } else if (pageType == MediaLibraryType.Video && !isSearching) {
+                var videoSubTab by rememberSaveable { mutableIntStateOf(0) }
+                Column(modifier = Modifier.fillMaxSize()) {
+                  Row(
+                    modifier = Modifier
+                      .fillMaxWidth()
+                      .padding(horizontal = 16.dp, vertical = 2.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                  ) {
+                    androidx.compose.material3.FilterChip(
+                      selected = videoSubTab == 0,
+                      onClick = { videoSubTab = 0 },
+                      label = { Text("Folders") },
+                      leadingIcon = {
+                        app.video.player.ui.icons.Icon(
+                          imageVector = app.video.player.ui.icons.Icons.RoundedFilled.Folder,
+                          contentDescription = null,
+                          modifier = Modifier.size(16.dp),
+                        )
+                      },
+                      colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                      ),
+                    )
+                    androidx.compose.material3.FilterChip(
+                      selected = videoSubTab == 1,
+                      onClick = { videoSubTab = 1 },
+                      label = { Text("All Videos (${pageVideosWithInfo.size})") },
+                      leadingIcon = {
+                        app.video.player.ui.icons.Icon(
+                          imageVector = app.video.player.ui.icons.Icons.RoundedFilled.VideoLibrary,
+                          contentDescription = null,
+                          modifier = Modifier.size(16.dp),
+                        )
+                      },
+                      colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                      ),
+                    )
+                  }
+                  Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                    if (videoSubTab == 0) {
+                      app.video.player.ui.browser.folderlist.FolderListScreen.MediaStoreFolderListContent(
+                        audioOnly = false,
+                        embedded = true,
+                        searchQuery = searchQuery,
+                      )
+                    } else {
+                      VideoListContent(
+                        folderId = "media_library_video",
+                        videosWithInfo = pageVideosWithInfo,
+                        isLoading = isLoading && videos.isEmpty(),
+                        isRefreshing = isRefreshing,
+                        recentlyPlayedFilePath = recentlyPlayedFilePath,
+                        videosWereDeletedOrMoved = videosWereDeletedOrMoved,
+                        autoScrollToLastPlayed = autoScrollToLastPlayed,
+                        onRefresh = { viewModel.refresh() },
+                        selectionManager = selectionManager,
+                        onVideoClick = { video ->
+                          if (selectionManager.isInSelectionMode) {
+                            selectionManager.toggleFromUser(video)
+                          } else {
+                            playFromMediaLibrary(video)
+                          }
+                        },
+                        onVideoLongClick = { video -> selectionManager.handleLongClick(video) },
+                        isFabVisible = isFabVisible,
+                        modifier = Modifier.fillMaxSize(),
+                        showFloatingBottomBar = showFloatingBottomBar,
+                        mediaLayoutMode = mediaLayoutMode,
+                        musicCoverArtSize = musicCoverArtSize,
+                        isFabExpanded = isFabExpanded.value,
+                        onFabExpandedChange = { isFabExpanded.value = it },
+                        headerContent = null,
+                      )
+                    }
+                  }
                 }
               } else {
                 VideoListContent(

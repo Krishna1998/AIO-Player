@@ -51,6 +51,7 @@ object NavigationBarState {
   // Mini player coordination state (published by MiniPlayer/MainScreen so the
   // browser layout can adapt when the mini player is on screen).
   var isMiniPlayerVisible: Boolean by mutableStateOf(false)
+  var isAllMediaTabActive: Boolean by mutableStateOf(false)
 
   internal var miniPlayerConnectionEnabled: Boolean by mutableStateOf(false)
   internal var isMiniPlayerDocked: Boolean by mutableStateOf(false)
