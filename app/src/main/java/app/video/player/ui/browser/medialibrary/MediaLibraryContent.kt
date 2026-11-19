@@ -220,10 +220,9 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
           if (videoSortType == app.video.player.preferences.VideoSortType.Title) {
             sortedVideosWithInfo.filter { it.video.isAudio }
               .sortedWith { a, b ->
-                val (artistA, titleA) = SortUtils.getAudioArtistAndTitle(a.video)
-                val (artistB, titleB) = SortUtils.getAudioArtistAndTitle(b.video)
-                val cmp = SortUtils.NaturalOrderComparator.DEFAULT.compare(artistA, artistB)
-                val res = if (cmp != 0) cmp else SortUtils.NaturalOrderComparator.DEFAULT.compare(titleA, titleB)
+                val titleA = if (a.video.title.isNotBlank()) a.video.title else FileTypeUtils.stripExtension(a.video.displayName)
+                val titleB = if (b.video.title.isNotBlank()) b.video.title else FileTypeUtils.stripExtension(b.video.displayName)
+                val res = SortUtils.NaturalOrderComparator.DEFAULT.compare(titleA, titleB)
                 if (videoSortOrder.isAscending) res else -res
               }
           } else {
@@ -775,10 +774,9 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                     if (videoSortType == app.video.player.preferences.VideoSortType.Title) {
                       sortedVideosWithInfo.filter { it.video.isAudio }
                         .sortedWith { a, b ->
-                          val (artistA, titleA) = SortUtils.getAudioArtistAndTitle(a.video)
-                          val (artistB, titleB) = SortUtils.getAudioArtistAndTitle(b.video)
-                          val cmp = SortUtils.NaturalOrderComparator.DEFAULT.compare(artistA, artistB)
-                          val res = if (cmp != 0) cmp else SortUtils.NaturalOrderComparator.DEFAULT.compare(titleA, titleB)
+                          val titleA = if (a.video.title.isNotBlank()) a.video.title else FileTypeUtils.stripExtension(a.video.displayName)
+                          val titleB = if (b.video.title.isNotBlank()) b.video.title else FileTypeUtils.stripExtension(b.video.displayName)
+                          val res = SortUtils.NaturalOrderComparator.DEFAULT.compare(titleA, titleB)
                           if (videoSortOrder.isAscending) res else -res
                         }
                     } else {

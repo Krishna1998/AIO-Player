@@ -5,13 +5,16 @@ These notes are written in plain English and focus on what changed for real use.
 ## 1.0.0
 
 ### 🌌 Dual-Horizon Rails & Smart Audio Architecture
+- **Title-Wise Audio Sorting in Media Library:**
+  - Audio files under **Media Library > All Media** and **Music** tabs are now sorted title-wise (by track title in natural alphabetical order), ensuring clean alphabetical track discovery.
+- **Original Audio Codec & Remaining Time in Audio Pulsing:**
+  - Audio Pulsing hero card now detects and displays the file's original audio codec (e.g. `FLAC`, `MP3`, `M4A`, `WAV`, `AAC`, `OPUS`) alongside live remaining playback time (`-MM:SS remaining`).
+  - Added an in-card seek progress bar with dynamic remaining time readout directly beneath the live animated equalizer waveform.
+- **Sonic Soundstage Horizon (Top 10 Recently Played Files):**
+  - Sonic Soundstage Horizon rail below Audio Pulsing now exclusively features recently played audio files, automatically displaying the top 10 most recently played tracks in chronological order with original codec badges and seek progress.
 - **Cinematic Video Horizon Up & Audio Pulsing Down:**
   - Re-architected All Media / Horizon layout: **Cinematic Video Horizon rail** is placed at the top of the screen ("going up") featuring 16:9 widescreen previews, resolution badges (4K HDR, 1080p, 720p), duration, and playback progress indicators.
   - Placed the **Audio Pulsing hero card** directly below the video horizon rail ("going down") with real-time reactive animated equalizer waves, lossless audio tags, and quick playback actions.
-  - Followed by the **Sonic Soundstage Horizon rail** showcasing square album art cards, lossless badges, and artist metadata.
-- **Music Sorting by Artist Name to Title Name:**
-  - In All Media and Music views, audio tracks are intelligently sorted primarily by artist name, then by title name.
-  - Supports MediaStore audio tags with fallback to intelligent `Artist - Title` filename extraction and album bucket categorization.
 - **Default Horizon View Mode & Bento Cleanup:**
   - Made **Dual Horizon ("Horizon")** the primary default view mode in `BrowserPreferences` for instant unified video and audio immersion on launch.
   - Streamlined View Mode options dialog: removed "Bento" in favor of the unified "Horizon" view mode alongside Folder, Tree, and Library.

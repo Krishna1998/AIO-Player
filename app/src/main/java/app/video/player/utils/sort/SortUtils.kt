@@ -31,26 +31,8 @@ object SortUtils {
       when (sortType) {
         VideoSortType.Title ->
           videos.sortedWith { t1, t2 ->
-            val key1 = if (t1.isAudio) {
-              val (artist, title) = getAudioArtistAndTitle(t1)
-              if (artist.isNotBlank() && !artist.equals("Unknown Artist", ignoreCase = true)) {
-                "$artist - $title"
-              } else {
-                title
-              }
-            } else {
-              t1.displayName
-            }
-            val key2 = if (t2.isAudio) {
-              val (artist, title) = getAudioArtistAndTitle(t2)
-              if (artist.isNotBlank() && !artist.equals("Unknown Artist", ignoreCase = true)) {
-                "$artist - $title"
-              } else {
-                title
-              }
-            } else {
-              t2.displayName
-            }
+            val key1 = if (t1.isAudio && t1.title.isNotBlank()) t1.title else t1.displayName
+            val key2 = if (t2.isAudio && t2.title.isNotBlank()) t2.title else t2.displayName
             NaturalOrderComparator.DEFAULT.compare(key1, key2)
           }
         VideoSortType.Duration -> videos.sortedBy { it.duration }

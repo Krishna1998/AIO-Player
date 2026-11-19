@@ -65,6 +65,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.video.player.domain.media.model.Video
+import app.video.player.domain.recentlyplayed.repository.RecentlyPlayedRepository
 import app.video.player.preferences.BrowserPreferences
 import app.video.player.preferences.MediaLibraryType
 import app.video.player.domain.thumbnail.ThumbnailRepository
@@ -73,9 +74,35 @@ import app.video.player.ui.icons.Icons
 import app.video.player.ui.icons.Icon
 import app.video.player.utils.sort.SortUtils
 import app.video.player.utils.storage.FileTypeUtils
+import app.video.player.utils.storage.VideoScanUtils
 import org.koin.compose.koinInject
 import kotlin.math.roundToInt
 import kotlin.math.sin
+
+/**
+ * Resolves the original audio codec tag (e.g. FLAC, MP3, M4A, WAV, AAC, OPUS)
+ * from file extension, mimeType, or embedded audio codec metadata.
+ */
+fun getAudioCodec(video: Video): String {
+  val ext = video.path.substringAfterLast('.', "").uppercase()
+  val mime = video.mimeType.lowercase()
+  return when {
+    ext in listOf("FLAC", "WAV", "MP3", "AAC", "M4A", "OPUS", "OGG", "ALAC", "WMA", "AIFF", "APE", "DSD", "DSF", "DFF", "AMR") -> ext
+    mime.contains("flac") -> "FLAC"
+    mime.contains("wav") || mime.contains("wave") -> "WAV"
+    mime.contains("mp3") || mime.contains("mpeg") -> "MP3"
+    mime.contains("aac") -> "AAC"
+    mime.contains("m4a") -> "M4A"
+    mime.contains("opus") -> "OPUS"
+    mime.contains("ogg") || mime.contains("vorbis") -> "OGG"
+    mime.contains("alac") -> "ALAC"
+    mime.contains("wma") -> "WMA"
+    mime.contains("aiff") -> "AIFF"
+    mime.contains("ape") -> "APE"
+    video.videoCodec.isNotBlank() -> video.videoCodec.uppercase()
+    else -> "AUDIO"
+  }
+}
 
 /**
  * Bento Fusion Hub Header
@@ -92,26 +119,62 @@ fun BentoFusionHeader(
 ) {
   if (videosWithInfo.isEmpty()) return
 
-  // 1. Separate video items and audio items (with music sorted by artist name to title name)
+  val recentlyPlayedRepo = koinInject<RecentlyPlayedRepository>()
+  val recentEntities by recentlyPlayedRepo.observeRecentlyPlayed(limit = 50).collectAsState(initial = emptyList())
+
+  // 1. Separate video items and audio items
   val videoItems = remember(videosWithInfo) {
     videosWithInfo.filter { !it.video.isAudio }
   }
-  val audioItems = remember(videosWithInfo) {
+  val allAudioItems = remember(videosWithInfo) {
     videosWithInfo.filter { it.video.isAudio }
-      .sortedWith { a, b ->
-        val (artistA, titleA) = SortUtils.getAudioArtistAndTitle(a.video)
-        val (artistB, titleB) = SortUtils.getAudioArtistAndTitle(b.video)
-        val cmp = SortUtils.NaturalOrderComparator.DEFAULT.compare(artistA, artistB)
-        if (cmp != 0) cmp else SortUtils.NaturalOrderComparator.DEFAULT.compare(titleA, titleB)
-      }
   }
 
-  // 2. Identify hero candidates: prioritizing audio track for audio pulsing, or fallback to hero media
-  val heroAudio = remember(audioItems, recentlyPlayedFilePath) {
+  // 2. Sonic Soundstage Horizon: ONLY show recently played audio files, top 10 max
+  val recentAudioItems = remember(allAudioItems, recentEntities, recentlyPlayedFilePath) {
+    val audioByPath = allAudioItems.associateBy { it.video.path }
+    val result = mutableListOf<VideoWithPlaybackInfo>()
+    val addedPaths = mutableSetOf<String>()
+
+    // Priority 1: Files in RecentlyPlayed repository in exact order of playback recency
+    for (entity in recentEntities) {
+      val item = audioByPath[entity.filePath]
+      if (item != null && addedPaths.add(item.video.path)) {
+        result.add(item)
+        if (result.size >= 10) break
+      }
+    }
+
+    // Priority 2: Actively played file path if not already added
+    if (result.size < 10 && recentlyPlayedFilePath != null) {
+      val lastPlayed = audioByPath[recentlyPlayedFilePath]
+      if (lastPlayed != null && addedPaths.add(lastPlayed.video.path)) {
+        result.add(0, lastPlayed)
+      }
+    }
+
+    // Priority 3: Audio tracks with recorded playback progress
+    if (result.size < 10) {
+      for (item in allAudioItems) {
+        if ((item.progressPercentage ?: 0f) > 0f && addedPaths.add(item.video.path)) {
+          result.add(item)
+          if (result.size >= 10) break
+        }
+      }
+    }
+
+    result.take(10)
+  }
+
+  // 3. Identify hero candidates: prioritizing recently played audio track for Audio Pulsing
+  val heroAudio = remember(recentAudioItems, allAudioItems, recentlyPlayedFilePath) {
     if (recentlyPlayedFilePath != null) {
-      audioItems.firstOrNull { it.video.path == recentlyPlayedFilePath }
+      recentAudioItems.firstOrNull { it.video.path == recentlyPlayedFilePath }
+        ?: allAudioItems.firstOrNull { it.video.path == recentlyPlayedFilePath }
     } else null
-  } ?: audioItems.firstOrNull()
+  } ?: recentAudioItems.firstOrNull()
+    ?: allAudioItems.firstOrNull { (it.progressPercentage ?: 0f) > 0f }
+    ?: allAudioItems.firstOrNull()
 
   val heroVideo = remember(videoItems, recentlyPlayedFilePath) {
     if (recentlyPlayedFilePath != null) {
@@ -161,13 +224,13 @@ fun BentoFusionHeader(
       )
     }
 
-    // 3. Sonic Soundstage Horizon Rail (Below Audio Pulsing card)
-    if (audioItems.isNotEmpty()) {
+    // 3. Sonic Soundstage Horizon Rail (Below Audio Pulsing card: ONLY recently played, top 10 max)
+    if (recentAudioItems.isNotEmpty()) {
       HorizonRailSection(
         title = "Sonic Soundstage Horizon",
         icon = "🎵",
         accentColor = MaterialTheme.colorScheme.tertiary,
-        count = audioItems.size,
+        count = recentAudioItems.size,
         onViewAll = { onFilterSelected?.invoke(MediaLibraryType.Audio) },
       ) {
         LazyRow(
@@ -175,7 +238,7 @@ fun BentoFusionHeader(
           horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
           items(
-            items = audioItems.take(20),
+            items = recentAudioItems,
             key = { it.video.path },
           ) { item ->
             BentoHorizonAudioCard(
@@ -202,17 +265,40 @@ fun DualHorizonRails(
   onFilterSelected: ((MediaLibraryType) -> Unit)? = null,
   modifier: Modifier = Modifier,
 ) {
+  val recentlyPlayedRepo = koinInject<RecentlyPlayedRepository>()
+  val recentEntities by recentlyPlayedRepo.observeRecentlyPlayed(limit = 50).collectAsState(initial = emptyList())
+
   val videoItems = remember(videosWithInfo) {
     videosWithInfo.filter { !it.video.isAudio }
   }
-  val audioItems = remember(videosWithInfo) {
+  val allAudioItems = remember(videosWithInfo) {
     videosWithInfo.filter { it.video.isAudio }
-      .sortedWith { a, b ->
-        val (artistA, titleA) = SortUtils.getAudioArtistAndTitle(a.video)
-        val (artistB, titleB) = SortUtils.getAudioArtistAndTitle(b.video)
-        val cmp = SortUtils.NaturalOrderComparator.DEFAULT.compare(artistA, artistB)
-        if (cmp != 0) cmp else SortUtils.NaturalOrderComparator.DEFAULT.compare(titleA, titleB)
+  }
+
+  // Sonic Soundstage Horizon: ONLY show recently played files, top 10 max
+  val recentAudioItems = remember(allAudioItems, recentEntities) {
+    val audioByPath = allAudioItems.associateBy { it.video.path }
+    val result = mutableListOf<VideoWithPlaybackInfo>()
+    val addedPaths = mutableSetOf<String>()
+
+    for (entity in recentEntities) {
+      val item = audioByPath[entity.filePath]
+      if (item != null && addedPaths.add(item.video.path)) {
+        result.add(item)
+        if (result.size >= 10) break
       }
+    }
+
+    if (result.size < 10) {
+      for (item in allAudioItems) {
+        if ((item.progressPercentage ?: 0f) > 0f && addedPaths.add(item.video.path)) {
+          result.add(item)
+          if (result.size >= 10) break
+        }
+      }
+    }
+
+    result.take(10)
   }
 
   Column(
@@ -245,17 +331,33 @@ fun DualHorizonRails(
       }
     }
 
-    // Lower Rail: Sonic Soundstage Horizon
-    if (audioItems.isNotEmpty()) {
+    // Lower Rail: Sonic Soundstage Horizon (Recently played audio only, top 10 max)
+    if (recentAudioItems.isNotEmpty()) {
       HorizonRailSection(
         title = "Sonic Soundstage Horizon",
         icon = "🎵",
         accentColor = MaterialTheme.colorScheme.tertiary,
-        count = audioItems.size,
+        count = recentAudioItems.size,
         onViewAll = { onFilterSelected?.invoke(MediaLibraryType.Audio) },
       ) {
         LazyRow(
           contentPadding = PaddingValues(horizontal = 16.dp),
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+          items(
+            items = recentAudioItems,
+            key = { it.video.path },
+          ) { item ->
+            BentoHorizonAudioCard(
+              item = item,
+              onClick = { onPlayMedia(item.video) },
+            )
+          }
+        }
+      }
+    }
+  }
+}
           horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
           items(
@@ -478,6 +580,18 @@ private fun BentoHorizonAudioCard(
   modifier: Modifier = Modifier,
 ) {
   val video = item.video
+  val progress = item.progressPercentage
+  val originalCodec = remember(video) { getAudioCodec(video) }
+  val remainingSeconds = item.timeRemaining ?: if (progress != null && progress > 0f && video.duration > 0L) {
+    (((1f - progress) * video.duration) / 1000L).toLong().coerceAtLeast(0L)
+  } else null
+  val displayTime = remember(remainingSeconds, video.durationFormatted) {
+    if (remainingSeconds != null && remainingSeconds > 0L) {
+      "-${VideoScanUtils.formatDuration(remainingSeconds * 1000L)}"
+    } else {
+      video.durationFormatted
+    }
+  }
 
   Card(
     modifier = modifier
@@ -503,14 +617,7 @@ private fun BentoHorizonAudioCard(
           modifier = Modifier.fillMaxSize(),
         )
 
-        // Top-left Lossless / Audio Badge
-        val audioBadge = when {
-          video.mimeType.contains("flac", ignoreCase = true) || video.path.endsWith(".flac", ignoreCase = true) -> "FLAC"
-          video.mimeType.contains("wav", ignoreCase = true) || video.path.endsWith(".wav", ignoreCase = true) -> "WAV"
-          video.mimeType.contains("alac", ignoreCase = true) || video.path.endsWith(".alac", ignoreCase = true) -> "ALAC"
-          video.mimeType.contains("opus", ignoreCase = true) || video.path.endsWith(".opus", ignoreCase = true) -> "OPUS"
-          else -> "HI-RES"
-        }
+        // Top-left Lossless / Original Audio Codec Badge
         Surface(
           modifier = Modifier
             .padding(6.dp)
@@ -520,7 +627,7 @@ private fun BentoHorizonAudioCard(
           border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f)),
         ) {
           Text(
-            text = audioBadge,
+            text = originalCodec,
             style = MaterialTheme.typography.labelSmall.copy(
               fontSize = 8.5.sp,
               fontWeight = FontWeight.Bold,
@@ -530,7 +637,7 @@ private fun BentoHorizonAudioCard(
           )
         }
 
-        // Bottom-right Duration Pill
+        // Bottom-right Duration / Remaining Time Pill
         Surface(
           modifier = Modifier
             .padding(6.dp)
@@ -539,13 +646,26 @@ private fun BentoHorizonAudioCard(
           color = Color.Black.copy(alpha = 0.75f),
         ) {
           Text(
-            text = video.durationFormatted,
+            text = displayTime,
             style = MaterialTheme.typography.labelSmall.copy(
               fontSize = 9.sp,
               fontWeight = FontWeight.Medium,
             ),
             color = Color.White,
             modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+          )
+        }
+
+        // Mini progress indicator on thumbnail if track is in progress
+        if (progress != null && progress > 0f && !item.isWatched) {
+          LinearProgressIndicator(
+            progress = { progress },
+            modifier = Modifier
+              .fillMaxWidth()
+              .height(3.dp)
+              .align(Alignment.BottomCenter),
+            color = MaterialTheme.colorScheme.tertiary,
+            trackColor = Color.Transparent,
           )
         }
       }
@@ -693,14 +813,32 @@ private fun BentoHeroSpotlightCard(
             }
           }
 
+          val originalCodec = remember(item.video) {
+            if (isAudio) getAudioCodec(item.video) else item.video.resolution.ifBlank { "HD" }
+          }
+          val remainingSec = item.timeRemaining ?: if (progress > 0f && item.video.duration > 0L) {
+            (((1f - progress) * item.video.duration) / 1000L).toLong().coerceAtLeast(0L)
+          } else {
+            (item.video.duration / 1000L).coerceAtLeast(0L)
+          }
+          val remainingFormatted = remember(remainingSec, item.video.durationFormatted) {
+            if (remainingSec > 0L) {
+              "-${VideoScanUtils.formatDuration(remainingSec * 1000L)}"
+            } else {
+              item.video.durationFormatted
+            }
+          }
+
           Text(
             text = if (isAudio) {
-              "Hi-Res • ${item.video.durationFormatted}"
+              "$originalCodec • $remainingFormatted remaining"
             } else {
-              "${item.video.resolution.ifBlank { "HD" }} • ${item.video.durationFormatted}"
+              "$originalCodec • ${item.video.durationFormatted}"
             },
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+            style = MaterialTheme.typography.labelSmall.copy(
+              fontWeight = FontWeight.SemiBold,
+            ),
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
           )
         }
 
@@ -711,12 +849,33 @@ private fun BentoHeroSpotlightCard(
           verticalAlignment = Alignment.CenterVertically,
         ) {
           // Media Thumbnail Box
-          BentoMediaThumbnail(
-            video = item.video,
-            modifier = Modifier
-              .size(width = if (isAudio) 70.dp else 108.dp, height = 66.dp)
-              .clip(RoundedCornerShape(16.dp)),
-          )
+          Box {
+            BentoMediaThumbnail(
+              video = item.video,
+              modifier = Modifier
+                .size(width = if (isAudio) 70.dp else 108.dp, height = 66.dp)
+                .clip(RoundedCornerShape(16.dp)),
+            )
+            if (isAudio) {
+              Surface(
+                modifier = Modifier
+                  .padding(4.dp)
+                  .align(Alignment.BottomStart),
+                shape = RoundedCornerShape(4.dp),
+                color = Color.Black.copy(alpha = 0.75f),
+              ) {
+                Text(
+                  text = originalCodec,
+                  style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 8.sp,
+                    fontWeight = FontWeight.Bold,
+                  ),
+                  color = MaterialTheme.colorScheme.tertiary,
+                  modifier = Modifier.padding(horizontal = 3.dp, vertical = 1.dp),
+                )
+              }
+            }
+          }
 
           // Information & Visualizer
           Column(
@@ -753,7 +912,7 @@ private fun BentoHeroSpotlightCard(
               overflow = TextOverflow.Ellipsis,
             )
 
-            // Animated Visualizer Waveform or Mini Progress Track
+            // Animated Visualizer Waveform & Remaining Time Progress Track
             if (isAudio) {
               BentoEqualizerWaveform(
                 modifier = Modifier
@@ -761,6 +920,33 @@ private fun BentoHeroSpotlightCard(
                   .height(18.dp)
                   .padding(top = 2.dp),
               )
+              if (progress > 0f) {
+                Row(
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                  LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier
+                      .weight(1f)
+                      .height(4.dp)
+                      .clip(RoundedCornerShape(999.dp)),
+                    color = MaterialTheme.colorScheme.tertiary,
+                    trackColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                  )
+                  Text(
+                    text = remainingFormatted,
+                    style = MaterialTheme.typography.labelSmall.copy(
+                      fontWeight = FontWeight.Bold,
+                      fontSize = 10.sp,
+                    ),
+                    color = MaterialTheme.colorScheme.tertiary,
+                  )
+                }
+              }
             } else if (progress > 0f) {
               Row(
                 modifier = Modifier
