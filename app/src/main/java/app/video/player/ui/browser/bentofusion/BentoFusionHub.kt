@@ -51,9 +51,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -212,24 +215,24 @@ fun BentoFusionHeader(
       .padding(bottom = 12.dp),
     verticalArrangement = Arrangement.spacedBy(14.dp),
   ) {
-    // 1. Cinematic Video Horizon Rail (Going UP - Top of screen)
-    if (videoItems.isNotEmpty()) {
+    // 1. Sonic Soundstage Horizon Rail (Now at TOP - ALL songs sorted by title)
+    if (sortedAudioByTitle.isNotEmpty()) {
       HorizonRailSection(
-        title = "Cinematic Video Horizon",
-        icon = "🎬",
-        accentColor = MaterialTheme.colorScheme.primary,
-        count = videoItems.size,
-        onViewAll = { onFilterSelected?.invoke(MediaLibraryType.Video) },
+        title = "Sonic Soundstage Horizon",
+        icon = "🎵",
+        accentColor = MaterialTheme.colorScheme.tertiary,
+        count = sortedAudioByTitle.size,
+        onViewAll = { onFilterSelected?.invoke(MediaLibraryType.Audio) },
       ) {
         LazyRow(
           contentPadding = PaddingValues(horizontal = 16.dp),
           horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
           items(
-            items = videoItems.take(20),
+            items = sortedAudioByTitle,
             key = { it.video.path },
           ) { item ->
-            BentoHorizonVideoCard(
+            BentoHorizonAudioCard(
               item = item,
               onClick = { onPlayMedia(item.video, null) },
             )
@@ -238,7 +241,7 @@ fun BentoFusionHeader(
       }
     }
 
-    // 2. Audio Pulsing Hero Spotlight Card (Going DOWN - Placed below video horizon rail)
+    // 2. Audio Pulsing Hero Spotlight Card
     val heroToDisplay = heroAudio ?: (if (videoItems.isEmpty()) heroVideo else null)
     if (heroToDisplay != null) {
       val isCurrentlyInSession = remember(playbackSessionState.currentItem, heroToDisplay.video) {
@@ -277,24 +280,24 @@ fun BentoFusionHeader(
       )
     }
 
-    // 3. Sonic Soundstage Horizon Rail (ALL songs sorted by title)
-    if (sortedAudioByTitle.isNotEmpty()) {
+    // 3. Cinematic Video Horizon Rail (Now below Audio Pulsing)
+    if (videoItems.isNotEmpty()) {
       HorizonRailSection(
-        title = "Sonic Soundstage Horizon",
-        icon = "🎵",
-        accentColor = MaterialTheme.colorScheme.tertiary,
-        count = sortedAudioByTitle.size,
-        onViewAll = { onFilterSelected?.invoke(MediaLibraryType.Audio) },
+        title = "Cinematic Video Horizon",
+        icon = "🎬",
+        accentColor = MaterialTheme.colorScheme.primary,
+        count = videoItems.size,
+        onViewAll = { onFilterSelected?.invoke(MediaLibraryType.Video) },
       ) {
         LazyRow(
           contentPadding = PaddingValues(horizontal = 16.dp),
           horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
           items(
-            items = sortedAudioByTitle,
+            items = videoItems.take(20),
             key = { it.video.path },
           ) { item ->
-            BentoHorizonAudioCard(
+            BentoHorizonVideoCard(
               item = item,
               onClick = { onPlayMedia(item.video, null) },
             )
@@ -342,8 +345,8 @@ fun BentoFusionHeader(
 /**
  * Dual-Horizon Rails component
  * Provides synchronized horizontal media rails:
- * 1. Upper Rail: Cinematic Video Horizon
- * 2. Lower Rail: Sonic Soundstage Horizon (ALL songs sorted by title)
+ * 1. Upper Rail: Sonic Soundstage Horizon (ALL songs sorted by title)
+ * 2. Lower Rail: Cinematic Video Horizon
  * 3. Bottom Rail: Recently Played (recent 10 files audio + video combined)
  */
 @Composable
@@ -402,33 +405,7 @@ fun DualHorizonRails(
     modifier = modifier.fillMaxWidth(),
     verticalArrangement = Arrangement.spacedBy(14.dp),
   ) {
-    // Upper Rail: Cinematic Video Horizon
-    if (videoItems.isNotEmpty()) {
-      HorizonRailSection(
-        title = "Cinematic Video Horizon",
-        icon = "🎬",
-        accentColor = MaterialTheme.colorScheme.primary,
-        count = videoItems.size,
-        onViewAll = { onFilterSelected?.invoke(MediaLibraryType.Video) },
-      ) {
-        LazyRow(
-          contentPadding = PaddingValues(horizontal = 16.dp),
-          horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-          items(
-            items = videoItems.take(20),
-            key = { it.video.path },
-          ) { item ->
-            BentoHorizonVideoCard(
-              item = item,
-              onClick = { onPlayMedia(item.video, null) },
-            )
-          }
-        }
-      }
-    }
-
-    // Lower Rail: Sonic Soundstage Horizon (ALL songs sorted by title)
+    // Upper Rail: Sonic Soundstage Horizon (ALL songs sorted by title)
     if (sortedAudioByTitle.isNotEmpty()) {
       HorizonRailSection(
         title = "Sonic Soundstage Horizon",
@@ -446,6 +423,32 @@ fun DualHorizonRails(
             key = { it.video.path },
           ) { item ->
             BentoHorizonAudioCard(
+              item = item,
+              onClick = { onPlayMedia(item.video, null) },
+            )
+          }
+        }
+      }
+    }
+
+    // Lower Rail: Cinematic Video Horizon
+    if (videoItems.isNotEmpty()) {
+      HorizonRailSection(
+        title = "Cinematic Video Horizon",
+        icon = "🎬",
+        accentColor = MaterialTheme.colorScheme.primary,
+        count = videoItems.size,
+        onViewAll = { onFilterSelected?.invoke(MediaLibraryType.Video) },
+      ) {
+        LazyRow(
+          contentPadding = PaddingValues(horizontal = 16.dp),
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+          items(
+            items = videoItems.take(20),
+            key = { it.video.path },
+          ) { item ->
+            BentoHorizonVideoCard(
               item = item,
               onClick = { onPlayMedia(item.video, null) },
             )
@@ -1101,28 +1104,39 @@ fun OneUi9WaveformVisualizer(
   primaryColor: Color = MaterialTheme.colorScheme.tertiary,
   secondaryColor: Color = MaterialTheme.colorScheme.primary,
 ) {
-  val infiniteTransition = rememberInfiniteTransition(label = "oneUiWaveTransition")
-  val phase by infiniteTransition.animateFloat(
-    initialValue = 0f,
-    targetValue = (2.0 * PI).toFloat(),
-    animationSpec = infiniteRepeatable(
-      animation = tween(2400, easing = LinearEasing),
-      repeatMode = RepeatMode.Restart,
-    ),
-    label = "oneUiWavePhase",
-  )
+  var frameNanos by remember { mutableLongStateOf(0L) }
+  var phase1 by remember { mutableFloatStateOf(0f) }
+  var phase2 by remember { mutableFloatStateOf(1.2f) }
+  var phase3 by remember { mutableFloatStateOf(2.4f) }
+
+  val twoPi = (2.0 * PI).toFloat()
+
+  LaunchedEffect(Unit) {
+    var previous = 0L
+    while (true) {
+      withFrameNanos { now ->
+        val dt = if (previous == 0L) 0f else ((now - previous) / 1_000_000_000f).coerceIn(0f, 0.1f)
+        previous = now
+        phase1 = (phase1 + dt * 1.5f) % twoPi
+        phase2 = (phase2 + dt * 2.3f) % twoPi
+        phase3 = (phase3 + dt * 3.4f) % twoPi
+        frameNanos = now
+      }
+    }
+  }
 
   val filledPath = remember { Path() }
   val contourPath = remember { Path() }
 
   Canvas(modifier = modifier) {
+    @Suppress("UNUSED_VARIABLE")
+    val frame = frameNanos // Subscribes Canvas draw phase to hardware vsync frames without recomposing
     val width = size.width
     val height = size.height
     if (width <= 0f || height <= 0f) return@Canvas
 
     val baselineY = height - 1.5.dp.toPx()
     val availableLift = (baselineY - 1.dp.toPx()).coerceAtLeast(0f)
-    val twoPi = (2.0 * PI).toFloat()
     val step = 2.dp.toPx().coerceAtLeast(1f)
     val taperInset = 16.dp.toPx().coerceAtMost(width / 4f)
 
@@ -1223,7 +1237,7 @@ fun OneUi9WaveformVisualizer(
     drawWaveRibbon(
       wavelength = 92.dp.toPx(),
       lift = availableLift * 0.95f,
-      phaseOffset = phase * 1.0f,
+      phaseOffset = phase1,
       fillTopColor = secondaryColor.copy(alpha = 0.20f),
       fillBottomColor = secondaryColor.copy(alpha = 0.02f),
       strokeColor = secondaryColor.copy(alpha = 0.40f),
@@ -1236,7 +1250,7 @@ fun OneUi9WaveformVisualizer(
     drawWaveRibbon(
       wavelength = 62.dp.toPx(),
       lift = availableLift * 0.80f,
-      phaseOffset = phase * 1.45f + 1.2f,
+      phaseOffset = phase2,
       fillTopColor = primaryColor.copy(alpha = 0.35f),
       fillBottomColor = secondaryColor.copy(alpha = 0.05f),
       strokeColor = primaryColor.copy(alpha = 0.75f),
@@ -1249,7 +1263,7 @@ fun OneUi9WaveformVisualizer(
     drawWaveRibbon(
       wavelength = 42.dp.toPx(),
       lift = availableLift * 0.65f,
-      phaseOffset = phase * 2.1f + 2.4f,
+      phaseOffset = phase3,
       fillTopColor = primaryColor.copy(alpha = 0.55f),
       fillBottomColor = primaryColor.copy(alpha = 0.12f),
       strokeColor = primaryColor.copy(alpha = 0.95f),
