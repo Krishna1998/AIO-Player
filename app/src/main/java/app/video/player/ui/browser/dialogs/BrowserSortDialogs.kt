@@ -587,6 +587,17 @@ fun FolderSortDialog(
                   app.video.player.utils.media.MediaLibraryEvents.notifyChanged()
                 },
               ),
+              ViewModeOption(
+                label = "Horizon",
+                icon = Icons.RoundedFilled.ViewArray,
+                isSelected = folderViewMode == FolderViewMode.DualHorizon,
+                onClick = {
+                  browserPreferences.includeAudioBrowser.set(true)
+                  browserPreferences.mediaLibraryType.set(MediaLibraryType.All)
+                  browserPreferences.folderViewMode.set(FolderViewMode.DualHorizon)
+                  app.video.player.utils.media.MediaLibraryEvents.notifyChanged()
+                },
+              ),
             ),
         )
       },
@@ -950,6 +961,17 @@ fun VideoSortDialog(
                   browserPreferences.includeAudioBrowser.set(true)
                   browserPreferences.mediaLibraryType.set(MediaLibraryType.All)
                   browserPreferences.folderViewMode.set(FolderViewMode.BentoFusion)
+                  app.video.player.utils.media.MediaLibraryEvents.notifyChanged()
+                },
+              ),
+              ViewModeOption(
+                label = "Horizon",
+                icon = Icons.RoundedFilled.ViewArray,
+                isSelected = folderViewMode == FolderViewMode.DualHorizon,
+                onClick = {
+                  browserPreferences.includeAudioBrowser.set(true)
+                  browserPreferences.mediaLibraryType.set(MediaLibraryType.All)
+                  browserPreferences.folderViewMode.set(FolderViewMode.DualHorizon)
                   app.video.player.utils.media.MediaLibraryEvents.notifyChanged()
                 },
               ),

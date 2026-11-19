@@ -385,10 +385,11 @@ enum class AudiobookSortType {
  * Folder view mode options
  */
 enum class FolderViewMode {
+  BentoFusion,
+  DualHorizon,
   AlbumView,
   FileManager,
   MediaLibrary,
-  BentoFusion,
   ;
 
   val displayName: String
@@ -398,6 +399,7 @@ enum class FolderViewMode {
         FileManager -> "Tree View"
         MediaLibrary -> "Media Library"
         BentoFusion -> "Bento Fusion"
+        DualHorizon -> "Dual Horizon"
       }
 }
 

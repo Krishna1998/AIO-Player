@@ -93,11 +93,12 @@ These notes are written in plain English and focus on what changed for real use.
     - Media thumbnail preview with specular play button overlay, title, and metadata chips.
     - **Live Harmonic Equalizer Waveform:** 20-band fluid sine-wave animated equalizer bars reacting in real time across primary and tertiary neon accents.
     - Integrated seek ribbon showing exact resume position and playback progress.
-  - **Quick Fusion Dual Rail Tiles:**
-    - **🎬 Cinema Vault Tile:** Direct access to recent/unwatched cinema with progress bar and one-tap playback.
-    - **🎵 Hi-Res Deck Tile:** Direct access to recent music tracks with FLAC / lossless badges and instant playback.
-  - **New View Mode Option & Default (`FolderViewMode.BentoFusion`):**
-    - Added "Bento" as a top-level view mode option alongside "Folder", "Tree", and "Library" in the View Options dialog.
+  - **Dual-Horizon Rails Architecture:**
+    - **🎬 Cinematic Video Horizon Rail:** Upper horizontal carousel featuring 16:9 thumbnail previews, dynamic 4K/1080p resolution chips, duration pills, watched % seek indicators, and one-tap playback.
+    - **🎵 Sonic Soundstage Horizon Rail:** Lower horizontal carousel featuring lossless audio cards with album artwork, FLAC/WAV/ALAC/OPUS badges, track duration, artist metadata, and one-tap playback.
+    - **Interactive "Swipe Deck →" Shortcuts:** One-tap navigation from each rail header directly scrolls the swipeable pager into the full dedicated Videos or Music catalog view.
+  - **New View Mode Option & Default (`FolderViewMode.BentoFusion` & `FolderViewMode.DualHorizon`):**
+    - Added "Bento" and "Horizon" as top-level view mode options in the View Options dialog.
     - Set Bento Fusion as the app's default landing view mode on fresh start, immediately welcoming users to the futuristic studio canvas.
     - **Fluid Swipeable Bento Tabs:** Integrated `NavigationPager` with velocity-aware horizontal swipe gestures across the category tabs (**All Media**, **Videos**, and **Music**). Swiping smoothly shifts the segmented tab indicator, clears selections safely, and preserves separate scroll positions for each media category. Tapping any Bento quick tile or segmented button smoothly animates the pager to that tab.
 - **Unified Video & Music Canvas (All-in-One Studio Page):**
