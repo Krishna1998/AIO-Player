@@ -111,7 +111,7 @@ class BrowserPreferences(
   val navidromeSortField = preferenceStore.getEnum("navidrome_sort_field", MusicSortField.TITLE)
   val navidromeSortOrder = preferenceStore.getEnum("navidrome_sort_order", MusicSortOrder.ASCENDING)
 
-  val folderViewMode = preferenceStore.getEnum("folder_view_mode", FolderViewMode.AlbumView)
+  val folderViewMode = preferenceStore.getEnum("folder_view_mode", FolderViewMode.BentoFusion)
   val dualPaneForTablet = preferenceStore.getBoolean("dual_pane_for_tablet", true)
 
   val folderGridColumnsPortrait = preferenceStore.getInt("folder_grid_columns_portrait", 0)

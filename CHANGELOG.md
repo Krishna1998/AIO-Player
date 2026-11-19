@@ -96,9 +96,10 @@ These notes are written in plain English and focus on what changed for real use.
   - **Quick Fusion Dual Rail Tiles:**
     - **🎬 Cinema Vault Tile:** Direct access to recent/unwatched cinema with progress bar and one-tap playback.
     - **🎵 Hi-Res Deck Tile:** Direct access to recent music tracks with FLAC / lossless badges and instant playback.
-  - **New View Mode Option (`FolderViewMode.BentoFusion`):**
+  - **New View Mode Option & Default (`FolderViewMode.BentoFusion`):**
     - Added "Bento" as a top-level view mode option alongside "Folder", "Tree", and "Library" in the View Options dialog.
-    - One-tap activation sets the home layout directly to the unified Bento Fusion experience.
+    - Set Bento Fusion as the app's default landing view mode on fresh start, immediately welcoming users to the futuristic studio canvas.
+    - **Fluid Swipeable Bento Tabs:** Integrated `NavigationPager` with velocity-aware horizontal swipe gestures across the category tabs (**All Media**, **Videos**, and **Music**). Swiping smoothly shifts the segmented tab indicator, clears selections safely, and preserves separate scroll positions for each media category. Tapping any Bento quick tile or segmented button smoothly animates the pager to that tab.
 - **Unified Video & Music Canvas (All-in-One Studio Page):**
   - Seamlessly unified Video and Music on the same screen within Media Library with instant category filtering:
     - **✦ All Media (`MediaLibraryType.All`):** Unified timeline displaying both video cards (with 16:9 thumbnails, duration chips, resolution, FPS) and music cards (with album cover art, lossless tags, audio track indicators) side-by-side.
