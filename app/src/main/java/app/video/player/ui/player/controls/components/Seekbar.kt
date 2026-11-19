@@ -1684,6 +1684,8 @@ private fun LiquidSeekbar(
   val isLtr = LocalLayoutDirection.current == LayoutDirection.Ltr
   val animationScope = rememberCoroutineScope()
   val isDark = MaterialTheme.colorScheme.surface.luminance() < 0.5f
+  val onSurfaceColor = MaterialTheme.colorScheme.onSurface
+  val unplayedTrackColor = if (isDark) Color.White.copy(alpha = 0.16f) else onSurfaceColor.copy(alpha = 0.12f)
   val safeDuration = duration.takeIf { it.isFinite() && it > 0f } ?: 0f
   val animationRange = 0f..safeDuration.coerceAtLeast(0.1f)
   val initialPosition =
@@ -1761,7 +1763,7 @@ private fun LiquidSeekbar(
           trackHeight = heightPx,
           playedColor = accentColor,
           bufferedColor = accentColor.copy(alpha = readAheadAlpha),
-          unplayedColor = if (isDark) Color.White.copy(alpha = 0.16f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+          unplayedColor = unplayedTrackColor,
           isGlass = true,
         )
 

@@ -80,6 +80,7 @@ import app.video.player.domain.recentlyplayed.repository.RecentlyPlayedRepositor
 import android.net.Uri
 import app.video.player.preferences.BrowserPreferences
 import app.video.player.preferences.MediaLibraryType
+import app.video.player.preferences.preference.collectAsState
 import app.video.player.domain.thumbnail.ThumbnailRepository
 import app.video.player.ui.browser.videolist.VideoWithPlaybackInfo
 import app.video.player.ui.browser.videolist.videoPlaybackIdentifiers
