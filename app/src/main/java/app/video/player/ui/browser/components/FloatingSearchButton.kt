@@ -14,7 +14,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
+import app.video.player.ui.icons.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -129,7 +129,7 @@ fun FloatingSearchButton(
     }
 
     Icon(
-      imageVector = Icons.RoundedFilled.Search,
+      icon = Icons.RoundedFilled.Search,
       contentDescription = stringResource(R.string.settings_search_title),
       tint = MaterialTheme.colorScheme.onSurfaceVariant,
       modifier = Modifier.size(24.dp),
