@@ -286,13 +286,13 @@ object FolderListScreen : Screen {
       if (internalIsSearching) focusRequester.requestFocus()
     }
 
-    var lastHandledSearchTrigger by rememberSaveable { mutableStateOf(NavigationBarState.searchTriggerRequestId) }
+    var lastHandledSearchTrigger by rememberSaveable { mutableStateOf(NavigationBarState.homeSearchTriggerRequestId) }
 
-    LaunchedEffect(NavigationBarState.searchTriggerRequestId) {
-      val currentId = NavigationBarState.searchTriggerRequestId
+    LaunchedEffect(NavigationBarState.homeSearchTriggerRequestId) {
+      val currentId = NavigationBarState.homeSearchTriggerRequestId
       if (currentId > 0L && currentId != lastHandledSearchTrigger && !embedded) {
         lastHandledSearchTrigger = currentId
-        NavigationBarState.clearSearchTrigger()
+        NavigationBarState.clearHomeSearchTrigger()
         internalIsSearching = true
       }
     }
@@ -654,7 +654,7 @@ object FolderListScreen : Screen {
         !embedded && internalIsSearching -> {
           internalIsSearching = false
           internalSearchQuery = ""
-          NavigationBarState.clearSearchTrigger()
+          NavigationBarState.clearHomeSearchTrigger()
         }
         isDualPaneActive && selectedFolderBucketId != null -> {
           selectedFolderBucketId = null
@@ -715,7 +715,7 @@ object FolderListScreen : Screen {
                   onClick = {
                     internalIsSearching = false
                     internalSearchQuery = ""
-                    NavigationBarState.clearSearchTrigger()
+                    NavigationBarState.clearHomeSearchTrigger()
                   },
                 ) {
                   Icon(
@@ -743,7 +743,7 @@ object FolderListScreen : Screen {
                 internalIsSearching = !internalIsSearching
                 if (!internalIsSearching) {
                   internalSearchQuery = ""
-                  NavigationBarState.clearSearchTrigger()
+                  NavigationBarState.clearHomeSearchTrigger()
                 }
               },
               onSettingsClick = {
@@ -966,13 +966,13 @@ object FolderListScreen : Screen {
                           if (!embedded) {
                             internalIsSearching = false
                             internalSearchQuery = ""
-                            NavigationBarState.clearSearchTrigger()
+                            NavigationBarState.clearHomeSearchTrigger()
                           }
                         } else {
                           if (!embedded) {
                             internalIsSearching = false
                             internalSearchQuery = ""
-                            NavigationBarState.clearSearchTrigger()
+                            NavigationBarState.clearHomeSearchTrigger()
                           }
                           backstack.navigateTo(
                             app.video.player.ui.browser.videolist

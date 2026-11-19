@@ -474,13 +474,13 @@ fun FileSystemBrowserScreen(path: String? = null) {
     }
   }
 
-  var lastHandledSearchTrigger by rememberSaveable { mutableStateOf(NavigationBarState.searchTriggerRequestId) }
+  var lastHandledSearchTrigger by rememberSaveable { mutableStateOf(NavigationBarState.homeSearchTriggerRequestId) }
 
-  LaunchedEffect(NavigationBarState.searchTriggerRequestId) {
-    val currentId = NavigationBarState.searchTriggerRequestId
+  LaunchedEffect(NavigationBarState.homeSearchTriggerRequestId) {
+    val currentId = NavigationBarState.homeSearchTriggerRequestId
     if (currentId > 0L && currentId != lastHandledSearchTrigger) {
       lastHandledSearchTrigger = currentId
-      NavigationBarState.clearSearchTrigger()
+      NavigationBarState.clearHomeSearchTrigger()
       isSearching = true
     }
   }
@@ -539,7 +539,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
       isSearching -> {
         isSearching = false
         searchQuery = ""
-        NavigationBarState.clearSearchTrigger()
+        NavigationBarState.clearHomeSearchTrigger()
       }
     }
   }
@@ -594,7 +594,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
                 onClick = {
                   isSearching = false
                   searchQuery = ""
-                  NavigationBarState.clearSearchTrigger()
+                  NavigationBarState.clearHomeSearchTrigger()
                 },
               ) {
                 Icon(
@@ -634,7 +634,7 @@ fun FileSystemBrowserScreen(path: String? = null) {
                   isSearching = !isSearching
                   if (!isSearching) {
                     searchQuery = ""
-                    NavigationBarState.clearSearchTrigger()
+                    NavigationBarState.clearHomeSearchTrigger()
                   }
                 }
               } else {

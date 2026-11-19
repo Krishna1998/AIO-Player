@@ -308,13 +308,13 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
     }
   }
 
-  var lastHandledSearchTrigger by rememberSaveable { mutableStateOf(NavigationBarState.searchTriggerRequestId) }
+  var lastHandledSearchTrigger by rememberSaveable { mutableStateOf(NavigationBarState.homeSearchTriggerRequestId) }
 
-  LaunchedEffect(NavigationBarState.searchTriggerRequestId) {
-    val currentId = NavigationBarState.searchTriggerRequestId
+  LaunchedEffect(NavigationBarState.homeSearchTriggerRequestId) {
+    val currentId = NavigationBarState.homeSearchTriggerRequestId
     if (currentId > 0L && currentId != lastHandledSearchTrigger) {
       lastHandledSearchTrigger = currentId
-      NavigationBarState.clearSearchTrigger()
+      NavigationBarState.clearHomeSearchTrigger()
       isSearching = true
     }
   }
@@ -397,7 +397,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
       isSearching -> {
         isSearching = false
         searchQuery = ""
-        NavigationBarState.clearSearchTrigger()
+        NavigationBarState.clearHomeSearchTrigger()
       }
     }
   }
@@ -446,7 +446,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
               onClick = {
                 isSearching = false
                 searchQuery = ""
-                NavigationBarState.clearSearchTrigger()
+                NavigationBarState.clearHomeSearchTrigger()
               },
             ) {
               Icon(
@@ -478,7 +478,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
             isSearching = !isSearching
             if (!isSearching) {
               searchQuery = ""
-              NavigationBarState.clearSearchTrigger()
+              NavigationBarState.clearHomeSearchTrigger()
             }
           },
           onSettingsClick = {

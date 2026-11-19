@@ -982,12 +982,13 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
                     FloatingSearchButton(
                       onClick = {
                         when (selectedTab) {
-                          MainTab.HOME, MainTab.MUSIC -> NavigationBarState.triggerSearch()
+                          MainTab.HOME -> NavigationBarState.triggerHomeSearch()
+                          MainTab.MUSIC -> NavigationBarState.triggerMusicSearch()
                           MainTab.PROFILE -> {
                             onTabSelected(MainTab.HOME)
                             coroutineScope.launch {
                               delay(50L)
-                              NavigationBarState.triggerSearch()
+                              NavigationBarState.triggerHomeSearch()
                             }
                           }
                         }

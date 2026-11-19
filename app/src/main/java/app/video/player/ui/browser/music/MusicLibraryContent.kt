@@ -104,6 +104,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -248,16 +249,20 @@ fun MusicLibraryContent(
   val isRefreshing = remember { mutableStateOf(false) }
   var isSearchActive by remember { mutableStateOf(false) }
   val searchFocusRequester = remember { FocusRequester() }
+  val keyboardController = LocalSoftwareKeyboardController.current
   LaunchedEffect(isSearchActive) {
-    if (isSearchActive) searchFocusRequester.requestFocus()
+    if (isSearchActive) {
+      searchFocusRequester.requestFocus()
+      keyboardController?.show()
+    }
   }
-  var lastHandledSearchTrigger by rememberSaveable { mutableStateOf(NavigationBarState.searchTriggerRequestId) }
+  var lastHandledSearchTrigger by rememberSaveable { mutableStateOf(NavigationBarState.musicSearchTriggerRequestId) }
 
-  LaunchedEffect(NavigationBarState.searchTriggerRequestId) {
-    val currentId = NavigationBarState.searchTriggerRequestId
+  LaunchedEffect(NavigationBarState.musicSearchTriggerRequestId) {
+    val currentId = NavigationBarState.musicSearchTriggerRequestId
     if (currentId > 0L && currentId != lastHandledSearchTrigger) {
       lastHandledSearchTrigger = currentId
-      NavigationBarState.clearSearchTrigger()
+      NavigationBarState.clearMusicSearchTrigger()
       isSearchActive = true
     }
   }
@@ -456,7 +461,7 @@ fun MusicLibraryContent(
       isSearchActive -> {
         isSearchActive = false
         musicViewModel.setSearchQuery("")
-        NavigationBarState.clearSearchTrigger()
+        NavigationBarState.clearMusicSearchTrigger()
       }
       activeSelectionManager.isInSelectionMode -> activeSelectionManager.clear()
     }
@@ -505,7 +510,7 @@ fun MusicLibraryContent(
               IconButton(onClick = {
                 isSearchActive = false
                 musicViewModel.setSearchQuery("")
-                NavigationBarState.clearSearchTrigger()
+                NavigationBarState.clearMusicSearchTrigger()
               }) {
                 Icon(imageVector = Icons.RoundedFilled.ArrowBack, contentDescription = "Back")
               }
@@ -534,7 +539,7 @@ fun MusicLibraryContent(
                 isSearchActive = !isSearchActive
                 if (!isSearchActive) {
                   musicViewModel.setSearchQuery("")
-                  NavigationBarState.clearSearchTrigger()
+                  NavigationBarState.clearMusicSearchTrigger()
                 }
               },
               onSettingsClick = {

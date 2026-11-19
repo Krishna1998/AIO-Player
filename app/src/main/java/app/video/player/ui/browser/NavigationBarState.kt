@@ -154,23 +154,43 @@ object NavigationBarState {
     shouldHideNavigationBar = !visible
   }
 
-  // Global search trigger for browser screens
+  // Tab-isolated search triggers for browser screens
+  var homeSearchTriggerRequestId: Long by mutableStateOf(0L)
+    private set
+
+  var musicSearchTriggerRequestId: Long by mutableStateOf(0L)
+    private set
+
   var searchTriggerRequestId: Long by mutableStateOf(0L)
     private set
 
-  fun triggerSearch() {
-    searchTriggerRequestId = System.currentTimeMillis()
+  fun triggerHomeSearch() {
+    val id = System.currentTimeMillis()
+    homeSearchTriggerRequestId = id
+    searchTriggerRequestId = id
   }
 
-  fun consumeSearchTrigger(): Boolean {
-    if (searchTriggerRequestId > 0L) {
-      searchTriggerRequestId = 0L
-      return true
-    }
-    return false
+  fun triggerMusicSearch() {
+    val id = System.currentTimeMillis()
+    musicSearchTriggerRequestId = id
+    searchTriggerRequestId = id
+  }
+
+  fun triggerSearch() {
+    triggerHomeSearch()
+  }
+
+  fun clearHomeSearchTrigger() {
+    homeSearchTriggerRequestId = 0L
+  }
+
+  fun clearMusicSearchTrigger() {
+    musicSearchTriggerRequestId = 0L
   }
 
   fun clearSearchTrigger() {
+    homeSearchTriggerRequestId = 0L
+    musicSearchTriggerRequestId = 0L
     searchTriggerRequestId = 0L
   }
 
