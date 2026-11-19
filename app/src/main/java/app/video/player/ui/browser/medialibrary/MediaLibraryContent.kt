@@ -80,12 +80,19 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import app.video.player.R
 import app.video.player.utils.storage.FileTypeUtils
 import app.video.player.database.repository.SecureFolderRepository
+import app.video.player.BuildConfig
 import app.video.player.domain.media.model.Video
 import app.video.player.preferences.BrowserPreferences
+import app.video.player.preferences.FoldersPreferences
 import app.video.player.preferences.MediaLibraryType
 import app.video.player.preferences.PlayerPreferences
 import app.video.player.preferences.SecureFolderPreferences
 import app.video.player.preferences.preference.collectAsState
+import app.video.player.ui.browser.states.PermissionDeniedState
+import app.video.player.ui.browser.states.StoragePermissionPrompt
+import app.video.player.utils.permission.PermissionUtils
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionStatus
 import app.video.player.ui.browser.MainScreen
 import app.video.player.ui.browser.LocalNavigationBarHeight
 import app.video.player.presentation.components.captureLiquidGlassBackdrop
@@ -127,13 +134,14 @@ import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import java.io.File
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalPermissionsApi::class)
 @Composable
 fun MediaLibraryContent(forceAudio: Boolean = false) {
   val context = LocalContext.current
   val coroutineScope = rememberCoroutineScope()
   val backstack = LocalBackStack.current
   val browserPreferences = koinInject<BrowserPreferences>()
+  val foldersPreferences = koinInject<FoldersPreferences>()
   val appearancePreferences = koinInject<app.video.player.preferences.AppearancePreferences>()
   val showQuickPlayFab by appearancePreferences.showQuickPlayFab.collectAsState()
   val playerPreferences = koinInject<PlayerPreferences>()
@@ -147,6 +155,39 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   val videosWithPlaybackInfo by viewModel.videosWithPlaybackInfo.collectAsState()
   val isLoading by viewModel.isLoading.collectAsState()
   val recentlyPlayedFilePath by viewModel.recentlyPlayedFilePath.collectAsState()
+
+  // Permissions
+  val permissionState =
+    PermissionUtils.handleStoragePermission(
+      audioOnly = forceAudio,
+      onPermissionGranted = { viewModel.refresh() },
+    )
+
+  val selectedTreeUris by foldersPreferences.scopedHiddenFolderUris.collectAsState()
+  val includeSelectedFolders by foldersPreferences.includeNoMediaFolders.collectAsState()
+  val canBrowseSelectedFolders = BuildConfig.SCOPED_STORAGE_ONLY && includeSelectedFolders &&
+    selectedTreeUris.isNotEmpty()
+
+  var isPermissionSetupCompleted by rememberSaveable {
+    mutableStateOf(
+      permissionState.status == PermissionStatus.Granted || browserPreferences.onboardingCompleted.get(),
+    )
+  }
+
+  LaunchedEffect(permissionState.status, isPermissionSetupCompleted) {
+    if (!forceAudio) {
+      MainScreen.updatePermissionState(
+        isDenied = !isPermissionSetupCompleted,
+      )
+    }
+  }
+
+  val hasCompletedInitialLoad = !isLoading || videos.isNotEmpty()
+  androidx.activity.compose.ReportDrawnWhen {
+    !isPermissionSetupCompleted ||
+      (permissionState.status != PermissionStatus.Granted && !canBrowseSelectedFolders) ||
+      hasCompletedInitialLoad
+  }
 
   val videoSortType by browserPreferences.videoSortType.collectAsState()
   val videoSortOrder by browserPreferences.videoSortOrder.collectAsState()
@@ -753,12 +794,13 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
       val videosWereDeletedOrMoved = false
 
       Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-          modifier =
-            Modifier
-              .fillMaxSize()
-              .padding(padding),
-        ) {
+        if ((isPermissionSetupCompleted && permissionState.status == PermissionStatus.Granted) || canBrowseSelectedFolders) {
+          Column(
+            modifier =
+              Modifier
+                .fillMaxSize()
+                .padding(padding),
+          ) {
           if (!forceAudio) {
             SingleChoiceSegmentedButtonRow(
               modifier =
@@ -991,6 +1033,32 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                 )
               }
             }
+          }
+        } else if (isPermissionSetupCompleted) {
+          Box(
+            modifier = Modifier
+              .fillMaxSize()
+              .padding(padding),
+          ) {
+            StoragePermissionPrompt(
+              onRequestPermission = { permissionState.launchPermissionRequest() },
+            )
+          }
+        } else {
+          Box(
+            modifier = Modifier
+              .fillMaxSize()
+              .padding(padding),
+          ) {
+            PermissionDeniedState(
+              onRequestPermission = { permissionState.launchPermissionRequest() },
+              onNext = {
+                isPermissionSetupCompleted = true
+                browserPreferences.onboardingCompleted.set(true)
+                viewModel.refresh()
+              },
+              modifier = Modifier,
+            )
           }
         }
 
