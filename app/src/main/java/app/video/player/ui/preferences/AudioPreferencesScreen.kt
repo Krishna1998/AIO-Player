@@ -122,7 +122,7 @@ object AudioPreferencesScreen : Screen {
                 value = includeAudioBrowser,
                 onValueChange = { enabled ->
                   browserPreferences.includeAudioBrowser.set(enabled)
-                  if (!enabled) {
+                  if (!enabled && browserPreferences.mediaLibraryType.get() == MediaLibraryType.Audio) {
                     browserPreferences.mediaLibraryType.set(MediaLibraryType.Video)
                   }
                   // Files/folders use the same MediaScanOptions as the rest of the browser.

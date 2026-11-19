@@ -25,8 +25,10 @@ import app.video.player.ui.browser.fab.FabPlacement
 import app.video.player.ui.browser.fab.FabScrollHelper
 import app.video.player.ui.components.InlineSearchBar
 import app.video.player.ui.components.themedSegmentedButtonColors
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -158,8 +160,10 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
     }
   val mediaTypeVideosWithInfo =
     remember(sortedVideosWithInfo, mediaType) {
-      sortedVideosWithInfo.filter { item ->
-        item.video.isAudio == (mediaType == MediaLibraryType.Audio)
+      when (mediaType) {
+        MediaLibraryType.All -> sortedVideosWithInfo
+        MediaLibraryType.Video -> sortedVideosWithInfo.filter { !it.video.isAudio }
+        MediaLibraryType.Audio -> sortedVideosWithInfo.filter { it.video.isAudio }
       }
     }
 
@@ -386,6 +390,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
         putExtra("playlist_id", ALL_VIDEOS_PLAYLIST_ID)
         putExtra("playlist_index", index)
         putExtra("launch_source", "media_library")
+        putExtra("media_library_all", mediaType == MediaLibraryType.All)
         putExtra("media_library_audio", mediaType == MediaLibraryType.Audio)
         putExtra("is_audio", video.isAudio)
         putExtra("title", video.displayName)
@@ -429,14 +434,10 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
           inputFieldModifier = Modifier.focusRequester(focusRequester),
           placeholder = {
             Text(
-              if (mediaType ==
-                MediaLibraryType.Audio
-              ) {
-                androidx.compose.ui.res
-                  .stringResource(app.video.player.R.string.ui_search_audio)
-              } else {
-                androidx.compose.ui.res
-                  .stringResource(app.video.player.R.string.ui_search_videos)
+              when (mediaType) {
+                MediaLibraryType.All -> androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_search_media)
+                MediaLibraryType.Audio -> androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_search_audio)
+                MediaLibraryType.Video -> androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_search_videos)
               },
             )
           },
@@ -588,7 +589,11 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
               onClick = {
                 isFabExpanded.value = false
                 filePicker.launch(
-                  if (mediaType == MediaLibraryType.Audio) arrayOf("audio/*") else FileTypeUtils.videoPickerMimeTypes(),
+                  when (mediaType) {
+                    MediaLibraryType.All -> FileTypeUtils.videoPickerMimeTypes() + arrayOf("audio/*")
+                    MediaLibraryType.Audio -> arrayOf("audio/*")
+                    MediaLibraryType.Video -> FileTypeUtils.videoPickerMimeTypes()
+                  },
                 )
               },
               icon = { Icon(Icons.RoundedFilled.FileOpen, contentDescription = null) },
@@ -620,10 +625,10 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
               text = {
                 Text(
                   text =
-                    if (mediaType == MediaLibraryType.Audio) {
-                      androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_play_recent_or_first_audio)
-                    } else {
-                      androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_play_recent_or_first_video)
+                    when (mediaType) {
+                      MediaLibraryType.All -> androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_play_recent_or_first_media)
+                      MediaLibraryType.Audio -> androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_play_recent_or_first_audio)
+                      MediaLibraryType.Video -> androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_play_recent_or_first_video)
                     },
                 )
               },
@@ -642,7 +647,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
               .fillMaxSize()
               .padding(padding),
         ) {
-          if (includeAudioBrowser && !forceAudio) {
+          if (!forceAudio) {
             SingleChoiceSegmentedButtonRow(
               modifier =
                 Modifier
@@ -655,13 +660,39 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                   onClick = {
                     if (mediaType != type) {
                       selectionManager.clear()
+                      if (!includeAudioBrowser && (type == MediaLibraryType.Audio || type == MediaLibraryType.All)) {
+                        browserPreferences.includeAudioBrowser.set(true)
+                        app.video.player.utils.media.MediaLibraryEvents.notifyChanged()
+                      }
                       browserPreferences.mediaLibraryType.set(type)
                     }
                   },
                   shape = SegmentedButtonDefaults.itemShape(index, MediaLibraryType.entries.size),
                   colors = themedSegmentedButtonColors(),
                 ) {
-                  Text(type.name)
+                  val count = when (type) {
+                    MediaLibraryType.All -> sortedVideosWithInfo.size
+                    MediaLibraryType.Video -> sortedVideosWithInfo.count { !it.video.isAudio }
+                    MediaLibraryType.Audio -> sortedVideosWithInfo.count { it.video.isAudio }
+                  }
+                  val label = when (type) {
+                    MediaLibraryType.All -> androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_all_media)
+                    MediaLibraryType.Video -> androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_videos)
+                    MediaLibraryType.Audio -> androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_music)
+                  }
+                  Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                  ) {
+                    Text(label)
+                    if (count > 0) {
+                      Text(
+                        text = "($count)",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+                      )
+                    }
+                  }
                 }
               }
             }
@@ -676,14 +707,10 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                 EmptyState(
                   icon = Icons.RoundedFilled.Search,
                   title =
-                    if (mediaType ==
-                      MediaLibraryType.Audio
-                    ) {
-                      androidx.compose.ui.res
-                        .stringResource(app.video.player.R.string.ui_no_audio_found)
-                    } else {
-                      androidx.compose.ui.res
-                        .stringResource(app.video.player.R.string.ui_no_videos_found)
+                    when (mediaType) {
+                      MediaLibraryType.All -> androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_no_media_found)
+                      MediaLibraryType.Audio -> androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_no_audio_found)
+                      MediaLibraryType.Video -> androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_no_videos_found)
                     },
                   message = "Try a different search term",
                 )
@@ -802,7 +829,12 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
         },
         itemCount = selectionManager.selectedCount,
         isOpen = deleteDialogOpen.value,
-        itemType = if (mediaType == MediaLibraryType.Audio) "audio file" else "video",
+        itemType =
+          when (mediaType) {
+            MediaLibraryType.All -> "media item"
+            MediaLibraryType.Audio -> "audio file"
+            MediaLibraryType.Video -> "video"
+          },
         itemPaths = selectionManager.getSelectedItems().map { it.uri.toString() },
         totalSizeBytes = selectionManager.getSelectedItems().sumOf { it.size.coerceAtLeast(0L) }.takeIf { it > 0L },
       )
@@ -819,7 +851,12 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
           },
           currentName = video.displayName,
           isOpen = renameDialogOpen.value,
-          itemType = if (mediaType == MediaLibraryType.Audio) "audio file" else "video",
+          itemType =
+            when (mediaType) {
+              MediaLibraryType.All -> "media item"
+              MediaLibraryType.Audio -> "audio file"
+              MediaLibraryType.Video -> "video"
+            },
         )
       }
     }

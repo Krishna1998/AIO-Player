@@ -86,6 +86,15 @@ These notes are written in plain English and focus on what changed for real use.
   - Responsive 2-column grid picker with live 132dp animated previews and instant one-tap switching.
 
 ### 💎 Interface & Fluid Aesthetics
+- **Unified Video & Music Canvas (All-in-One Studio Page):**
+  - Seamlessly unified Video and Music on the same screen within Media Library with instant category filtering:
+    - **✦ All Media (`MediaLibraryType.All`):** Unified timeline displaying both video cards (with 16:9 thumbnails, duration chips, resolution, FPS) and music cards (with album cover art, lossless tags, audio track indicators) side-by-side.
+    - **🎬 Videos:** Instant filter dedicated exclusively to video content.
+    - **🎵 Music:** Instant filter dedicated exclusively to audio and lossless songs.
+  - **Dynamic Item Counters:** Category capsules display live item counts (`All (142)`, `Videos (38)`, `Music (104)`).
+  - **Auto-Activating Audio Indexing:** Selecting `All Media` or `Music` automatically activates audio browser scanning on the fly so music files appear immediately without requiring manual preference toggling.
+  - **Polymorphic Playback Queue:** Tapping a video launches full video playback, while tapping a track launches audio playback, preserving the unified queue across `PlayerActivity` without stripping either media type.
+  - **Adaptive Search & Empty States:** Intelligent search input placeholders ("Search media...", "Search videos...", "Search audio...") and empty states tailored to the active filter mode.
 - **Material 3 Expressive & System-Wide Liquid Glass:**
   - Full dynamic color integration, OLED pure black theme, and expressive typography.
   - Frosted translucent glass surfaces, top-lit specular rim highlights, and ambient drop shadows across app bars, player pods, dialogs, and bento cards.

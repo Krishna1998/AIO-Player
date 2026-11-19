@@ -1050,6 +1050,12 @@
   <string name="online_subtitle_episode">Episode %1$d</string>
   <string name="update_progress_percent">%1$d%%</string>
   <string name="ui_install">Install</string>
+  <string name="ui_all_media">All Media</string>
+  <string name="ui_videos">Videos</string>
+  <string name="ui_music">Music</string>
+  <string name="ui_search_media">Search media...</string>
+  <string name="ui_no_media_found">No media found</string>
+  <string name="ui_play_recent_or_first_media">Play recent or first media</string>
   <string name="ui_search_audio">Search audio...</string>
   <string name="ui_play_recent_or_first_audio">Play recent or first audio</string>
   <string name="ui_play_recent_or_first_video">Play recent or first video</string>

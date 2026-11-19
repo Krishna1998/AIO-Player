@@ -171,10 +171,10 @@ class BrowserPreferences(
 
   // Maximum single-child folder levels skipped in one Tree View navigation step.
   val treeFlattenDepth = preferenceStore.getEnum("tree_flatten_depth", TreeFlattenDepth.Unlimited)
-  val includeAudioBrowser = preferenceStore.getBoolean("include_audio_browser", false)
+  val includeAudioBrowser = preferenceStore.getBoolean("include_audio_browser", true)
   val includeImagesInBrowser = preferenceStore.getBoolean("include_images_in_browser", false)
   val minimumAudioDurationSeconds = preferenceStore.getInt("minimum_audio_duration_seconds", 0)
-  val mediaLibraryType = preferenceStore.getEnum("media_library_type", MediaLibraryType.Video)
+  val mediaLibraryType = preferenceStore.getEnum("media_library_type", MediaLibraryType.All)
 
   // True once the user finished (or skipped through) the first-run permission flow.
   val onboardingCompleted = preferenceStore.getBoolean(ONBOARDING_COMPLETED_KEY, false)
@@ -433,6 +433,7 @@ enum class MediaLayoutMode {
 }
 
 enum class MediaLibraryType {
+  All,
   Video,
   Audio,
 }
