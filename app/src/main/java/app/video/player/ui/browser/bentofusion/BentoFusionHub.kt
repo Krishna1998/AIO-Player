@@ -43,6 +43,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -253,6 +254,7 @@ fun BentoFusionHeader(
           curr.title == heroToDisplay.video.displayName
         )
       }
+      val isPaused by PlaybackSession.propBoolean["pause"].collectAsState()
       val livePos = PlaybackSession.propInt["time-pos"].collectAsState().value?.toDouble()
       val savedPos = heroToDisplay.timeRemaining?.let { rem ->
         ((heroToDisplay.video.duration / 1000L) - rem).coerceAtLeast(0L).toDouble()
@@ -270,11 +272,51 @@ fun BentoFusionHeader(
         item = heroToDisplay,
         onClick = {
           if (isCurrentlyInSession) {
-            if (playbackSessionState.paused) {
+            if (isPaused == true) {
               PlaybackSession.setPropertyBoolean("pause", false)
             }
           } else {
             onPlayMedia(heroToDisplay.video, resumePos.takeIf { it > 0.0 })
+          }
+        },
+        onPrevious = {
+          if (isCurrentlyInSession) {
+            val prev = PlaybackSession.playPrevious()
+            if (prev == null && sortedAudioByTitle.isNotEmpty()) {
+              val currIdx = sortedAudioByTitle.indexOfFirst { it.video.path == heroToDisplay.video.path }
+              if (currIdx >= 0) {
+                val prevIdx = (currIdx - 1 + sortedAudioByTitle.size) % sortedAudioByTitle.size
+                onPlayMedia(sortedAudioByTitle[prevIdx].video, null)
+              }
+            }
+          } else if (sortedAudioByTitle.isNotEmpty()) {
+            val currIdx = sortedAudioByTitle.indexOfFirst { it.video.path == heroToDisplay.video.path }
+            val prevIdx = if (currIdx >= 0) (currIdx - 1 + sortedAudioByTitle.size) % sortedAudioByTitle.size else 0
+            onPlayMedia(sortedAudioByTitle[prevIdx].video, null)
+          }
+        },
+        onPlayPause = {
+          if (isCurrentlyInSession) {
+            val currentPaused = isPaused ?: false
+            PlaybackSession.setPropertyBoolean("pause", !currentPaused)
+          } else {
+            onPlayMedia(heroToDisplay.video, resumePos.takeIf { it > 0.0 })
+          }
+        },
+        onNext = {
+          if (isCurrentlyInSession) {
+            val next = PlaybackSession.playNext()
+            if (next == null && sortedAudioByTitle.isNotEmpty()) {
+              val currIdx = sortedAudioByTitle.indexOfFirst { it.video.path == heroToDisplay.video.path }
+              if (currIdx >= 0) {
+                val nextIdx = (currIdx + 1) % sortedAudioByTitle.size
+                onPlayMedia(sortedAudioByTitle[nextIdx].video, null)
+              }
+            }
+          } else if (sortedAudioByTitle.isNotEmpty()) {
+            val currIdx = sortedAudioByTitle.indexOfFirst { it.video.path == heroToDisplay.video.path }
+            val nextIdx = if (currIdx >= 0) (currIdx + 1) % sortedAudioByTitle.size else 0
+            onPlayMedia(sortedAudioByTitle[nextIdx].video, null)
           }
         },
       )
@@ -705,7 +747,7 @@ private fun BentoHorizonAudioCard(
   } else null
   val displayTime = remember(remainingSeconds, video.durationFormatted) {
     if (remainingSeconds != null && remainingSeconds > 0L) {
-      "-${VideoScanUtils.formatDuration(remainingSeconds * 1000L)}"
+      "-${VideoScanUtils.formatDuration(remainingSeconds * 1000L)}/${video.durationFormatted}"
     } else {
       video.durationFormatted
     }
@@ -832,6 +874,9 @@ private fun BentoHorizonAudioCard(
 private fun BentoHeroSpotlightCard(
   item: VideoWithPlaybackInfo,
   onClick: () -> Unit,
+  onPrevious: () -> Unit = {},
+  onPlayPause: () -> Unit = {},
+  onNext: () -> Unit = {},
   modifier: Modifier = Modifier,
 ) {
   val isAudio = item.video.isAudio
@@ -840,6 +885,7 @@ private fun BentoHeroSpotlightCard(
   val playbackSessionState by PlaybackSession.state.collectAsState()
   val livePositionSec by PlaybackSession.propInt["time-pos"].collectAsState()
   val liveDurationSec by PlaybackSession.propInt["duration"].collectAsState()
+  val isPaused by PlaybackSession.propBoolean["pause"].collectAsState()
 
   val isCurrentlyPlayingInSession = remember(playbackSessionState.currentItem, item.video) {
     val curr = playbackSessionState.currentItem
@@ -851,27 +897,36 @@ private fun BentoHeroSpotlightCard(
     )
   }
 
+  val isPlaying = isCurrentlyPlayingInSession && (isPaused == false)
+
   val originalCodec = remember(item.video) {
     if (isAudio) getAudioCodec(item.video) else item.video.resolution.ifBlank { "HD" }
   }
 
+  // Total duration:
+  val totalSec = if (isCurrentlyPlayingInSession && liveDurationSec != null && liveDurationSec!! > 0) {
+    liveDurationSec!!.toLong()
+  } else {
+    (item.video.duration / 1000L).coerceAtLeast(0L)
+  }
+  val totalFormatted = if (totalSec > 0L) {
+    VideoScanUtils.formatDuration(totalSec * 1000L)
+  } else {
+    item.video.durationFormatted.ifBlank { "00:00" }
+  }
+
   // Real-time synced remaining time:
   val remainingSec = if (isCurrentlyPlayingInSession && livePositionSec != null) {
-    val totalDur = liveDurationSec?.takeIf { it > 0 } ?: (item.video.duration / 1000L).toInt()
-    (totalDur - livePositionSec!!).coerceAtLeast(0).toLong()
+    (totalSec - livePositionSec!!).coerceAtLeast(0L)
   } else {
-    item.timeRemaining ?: if (progress > 0f && item.video.duration > 0L) {
-      (((1f - progress) * item.video.duration) / 1000L).toLong().coerceAtLeast(0L)
+    item.timeRemaining ?: if (progress > 0f && totalSec > 0L) {
+      (((1f - progress) * totalSec)).toLong().coerceAtLeast(0L)
     } else {
-      (item.video.duration / 1000L).coerceAtLeast(0L)
+      totalSec
     }
   }
 
-  val remainingFormatted = if (remainingSec > 0L) {
-    "-${VideoScanUtils.formatDuration(remainingSec * 1000L)}"
-  } else {
-    item.video.durationFormatted
-  }
+  val remainingFormatted = "-${VideoScanUtils.formatDuration(remainingSec * 1000L)}"
 
   val infiniteTransition = rememberInfiniteTransition(label = "bentoPulse")
   val pulseScale by infiniteTransition.animateFloat(
@@ -969,7 +1024,7 @@ private fun BentoHeroSpotlightCard(
 
           Text(
             text = if (isAudio) {
-              "$originalCodec • $remainingFormatted remaining"
+              "$originalCodec • $remainingFormatted/$totalFormatted"
             } else {
               "$originalCodec • ${item.video.durationFormatted}"
             },
@@ -986,33 +1041,15 @@ private fun BentoHeroSpotlightCard(
           horizontalArrangement = Arrangement.spacedBy(12.dp),
           verticalAlignment = Alignment.CenterVertically,
         ) {
-          // Media Thumbnail Box
+          // Media Thumbnail Box (clean thumbnail: NO play button overlay, NO codec badge)
           Box {
             BentoMediaThumbnail(
               video = item.video,
               modifier = Modifier
                 .size(width = if (isAudio) 70.dp else 108.dp, height = 66.dp)
                 .clip(RoundedCornerShape(16.dp)),
+              showPlayOverlay = !isAudio,
             )
-            if (isAudio) {
-              Surface(
-                modifier = Modifier
-                  .padding(4.dp)
-                  .align(Alignment.BottomStart),
-                shape = RoundedCornerShape(4.dp),
-                color = Color.Black.copy(alpha = 0.75f),
-              ) {
-                Text(
-                  text = originalCodec,
-                  style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 8.sp,
-                    fontWeight = FontWeight.Bold,
-                  ),
-                  color = MaterialTheme.colorScheme.tertiary,
-                  modifier = Modifier.padding(horizontal = 3.dp, vertical = 1.dp),
-                )
-              }
-            }
           }
 
           // Information & Visualizer
@@ -1083,6 +1120,65 @@ private fun BentoHeroSpotlightCard(
                   color = MaterialTheme.colorScheme.primary,
                 )
               }
+            }
+          }
+        }
+
+        // Playback Controls Row (Previous - Play/Pause - Next) for Audio Pulsing
+        if (isAudio) {
+          Row(
+            modifier = Modifier
+              .fillMaxWidth()
+              .padding(top = 2.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            IconButton(
+              onClick = onPrevious,
+              modifier = Modifier.size(36.dp),
+            ) {
+              Icon(
+                imageVector = Icons.RoundedFilled.SkipPrevious,
+                contentDescription = "Previous",
+                modifier = Modifier.size(22.dp),
+                tint = MaterialTheme.colorScheme.tertiary,
+              )
+            }
+
+            Spacer(modifier = Modifier.width(18.dp))
+
+            Surface(
+              onClick = onPlayPause,
+              modifier = Modifier.size(40.dp),
+              shape = CircleShape,
+              color = MaterialTheme.colorScheme.tertiary,
+              shadowElevation = 3.dp,
+            ) {
+              Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.fillMaxSize(),
+              ) {
+                Icon(
+                  imageVector = if (isPlaying) Icons.RoundedFilled.Pause else Icons.RoundedFilled.PlayArrow,
+                  contentDescription = if (isPlaying) "Pause" else "Play",
+                  modifier = Modifier.size(22.dp),
+                  tint = MaterialTheme.colorScheme.onTertiary,
+                )
+              }
+            }
+
+            Spacer(modifier = Modifier.width(18.dp))
+
+            IconButton(
+              onClick = onNext,
+              modifier = Modifier.size(36.dp),
+            ) {
+              Icon(
+                imageVector = Icons.RoundedFilled.SkipNext,
+                contentDescription = "Next",
+                modifier = Modifier.size(22.dp),
+                tint = MaterialTheme.colorScheme.tertiary,
+              )
             }
           }
         }
@@ -1370,6 +1466,7 @@ private fun BentoQuickTile(
 private fun BentoMediaThumbnail(
   video: Video,
   modifier: Modifier = Modifier,
+  showPlayOverlay: Boolean = true,
 ) {
   val thumbnailRepository = koinInject<ThumbnailRepository>()
   val density = LocalDensity.current
@@ -1421,20 +1518,22 @@ private fun BentoMediaThumbnail(
       }
     }
 
-    // Play button specular overlay
-    Box(
-      modifier = Modifier
-        .size(28.dp)
-        .clip(CircleShape)
-        .background(Color.Black.copy(alpha = 0.45f)),
-      contentAlignment = Alignment.Center,
-    ) {
-      Icon(
-        imageVector = Icons.RoundedFilled.PlayArrow,
-        contentDescription = null,
-        modifier = Modifier.size(16.dp),
-        tint = Color.White,
-      )
+    // Play button specular overlay (can be hidden, e.g. for audio pulsing)
+    if (showPlayOverlay) {
+      Box(
+        modifier = Modifier
+          .size(28.dp)
+          .clip(CircleShape)
+          .background(Color.Black.copy(alpha = 0.45f)),
+        contentAlignment = Alignment.Center,
+      ) {
+        Icon(
+          imageVector = Icons.RoundedFilled.PlayArrow,
+          contentDescription = null,
+          modifier = Modifier.size(16.dp),
+          tint = Color.White,
+        )
+      }
     }
   }
 }

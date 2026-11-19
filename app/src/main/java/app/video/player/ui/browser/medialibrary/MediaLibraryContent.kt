@@ -816,7 +816,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
               } else {
                 VideoListContent(
                   folderId = "media_library_${pageType.name.lowercase()}",
-                  videosWithInfo = pageVideosWithInfo,
+                  videosWithInfo = if (pageType == MediaLibraryType.All && !isSearching) emptyList() else pageVideosWithInfo,
                   isLoading = isLoading && videos.isEmpty(),
                   isRefreshing = isRefreshing,
                   recentlyPlayedFilePath = recentlyPlayedFilePath,

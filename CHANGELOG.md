@@ -5,11 +5,21 @@ These notes are written in plain English and focus on what changed for real use.
 ## 1.0.0
 
 ### 🌌 Dual-Horizon Rails & Smart Audio Architecture
+- **Exclusive All Media Horizon Layout:**
+  - Removed vertical redundant list of media under **Media Library > All Media** so the tab exclusively showcases the Bento Horizon Hub (Sonic Soundstage Horizon, Audio Pulsing, Cinematic Video Horizon, Recently Played).
+- **Audio Pulsing Dedicated Controls & Clean Thumbnail:**
+  - Integrated interactive Previous, Play/Pause, and Next transport controls directly into the Audio Pulsing hero card with live playback state sync and seamless playlist traversal.
+  - Removed the play button overlay and codec badge overlay from the thumbnail in Audio Pulsing for an uncluttered cover art presentation.
+- **Dynamic Time Format (`-MM:SS/MM:SS`):**
+  - Updated live remaining time display in Audio Pulsing and Horizon cards from `-MM:SS remaining` to `-MM:SS/MM:SS` (remaining time / total duration).
 - **Title-Wise Audio Sorting in Media Library:**
   - Audio files under **Media Library > All Media** and **Music** tabs are now sorted title-wise (by track title in natural alphabetical order), ensuring clean alphabetical track discovery.
-- **Original Audio Codec & Remaining Time in Audio Pulsing:**
-  - Audio Pulsing hero card now detects and displays the file's original audio codec (e.g. `FLAC`, `MP3`, `M4A`, `WAV`, `AAC`, `OPUS`) alongside live remaining playback time (`-MM:SS remaining`).
-  - Added an in-card seek progress bar with dynamic remaining time readout directly beneath the live animated equalizer waveform.
+- **Original Audio Codec & Real-Time Remaining Time:**
+  - Audio Pulsing hero card detects and displays the file's original audio codec alongside live remaining and total duration (`-MM:SS/MM:SS`).
+- **One UI 9 Continuous Fluid Waveform Visualizer:**
+  - Upgraded Audio Pulsing visualizer to Samsung One UI 9 3-tier aurora wave visualizer with continuous vsync frame-clock accumulation eliminating loop stuttering.
+- **Sonic Soundstage Horizon & Cinematic Video Horizon Position Sweep:**
+  - Swept positions: Sonic Soundstage Horizon placed at the top of the screen (Rail 1), Audio Pulsing in the center (Hero 2), Cinematic Video Horizon below Audio Pulsing (Rail 3), and Recently Played at the bottom (Rail 4).
 - **Sonic Soundstage Horizon (Top 10 Recently Played Files):**
   - Sonic Soundstage Horizon rail below Audio Pulsing now exclusively features recently played audio files, automatically displaying the top 10 most recently played tracks in chronological order with original codec badges and seek progress.
 - **Cinematic Video Horizon Up & Audio Pulsing Down:**
