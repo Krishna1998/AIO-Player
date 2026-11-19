@@ -47,6 +47,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -346,22 +347,6 @@ fun DualHorizonRails(
         ) {
           items(
             items = recentAudioItems,
-            key = { it.video.path },
-          ) { item ->
-            BentoHorizonAudioCard(
-              item = item,
-              onClick = { onPlayMedia(item.video) },
-            )
-          }
-        }
-      }
-    }
-  }
-}
-          horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-          items(
-            items = audioItems.take(20),
             key = { it.video.path },
           ) { item ->
             BentoHorizonAudioCard(
@@ -719,6 +704,22 @@ private fun BentoHeroSpotlightCard(
   val isAudio = item.video.isAudio
   val progress = item.progressPercentage ?: 0f
 
+  val originalCodec = remember(item.video) {
+    if (isAudio) getAudioCodec(item.video) else item.video.resolution.ifBlank { "HD" }
+  }
+  val remainingSec = item.timeRemaining ?: if (progress > 0f && item.video.duration > 0L) {
+    (((1f - progress) * item.video.duration) / 1000L).toLong().coerceAtLeast(0L)
+  } else {
+    (item.video.duration / 1000L).coerceAtLeast(0L)
+  }
+  val remainingFormatted = remember(remainingSec, item.video.durationFormatted) {
+    if (remainingSec > 0L) {
+      "-${VideoScanUtils.formatDuration(remainingSec * 1000L)}"
+    } else {
+      item.video.durationFormatted
+    }
+  }
+
   val infiniteTransition = rememberInfiniteTransition(label = "bentoPulse")
   val pulseScale by infiniteTransition.animateFloat(
     initialValue = 0.85f,
@@ -810,22 +811,6 @@ private fun BentoHeroSpotlightCard(
                 ),
                 color = if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
               )
-            }
-          }
-
-          val originalCodec = remember(item.video) {
-            if (isAudio) getAudioCodec(item.video) else item.video.resolution.ifBlank { "HD" }
-          }
-          val remainingSec = item.timeRemaining ?: if (progress > 0f && item.video.duration > 0L) {
-            (((1f - progress) * item.video.duration) / 1000L).toLong().coerceAtLeast(0L)
-          } else {
-            (item.video.duration / 1000L).coerceAtLeast(0L)
-          }
-          val remainingFormatted = remember(remainingSec, item.video.durationFormatted) {
-            if (remainingSec > 0L) {
-              "-${VideoScanUtils.formatDuration(remainingSec * 1000L)}"
-            } else {
-              item.video.durationFormatted
             }
           }
 
