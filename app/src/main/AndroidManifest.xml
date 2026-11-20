@@ -54,6 +54,7 @@
         android:theme="@style/Theme.videoplayer"
         android:largeHeap="true"
         android:hardwareAccelerated="true"
+        android:usesCleartextTraffic="true"
         android:networkSecurityConfig="@xml/network_security_config"
         tools:targetApi="35">
         <!-- Initialize WorkManager on demand, outside the startup rendering path. -->

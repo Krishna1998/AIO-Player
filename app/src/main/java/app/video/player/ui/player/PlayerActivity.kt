@@ -4166,7 +4166,9 @@ class PlayerActivity :
         // PlaybackSession opens one fresh descriptor immediately before every actual load.
         Intent.ACTION_VIEW -> intent.data?.resolveUri(this, allowFdFallback = false)
         Intent.ACTION_SEND -> parsePathFromSendIntent(intent)
-        else -> intent.getStringExtra("uri")
+        else -> intent.getStringExtra("uri") ?: intent.data?.resolveUri(this, allowFdFallback = false)
+      } ?: extractUriFromIntent(intent)?.let { uri ->
+        uri.resolveUri(this, allowFdFallback = false) ?: uri.toString().takeIf { it.isNotBlank() }
       }
 
   /**

@@ -250,7 +250,7 @@ internal fun Uri.resolveUri(
     "data" -> "data://$schemeSpecificPart"
     "archive" -> toString()
     NetworkPlaybackUri.SCHEME, XtreamPlaybackUri.SCHEME -> toString()
-    in Utils.PROTOCOLS -> toString()
+    in Utils.PROTOCOLS, in app.video.player.utils.media.MediaUtils.STREAM_PROTOCOLS -> toString()
     else -> {
       Log.e(TAG, "Unsupported URI scheme: $scheme")
       null

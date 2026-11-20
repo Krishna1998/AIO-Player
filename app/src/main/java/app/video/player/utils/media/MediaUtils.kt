@@ -574,6 +574,11 @@ object MediaUtils {
   const val EXTRA_MEDIA_POSTER_URL = "media_poster_url"
   const val EXTRA_MEDIA_BACKDROP_URL = "media_backdrop_url"
 
+  val STREAM_PROTOCOLS = setOf(
+    "http", "https", "ftp", "ftps", "rtmp", "rtmps", "rtp", "rtsp", "rtsps",
+    "mms", "mmst", "mmsh", "tcp", "udp", "gopher", "sctp", "srt", "rist",
+  )
+
   /**
    * Validate URL structure and protocol support.
    * Checks only URL format and MPV protocol support (http, https, rtsp, rtmp, etc.).
@@ -581,9 +586,10 @@ object MediaUtils {
    */
   fun isURLValid(url: String): Boolean =
     url.toUri().let { uri ->
+      val scheme = uri.scheme?.lowercase() ?: return false
       val structureOk =
         uri.isHierarchical && !uri.isRelative && (!uri.host.isNullOrBlank() || !uri.path.isNullOrBlank())
-      structureOk && Utils.PROTOCOLS.contains(uri.scheme)
+      structureOk && (scheme in STREAM_PROTOCOLS || Utils.PROTOCOLS.contains(scheme))
     }
 
   /**

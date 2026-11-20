@@ -10,17 +10,26 @@
 package app.video.player.utils.media
 
 object SharedUrlExtractor {
-  private val webUrlPattern = Regex("""(?i)\bhttps?://[^\s<>\"'‘’“”]+""")
+  private val webUrlPattern = Regex("""(?i)\b(?:https?|rtmp|rtmps|rtp|rtsp|rtsps|mms|mmst|mmsh|tcp|udp|ftp|ftps|srt|rist)://[^\s<>\"'‘’“”]+""")
   private val simpleTrailingPunctuation =
     charArrayOf('.', ',', ';', ':', '!', '?', '…', '。', '，', '；', '：', '！', '？', '、')
 
-  fun normalizeInput(text: String): String = firstWebUrl(text) ?: text.trim()
+  fun normalizeInput(text: String): String {
+    val trimmed = text.trim()
+    val extracted = firstWebUrl(trimmed)
+    if (extracted != null) return extracted
+    // If the input doesn't contain a scheme but looks like a network address/host (e.g. 192.168.1.5:8080 or domain.com/stream)
+    if (!trimmed.contains("://") && (trimmed.contains(':') || trimmed.contains('/')) && !trimmed.startsWith('/')) {
+      return "http://$trimmed"
+    }
+    return trimmed
+  }
 
   fun firstWebUrl(text: String): String? =
     webUrlPattern
       .findAll(text)
       .map { match -> trimSharePunctuation(match.value) }
-      .firstOrNull { url -> url.length > "https://".length }
+      .firstOrNull { url -> url.length > "rtsp://".length }
 
   private fun trimSharePunctuation(rawUrl: String): String {
     var url = rawUrl.trimEnd(*simpleTrailingPunctuation)
