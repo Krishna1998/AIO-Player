@@ -1522,7 +1522,21 @@ class ThumbnailRepository(
     connection: NetworkConnection? = null,
     fileSize: Long = -1L,
     mimeType: String? = null,
-  ): Bitmap? = null
+  ): Bitmap? {
+    if (!browserPreferences.showVideoThumbnails.get()) return null
+    val identity = networkThumbnailIdentity(path, connection)
+    val revision = cacheRevision.value
+    return getNonHttpNetworkThumbnail(
+      path = path,
+      connection = connection,
+      widthPx = widthPx,
+      heightPx = heightPx,
+      identity = identity,
+      fileSize = fileSize,
+      mimeType = mimeType,
+      revision = revision,
+    )
+  }
 
   suspend fun getThumbnailForNetworkSource(
     connectionId: Long,

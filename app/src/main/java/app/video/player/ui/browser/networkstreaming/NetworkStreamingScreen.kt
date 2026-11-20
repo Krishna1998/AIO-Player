@@ -1129,6 +1129,7 @@ private fun StreamLinkSection(
         }
 
         topRecent.forEach { entry ->
+          val posterOrBackdrop = entry.posterUrl ?: entry.backdropUrl
           Surface(
             modifier =
               Modifier
@@ -1140,16 +1141,43 @@ private fun StreamLinkSection(
             color = MaterialTheme.colorScheme.surfaceContainerLow,
           ) {
             Row(
-              modifier = Modifier.padding(start = 12.dp, top = 8.dp, bottom = 8.dp, end = 4.dp),
+              modifier = Modifier.padding(start = 8.dp, top = 8.dp, bottom = 8.dp, end = 4.dp),
               verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(6.dp),
+              horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-              Icon(
-                imageVector = Icons.RoundedFilled.Link,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(16.dp),
-              )
+              if (!posterOrBackdrop.isNullOrBlank()) {
+                Box(
+                  modifier =
+                    Modifier
+                      .size(width = 56.dp, height = 36.dp)
+                      .clip(RoundedCornerShape(8.dp))
+                      .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                  contentAlignment = Alignment.Center,
+                ) {
+                  app.video.player.presentation.components.RemoteImage(
+                    url = posterOrBackdrop,
+                    contentDescription = entry.fileName,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                  )
+                }
+              } else {
+                Box(
+                  modifier =
+                    Modifier
+                      .size(width = 36.dp, height = 36.dp)
+                      .clip(RoundedCornerShape(8.dp))
+                      .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                  contentAlignment = Alignment.Center,
+                ) {
+                  Icon(
+                    imageVector = Icons.RoundedFilled.Link,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(18.dp),
+                  )
+                }
+              }
               Column(modifier = Modifier.weight(1f)) {
                 val displayTitle =
                   remember(entry.fileName, entry.canonicalSourceUri) {

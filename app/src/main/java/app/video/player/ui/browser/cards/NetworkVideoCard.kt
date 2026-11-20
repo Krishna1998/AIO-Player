@@ -90,7 +90,7 @@ fun NetworkVideoCard(
   val showVideoThumbnails by browserPreferences.showVideoThumbnails.collectAsState()
   val centerGridTitles by browserPreferences.centerGridTitles.collectAsState()
 
-  val displayThumb = false
+  val displayThumb = showVideoThumbnails
   val maxLines = if (unlimitedNameLines) Int.MAX_VALUE else 1
 
   val thumbSizeDp = 128.dp

@@ -88,7 +88,7 @@ fun NetworkImageCard(
   val unlimitedNameLines by appearancePreferences.unlimitedNameLines.collectAsState()
   val maxLines = if (unlimitedNameLines) Int.MAX_VALUE else 1
   val displayName = if (showExtensionField) file.name else file.name.substringBeforeLast('.', file.name)
-  val displayThumb = false
+  val displayThumb = showThumbnails
 
   // A grid card is as wide as its column, and the column count is a preference, so the thumbnail is
   // requested at the size the layout actually gave it. The fixed 160dp guess it replaces was smaller

@@ -54,11 +54,8 @@ internal fun safeRemoteImageUrl(value: String?): String? {
   return runCatching {
     val uri = URI(candidate)
     candidate.takeIf {
-      uri.scheme.equals("https", ignoreCase = true) &&
-        !uri.host.isNullOrBlank() &&
-        !uri.host.equals("localhost", ignoreCase = true) &&
-        uri.host != "127.0.0.1" &&
-        uri.host != "::1"
+      val scheme = uri.scheme?.lowercase()
+      (scheme == "https" || scheme == "http") && !uri.host.isNullOrBlank()
     }
   }.getOrNull()
 }
