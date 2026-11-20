@@ -85,10 +85,13 @@ fun PlayLinkSheet(
   val handleConfirm = {
     val url = normalizedInput
     if (url.isNotBlank() && MediaUtils.isURLValid(url)) {
-      val playableSource = url
       isSubmitting = true
       coroutineScope.launch {
         try {
+          val resolved = app.video.player.utils.media.HttpUtils.resolveDirectStreamUrl(url)
+          val playableSource = resolved.streamUrl
+          val resolvedTitle = resolved.title
+
           val extractedPlaylist =
             if (isPlaylistInput) {
               YtdlpManager.extractPlaylist(context, playableSource, ytdlPreferences).getOrNull()
@@ -97,7 +100,7 @@ fun PlayLinkSheet(
             }
           val firstEntry = extractedPlaylist?.entries?.firstOrNull()
           val selectedSource = firstEntry?.url ?: playableSource
-          val selectedName = firstEntry?.title ?: MediaInfoParser.parseStreamTitle(playableSource)
+          val selectedName = firstEntry?.title ?: resolvedTitle ?: MediaInfoParser.parseStreamTitle(playableSource)
           val selectedUri = runCatching { android.net.Uri.parse(selectedSource) }.getOrNull()
           val artworkUrl =
             firstEntry?.thumbnailUrl

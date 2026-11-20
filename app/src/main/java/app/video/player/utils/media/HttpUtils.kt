@@ -63,6 +63,11 @@ object HttpUtils {
       "player",
     )
 
+  data class ResolvedStream(
+    val streamUrl: String,
+    val title: String? = null,
+  )
+
   data class YouTubeMetadata(
     val title: String,
     val author: String? = null,
@@ -261,6 +266,176 @@ object HttpUtils {
       }
     }
 
+  /**
+   * Resolves a potentially wrapped webpage URL (such as a Telegram bot file-to-link watch page,
+   * embed page, or redirecting service) into the actual direct video stream URL and its title.
+   *
+   * If [url] is already a direct stream or non-HTML resource, it returns [url] unchanged
+   * (with extracted title if available).
+   */
+  suspend fun resolveDirectStreamUrl(url: String): ResolvedStream =
+    withContext(Dispatchers.IO) {
+      val trimmed = url.trim()
+      if (trimmed.isBlank()) return@withContext ResolvedStream(trimmed)
+
+      val uri = runCatching { Uri.parse(trimmed) }.getOrNull()
+      if (uri == null || !isNetworkStream(uri)) {
+        return@withContext ResolvedStream(trimmed)
+      }
+
+      // Do not touch YouTube or known music streaming URLs
+      if (isYouTubeUrl(uri) || isMusicStreamingUrl(uri)) {
+        return@withContext ResolvedStream(trimmed)
+      }
+
+      // 1. Check if the URL is a known file-to-link bot "/watch/" pattern
+      // e.g., https://.../watch/477107/Ninja+Assassin...mkv?hash=AgADqQ -> https://.../477107/Ninja+Assassin...mkv?hash=AgADqQ
+      val path = uri.path.orEmpty()
+      if (path.contains("/watch/")) {
+        val directCandidate = trimmed.replace("/watch/", "/")
+        try {
+          val (isDirect, directTitle) = probeDirectStream(directCandidate)
+          if (isDirect) {
+            Log.d(TAG, "Resolved /watch/ URL to direct stream: $directCandidate (title: $directTitle)")
+            return@withContext ResolvedStream(directCandidate, directTitle)
+          }
+        } catch (e: Exception) {
+          Log.w(TAG, "Probe candidate $directCandidate failed: ${e.message}")
+        }
+      }
+
+      // 2. Probe the input URL headers / content-type
+      var connection: HttpURLConnection? = null
+      try {
+        connection = (URL(trimmed).openConnection() as HttpURLConnection).apply {
+          requestMethod = "GET"
+          connectTimeout = CONNECTION_TIMEOUT
+          readTimeout = READ_TIMEOUT
+          setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+          setRequestProperty("Range", "bytes=0-16384")
+          instanceFollowRedirects = true
+        }
+        connection.connect()
+
+        val responseCode = connection.responseCode
+        val contentType = connection.contentType?.lowercase().orEmpty()
+        val disposition = connection.getHeaderField("Content-Disposition")
+        val contentTitle = disposition?.let { parseContentDisposition(it) }
+
+        // If it's already video/audio or stream media
+        if (contentType.startsWith("video/") ||
+          contentType.startsWith("audio/") ||
+          contentType.contains("octet-stream") ||
+          contentType.contains("matroska") ||
+          contentType.contains("mp4") ||
+          contentType.contains("mpegurl")
+        ) {
+          return@withContext ResolvedStream(trimmed, contentTitle)
+        }
+
+        // If it returned HTML, inspect the page for video elements or player sources
+        if (contentType.contains("text/html") && (responseCode in 200..299)) {
+          val html = connection.inputStream.bufferedReader().use { reader ->
+            val chars = CharArray(32768)
+            val read = reader.read(chars, 0, chars.size)
+            if (read > 0) String(chars, 0, read) else ""
+          }
+
+          // Extract title from HTML (<p id="myDiv">...</p> or <title>...</title>)
+          val extractedHtmlTitle = extractTitleFromHtml(html)
+
+          // Extract video src from HTML
+          // Patterns:
+          // <video ... src="URL" ...>
+          // <source ... src="URL" ...>
+          val videoSrcRegex = Regex("""<(?:video|source)[^>]+src=["']([^"']+)["']""", RegexOption.IGNORE_CASE)
+          val match = videoSrcRegex.find(html)
+          if (match != null) {
+            var extractedSrc = match.groupValues[1].trim()
+            if (extractedSrc.startsWith("//")) {
+              extractedSrc = "${uri.scheme ?: "https"}:$extractedSrc"
+            } else if (extractedSrc.startsWith("/")) {
+              extractedSrc = "${uri.scheme ?: "https"}://${uri.host}$extractedSrc"
+            }
+            if (isNetworkStream(Uri.parse(extractedSrc))) {
+              Log.d(TAG, "Extracted video source from HTML: $extractedSrc (title: $extractedHtmlTitle)")
+              return@withContext ResolvedStream(extractedSrc, extractedHtmlTitle ?: contentTitle)
+            }
+          }
+
+          // If /watch/ replacement was not done earlier, try it here as fallback
+          if (path.contains("/watch/")) {
+            val candidate = trimmed.replace("/watch/", "/")
+            return@withContext ResolvedStream(candidate, extractedHtmlTitle ?: contentTitle)
+          }
+        }
+      } catch (e: Exception) {
+        Log.w(TAG, "Error resolving direct stream URL for $url: ${e.message}")
+      } finally {
+        connection?.disconnect()
+      }
+
+      ResolvedStream(trimmed)
+    }
+
+  private fun probeDirectStream(url: String): Pair<Boolean, String?> {
+    var connection: HttpURLConnection? = null
+    try {
+      connection = (URL(url).openConnection() as HttpURLConnection).apply {
+        requestMethod = "GET"
+        connectTimeout = CONNECTION_TIMEOUT
+        readTimeout = READ_TIMEOUT
+        setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+        setRequestProperty("Range", "bytes=0-1024")
+        instanceFollowRedirects = true
+      }
+      connection.connect()
+
+      val responseCode = connection.responseCode
+      val contentType = connection.contentType?.lowercase().orEmpty()
+      val disposition = connection.getHeaderField("Content-Disposition")
+      val title = disposition?.let { parseContentDisposition(it) }
+
+      val isMedia = responseCode in 200..299 && (
+        contentType.startsWith("video/") ||
+          contentType.startsWith("audio/") ||
+          contentType.contains("octet-stream") ||
+          contentType.contains("matroska") ||
+          contentType.contains("mp4") ||
+          contentType.contains("mpegurl")
+      )
+      return Pair(isMedia, title)
+    } catch (_: Exception) {
+      return Pair(false, null)
+    } finally {
+      connection?.disconnect()
+    }
+  }
+
+  private fun extractTitleFromHtml(html: String): String? {
+    // 1. Check for Telegram bot Div: <p id="myDiv">...</p>
+    val myDivRegex = Regex("""<p[^>]+id=["']myDiv["'][^>]*>([^<]+)</p>""", RegexOption.IGNORE_CASE)
+    myDivRegex.find(html)?.let { match ->
+      val title = match.groupValues[1].trim()
+      if (title.isNotBlank()) return title
+    }
+
+    // 2. Check for <title>...</title>
+    val titleRegex = Regex("""<title[^>]*>([^<]+)</title>""", RegexOption.IGNORE_CASE)
+    titleRegex.find(html)?.let { match ->
+      var title = match.groupValues[1].trim()
+      // Remove common prefix e.g. "Dhruv Mirror FILES | "
+      if (title.contains("|")) {
+        val afterPipe = title.substringAfterLast("|").trim()
+        if (afterPipe.isNotBlank()) title = afterPipe
+      }
+      if (title.isNotBlank() && !genericRouteTitles.contains(title.lowercase())) {
+        return title
+      }
+    }
+    return null
+  }
+
   private fun getFilenameFromHttpHeaders(url: String): String? {
     var connection: HttpURLConnection? = null
     try {
@@ -268,21 +443,38 @@ object HttpUtils {
       connection.requestMethod = "HEAD"
       connection.connectTimeout = CONNECTION_TIMEOUT
       connection.readTimeout = READ_TIMEOUT
-      connection.setRequestProperty("User-Agent", "VideoPlayer/1.0")
+      connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
       connection.instanceFollowRedirects = true
       connection.connect()
 
       val responseCode = connection.responseCode
-      if (responseCode != HttpURLConnection.HTTP_OK && responseCode != HttpURLConnection.HTTP_PARTIAL) {
-        Log.w(TAG, "HTTP response: $responseCode")
+      if (responseCode == HttpURLConnection.HTTP_OK || responseCode == HttpURLConnection.HTTP_PARTIAL) {
+        connection.getHeaderField("Content-Disposition")?.let {
+          parseContentDisposition(it)?.let { filename -> return filename }
+        }
+        connection.getHeaderField("Content-Location")?.let {
+          return extractFilenameFromUrlPath(Uri.parse(it))
+        }
       }
 
-      connection.getHeaderField("Content-Disposition")?.let {
-        parseContentDisposition(it)?.let { filename -> return filename }
-      }
+      // If HEAD is not allowed (405) or forbidden (403), fallback to GET with Range 0-0
+      if (responseCode == HttpURLConnection.HTTP_BAD_METHOD || responseCode == HttpURLConnection.HTTP_FORBIDDEN || responseCode == 400) {
+        connection.disconnect()
+        connection = URL(url).openConnection() as HttpURLConnection
+        connection.requestMethod = "GET"
+        connection.connectTimeout = CONNECTION_TIMEOUT
+        connection.readTimeout = READ_TIMEOUT
+        connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+        connection.setRequestProperty("Range", "bytes=0-0")
+        connection.instanceFollowRedirects = true
+        connection.connect()
 
-      connection.getHeaderField("Content-Location")?.let {
-        return extractFilenameFromUrlPath(Uri.parse(it))
+        connection.getHeaderField("Content-Disposition")?.let {
+          parseContentDisposition(it)?.let { filename -> return filename }
+        }
+        connection.getHeaderField("Content-Location")?.let {
+          return extractFilenameFromUrlPath(Uri.parse(it))
+        }
       }
 
       return null
@@ -359,12 +551,22 @@ object HttpUtils {
 
   /**
    * True when [uri] is a network stream that points directly at a media/manifest file
-   * (e.g. .m3u8/.mpd/.mp4/.ts). Such URLs should bypass yt-dlp and be handed straight to
-   * mpv/ffmpeg's native demuxers, exactly like a dedicated player (MX Player/VLC) would.
+   * (e.g. .m3u8/.mpd/.mp4/.ts, or query params like dl=1 or direct media query). Such URLs should bypass
+   * yt-dlp and be handed straight to mpv/ffmpeg's native demuxers, exactly like a dedicated player (MX Player/VLC) would.
    */
   fun isDirectMediaUrl(uri: Uri?): Boolean {
     if (uri == null || !isNetworkStream(uri)) return false
-    return hasDirectMediaExtension(uri)
+    if (hasDirectMediaExtension(uri)) return true
+    
+    // Check if query parameters indicate a direct file download or contain a media filename
+    val query = uri.query?.lowercase().orEmpty()
+    if (query.contains("dl=1") || query.contains("download=1")) return true
+    for (paramName in listOf("file", "filename", "path", "src", "url")) {
+      val paramVal = uri.getQueryParameter(paramName)?.lowercase() ?: continue
+      val ext = paramVal.substringAfterLast('.', "")
+      if (ext in directMediaExtensions) return true
+    }
+    return false
   }
 
   private fun hasDirectMediaExtension(uri: Uri): Boolean {

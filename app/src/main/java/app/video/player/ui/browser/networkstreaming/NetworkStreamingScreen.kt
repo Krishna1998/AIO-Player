@@ -155,17 +155,21 @@ object NetworkStreamingScreen : Screen {
       linkPlaybackJob =
         coroutineScope.launch {
           try {
+            val resolved = HttpUtils.resolveDirectStreamUrl(url)
+            val playableSource = resolved.streamUrl
+            val resolvedTitle = resolved.title
+
             val extractedPlaylist =
-              if (YtdlpManager.isPotentialPlaylistUrl(url)) {
-                YtdlpManager.extractPlaylist(context, url, ytdlPreferences).getOrNull()
+              if (YtdlpManager.isPotentialPlaylistUrl(playableSource)) {
+                YtdlpManager.extractPlaylist(context, playableSource, ytdlPreferences).getOrNull()
               } else {
                 null
               }
-            viewModel.recordSubmittedLink(url)
+            viewModel.recordSubmittedLink(playableSource, resolvedTitle)
             if (extractedPlaylist != null) {
               YtdlpManager.playPlaylist(context, extractedPlaylist, "network_stream")
             } else {
-              MediaUtils.playFile(url, context, "network_stream")
+              MediaUtils.playFile(playableSource, context, "network_stream", title = resolvedTitle)
             }
           } finally {
             linkPlaybackJob = null
@@ -582,9 +586,13 @@ object NetworkStreamingScreen : Screen {
         isOpen = showAddMediaDialog,
         onDismiss = { showAddMediaDialog = false },
         onSubmit = { url ->
-          val playableSource = url.trim()
-          viewModel.saveLinkToMedia(playableSource)
-          MediaUtils.playFile(playableSource, context, "network_stream")
+          coroutineScope.launch {
+            val resolved = HttpUtils.resolveDirectStreamUrl(url)
+            val playableSource = resolved.streamUrl
+            val resolvedTitle = resolved.title
+            viewModel.saveLinkToMedia(playableSource, resolvedTitle)
+            MediaUtils.playFile(playableSource, context, "network_stream", title = resolvedTitle)
+          }
         },
       )
 

@@ -330,12 +330,12 @@ class NetworkStreamingViewModel(
     Log.d(ENRICHMENT_TAG, "artwork raw=\"$rawTitle\" query=\"$query\" year=$year $outcome")
   }
 
-  fun recordSubmittedLink(url: String) {
+  fun recordSubmittedLink(url: String, knownTitle: String? = null) {
     val source = url.trim()
     if (source.isBlank() || !MediaUtils.isURLValid(source)) return
     viewModelScope.launch {
       val uri = runCatching { Uri.parse(source) }.getOrNull()
-      val initialTitle = MediaInfoParser.parseStreamTitle(source)
+      val initialTitle = knownTitle?.takeIf(String::isNotBlank) ?: MediaInfoParser.parseStreamTitle(source)
       streamEntryRepository.saveNormalEntry(
         canonicalSourceUri = source,
         fileName = initialTitle,
@@ -353,7 +353,7 @@ class NetworkStreamingViewModel(
           )
         }
       } else {
-        val betterTitle = HttpUtils.extractFilenameFromUrl(source)
+        val betterTitle = if (knownTitle.isNullOrBlank()) HttpUtils.extractFilenameFromUrl(source) else knownTitle
         if (betterTitle != null && !HttpUtils.isLikelyJunkTitle(betterTitle) && betterTitle != initialTitle && betterTitle != uri?.host) {
           streamEntryRepository.saveNormalEntry(
             canonicalSourceUri = source,
