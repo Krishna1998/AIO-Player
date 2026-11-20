@@ -54,4 +54,5 @@ val domainModule =
     single { app.video.player.data.lyrics.LyricsTranslationService(get()) }
     single { app.video.player.repository.lyrics.LyricsRepository(androidContext(), get(), get()) }
     single { app.video.player.repository.SeerrRepository(get(), get(), get()) }
+    single { app.video.player.domain.thumbnail.OnlineMoviePosterRepository(androidContext(), get(), get(), get()) }
   }

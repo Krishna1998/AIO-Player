@@ -143,6 +143,8 @@ class BrowserPreferences(
 
   /** Thumbnails generated at the same time; 0 means Auto (a safe value for this device). */
   val thumbnailParallelism = preferenceStore.getInt("thumbnail_parallelism", 0)
+  val autoFetchOnlinePosters = preferenceStore.getBoolean("auto_fetch_online_posters", true)
+  val replaceEmbeddedWithOnlinePosters = preferenceStore.getBoolean("replace_embedded_with_online_posters", true)
   val showSizeChip = preferenceStore.getBoolean("show_size_chip", false)
 
   // Metadata-dependent chips (disabled by default for better performance)

@@ -121,6 +121,10 @@
   <string name="pref_appearance_thumbnail_parallelism_value">%1$d of %2$d</string>
   <string name="pref_appearance_thumbnail_parallelism_dialog_summary">How many thumbnails are created at the same time. More is faster but uses more memory and battery and can make scrolling stutter. Auto picks a safe value for this device.</string>
   <string name="pref_appearance_thumbnail_parallelism_warning">Higher than the %1$d recommended for this device. Lower it if lists lag or the app is closed in the background.</string>
+  <string name="pref_appearance_auto_fetch_online_posters_title">Auto-fetch movie &amp; show posters</string>
+  <string name="pref_appearance_auto_fetch_online_posters_summary">Automatically download official posters from TMDB, TVMaze &amp; OMDb for local movies to replace missing or poor thumbnails</string>
+  <string name="pref_appearance_replace_promotional_artwork_title">Replace promotional embedded covers</string>
+  <string name="pref_appearance_replace_promotional_artwork_summary">Suppress torrent website ads and promotional covers, prioritizing official online posters or video frames</string>
   <string name="pref_nav_music_title">Show Music tab</string>
   <string name="pref_nav_music_summary">Show or hide Music in the bottom navigation bar</string>
   <string name="pref_nav_network_title">Show Network tab</string>

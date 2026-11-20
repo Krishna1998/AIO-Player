@@ -275,6 +275,17 @@ object MediaUtils {
         videoSource?.isAudio == true ||
         (localPath?.let { File(it).extension.lowercase() in FileTypeUtils.AUDIO_EXTENSIONS } ?: false)
 
+    val resolvedPosterUrl = posterUrl ?: runCatching {
+      if (videoSource != null && !isAudioMedia) {
+        val onlinePosterRepo = org.koin.java.KoinJavaComponent.get<app.video.player.domain.thumbnail.OnlineMoviePosterRepository>(
+          app.video.player.domain.thumbnail.OnlineMoviePosterRepository::class.java,
+        )
+        onlinePosterRepo.getCachedPosterFile(videoSource)?.let { file ->
+          Uri.fromFile(file).toString()
+        }
+      } else null
+    }.getOrNull()
+
     if (shouldPlayInMiniPlayerOnly(isAudioMedia)) {
       val queueItems =
         if (playlist.isNotEmpty()) {
@@ -288,7 +299,7 @@ object MediaUtils {
               headers = headers.orEmpty(),
               artworkUri =
                 playlistArtworkUrls.getOrNull(idx)?.takeIf(String::isNotBlank)
-                  ?: posterUrl?.takeIf { idx == selIndex },
+                  ?: resolvedPosterUrl?.takeIf { idx == selIndex },
               durationSeconds = playlistDurationsSeconds.getOrNull(idx)?.takeIf { it > 0 },
             )
           }
@@ -304,7 +315,7 @@ object MediaUtils {
               artist = playlistArtists.firstOrNull(),
               mimeType = "audio/*",
               headers = headers.orEmpty(),
-              artworkUri = posterUrl ?: playlistArtworkUrls.firstOrNull(),
+              artworkUri = resolvedPosterUrl ?: playlistArtworkUrls.firstOrNull(),
               durationSeconds = durSec,
             ),
           )
@@ -357,7 +368,7 @@ object MediaUtils {
       subtitleTracks = subtitleTracks,
       lookupHints = lookupHints,
       mediaDescription = mediaDescription,
-      posterUrl = posterUrl,
+      posterUrl = resolvedPosterUrl,
       backdropUrl = backdropUrl,
       playlist = playlist,
       playlistIndex = playlistIndex,

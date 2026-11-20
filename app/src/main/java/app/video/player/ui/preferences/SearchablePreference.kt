@@ -266,6 +266,24 @@ object SearchablePreferences {
       )
       add(
         SearchablePreference(
+          titleRes = R.string.pref_appearance_auto_fetch_online_posters_title,
+          summaryRes = R.string.pref_appearance_auto_fetch_online_posters_summary,
+          keywords = listOf("poster", "movie", "tmdb", "omdb", "tvmaze", "online", "fetch", "cover", "thumbnail"),
+          category = "Appearance",
+          screen = AppearancePreferencesScreen,
+        ),
+      )
+      add(
+        SearchablePreference(
+          titleRes = R.string.pref_appearance_replace_promotional_artwork_title,
+          summaryRes = R.string.pref_appearance_replace_promotional_artwork_summary,
+          keywords = listOf("poster", "promotional", "ad", "torrent", "embedded", "replace", "cover", "thumbnail"),
+          category = "Appearance",
+          screen = AppearancePreferencesScreen,
+        ),
+      )
+      add(
+        SearchablePreference(
           titleRes = R.string.pref_gesture_tap_thumbnail_to_select_title,
           summaryRes = R.string.pref_gesture_tap_thumbnail_to_select_summary,
           keywords = listOf("thumbnail", "selection", "select", "tap", "gesture"),

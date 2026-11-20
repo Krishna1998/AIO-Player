@@ -825,7 +825,10 @@ object AppearancePreferencesScreen : Screen {
           item {
             ExpressivePreferenceGroup {
               val showFramePosition = thumbnailGenerator != ThumbnailGenerator.MediaStore && thumbnailMode == ThumbnailMode.FrameAtPosition
-              val itemCount = if (showFramePosition) 7 else 6
+              val autoFetchOnlinePosters by browserPreferences.autoFetchOnlinePosters.collectAsState()
+              val replaceEmbeddedWithOnlinePosters by browserPreferences.replaceEmbeddedWithOnlinePosters.collectAsState()
+              val baseCount = if (showFramePosition) 7 else 6
+              val itemCount = baseCount + 2
               val showVideoThumbnails by browserPreferences.showVideoThumbnails.collectAsState()
               SwitchPreference(
                 modifier = Modifier.settingsSearchTarget(R.string.pref_appearance_show_video_thumbnails_title),
@@ -1019,6 +1022,39 @@ object AppearancePreferencesScreen : Screen {
                     enabled = showVideoThumbnails,
                   )
                 }
+              }
+
+              val autoFetchIndex = if (showFramePosition) 6 else 5
+              val replaceEmbeddedIndex = if (showFramePosition) 7 else 6
+
+              ExpressivePreferenceTile(index = autoFetchIndex, itemCount = itemCount) {
+                SwitchPreference(
+                  value = autoFetchOnlinePosters,
+                  onValueChange = { browserPreferences.autoFetchOnlinePosters.set(it) },
+                  title = { Text(stringResource(id = R.string.pref_appearance_auto_fetch_online_posters_title)) },
+                  summary = {
+                    Text(
+                      text = stringResource(id = R.string.pref_appearance_auto_fetch_online_posters_summary),
+                      color = MaterialTheme.colorScheme.outline,
+                    )
+                  },
+                  enabled = showVideoThumbnails,
+                )
+              }
+
+              ExpressivePreferenceTile(index = replaceEmbeddedIndex, itemCount = itemCount) {
+                SwitchPreference(
+                  value = replaceEmbeddedWithOnlinePosters,
+                  onValueChange = { browserPreferences.replaceEmbeddedWithOnlinePosters.set(it) },
+                  title = { Text(stringResource(id = R.string.pref_appearance_replace_promotional_artwork_title)) },
+                  summary = {
+                    Text(
+                      text = stringResource(id = R.string.pref_appearance_replace_promotional_artwork_summary),
+                      color = MaterialTheme.colorScheme.outline,
+                    )
+                  },
+                  enabled = showVideoThumbnails && autoFetchOnlinePosters,
+                )
               }
 
               val tapThumbnailToSelect by gesturePreferences.tapThumbnailToSelect.collectAsState()

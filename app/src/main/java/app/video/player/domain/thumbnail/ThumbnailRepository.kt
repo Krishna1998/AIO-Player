@@ -102,6 +102,11 @@ class ThumbnailRepository(
   private val networkRepository by lazy {
     KoinJavaComponent.get<NetworkRepository>(NetworkRepository::class.java)
   }
+  val onlinePosterRepository by lazy {
+    KoinJavaComponent.get<OnlineMoviePosterRepository>(
+      OnlineMoviePosterRepository::class.java,
+    )
+  }
 
   private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
   private val memoryCache = BitmapMemoryCache<String>(heapDivisor = 8, maxSizeMiB = 48)
@@ -304,6 +309,18 @@ class ThumbnailRepository(
 
         val isNetwork = isNetworkUrl(video.path)
         val artworkTier = audioArtworkTier(video, widthPx, heightPx)
+        val isAudio = isAudioArtwork(video)
+        if (!isNetwork && !isAudio && browserPreferences.autoFetchOnlinePosters.get()) {
+          onlinePosterRepository.getCachedPosterBitmap(video, widthPx, heightPx)?.let { cachedPoster ->
+            val scaled = scaleBitmap(cachedPoster, widthPx, heightPx)
+            scaled.prepareToDraw()
+            diskCacheLock.read {
+              if (revision != cacheRevision.value) return@withPermit null
+              synchronized(memoryCache) { memoryCache.put(key, scaled) }
+            }
+            return@withPermit scaled
+          }
+        }
         val fullColor = artworkTier > 0
         var decoded = readBitmapFromDisk(diskCacheKey(video, generator, artworkTier), isNetwork, widthPx, heightPx, fullColor)
         if (decoded == null && !isNetwork) {
@@ -444,6 +461,7 @@ class ThumbnailRepository(
     }
 
     try {
+      runCatching { onlinePosterRepository.clearOnlinePosterCache() }
       listOf(
         File(context.cacheDir, "thumbnails"),
         File(context.filesDir, "thumbnails"),
@@ -791,7 +809,28 @@ class ThumbnailRepository(
     fun fitRequest(bitmap: Bitmap): Bitmap =
       if (artworkTier > 0) bitmap.scaleToThumbnailMax(artworkTier) else scaleBitmap(bitmap, widthPx, heightPx)
 
+    if (!isAudio && browserPreferences.autoFetchOnlinePosters.get()) {
+      onlinePosterRepository.getCachedPosterBitmap(video, widthPx, heightPx)?.let { cachedPoster ->
+        return fitRequest(cachedPoster)
+      }
+      onlinePosterRepository.fetchPosterAsync(video) { posterBitmap ->
+        repositoryScope.launch(Dispatchers.IO) {
+          val key = thumbnailKey(video, widthPx, heightPx, generator)
+          val diskKey = diskCacheKey(video, generator, artworkTier)
+          val revision = diskCacheLock.read { cacheRevision.value }
+          writeBitmapToDisk(diskKey, posterBitmap, false, revision)
+          val scaled = scaleBitmap(posterBitmap, widthPx, heightPx)
+          scaled.prepareToDraw()
+          diskCacheLock.read {
+            synchronized(memoryCache) { memoryCache.put(key, scaled) }
+          }
+          _thumbnailReadyKeys.tryEmit(key)
+        }
+      }
+    }
+
     var embeddedArtwork: Bitmap? = null
+    val replaceEmbedded = !isAudio && browserPreferences.replaceEmbeddedWithOnlinePosters.get()
     if (generator != ThumbnailGenerator.Native) {
       // MediaStore's generated audio thumbnail can be smaller than the artwork embedded in the
       // source file. Auto therefore prefers the original embedded image and uses MediaStore only
@@ -808,7 +847,7 @@ class ThumbnailRepository(
       currentCoroutineContext().ensureActive()
     }
 
-    if (isAudio || mode == ThumbnailMode.Smart || mode == ThumbnailMode.EmbeddedThumbnail) {
+    if (!replaceEmbedded && (isAudio || mode == ThumbnailMode.Smart || mode == ThumbnailMode.EmbeddedThumbnail)) {
       (embeddedArtwork ?: generateEmbeddedArtwork(video, artworkTier.takeIf { it > 0 } ?: thumbnailMaxSize()))
         ?.let { return fitRequest(it) }
       if (isAudio) {
