@@ -1497,7 +1497,7 @@ fun FileSystemSortDialog(
         )
         add(
           VisibilityToggle(
-            label = if (isAudio) "Total Songs" else "Total Media",
+            label = if (includeAudioBrowser) "Total Songs" else "Total Media",
             checked = showTotalVideosChip,
             onCheckedChange = { browserPreferences.showTotalVideosChip.set(it) },
           ),
