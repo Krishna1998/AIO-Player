@@ -863,34 +863,37 @@ class ThumbnailRepository(
       }
     }
 
-    if (isAudio && browserPreferences.autoFetchOnlineMusicArtwork.get()) {
+    val replaceEmbedded = if (isAudio) {
+      browserPreferences.replaceEmbeddedWithOnlineMusicArtwork.get()
+    } else {
+      browserPreferences.replaceEmbeddedWithOnlinePosters.get()
+    }
+
+    if (isAudio && browserPreferences.autoFetchOnlineMusicArtwork.get() && replaceEmbedded) {
       onlineMusicArtworkRepository.getCachedArtworkBitmap(video, widthPx, heightPx)?.let { cachedArtwork ->
         return fitRequest(cachedArtwork)
       }
-      if (browserPreferences.replaceEmbeddedWithOnlineMusicArtwork.get()) {
-        onlineMusicArtworkRepository.fetchArtworkAsync(video) { artworkBitmap ->
-          repositoryScope.launch(Dispatchers.IO) {
-            val key = thumbnailKey(video, widthPx, heightPx, generator)
-            val diskKey = diskCacheKey(video, generator, artworkTier)
-            val revision = diskCacheLock.read { cacheRevision.value }
-            writeBitmapToDisk(diskKey, artworkBitmap, false, revision)
-            val scaled = scaleBitmap(artworkBitmap, widthPx, heightPx)
-            if (!scaled.isRecycled) {
-              runCatching { scaled.prepareToDraw() }
-            }
-            diskCacheLock.read {
-              synchronized(memoryCache) { memoryCache.put(key, scaled) }
-            }
-            _thumbnailReadyKeys.tryEmit(key)
-            if (video.path.isNotBlank()) _thumbnailReadyKeys.tryEmit(video.path)
-            if (video.uri != Uri.EMPTY) _thumbnailReadyKeys.tryEmit(video.uri.toString())
+      onlineMusicArtworkRepository.fetchArtworkAsync(video) { artworkBitmap ->
+        repositoryScope.launch(Dispatchers.IO) {
+          val key = thumbnailKey(video, widthPx, heightPx, generator)
+          val diskKey = diskCacheKey(video, generator, artworkTier)
+          val revision = diskCacheLock.read { cacheRevision.value }
+          writeBitmapToDisk(diskKey, artworkBitmap, false, revision)
+          val scaled = scaleBitmap(artworkBitmap, widthPx, heightPx)
+          if (!scaled.isRecycled) {
+            runCatching { scaled.prepareToDraw() }
           }
+          diskCacheLock.read {
+            synchronized(memoryCache) { memoryCache.put(key, scaled) }
+          }
+          _thumbnailReadyKeys.tryEmit(key)
+          if (video.path.isNotBlank()) _thumbnailReadyKeys.tryEmit(video.path)
+          if (video.uri != Uri.EMPTY) _thumbnailReadyKeys.tryEmit(video.uri.toString())
         }
       }
     }
 
     var embeddedArtwork: Bitmap? = null
-    val replaceEmbedded = !isAudio && browserPreferences.replaceEmbeddedWithOnlinePosters.get()
     if (generator != ThumbnailGenerator.Native) {
       // MediaStore's generated audio thumbnail can be smaller than the artwork embedded in the
       // source file. Auto therefore prefers the original embedded image and uses MediaStore only

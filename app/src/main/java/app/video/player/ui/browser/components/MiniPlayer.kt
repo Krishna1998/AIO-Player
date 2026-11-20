@@ -977,9 +977,12 @@ private fun rememberMiniPlayerArtwork(
       return@LaunchedEffect
     }
     artwork = withContext(Dispatchers.IO) {
-      val cached = repository.onlineMusicArtworkRepository.getCachedArtworkBitmap(pathOrUri, title, artist, 480, 480)
-      if (cached != null) {
-        return@withContext MiniPlayerArtwork(bitmap = cached)
+      val replaceEmbedded = repository.browserPreferences.replaceEmbeddedWithOnlineMusicArtwork.get()
+      if (replaceEmbedded) {
+        val cached = repository.onlineMusicArtworkRepository.getCachedArtworkBitmap(pathOrUri, title, artist, 480, 480)
+        if (cached != null) {
+          return@withContext MiniPlayerArtwork(bitmap = cached)
+        }
       }
       val nativeArtworkUri = artworkUri?.takeUnless {
         isLocalArtworkSource(pathOrUri) && runCatching { Uri.parse(it).authority == android.provider.MediaStore.AUTHORITY }.getOrDefault(false)
@@ -1003,7 +1006,7 @@ private fun rememberMiniPlayerArtwork(
           return@withContext MiniPlayerArtwork(bitmap = repoArt)
         }
       }
-      runCatching {
+      val localEmbedded = runCatching {
         if (pathOrUri.isNullOrBlank()) return@runCatching null
         val cleanPath =
           when {
@@ -1019,14 +1022,25 @@ private fun rememberMiniPlayerArtwork(
             retriever.setDataSource(context, Uri.parse(pathOrUri))
           }
           val pictureBytes = retriever.embeddedPicture
-          MiniPlayerArtwork(
-            bitmap = EmbeddedArtworkResolver.decodeEmbeddedArtwork(cleanPath, retriever, pictureBytes),
-            motionArtwork = EmbeddedMotionArtwork.animatedBytes(pictureBytes),
-          )
+          val bmp = EmbeddedArtworkResolver.decodeEmbeddedArtwork(cleanPath, retriever, pictureBytes)
+          if (bmp != null) {
+            MiniPlayerArtwork(
+              bitmap = bmp,
+              motionArtwork = EmbeddedMotionArtwork.animatedBytes(pictureBytes),
+            )
+          } else null
         } finally {
           runCatching { retriever.release() }
         }
       }.getOrNull()
+
+      if (localEmbedded != null) return@withContext localEmbedded
+
+      val cached = repository.onlineMusicArtworkRepository.getCachedArtworkBitmap(pathOrUri, title, artist, 480, 480)
+      if (cached != null) {
+        return@withContext MiniPlayerArtwork(bitmap = cached)
+      }
+      null
     }
   }
 

@@ -79,7 +79,7 @@ internal suspend fun ThumbnailRepository.getArtwork(
       val browserPrefs = org.koin.java.KoinJavaComponent.get<app.video.player.preferences.BrowserPreferences>(
         app.video.player.preferences.BrowserPreferences::class.java,
       )
-      if (browserPrefs.autoFetchOnlineMusicArtwork.get()) {
+      if (browserPrefs.replaceEmbeddedWithOnlineMusicArtwork.get() && browserPrefs.autoFetchOnlineMusicArtwork.get()) {
         // 1. Check memory / disk cache first
         onlineMusicArtworkRepository.getCachedArtworkBitmap(source, effectiveTitle, effectiveArtist, widthPx, heightPx)?.let {
           return@withContext it
@@ -95,9 +95,31 @@ internal suspend fun ThumbnailRepository.getArtwork(
     }
   }
 
-  getThumbnail(
+  val localThumbnail = getThumbnail(
     video,
     widthPx,
     heightPx,
   )
+  if (localThumbnail != null) return@withContext localThumbnail
+
+  if (isAudio) {
+    runCatching {
+      val browserPrefs = org.koin.java.KoinJavaComponent.get<app.video.player.preferences.BrowserPreferences>(
+        app.video.player.preferences.BrowserPreferences::class.java,
+      )
+      if (browserPrefs.autoFetchOnlineMusicArtwork.get()) {
+        onlineMusicArtworkRepository.getCachedArtworkBitmap(source, effectiveTitle, effectiveArtist, widthPx, heightPx)?.let {
+          return@withContext it
+        }
+        onlineMusicArtworkRepository.getCachedArtworkBitmap(video, widthPx, heightPx)?.let {
+          return@withContext it
+        }
+        onlineMusicArtworkRepository.getOrFetchArtwork(video, widthPx, heightPx, timeoutMs = 4000L)?.let { artwork ->
+          return@withContext artwork
+        }
+      }
+    }
+  }
+
+  null
 }

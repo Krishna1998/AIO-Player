@@ -384,9 +384,15 @@ private object AudioPresentationMetadataCache {
 
             val extractedTitle = retriever?.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) ?: title
 
-            var onlinePoster: Bitmap? = null
-            if (autoFetchOnline) {
-              onlinePoster = repository.onlineMusicArtworkRepository.getCachedArtworkBitmap(
+            val replaceEmbedded = repository.browserPreferences.replaceEmbeddedWithOnlineMusicArtwork.get()
+            val pictureBytes = retriever?.embeddedPicture
+            val embeddedArtwork = explicitArtwork ?: retriever?.let {
+              EmbeddedArtworkResolver.decodeEmbeddedArtwork(cleanPath ?: pathOrUri, it, pictureBytes)
+            } ?: (cleanPath?.let { EmbeddedArtworkResolver.decodeSidecar(it) })
+
+            var finalArtwork: Bitmap? = null
+            if (replaceEmbedded && autoFetchOnline) {
+              finalArtwork = repository.onlineMusicArtworkRepository.getCachedArtworkBitmap(
                 pathOrUri = pathOrUri,
                 title = extractedTitle,
                 artist = extractedArtist,
@@ -399,12 +405,24 @@ private object AudioPresentationMetadataCache {
                 widthPx = 960,
                 heightPx = 960,
                 timeoutMs = 3000L,
-              )
-            }
-
-            val pictureBytes = if (explicitArtwork == null && onlinePoster == null) retriever?.embeddedPicture else null
-            val finalArtwork = onlinePoster ?: explicitArtwork ?: retriever?.let {
-              EmbeddedArtworkResolver.decodeEmbeddedArtwork(cleanPath ?: pathOrUri, it, pictureBytes)
+              ) ?: embeddedArtwork
+            } else {
+              finalArtwork = embeddedArtwork ?: if (autoFetchOnline) {
+                repository.onlineMusicArtworkRepository.getCachedArtworkBitmap(
+                  pathOrUri = pathOrUri,
+                  title = extractedTitle,
+                  artist = extractedArtist,
+                  widthPx = 960,
+                  heightPx = 960,
+                ) ?: repository.onlineMusicArtworkRepository.getOrFetchArtworkForTrack(
+                  pathOrUri = pathOrUri,
+                  title = extractedTitle,
+                  artist = extractedArtist,
+                  widthPx = 960,
+                  heightPx = 960,
+                  timeoutMs = 3000L,
+                )
+              } else null
             }
 
             AudioPresentationMetadata(

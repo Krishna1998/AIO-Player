@@ -60,6 +60,12 @@ private data class ITunesSearchResponse(
 )
 
 @Serializable
+private data class DeezerArtist(
+  val id: Long? = null,
+  val name: String? = null,
+)
+
+@Serializable
 private data class DeezerAlbum(
   val id: Long? = null,
   val title: String? = null,
@@ -72,6 +78,7 @@ private data class DeezerAlbum(
 private data class DeezerTrack(
   val id: Long? = null,
   val title: String? = null,
+  val artist: DeezerArtist? = null,
   val album: DeezerAlbum? = null,
 )
 
@@ -117,14 +124,18 @@ object MusicTrackInfoParser {
     rawTitle = rawTitle.replace('_', ' ')
 
     var artist = video.artist.trim().takeUnless {
-      it.isBlank() || it.equals("<unknown>", ignoreCase = true) || it.equals("unknown artist", ignoreCase = true)
+      it.isBlank() || isGenericArtistName(it)
     }.orEmpty()
 
     if (artist.isBlank() && rawTitle.contains(" - ")) {
       val parts = rawTitle.split(" - ", limit = 2)
       if (parts.size == 2 && parts[0].isNotBlank() && parts[1].isNotBlank()) {
-        artist = parts[0].trim()
-        rawTitle = parts[1].trim()
+        val possibleArtist = parts[0].trim()
+        val possibleTitle = parts[1].trim()
+        if (!isGenericArtistName(possibleArtist) && !possibleArtist.all { it.isDigit() || it == '.' }) {
+          artist = possibleArtist
+          rawTitle = possibleTitle
+        }
       }
     }
 
@@ -133,6 +144,94 @@ object MusicTrackInfoParser {
 
     return CleanedMusicInfo(cleanTitle, cleanArtist)
   }
+}
+
+fun isGenericTrackName(title: String): Boolean {
+  val t = title.lowercase().trim()
+  if (t.length < 2) return true
+  if (t.all { it.isDigit() || it == '-' || it == '_' || it == ' ' || it == '.' }) return true
+  val genericRegex = Regex(
+    "^(?:track|audio|sound|record|recording|voice|song|untitled|new track|bgm|instrumental|sample|intro|outro|interlude|audiotrack|aud|rec)?\\s*\\d*$",
+    RegexOption.IGNORE_CASE,
+  )
+  return genericRegex.matches(t)
+}
+
+fun isGenericArtistName(artist: String): Boolean {
+  val a = artist.lowercase().trim()
+  if (a.length < 2) return true
+  val genericArtists = setOf("unknown", "unknown artist", "various", "various artists", "various artist", "<unknown>", "artist", "singer", "audio", "music")
+  return a in genericArtists || a.equals("<unknown>", ignoreCase = true)
+}
+
+internal fun normalizeForComparison(input: String): String {
+  return input.lowercase()
+    .replace(Regex("[^a-z0-9\\s]"), "")
+    .replace(Regex("\\s+"), " ")
+    .trim()
+}
+
+internal fun similarityScore(s1: String, s2: String): Double {
+  if (s1 == s2) return 1.0
+  if (s1.isEmpty() || s2.isEmpty()) return 0.0
+  val pairs1 = wordLetterPairs(s1)
+  val pairs2 = wordLetterPairs(s2)
+  val union = pairs1.size + pairs2.size
+  if (union == 0) return 0.0
+  var intersection = 0
+  for (p in pairs1) {
+    if (pairs2.remove(p)) intersection++
+  }
+  return (2.0 * intersection) / union
+}
+
+private fun wordLetterPairs(str: String): MutableList<String> {
+  val allPairs = mutableListOf<String>()
+  val words = str.split(" ")
+  for (w in words) {
+    for (i in 0 until w.length - 1) {
+      allPairs.add(w.substring(i, i + 2))
+    }
+  }
+  return allPairs
+}
+
+internal fun matchesMusicMetadata(
+  queryTitle: String,
+  queryArtist: String,
+  resultTitle: String?,
+  resultArtist: String?,
+): Boolean {
+  val resTitle = resultTitle?.trim().orEmpty()
+  if (resTitle.isBlank()) return false
+
+  val normQueryTitle = normalizeForComparison(queryTitle)
+  val normResTitle = normalizeForComparison(resTitle)
+  if (normQueryTitle.isBlank() || normResTitle.isBlank()) return false
+
+  val titleMatches = normQueryTitle == normResTitle ||
+    normQueryTitle.contains(normResTitle) ||
+    normResTitle.contains(normQueryTitle) ||
+    similarityScore(normQueryTitle, normResTitle) >= 0.70
+
+  if (!titleMatches) return false
+
+  val normQueryArtist = normalizeForComparison(queryArtist)
+  val resArtist = resultArtist?.trim().orEmpty()
+  val normResArtist = normalizeForComparison(resArtist)
+
+  if (normQueryArtist.isNotBlank() && !isGenericArtistName(queryArtist)) {
+    if (normResArtist.isBlank()) return false
+    val artistMatches = normQueryArtist == normResArtist ||
+      normQueryArtist.contains(normResArtist) ||
+      normResArtist.contains(normQueryArtist) ||
+      similarityScore(normQueryArtist, normResArtist) >= 0.65
+    return artistMatches
+  }
+
+  // When query artist is blank or generic, require strict title match and non-generic title
+  if (isGenericTrackName(queryTitle)) return false
+  return normQueryTitle == normResTitle || similarityScore(normQueryTitle, normResTitle) >= 0.85
 }
 
 class OnlineMusicArtworkRepository(
@@ -148,6 +247,24 @@ class OnlineMusicArtworkRepository(
   private val ongoingFetches = ConcurrentHashMap<String, Job>()
   private val fetchSemaphore = Semaphore(3)
 
+  init {
+    ensureCacheVersion()
+  }
+
+  private fun ensureCacheVersion() {
+    val versionMarker = File(artworkDir, "cache_v2.marker")
+    if (!versionMarker.exists()) {
+      runCatching {
+        artworkDir.listFiles()?.forEach { file ->
+          if (file.isFile && file.name != "cache_v2.marker") {
+            file.delete()
+          }
+        }
+        versionMarker.createNewFile()
+      }
+    }
+  }
+
   companion object {
     fun sha256(input: String): String =
       MessageDigest.getInstance("SHA-256")
@@ -158,8 +275,14 @@ class OnlineMusicArtworkRepository(
   fun artworkFileForPath(path: String): File =
     File(artworkDir, "p_${sha256(path)}.jpg")
 
-  fun artworkFileForTitleArtist(title: String, artist: String): File =
-    File(artworkDir, "t_${sha256(title.lowercase().trim() + "_" + artist.lowercase().trim())}.jpg")
+  fun artworkFileForTitleArtist(title: String, artist: String): File? {
+    val cleanT = title.lowercase().trim()
+    val cleanA = artist.lowercase().trim()
+    if (cleanT.length < 2 || cleanA.isBlank() || isGenericTrackName(cleanT) || isGenericArtistName(cleanA)) {
+      return null
+    }
+    return File(artworkDir, "t_${sha256(cleanT + "_" + cleanA)}.jpg")
+  }
 
   fun hasCachedArtwork(video: Video): Boolean =
     getCachedArtworkFile(video) != null
@@ -186,15 +309,15 @@ class OnlineMusicArtworkRepository(
     }
 
     val parsed = MusicTrackInfoParser.parse(video)
-    if (parsed.title.isNotBlank()) {
+    if (parsed.title.isNotBlank() && parsed.artist.isNotBlank() && !isGenericArtistName(parsed.artist)) {
       val fileByTitle = artworkFileForTitleArtist(parsed.title, parsed.artist)
-      if (fileByTitle.isFile && fileByTitle.length() > 500) return fileByTitle
+      if (fileByTitle != null && fileByTitle.isFile && fileByTitle.length() > 500) return fileByTitle
     }
 
     val cleanTitle = video.title.ifBlank { video.displayName }.substringBeforeLast('.').trim()
-    if (cleanTitle.isNotBlank() && cleanTitle != parsed.title) {
+    if (cleanTitle.isNotBlank() && video.artist.isNotBlank() && !isGenericArtistName(video.artist)) {
       val altFile = artworkFileForTitleArtist(cleanTitle, video.artist.trim())
-      if (altFile.isFile && altFile.length() > 500) return altFile
+      if (altFile != null && altFile.isFile && altFile.length() > 500) return altFile
     }
 
     return null
@@ -224,11 +347,27 @@ class OnlineMusicArtworkRepository(
       }
     }
 
-    if (!title.isNullOrBlank()) {
+    if (!title.isNullOrBlank() && !artist.isNullOrBlank() && !isGenericArtistName(artist)) {
       val cleanTitle = title.substringBeforeLast('.').trim()
-      val cleanArtist = artist?.trim().orEmpty()
+      val cleanArtist = artist.trim()
       val fileByTitle = artworkFileForTitleArtist(cleanTitle, cleanArtist)
-      if (fileByTitle.isFile && fileByTitle.length() > 500) return fileByTitle
+      if (fileByTitle != null && fileByTitle.isFile && fileByTitle.length() > 500) return fileByTitle
+
+      val dummyVideo = Video(
+        id = 0L, title = title, displayName = title, path = pathOrUri.orEmpty(),
+        uri = Uri.parse(pathOrUri.orEmpty()), duration = 0L, durationFormatted = "",
+        size = 0L, sizeFormatted = "", dateModified = 0L, dateAdded = 0L,
+        mimeType = "audio/*", bucketId = "", bucketDisplayName = "", width = 0, height = 0,
+        fps = 0f, resolution = "", isAudio = true, artist = cleanArtist,
+      )
+      val parsed = MusicTrackInfoParser.parse(dummyVideo)
+      if (parsed.title.isNotBlank() && parsed.artist.isNotBlank() && !isGenericArtistName(parsed.artist)) {
+        val fileByParsed = artworkFileForTitleArtist(parsed.title, parsed.artist)
+        if (fileByParsed != null && fileByParsed.isFile && fileByParsed.length() > 500) return fileByParsed
+      }
+    }
+    return null
+  }
 
       val dummyVideo = Video(
         id = 0L, title = title, displayName = title, path = pathOrUri.orEmpty(),
@@ -450,23 +589,31 @@ class OnlineMusicArtworkRepository(
     title: String,
     artist: String,
   ): String? {
-    val query = if (artist.isNotBlank()) "$title $artist" else title
+    if (isGenericTrackName(title)) return null
+    val effectiveArtist = if (isGenericArtistName(artist)) "" else artist.trim()
+    val query = if (effectiveArtist.isNotBlank()) "$title $effectiveArtist" else title
 
     // 1. Apple iTunes Search API (fast, high-resolution square cover art)
-    resolveFromItunes(query)?.let { return it }
+    resolveFromItunes(title, effectiveArtist, query)?.let { return it }
 
     // 2. Deezer Public API (1000x1000 square cover art)
-    resolveFromDeezer(query)?.let { return it }
+    resolveFromDeezer(title, effectiveArtist, query)?.let { return it }
 
     // 3. MusicBrainz + Cover Art Archive (open-source community music database)
-    resolveFromMusicBrainz(title, artist)?.let { return it }
+    if (effectiveArtist.isNotBlank()) {
+      resolveFromMusicBrainz(title, effectiveArtist)?.let { return it }
+    }
 
     return null
   }
 
-  private suspend fun resolveFromItunes(query: String): String? = runCatching {
+  private suspend fun resolveFromItunes(
+    title: String,
+    artist: String,
+    query: String,
+  ): String? = runCatching {
     val encoded = URLEncoder.encode(query, "UTF-8")
-    val url = "$ITUNES_SEARCH_URL?term=$encoded&entity=song&limit=1"
+    val url = "$ITUNES_SEARCH_URL?term=$encoded&entity=song&limit=5"
     val req = Request.Builder()
       .url(url)
       .header("User-Agent", "Mozilla/5.0 (Linux; Android 14)")
@@ -476,8 +623,15 @@ class OnlineMusicArtworkRepository(
       if (!response.isSuccessful) return@use null
       val body = response.body.string()
       val resp = json.decodeFromString<ITunesSearchResponse>(body)
-      val item = resp.results.firstOrNull() ?: return@use null
-      val rawArtwork = item.artworkUrl100?.trim()?.takeIf { it.isNotBlank() } ?: return@use null
+      val bestMatch = resp.results.firstOrNull { item ->
+        matchesMusicMetadata(
+          queryTitle = title,
+          queryArtist = artist,
+          resultTitle = item.trackName,
+          resultArtist = item.artistName,
+        )
+      } ?: return@use null
+      val rawArtwork = bestMatch.artworkUrl100?.trim()?.takeIf { it.isNotBlank() } ?: return@use null
       formatItunesArtworkUrl(rawArtwork)
     }
   }.getOrNull()
@@ -490,9 +644,13 @@ class OnlineMusicArtworkRepository(
     }
   }
 
-  private suspend fun resolveFromDeezer(query: String): String? = runCatching {
+  private suspend fun resolveFromDeezer(
+    title: String,
+    artist: String,
+    query: String,
+  ): String? = runCatching {
     val encoded = URLEncoder.encode(query, "UTF-8")
-    val url = "$DEEZER_SEARCH_URL?q=$encoded&limit=1"
+    val url = "$DEEZER_SEARCH_URL?q=$encoded&limit=5"
     val req = Request.Builder()
       .url(url)
       .header("User-Agent", "Mozilla/5.0 (Linux; Android 14)")
@@ -502,8 +660,15 @@ class OnlineMusicArtworkRepository(
       if (!response.isSuccessful) return@use null
       val body = response.body.string()
       val resp = json.decodeFromString<DeezerSearchResponse>(body)
-      val track = resp.data.firstOrNull() ?: return@use null
-      val album = track.album ?: return@use null
+      val bestMatch = resp.data.firstOrNull { item ->
+        matchesMusicMetadata(
+          queryTitle = title,
+          queryArtist = artist,
+          resultTitle = item.title,
+          resultArtist = item.artist?.name,
+        )
+      } ?: return@use null
+      val album = bestMatch.album ?: return@use null
       album.cover_xl ?: album.cover_big ?: album.cover_medium
     }
   }.getOrNull()
@@ -524,7 +689,14 @@ class OnlineMusicArtworkRepository(
       if (!response.isSuccessful) return@use null
       val body = response.body.string()
       val resp = json.decodeFromString<MusicBrainzRecordingResponse>(body)
-      val recording = resp.recordings.firstOrNull() ?: return@use null
+      val recording = resp.recordings.firstOrNull { rec ->
+        matchesMusicMetadata(
+          queryTitle = title,
+          queryArtist = artist,
+          resultTitle = rec.title,
+          resultArtist = artist,
+        )
+      } ?: return@use null
       val releaseId = recording.releases.firstOrNull()?.id ?: return@use null
       "https://coverartarchive.org/release/$releaseId/front-1200"
     }
@@ -567,7 +739,7 @@ class OnlineMusicArtworkRepository(
       }
 
       val titleFile = artworkFileForTitleArtist(title, artist)
-      if (!titleFile.exists() || titleFile.length() == 0L) {
+      if (titleFile != null && (!titleFile.exists() || titleFile.length() == 0L)) {
         FileOutputStream(titleFile).use { it.write(bytes) }
       }
 
