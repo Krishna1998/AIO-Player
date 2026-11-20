@@ -24,9 +24,11 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
@@ -51,11 +53,22 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.Icon
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.ui.res.stringResource
+import app.video.player.R
+import app.video.player.preferences.FoldersPreferences
+import app.video.player.preferences.BlacklistScope
+import app.video.player.ui.browser.dialogs.RenameDialog
+import app.video.player.ui.browser.dialogs.DeleteConfirmationDialog
+import app.video.player.ui.components.AppToast as Toast
+import app.video.player.utils.permission.PermissionUtils
+import app.video.player.ui.icons.AppIcon
 import androidx.compose.ui.graphics.compositeOver
 import app.video.player.preferences.AppearancePreferences
 import app.video.player.ui.player.visualizer.resolveWaveformColors
@@ -204,17 +217,29 @@ fun getAudioCodec(video: Video): String {
  * Integrates a liquid-glass Hero Spotlight Card (with dynamic audio visualizer / video resume)
  * and synchronized horizon rails for Cinema, Hi-Res Audio, and Recently Played.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BentoFusionHeader(
   videosWithInfo: List<VideoWithPlaybackInfo>,
   recentlyPlayedFilePath: String?,
   onPlayMedia: (Video, Double?) -> Unit,
   onFilterSelected: ((MediaLibraryType) -> Unit)? = null,
+  onRenameMedia: ((Video, String) -> Unit)? = null,
+  onHideMedia: ((Video) -> Unit)? = null,
+  onDeleteMedia: ((Video) -> Unit)? = null,
   modifier: Modifier = Modifier,
 ) {
   if (videosWithInfo.isEmpty()) return
 
   val context = LocalContext.current
+  val coroutineScope = rememberCoroutineScope()
+  val foldersPreferences = koinInject<FoldersPreferences>()
+
+  var actionTargetVideo by remember { mutableStateOf<Video?>(null) }
+  var isRenameOpen by remember { mutableStateOf(false) }
+  var isDeleteOpen by remember { mutableStateOf(false) }
+  var videoToRename by remember { mutableStateOf<Video?>(null) }
+  var videoToDelete by remember { mutableStateOf<Video?>(null) }
 
   val recentlyPlayedRepo = koinInject<RecentlyPlayedRepository>()
   val recentEntities by recentlyPlayedRepo.observeRecentlyPlayed(limit = 50).collectAsState(initial = emptyList())
@@ -459,6 +484,7 @@ fun BentoFusionHeader(
             BentoHorizonVideoCard(
               item = item,
               onClick = { onPlayMedia(item.video, null) },
+              onLongClick = { actionTargetVideo = item.video },
             )
           }
         }
@@ -486,6 +512,7 @@ fun BentoFusionHeader(
               onClick = {
                 playAudioInBackground(item.video, null)
               },
+              onLongClick = { actionTargetVideo = item.video },
             )
           }
         }
@@ -583,6 +610,83 @@ fun BentoFusionHeader(
       )
     }
   }
+
+  // Bottom Sheet for Bento Media Long-Press Actions (Rename, Hide, Delete)
+  actionTargetVideo?.let { targetVideo ->
+    BentoMediaActionSheet(
+      video = targetVideo,
+      onDismiss = { actionTargetVideo = null },
+      onRename = {
+        videoToRename = targetVideo
+        actionTargetVideo = null
+        isRenameOpen = true
+      },
+      onHide = {
+        actionTargetVideo = null
+        val scope = if (targetVideo.isAudio) BlacklistScope.AUDIO_ONLY else BlacklistScope.VIDEO_ONLY
+        foldersPreferences.addBlacklistedFolders(setOf(targetVideo.path), scope)
+        onHideMedia?.invoke(targetVideo)
+        Toast.makeText(context, context.getString(R.string.bento_action_hidden_msg), Toast.LENGTH_SHORT).show()
+      },
+      onDelete = {
+        videoToDelete = targetVideo
+        actionTargetVideo = null
+        isDeleteOpen = true
+      },
+    )
+  }
+
+  // Rename Dialog
+  if (isRenameOpen && videoToRename != null) {
+    val target = videoToRename!!
+    RenameDialog(
+      isOpen = isRenameOpen,
+      currentName = target.displayName,
+      itemType = if (target.isAudio) "audio file" else "video",
+      onDismiss = {
+        isRenameOpen = false
+        videoToRename = null
+      },
+      onConfirm = { newName ->
+        if (onRenameMedia != null) {
+          onRenameMedia(target, newName)
+        } else {
+          coroutineScope.launch(Dispatchers.IO) {
+            PermissionUtils.StorageOps.renameVideo(context, target, newName)
+          }
+        }
+        isRenameOpen = false
+        videoToRename = null
+      },
+    )
+  }
+
+  // Delete Dialog
+  if (isDeleteOpen && videoToDelete != null) {
+    val target = videoToDelete!!
+    DeleteConfirmationDialog(
+      isOpen = isDeleteOpen,
+      itemCount = 1,
+      itemType = if (target.isAudio) "audio file" else "video",
+      itemPaths = listOf(target.uri.toString()),
+      totalSizeBytes = target.size.takeIf { it > 0L },
+      onDismiss = {
+        isDeleteOpen = false
+        videoToDelete = null
+      },
+      onConfirm = {
+        if (onDeleteMedia != null) {
+          onDeleteMedia(target)
+        } else {
+          coroutineScope.launch(Dispatchers.IO) {
+            PermissionUtils.StorageOps.deleteVideos(context, listOf(target))
+          }
+        }
+        isDeleteOpen = false
+        videoToDelete = null
+      },
+    )
+  }
 }
 
 /**
@@ -596,6 +700,7 @@ fun BentoFusionHeader(
 fun DualHorizonRails(
   videosWithInfo: List<VideoWithPlaybackInfo>,
   onPlayMedia: (Video, Double?) -> Unit = { v, _ -> },
+  onItemLongClick: ((Video) -> Unit)? = null,
   onFilterSelected: ((MediaLibraryType) -> Unit)? = null,
   modifier: Modifier = Modifier,
 ) {
@@ -642,6 +747,7 @@ fun DualHorizonRails(
             BentoHorizonVideoCard(
               item = item,
               onClick = { onPlayMedia(item.video, null) },
+              onLongClick = onItemLongClick?.let { { it(item.video) } },
             )
           }
         }
@@ -667,6 +773,7 @@ fun DualHorizonRails(
             BentoHorizonAudioCard(
               item = item,
               onClick = { onPlayMedia(item.video, null) },
+              onLongClick = onItemLongClick?.let { { it(item.video) } },
             )
           }
         }
@@ -750,20 +857,31 @@ private fun HorizonRailSection(
   }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun BentoHorizonVideoCard(
   item: VideoWithPlaybackInfo,
   onClick: () -> Unit,
+  onLongClick: (() -> Unit)? = null,
   modifier: Modifier = Modifier,
 ) {
   val video = item.video
   val progress = item.progressPercentage
+  val haptics = LocalHapticFeedback.current
 
   Card(
     modifier = modifier
       .width(180.dp)
       .clip(RoundedCornerShape(18.dp))
-      .clickable(onClick = onClick),
+      .combinedClickable(
+        onClick = onClick,
+        onLongClick = onLongClick?.let { action ->
+          {
+            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+            action()
+          }
+        },
+      ),
     shape = RoundedCornerShape(18.dp),
     colors = CardDefaults.cardColors(
       containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -881,10 +999,12 @@ private fun BentoHorizonVideoCard(
   }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun BentoHorizonAudioCard(
   item: VideoWithPlaybackInfo,
   onClick: () -> Unit,
+  onLongClick: (() -> Unit)? = null,
   modifier: Modifier = Modifier,
 ) {
   val video = item.video
@@ -893,12 +1013,21 @@ private fun BentoHorizonAudioCard(
   val displayTime = remember(video.durationFormatted) {
     video.durationFormatted.ifBlank { "00:00" }
   }
+  val haptics = LocalHapticFeedback.current
 
   Card(
     modifier = modifier
       .width(140.dp)
       .clip(RoundedCornerShape(18.dp))
-      .clickable(onClick = onClick),
+      .combinedClickable(
+        onClick = onClick,
+        onLongClick = onLongClick?.let { action ->
+          {
+            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+            action()
+          }
+        },
+      ),
     shape = RoundedCornerShape(18.dp),
     colors = CardDefaults.cardColors(
       containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -1722,6 +1851,218 @@ private fun BentoQuickTile(
             .clip(RoundedCornerShape(999.dp)),
           color = badgeColor,
           trackColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+        )
+      }
+    }
+  }
+}
+
+/**
+ * Bento Media Action Bottom Sheet
+ * Triggered on long-pressing movie and music cards in BentoFusion rails.
+ * Provides Rename, Hide, and Delete options.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun BentoMediaActionSheet(
+  video: Video,
+  onDismiss: () -> Unit,
+  onRename: () -> Unit,
+  onHide: () -> Unit,
+  onDelete: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+  val isAudio = video.isAudio
+  val (artist, title) = if (isAudio) {
+    SortUtils.getAudioArtistAndTitle(video)
+  } else {
+    "" to FileTypeUtils.stripExtension(video.displayName)
+  }
+
+  ModalBottomSheet(
+    onDismissRequest = onDismiss,
+    sheetState = sheetState,
+    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+    shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+    modifier = modifier,
+  ) {
+    Column(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 20.dp)
+        .padding(bottom = 32.dp),
+      verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+      // Header preview card
+      Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLowest,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)),
+      ) {
+        Row(
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(12.dp),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+          // Thumbnail
+          Box(
+            modifier = Modifier
+              .size(60.dp)
+              .clip(RoundedCornerShape(14.dp)),
+          ) {
+            BentoMediaThumbnail(
+              video = video,
+              modifier = Modifier.fillMaxSize(),
+              showPlayOverlay = false,
+            )
+          }
+
+          Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+          ) {
+            Text(
+              text = title,
+              style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+              color = MaterialTheme.colorScheme.onSurface,
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
+            )
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+              if (artist.isNotBlank()) {
+                Text(
+                  text = artist,
+                  style = MaterialTheme.typography.bodySmall,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                  text = "•",
+                  style = MaterialTheme.typography.bodySmall,
+                  color = MaterialTheme.colorScheme.outline,
+                )
+              }
+              val durationText = video.durationFormatted.ifBlank { "00:00" }
+              Text(
+                text = durationText,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+              val badge = if (isAudio) getAudioCodec(video) else video.resolution.ifBlank { "VIDEO" }
+              Surface(
+                shape = RoundedCornerShape(4.dp),
+                color = (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.15f),
+              ) {
+                Text(
+                  text = badge,
+                  style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp, fontWeight = FontWeight.Bold),
+                  color = if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
+                  modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+                )
+              }
+            }
+          }
+        }
+      }
+
+      // Actions Section
+      Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
+        // 1. Rename
+        BentoActionItemRow(
+          icon = Icons.RoundedFilled.DriveFileRenameOutline,
+          title = stringResource(R.string.rename),
+          subtitle = "Change file name",
+          iconTint = MaterialTheme.colorScheme.primary,
+          onClick = onRename,
+        )
+
+        // 2. Hide
+        BentoActionItemRow(
+          icon = Icons.RoundedFilled.VisibilityOff,
+          title = stringResource(R.string.bento_action_hide),
+          subtitle = "Hide from library (accessible in Folder Blacklist)",
+          iconTint = MaterialTheme.colorScheme.tertiary,
+          onClick = onHide,
+        )
+
+        // 3. Delete
+        BentoActionItemRow(
+          icon = Icons.RoundedFilled.Delete,
+          title = stringResource(R.string.delete),
+          subtitle = "Permanently remove from device storage",
+          iconTint = MaterialTheme.colorScheme.error,
+          textColor = MaterialTheme.colorScheme.error,
+          onClick = onDelete,
+        )
+      }
+    }
+  }
+}
+
+@Composable
+private fun BentoActionItemRow(
+  icon: AppIcon,
+  title: String,
+  subtitle: String,
+  iconTint: Color,
+  textColor: Color = MaterialTheme.colorScheme.onSurface,
+  onClick: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  Surface(
+    modifier = modifier
+      .fillMaxWidth()
+      .clip(RoundedCornerShape(16.dp))
+      .clickable(onClick = onClick),
+    shape = RoundedCornerShape(16.dp),
+    color = MaterialTheme.colorScheme.surfaceContainerLowest.copy(alpha = 0.6f),
+    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f)),
+  ) {
+    Row(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 16.dp, vertical = 12.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(14.dp),
+    ) {
+      Surface(
+        shape = CircleShape,
+        color = iconTint.copy(alpha = 0.12f),
+        modifier = Modifier.size(42.dp),
+      ) {
+        Box(contentAlignment = Alignment.Center) {
+          Icon(
+            imageVector = icon,
+            contentDescription = title,
+            tint = iconTint,
+            modifier = Modifier.size(22.dp),
+          )
+        }
+      }
+      Column(
+        modifier = Modifier.weight(1f),
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+      ) {
+        Text(
+          text = title,
+          style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
+          color = textColor,
+        )
+        Text(
+          text = subtitle,
+          style = MaterialTheme.typography.bodySmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
       }
     }

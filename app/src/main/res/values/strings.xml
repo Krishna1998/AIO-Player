@@ -2998,4 +2998,6 @@
   <string name="pref_audio_hrtf_summary">Binaural HRTF processing for music using the bundled 96 kHz KU100 dataset. Requires an mpv build with sofalizer and libmysofa support.</string>
   <string name="pref_audio_hrtf_unavailable">HRTF could not be activated for this track. Check that the mpv build includes sofalizer and libmysofa, or select stereo widening.</string>
 
+  <string name="bento_action_hide">Hide</string>
+  <string name="bento_action_hidden_msg">Item hidden from library</string>
 </resources>

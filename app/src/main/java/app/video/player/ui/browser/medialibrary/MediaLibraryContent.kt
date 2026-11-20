@@ -1321,6 +1321,21 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                           val targetIdx = mediaLibraryTabs.indexOf(type)
                           if (targetIdx >= 0) navigateTab(targetIdx)
                         },
+                        onRenameMedia = { video, newName ->
+                          coroutineScope.launch {
+                            viewModel.renameVideo(video, newName)
+                            viewModel.refresh()
+                          }
+                        },
+                        onHideMedia = { _ ->
+                          viewModel.refresh()
+                        },
+                        onDeleteMedia = { video ->
+                          coroutineScope.launch {
+                            viewModel.deleteVideos(listOf(video))
+                            viewModel.refresh()
+                          }
+                        },
                       )
                     }
                   } else null,
