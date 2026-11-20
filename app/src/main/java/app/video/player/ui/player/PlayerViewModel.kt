@@ -3332,6 +3332,12 @@ fun restartFromBeginning() {
   private fun publishPrecisePosition(time: Double) {
     val posFloat = time.toFloat()
     if (isGestureSeeking || _precisePosition.value == posFloat) return
+    val current = _precisePosition.value
+    val isPlaying = paused == false && PlaybackSession.state.value.paused == false
+    val isSeeking = isGestureSeeking || !lastScrubTarget.isNaN()
+    if (isPlaying && !isSeeking && current > 0f && posFloat < current && (current - posFloat) < 1.5f) {
+      return
+    }
     _precisePosition.value = posFloat
     updateLyricsActiveLine()
   }

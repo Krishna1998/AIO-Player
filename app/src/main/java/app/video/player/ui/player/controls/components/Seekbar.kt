@@ -418,7 +418,7 @@ internal fun SeekbarWithTimers(
           targetValue = position,
           animationSpec =
             spring(
-              dampingRatio = AppMotion.Spatial.Standard.dampingRatio,
+              dampingRatio = Spring.DampingRatioNoBouncy,
               stiffness = AppMotion.Spatial.Standard.stiffness,
             ),
         )

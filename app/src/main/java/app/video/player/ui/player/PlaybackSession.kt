@@ -1930,6 +1930,12 @@ internal fun userScriptsNeedReload(currentKey: String): Boolean {
       propInt.emit(property, null)
       return
     }
+    if (property == "time-pos" && _state.value.paused == false && _state.value.phase.let { it == PlaybackPhase.READY || it == PlaybackPhase.BACKGROUND }) {
+      val lastPos = propLong["time-pos"].value
+      if (lastPos != null && value < lastPos && (lastPos - value) <= 1L) {
+        return
+      }
+    }
     propLong.emit(property, value)
     propInt.emit(property, value.toInt())
     observerSnapshot().forEach { observer -> runCatching { observer.eventProperty(property, value) } }
@@ -1963,6 +1969,12 @@ internal fun userScriptsNeedReload(currentKey: String): Boolean {
       propDouble.emit(property, null)
       propFloat.emit(property, null)
       return
+    }
+    if (property == "time-pos" && _state.value.paused == false && _state.value.phase.let { it == PlaybackPhase.READY || it == PlaybackPhase.BACKGROUND }) {
+      val lastPos = propDouble["time-pos"].value
+      if (lastPos != null && value < lastPos && (lastPos - value) < 1.5) {
+        return
+      }
     }
     propDouble.emit(property, value)
     propFloat.emit(property, value.toFloat())

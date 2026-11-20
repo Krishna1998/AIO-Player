@@ -2270,8 +2270,11 @@ fun AudioPlayerControls(
       val timelineDuration = audiobook?.durationMs?.div(1000f) ?: currentDurSec
       val effectiveRemaining =
         if (audiobook != null) (timelineDuration - timelinePosition).coerceAtLeast(0f) / (playbackSpeed ?: 1f).coerceAtLeast(0.1f)
-        else (remaining ?: 0f).takeIf { it > 0f }
-          ?: (currentDurSec - currentPosSec).coerceAtLeast(0f)
+        else if (timelineDuration > 0f && timelinePosition > 0f) {
+          ((timelineDuration - timelinePosition) / (playbackSpeed ?: 1f).coerceAtLeast(0.1f)).coerceAtLeast(0f)
+        } else {
+          (remaining ?: 0f).takeIf { it > 0f } ?: (currentDurSec - currentPosSec).coerceAtLeast(0f)
+        }
 
       androidx.compose.runtime.key(audiobook?.book?.id ?: currentItem?.stableId) {
       SeekbarWithTimers(
