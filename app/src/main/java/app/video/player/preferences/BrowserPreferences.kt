@@ -114,7 +114,7 @@ class BrowserPreferences(
   val folderViewMode = preferenceStore.getEnum("folder_view_mode", FolderViewMode.DualHorizon)
   val dualPaneForTablet = preferenceStore.getBoolean("dual_pane_for_tablet", true)
 
-  val folderGridColumnsPortrait = preferenceStore.getInt("folder_grid_columns_portrait", 0)
+  val folderGridColumnsPortrait = preferenceStore.getInt("folder_grid_columns_portrait", 2)
   val folderGridColumnsLandscape = preferenceStore.getInt("folder_grid_columns_landscape", 0)
 
   val videoGridColumnsPortrait = preferenceStore.getInt("video_grid_columns_portrait", 2)
