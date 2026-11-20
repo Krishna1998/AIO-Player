@@ -283,6 +283,13 @@ object MediaUtils {
         onlinePosterRepo.getCachedPosterFile(videoSource)?.let { file ->
           Uri.fromFile(file).toString()
         }
+      } else if (videoSource != null && isAudioMedia) {
+        val onlineMusicRepo = org.koin.java.KoinJavaComponent.get<app.video.player.domain.thumbnail.OnlineMusicArtworkRepository>(
+          app.video.player.domain.thumbnail.OnlineMusicArtworkRepository::class.java,
+        )
+        onlineMusicRepo.getCachedArtworkFile(videoSource)?.let { file ->
+          Uri.fromFile(file).toString()
+        }
       } else null
     }.getOrNull()
 

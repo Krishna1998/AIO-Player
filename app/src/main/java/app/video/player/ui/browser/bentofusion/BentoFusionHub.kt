@@ -1747,23 +1747,26 @@ private fun BentoMediaThumbnail(
     contentAlignment = Alignment.Center,
   ) {
     if (thumbnail != null) {
-      val isPortraitPoster = !video.isAudio && thumbnail!!.height > thumbnail!!.width * 1.05f
-      if (isPortraitPoster) {
+      val bmp = thumbnail!!
+      val targetAspect = if (video.isAudio) 1f else 16f / 9f
+      val bmpAspect = bmp.width.toFloat() / bmp.height.toFloat()
+      val aspectMismatch = kotlin.math.abs(bmpAspect - targetAspect) > 0.18f || (!video.isAudio && bmp.height > bmp.width * 1.05f)
+      if (aspectMismatch) {
         Image(
-          bitmap = thumbnail!!.asImageBitmap(),
+          bitmap = bmp.asImageBitmap(),
           contentDescription = null,
           modifier = Modifier.fillMaxSize().blur(16.dp).alpha(0.55f),
           contentScale = ContentScale.Crop,
         )
         Image(
-          bitmap = thumbnail!!.asImageBitmap(),
+          bitmap = bmp.asImageBitmap(),
           contentDescription = null,
           modifier = Modifier.fillMaxSize(),
           contentScale = ContentScale.Fit,
         )
       } else {
         Image(
-          bitmap = thumbnail!!.asImageBitmap(),
+          bitmap = bmp.asImageBitmap(),
           contentDescription = null,
           modifier = Modifier.fillMaxSize(),
           contentScale = ContentScale.Crop,

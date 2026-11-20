@@ -54,6 +54,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -810,12 +812,29 @@ fun LocalAlbumArtImage(
 
     val loaded = bitmap
     if (loaded != null) {
-      Image(
-        bitmap = loaded,
-        contentDescription = contentDescription,
-        contentScale = ContentScale.Crop,
-        modifier = Modifier.fillMaxSize(),
-      )
+      val bmpAspect = loaded.width.toFloat() / loaded.height.toFloat()
+      val aspectMismatch = kotlin.math.abs(bmpAspect - 1f) > 0.18f
+      if (aspectMismatch) {
+        Image(
+          bitmap = loaded,
+          contentDescription = null,
+          contentScale = ContentScale.Crop,
+          modifier = Modifier.fillMaxSize().blur(14.dp).alpha(0.55f),
+        )
+        Image(
+          bitmap = loaded,
+          contentDescription = contentDescription,
+          contentScale = ContentScale.Fit,
+          modifier = Modifier.fillMaxSize(),
+        )
+      } else {
+        Image(
+          bitmap = loaded,
+          contentDescription = contentDescription,
+          contentScale = ContentScale.Crop,
+          modifier = Modifier.fillMaxSize(),
+        )
+      }
     } else {
       Icon(
         imageVector = Icons.RoundedFilled.Audiotrack,

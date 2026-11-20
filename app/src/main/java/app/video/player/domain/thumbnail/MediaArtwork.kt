@@ -47,6 +47,17 @@ internal suspend fun ThumbnailRepository.getArtwork(
         }
       }
     }
+  } else {
+    runCatching {
+      val browserPrefs = org.koin.java.KoinJavaComponent.get<app.video.player.preferences.BrowserPreferences>(
+        app.video.player.preferences.BrowserPreferences::class.java,
+      )
+      if (browserPrefs.autoFetchOnlineMusicArtwork.get()) {
+        onlineMusicArtworkRepository.getOrFetchArtwork(video, widthPx, heightPx, timeoutMs = 4000L)?.let { artwork ->
+          return@withContext artwork
+        }
+      }
+    }
   }
   getThumbnail(
     video,

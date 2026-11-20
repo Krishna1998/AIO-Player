@@ -827,8 +827,10 @@ object AppearancePreferencesScreen : Screen {
               val showFramePosition = thumbnailGenerator != ThumbnailGenerator.MediaStore && thumbnailMode == ThumbnailMode.FrameAtPosition
               val autoFetchOnlinePosters by browserPreferences.autoFetchOnlinePosters.collectAsState()
               val replaceEmbeddedWithOnlinePosters by browserPreferences.replaceEmbeddedWithOnlinePosters.collectAsState()
+              val autoFetchOnlineMusicArtwork by browserPreferences.autoFetchOnlineMusicArtwork.collectAsState()
+              val replaceEmbeddedWithOnlineMusicArtwork by browserPreferences.replaceEmbeddedWithOnlineMusicArtwork.collectAsState()
               val baseCount = if (showFramePosition) 7 else 6
-              val itemCount = baseCount + 2
+              val itemCount = baseCount + 4
               val showVideoThumbnails by browserPreferences.showVideoThumbnails.collectAsState()
               SwitchPreference(
                 modifier = Modifier.settingsSearchTarget(R.string.pref_appearance_show_video_thumbnails_title),
@@ -1026,6 +1028,8 @@ object AppearancePreferencesScreen : Screen {
 
               val autoFetchIndex = if (showFramePosition) 6 else 5
               val replaceEmbeddedIndex = if (showFramePosition) 7 else 6
+              val autoFetchMusicIndex = if (showFramePosition) 8 else 7
+              val replaceEmbeddedMusicIndex = if (showFramePosition) 9 else 8
 
               ExpressivePreferenceTile(index = autoFetchIndex, itemCount = itemCount) {
                 SwitchPreference(
@@ -1054,6 +1058,35 @@ object AppearancePreferencesScreen : Screen {
                     )
                   },
                   enabled = showVideoThumbnails && autoFetchOnlinePosters,
+                )
+              }
+
+              ExpressivePreferenceTile(index = autoFetchMusicIndex, itemCount = itemCount) {
+                SwitchPreference(
+                  value = autoFetchOnlineMusicArtwork,
+                  onValueChange = { browserPreferences.autoFetchOnlineMusicArtwork.set(it) },
+                  title = { Text(stringResource(id = R.string.pref_appearance_auto_fetch_online_music_artwork_title)) },
+                  summary = {
+                    Text(
+                      text = stringResource(id = R.string.pref_appearance_auto_fetch_online_music_artwork_summary),
+                      color = MaterialTheme.colorScheme.outline,
+                    )
+                  },
+                )
+              }
+
+              ExpressivePreferenceTile(index = replaceEmbeddedMusicIndex, itemCount = itemCount) {
+                SwitchPreference(
+                  value = replaceEmbeddedWithOnlineMusicArtwork,
+                  onValueChange = { browserPreferences.replaceEmbeddedWithOnlineMusicArtwork.set(it) },
+                  title = { Text(stringResource(id = R.string.pref_appearance_replace_embedded_music_artwork_title)) },
+                  summary = {
+                    Text(
+                      text = stringResource(id = R.string.pref_appearance_replace_embedded_music_artwork_summary),
+                      color = MaterialTheme.colorScheme.outline,
+                    )
+                  },
+                  enabled = autoFetchOnlineMusicArtwork,
                 )
               }
 

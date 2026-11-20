@@ -107,6 +107,11 @@ class ThumbnailRepository(
       OnlineMoviePosterRepository::class.java,
     )
   }
+  val onlineMusicArtworkRepository by lazy {
+    KoinJavaComponent.get<OnlineMusicArtworkRepository>(
+      OnlineMusicArtworkRepository::class.java,
+    )
+  }
 
   private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
   private val memoryCache = BitmapMemoryCache<String>(heapDivisor = 8, maxSizeMiB = 48)
@@ -325,6 +330,19 @@ class ThumbnailRepository(
             return@withPermit scaled
           }
         }
+        if (!isNetwork && isAudio && browserPreferences.autoFetchOnlineMusicArtwork.get()) {
+          onlineMusicArtworkRepository.getCachedArtworkBitmap(video, widthPx, heightPx)?.let { cachedArtwork ->
+            val scaled = scaleBitmap(cachedArtwork, widthPx, heightPx)
+            if (!scaled.isRecycled) {
+              runCatching { scaled.prepareToDraw() }
+            }
+            diskCacheLock.read {
+              if (revision != cacheRevision.value) return@withPermit null
+              synchronized(memoryCache) { memoryCache.put(key, scaled) }
+            }
+            return@withPermit scaled
+          }
+        }
         val fullColor = artworkTier > 0
         var decoded = readBitmapFromDisk(diskCacheKey(video, generator, artworkTier), isNetwork, widthPx, heightPx, fullColor)
         if (decoded == null && !isNetwork) {
@@ -468,6 +486,7 @@ class ThumbnailRepository(
 
     try {
       runCatching { onlinePosterRepository.clearOnlinePosterCache() }
+      runCatching { onlineMusicArtworkRepository.clearOnlineArtworkCache() }
       listOf(
         File(context.cacheDir, "thumbnails"),
         File(context.filesDir, "thumbnails"),
@@ -837,6 +856,30 @@ class ThumbnailRepository(
       }
     }
 
+    if (isAudio && browserPreferences.autoFetchOnlineMusicArtwork.get()) {
+      onlineMusicArtworkRepository.getCachedArtworkBitmap(video, widthPx, heightPx)?.let { cachedArtwork ->
+        return fitRequest(cachedArtwork)
+      }
+      if (browserPreferences.replaceEmbeddedWithOnlineMusicArtwork.get()) {
+        onlineMusicArtworkRepository.fetchArtworkAsync(video) { artworkBitmap ->
+          repositoryScope.launch(Dispatchers.IO) {
+            val key = thumbnailKey(video, widthPx, heightPx, generator)
+            val diskKey = diskCacheKey(video, generator, artworkTier)
+            val revision = diskCacheLock.read { cacheRevision.value }
+            writeBitmapToDisk(diskKey, artworkBitmap, false, revision)
+            val scaled = scaleBitmap(artworkBitmap, widthPx, heightPx)
+            if (!scaled.isRecycled) {
+              runCatching { scaled.prepareToDraw() }
+            }
+            diskCacheLock.read {
+              synchronized(memoryCache) { memoryCache.put(key, scaled) }
+            }
+            _thumbnailReadyKeys.tryEmit(key)
+          }
+        }
+      }
+    }
+
     var embeddedArtwork: Bitmap? = null
     val replaceEmbedded = !isAudio && browserPreferences.replaceEmbeddedWithOnlinePosters.get()
     if (generator != ThumbnailGenerator.Native) {
@@ -859,6 +902,27 @@ class ThumbnailRepository(
       (embeddedArtwork ?: generateEmbeddedArtwork(video, artworkTier.takeIf { it > 0 } ?: thumbnailMaxSize()))
         ?.let { return fitRequest(it) }
       if (isAudio) {
+        if (browserPreferences.autoFetchOnlineMusicArtwork.get()) {
+          onlineMusicArtworkRepository.getCachedArtworkBitmap(video, widthPx, heightPx)?.let {
+            return fitRequest(it)
+          }
+          onlineMusicArtworkRepository.fetchArtworkAsync(video) { artworkBitmap ->
+            repositoryScope.launch(Dispatchers.IO) {
+              val key = thumbnailKey(video, widthPx, heightPx, generator)
+              val diskKey = diskCacheKey(video, generator, artworkTier)
+              val revision = diskCacheLock.read { cacheRevision.value }
+              writeBitmapToDisk(diskKey, artworkBitmap, false, revision)
+              val scaled = scaleBitmap(artworkBitmap, widthPx, heightPx)
+              if (!scaled.isRecycled) {
+                runCatching { scaled.prepareToDraw() }
+              }
+              diskCacheLock.read {
+                synchronized(memoryCache) { memoryCache.put(key, scaled) }
+              }
+              _thumbnailReadyKeys.tryEmit(key)
+            }
+          }
+        }
         return null
       }
     }

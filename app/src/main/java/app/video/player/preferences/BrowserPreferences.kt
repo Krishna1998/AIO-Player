@@ -145,6 +145,8 @@ class BrowserPreferences(
   val thumbnailParallelism = preferenceStore.getInt("thumbnail_parallelism", 0)
   val autoFetchOnlinePosters = preferenceStore.getBoolean("auto_fetch_online_posters", true)
   val replaceEmbeddedWithOnlinePosters = preferenceStore.getBoolean("replace_embedded_with_online_posters", true)
+  val autoFetchOnlineMusicArtwork = preferenceStore.getBoolean("auto_fetch_online_music_artwork", true)
+  val replaceEmbeddedWithOnlineMusicArtwork = preferenceStore.getBoolean("replace_embedded_with_online_music_artwork", false)
   val showSizeChip = preferenceStore.getBoolean("show_size_chip", false)
 
   // Metadata-dependent chips (disabled by default for better performance)

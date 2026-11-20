@@ -463,8 +463,10 @@ fun VideoCard(
                   colorFilter = thumbnailColorFilter,
                 )
               } else thumbnailBitmap?.let {
-                val isPortraitPoster = !video.isAudio && it.height > it.width * 1.05f
-                if (isPortraitPoster) {
+                val targetAspect = if (video.isAudio) 1f else 16f / 9f
+                val bmpAspect = it.width.toFloat() / it.height.toFloat()
+                val aspectMismatch = kotlin.math.abs(bmpAspect - targetAspect) > 0.18f || (!video.isAudio && it.height > it.width * 1.05f)
+                if (aspectMismatch) {
                   Image(
                     bitmap = it,
                     contentDescription = null,
@@ -907,8 +909,10 @@ fun VideoCard(
                   colorFilter = thumbnailColorFilter,
                 )
               } else listThumbnailBitmap?.let {
-                val isPortraitPoster = !video.isAudio && it.height > it.width * 1.05f
-                if (isPortraitPoster) {
+                val targetAspect = if (video.isAudio) 1f else 16f / 9f
+                val bmpAspect = it.width.toFloat() / it.height.toFloat()
+                val aspectMismatch = kotlin.math.abs(bmpAspect - targetAspect) > 0.18f || (!video.isAudio && it.height > it.width * 1.05f)
+                if (aspectMismatch) {
                   Image(
                     bitmap = it,
                     contentDescription = null,
