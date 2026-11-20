@@ -185,7 +185,7 @@ fun SortDialog(
           if (layoutModeSelector != null) {
             HorizontalDivider(modifier = Modifier.padding(top = 10.dp))
             DialogSectionTitle(
-              text = layoutModeSelector.label + if (!enableLayoutModeOptions) " (Disabled in BentoFusion)" else "",
+              text = layoutModeSelector.label + if (!enableLayoutModeOptions) " (Disabled in Library)" else "",
             )
             // A page with three layouts owns its own selection, so the third option decides whether
             // the middle one is the one showing; with only two the flag still describes both.
@@ -341,7 +341,7 @@ fun SortDialog(
                   text =
                     androidx.compose.ui.res
                       .stringResource(app.video.player.R.string.ui_fields) +
-                      if (!enableFieldOptions) " (Disabled in BentoFusion)" else "",
+                      if (!enableFieldOptions) " (Disabled in Library)" else "",
                   style = MaterialTheme.typography.titleSmall,
                   color = if (enableFieldOptions) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
                 )
