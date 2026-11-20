@@ -178,6 +178,17 @@ enum class AppTheme(
   val backgroundDark: Color,
   val isDynamic: Boolean = false,
 ) {
+  BentoFusionAura(
+    titleRes = R.string.theme_bentofusion_aura,
+    primaryLight = Color(0xFF007A8A),
+    primaryDark = Color(0xFF00F5FF),
+    secondaryLight = Color(0xFF7E22CE),
+    secondaryDark = Color(0xFFA855F7),
+    tertiaryLight = Color(0xFF047857),
+    tertiaryDark = Color(0xFF00F5A0),
+    backgroundLight = Color(0xFFF0F9FF),
+    backgroundDark = Color(0xFF060814),
+  ),
   StealthAcidLime(
     titleRes = R.string.theme_stealth_acid_lime,
     primaryLight = Color(0xFF5E7300),

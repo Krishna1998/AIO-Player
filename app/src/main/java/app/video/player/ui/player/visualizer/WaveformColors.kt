@@ -24,6 +24,11 @@ fun resolveWaveformColors(
   colorScheme: ColorScheme,
 ): Triple<Color, Color, Color> {
   return when (appTheme) {
+    AppTheme.BentoFusionAura -> Triple(
+      Color(0xFF581C87), // Deep royal ultraviolet sub-bass glow
+      Color(0xFF00B4D8), // Luminous electric azure harmonic body
+      Color(0xFF00F5FF), // Specular prism cyan treble crest
+    )
     AppTheme.StealthAcidLime -> Triple(
       Color(0xFF047857), // Luminous emerald pine sub-glow (lighter & vibrant in dark/AMOLED)
       Color(0xFF10B981), // Emerald mint harmonic
