@@ -317,8 +317,8 @@ class OnlineMusicArtworkRepository(
 
   private fun formatItunesArtworkUrl(rawUrl: String): String {
     return when {
-      rawUrl.contains("/100x100bb.") -> rawUrl.replace("/100x100bb.", "/800x800bb.")
-      rawUrl.contains("/60x60bb.") -> rawUrl.replace("/60x60bb.", "/800x800bb.")
+      rawUrl.contains("/100x100bb.") -> rawUrl.replace("/100x100bb.", "/1400x1400bb.")
+      rawUrl.contains("/60x60bb.") -> rawUrl.replace("/60x60bb.", "/1400x1400bb.")
       else -> rawUrl
     }
   }
@@ -359,7 +359,7 @@ class OnlineMusicArtworkRepository(
       val resp = json.decodeFromString<MusicBrainzRecordingResponse>(body)
       val recording = resp.recordings.firstOrNull() ?: return@use null
       val releaseId = recording.releases.firstOrNull()?.id ?: return@use null
-      "https://coverartarchive.org/release/$releaseId/front-500"
+      "https://coverartarchive.org/release/$releaseId/front-1200"
     }
   }.getOrNull()
 
@@ -397,25 +397,18 @@ class OnlineMusicArtworkRepository(
     heightPx: Int = 0,
   ): Bitmap? = runCatching {
     if (!file.canRead() || file.length() < 500) return null
-    if (widthPx > 0 && heightPx > 0) {
-      val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-      BitmapFactory.decodeFile(file.absolutePath, bounds)
-      val sampleSize = calculateThumbnailSampleSize(bounds.outWidth, bounds.outHeight, 800, widthPx, heightPx)
-      BitmapFactory.decodeFile(
-        file.absolutePath,
-        BitmapFactory.Options().apply {
-          inSampleSize = sampleSize
-          inPreferredConfig = Bitmap.Config.ARGB_8888
-        },
-      )
-    } else {
-      BitmapFactory.decodeFile(
-        file.absolutePath,
-        BitmapFactory.Options().apply {
-          inPreferredConfig = Bitmap.Config.ARGB_8888
-        },
-      )
-    }
+    val targetW = maxOf(widthPx, 512)
+    val targetH = maxOf(heightPx, 512)
+    val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+    BitmapFactory.decodeFile(file.absolutePath, bounds)
+    val sampleSize = calculateThumbnailSampleSize(bounds.outWidth, bounds.outHeight, 1400, targetW, targetH)
+    BitmapFactory.decodeFile(
+      file.absolutePath,
+      BitmapFactory.Options().apply {
+        inSampleSize = sampleSize
+        inPreferredConfig = Bitmap.Config.ARGB_8888
+      },
+    )
   }.getOrNull()
 
   fun clearOnlineArtworkCache() {

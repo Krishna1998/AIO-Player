@@ -832,7 +832,14 @@ class ThumbnailRepository(
     val dimension =
       if (artworkTier > 0) artworkTier else maxOf(widthPx, heightPx, MAX_THUMBNAIL_SIZE).coerceAtMost(thumbnailMaxSize())
     fun fitRequest(bitmap: Bitmap): Bitmap =
-      if (artworkTier > 0) bitmap.scaleToThumbnailMax(artworkTier) else scaleBitmap(bitmap, widthPx, heightPx)
+      if (artworkTier > 0) {
+        bitmap.scaleToThumbnailMax(artworkTier)
+      } else if (isAudio && (widthPx in 1..383 || heightPx in 1..383)) {
+        val highDef = maxOf(widthPx, heightPx, 384)
+        scaleBitmap(bitmap, highDef, highDef)
+      } else {
+        scaleBitmap(bitmap, widthPx, heightPx)
+      }
 
     if (!isAudio && browserPreferences.autoFetchOnlinePosters.get()) {
       onlinePosterRepository.getCachedPosterBitmap(video, widthPx, heightPx)?.let { cachedPoster ->
@@ -912,7 +919,12 @@ class ThumbnailRepository(
               val diskKey = diskCacheKey(video, generator, artworkTier)
               val revision = diskCacheLock.read { cacheRevision.value }
               writeBitmapToDisk(diskKey, artworkBitmap, false, revision)
-              val scaled = scaleBitmap(artworkBitmap, widthPx, heightPx)
+              val scaled = if (video.isAudio && (widthPx in 1..383 || heightPx in 1..383)) {
+                val highDef = maxOf(widthPx, heightPx, 384)
+                scaleBitmap(artworkBitmap, highDef, highDef)
+              } else {
+                scaleBitmap(artworkBitmap, widthPx, heightPx)
+              }
               if (!scaled.isRecycled) {
                 runCatching { scaled.prepareToDraw() }
               }

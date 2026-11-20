@@ -52,6 +52,7 @@ private data class TmdbSearchResultItem(
   val originalTitle: String? = null,
   val releaseYear: String? = null,
   val poster: String? = null,
+  val backdrop: String? = null,
   val voteAverage: Double? = null,
   val popularity: Double? = null,
 )
@@ -282,10 +283,31 @@ class OnlineMoviePosterRepository(
         else -> results.firstOrNull { it.mediaType.equals(type, ignoreCase = true) } ?: results[0]
       }
 
+      // Prefer cinematic 16:9 landscape backdrop over vertical portrait poster
+      val backdrop = match.backdrop?.trim()?.takeIf { it.isNotBlank() }
+      if (backdrop != null) {
+        return@use formatTmdbBackdropUrl(backdrop)
+      }
+
       val poster = match.poster?.trim()?.takeIf { it.isNotBlank() } ?: return@use null
       formatTmdbPosterUrl(poster)
     }
   }.getOrNull()
+
+  private fun formatTmdbBackdropUrl(backdrop: String): String = when {
+    backdrop.startsWith("https://image.tmdb.org/t/p/w500/") ->
+      backdrop.replace("/w500/", "/w780/")
+    backdrop.startsWith("https://image.tmdb.org/t/p/w300/") ->
+      backdrop.replace("/w300/", "/w780/")
+    backdrop.startsWith("https://image.tmdb.org/t/p/w185/") ->
+      backdrop.replace("/w185/", "/w780/")
+    backdrop.startsWith("http://", ignoreCase = true) || backdrop.startsWith("https://", ignoreCase = true) ->
+      backdrop
+    backdrop.startsWith("/") ->
+      "https://image.tmdb.org/t/p/w780$backdrop"
+    else ->
+      "https://image.tmdb.org/t/p/w780/$backdrop"
+  }
 
   private fun formatTmdbPosterUrl(poster: String): String = when {
     poster.startsWith("https://image.tmdb.org/t/p/w185/") ->

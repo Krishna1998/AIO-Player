@@ -906,11 +906,11 @@ private fun BentoHorizonAudioCard(
     border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.25f)),
   ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-      // Artwork Area
+      // Artwork Area - Portrait Music Poster
       Box(
         modifier = Modifier
           .fillMaxWidth()
-          .height(115.dp)
+          .height(175.dp)
           .clip(RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp)),
       ) {
         BentoMediaThumbnail(
@@ -978,7 +978,7 @@ private fun BentoHorizonAudioCard(
           .padding(horizontal = 8.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
       ) {
-        val (_, title) = SortUtils.getAudioArtistAndTitle(video)
+        val (artist, title) = SortUtils.getAudioArtistAndTitle(video)
         Text(
           text = title,
           style = MaterialTheme.typography.labelMedium.copy(
@@ -988,6 +988,17 @@ private fun BentoHorizonAudioCard(
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
+        if (artist.isNotBlank()) {
+          Text(
+            text = artist,
+            style = MaterialTheme.typography.labelSmall.copy(
+              fontSize = 10.sp,
+            ),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+          )
+        }
       }
     }
   }
@@ -1728,8 +1739,9 @@ private fun BentoMediaThumbnail(
 ) {
   val thumbnailRepository = koinInject<ThumbnailRepository>()
   val density = LocalDensity.current
-  val thumbWidthPx = with(density) { 120.dp.roundToPx() }
-  val thumbHeightPx = with(density) { 70.dp.roundToPx() }
+  val isAudio = video.isAudio
+  val thumbWidthPx = with(density) { (if (isAudio) 280.dp else 360.dp).roundToPx() }
+  val thumbHeightPx = with(density) { (if (isAudio) 350.dp else 202.dp).roundToPx() }
 
   var thumbnail by remember(video.path) {
     mutableStateOf<Bitmap?>(thumbnailRepository.peekThumbnailFromMemory(video, thumbWidthPx, thumbHeightPx))
@@ -1748,7 +1760,7 @@ private fun BentoMediaThumbnail(
   ) {
     if (thumbnail != null) {
       val bmp = thumbnail!!
-      val targetAspect = if (video.isAudio) 1f else 16f / 9f
+      val targetAspect = if (video.isAudio) (140f / 175f) else 16f / 9f
       val bmpAspect = bmp.width.toFloat() / bmp.height.toFloat()
       val aspectMismatch = kotlin.math.abs(bmpAspect - targetAspect) > 0.18f || (!video.isAudio && bmp.height > bmp.width * 1.05f)
       if (aspectMismatch) {
@@ -1762,7 +1774,7 @@ private fun BentoMediaThumbnail(
           bitmap = bmp.asImageBitmap(),
           contentDescription = null,
           modifier = Modifier.fillMaxSize(),
-          contentScale = ContentScale.Fit,
+          contentScale = if (video.isAudio) ContentScale.Crop else ContentScale.Fit,
         )
       } else {
         Image(
