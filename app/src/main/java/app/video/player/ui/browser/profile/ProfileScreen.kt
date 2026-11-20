@@ -177,7 +177,8 @@ object ProfileScreen : Screen {
           selectedCount = 0,
           totalCount = 0,
           onCancelSelection = { },
-          onSettingsClick = { backStack.navigateTo(PreferencesScreen) },
+          onBackClick = if (app.video.player.ui.browser.LocalIsMainTabPage.current) null else ({ backStack.popSafely() }),
+          onSettingsClick = if (app.video.player.ui.browser.LocalIsMainTabPage.current) ({ backStack.navigateTo(PreferencesScreen) }) else null,
           customTitle = {
             AnimatedContent(
               targetState = showHeaderAvatar,
@@ -330,7 +331,7 @@ internal fun ProfileAvatar(
 }
 
 @Composable
-private fun rememberProfileAvatar(path: String): ImageBitmap? {
+internal fun rememberProfileAvatar(path: String): ImageBitmap? {
   val avatar by produceState<ImageBitmap?>(initialValue = null, path) {
     value =
       if (path.isBlank()) {
@@ -377,12 +378,18 @@ private fun ProfileOverviewCard(
             alpha = avatarAlpha
           },
       ) {
-        ProfileAvatar(
-          size = if (isTablet) 116.dp else 96.dp,
-          tint = MaterialTheme.colorScheme.onPrimaryContainer,
-          containerColor = MaterialTheme.colorScheme.primaryContainer,
-          contentDescription = null,
-        )
+        Box(
+          modifier = Modifier
+            .clip(CircleShape)
+            .clickable(onClick = onEditProfile),
+        ) {
+          ProfileAvatar(
+            size = if (isTablet) 116.dp else 96.dp,
+            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentDescription = null,
+          )
+        }
         // A small visual badge at the lower-right edge, with an independent 48dp
         // touch target so the edit action remains easy to reach on small devices.
         Box(
@@ -423,6 +430,23 @@ private fun ProfileOverviewCard(
           maxLines = 2,
           overflow = TextOverflow.Ellipsis,
         )
+        FilledTonalButton(
+          onClick = onEditProfile,
+          shape = CircleShape,
+          contentPadding = PaddingValues(horizontal = 16.dp, vertical = 6.dp),
+          modifier = Modifier.padding(top = 4.dp),
+        ) {
+          Icon(
+            imageVector = Icons.RoundedFilled.Edit,
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
+          )
+          Spacer(modifier = Modifier.width(6.dp))
+          Text(
+            text = stringResource(R.string.profile_edit),
+            style = MaterialTheme.typography.labelLarge,
+          )
+        }
       }
     }
   }

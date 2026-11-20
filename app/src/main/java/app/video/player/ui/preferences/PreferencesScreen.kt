@@ -79,6 +79,9 @@ import app.video.player.ui.tv.tvFocusMemory
 import app.video.player.ui.theme.AppConnectedShapeTokens
 import app.video.player.ui.theme.ConnectedLayout
 import app.video.player.ui.securefolder.SecureFolderSettingsScreen
+import app.video.player.preferences.AppearancePreferences
+import app.video.player.ui.browser.profile.ProfileScreen
+import app.video.player.ui.browser.profile.ProfileAvatar
 import app.video.player.ui.theme.LocalEmphasizedTypography
 import app.video.player.ui.theme.rememberConnectedShape
 import app.video.player.ui.browser.LocalNavigationBarHeight
@@ -257,7 +260,22 @@ object PreferencesScreen : Screen {
     val television = isTelevision()
     val secureFolderPreferences = koinInject<SecureFolderPreferences>()
     val isSecureFolderEntryHidden by secureFolderPreferences.isEntryPointHidden.collectAsState()
+    val appearancePreferences = koinInject<AppearancePreferences>()
+    val profileName by appearancePreferences.profileName.collectAsState()
     return listOfNotNull(
+      SettingsSection(
+        title = stringResource(R.string.ui_profile),
+        tint = colorScheme.primary,
+        items =
+          listOf(
+            SettingsDestination(
+              title = profileName.ifBlank { stringResource(R.string.ui_profile) },
+              summary = if (profileName.isNotBlank()) stringResource(R.string.profile_edit) else stringResource(R.string.pref_nav_profile_summary),
+              icon = Icons.RoundedFilled.Person,
+              screen = ProfileScreen,
+            ),
+          ),
+      ),
       SettingsSection(
         title = stringResource(R.string.pref_section_appearance),
         tint = colorScheme.onSurfaceVariant,
@@ -580,12 +598,20 @@ private fun SettingsDestinationRow(
           modifier = Modifier.size(48.dp),
           contentAlignment = Alignment.Center,
         ) {
-          Icon(
-            imageVector = item.icon,
-            contentDescription = null,
-            modifier = Modifier.size(26.dp),
-            tint = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else tint,
-          )
+          if (item.screen == ProfileScreen) {
+            ProfileAvatar(
+              size = 40.dp,
+              tint = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else tint,
+              contentDescription = null,
+            )
+          } else {
+            Icon(
+              imageVector = item.icon,
+              contentDescription = null,
+              modifier = Modifier.size(26.dp),
+              tint = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else tint,
+            )
+          }
         }
       }
 

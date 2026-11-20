@@ -17,6 +17,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -31,6 +32,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.layout.ContentScale
+import app.video.player.ui.browser.profile.rememberProfileAvatar
 import app.video.player.presentation.components.AppDropdownMenu as DropdownMenu
 import app.video.player.presentation.components.AppDropdownMenuItem as DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -302,6 +305,11 @@ private fun NormalTopBar(
   val isOnlyHomeFilesTab = !showMusicTab && !showProfileTab
   val isNavBarVisible = NavigationBarState.isNavBarVisible
   val showTopBarSearch = legacyNavigationBar || !isMainTabPage || isOnlyHomeFilesTab || !isNavBarVisible
+  val profileName by preferences.profileName.collectAsState()
+  val profileImagePath by preferences.profileImagePath.collectAsState()
+  val profileAvatar = rememberProfileAvatar(profileImagePath)
+  val appName = stringResource(R.string.app_name)
+  val effectiveTitle = if (title == appName && profileName.isNotBlank()) profileName else title
   val wallpaperActive = LocalAppWallpaperActive.current
   val darkMode by preferences.darkMode.collectAsState()
   val darkTheme = isSystemInDarkTheme()
@@ -424,7 +432,7 @@ private fun NormalTopBar(
           ) {
             Text(
               buildAnnotatedString {
-                append(title)
+                append(effectiveTitle)
                 if (showBetaBadge) {
                   withStyle(
                     SpanStyle(
@@ -529,14 +537,30 @@ private fun NormalTopBar(
           onClick = onSettingsClick,
           modifier = Modifier.padding(horizontal = 2.dp).browserTopBarFocus(),
         ) {
-          Icon(
-            Icons.RoundedFilled.Settings,
-            contentDescription =
-              androidx.compose.ui.res
-                .stringResource(app.video.player.R.string.ui_settings),
-            modifier = Modifier.size(24.dp),
-            tint = MaterialTheme.colorScheme.secondary.onWallpaper(),
-          )
+          if (profileAvatar != null) {
+            Image(
+              bitmap = profileAvatar,
+              contentDescription = profileName.ifBlank { stringResource(R.string.ui_settings) },
+              contentScale = ContentScale.Crop,
+              modifier = Modifier
+                .size(28.dp)
+                .clip(CircleShape)
+                .border(
+                  width = 1.5.dp,
+                  color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                  shape = CircleShape,
+                ),
+            )
+          } else {
+            Icon(
+              Icons.RoundedFilled.Settings,
+              contentDescription =
+                androidx.compose.ui.res
+                  .stringResource(app.video.player.R.string.ui_settings),
+              modifier = Modifier.size(24.dp),
+              tint = MaterialTheme.colorScheme.secondary.onWallpaper(),
+            )
+          }
         }
       }
     },

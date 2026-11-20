@@ -15,6 +15,7 @@ import app.video.player.presentation.Screen
 import app.video.player.ui.background.BackgroundType
 import app.video.player.ui.background.RandomInterval
 import app.video.player.ui.browser.music.MusicTab
+import app.video.player.ui.browser.profile.ProfileScreen
 import app.video.player.ui.securefolder.SecureFolderSettingsScreen
 import java.text.Normalizer
 import kotlin.math.abs
@@ -1745,6 +1746,14 @@ object SearchablePreferences {
           ),
         category = "Folders",
         screen = FoldersPreferencesScreen,
+      ),
+
+      SearchablePreference(
+        titleRes = R.string.ui_profile,
+        summaryRes = R.string.pref_nav_profile_summary,
+        keywords = listOf("profile avatar photo name edit account picture display name"),
+        category = "Profile",
+        screen = ProfileScreen,
       ),
 
       SearchablePreference(
