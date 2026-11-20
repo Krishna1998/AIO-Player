@@ -104,6 +104,7 @@ import app.video.player.ui.utils.popSafely
 import app.video.player.ui.utils.rememberTabNavigation
 import app.video.player.utils.media.SharedUrlExtractor
 import app.video.player.utils.media.MediaUtils
+import app.video.player.utils.media.HttpUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
