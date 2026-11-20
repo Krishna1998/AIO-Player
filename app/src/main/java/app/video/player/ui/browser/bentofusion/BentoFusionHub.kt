@@ -445,7 +445,6 @@ fun BentoFusionHeader(
         icon = "🎬",
         accentColor = MaterialTheme.colorScheme.primary,
         count = videoItems.size,
-        onViewAll = { onFilterSelected?.invoke(MediaLibraryType.Video) },
       ) {
         LazyRow(
           contentPadding = PaddingValues(horizontal = 16.dp),
@@ -471,7 +470,6 @@ fun BentoFusionHeader(
         icon = "🎵",
         accentColor = MaterialTheme.colorScheme.tertiary,
         count = sortedAudioByTitle.size,
-        onViewAll = { onFilterSelected?.invoke(MediaLibraryType.Audio) },
       ) {
         LazyRow(
           contentPadding = PaddingValues(horizontal = 16.dp),
@@ -630,7 +628,6 @@ fun DualHorizonRails(
         icon = "🎬",
         accentColor = MaterialTheme.colorScheme.primary,
         count = videoItems.size,
-        onViewAll = { onFilterSelected?.invoke(MediaLibraryType.Video) },
       ) {
         LazyRow(
           contentPadding = PaddingValues(horizontal = 16.dp),
@@ -656,7 +653,6 @@ fun DualHorizonRails(
         icon = "🎵",
         accentColor = MaterialTheme.colorScheme.tertiary,
         count = sortedAudioByTitle.size,
-        onViewAll = { onFilterSelected?.invoke(MediaLibraryType.Audio) },
       ) {
         LazyRow(
           contentPadding = PaddingValues(horizontal = 16.dp),
@@ -683,7 +679,6 @@ private fun HorizonRailSection(
   icon: String,
   accentColor: Color,
   count: Int,
-  onViewAll: () -> Unit,
   content: @Composable () -> Unit,
 ) {
   Column(
@@ -694,7 +689,7 @@ private fun HorizonRailSection(
       modifier = Modifier
         .fillMaxWidth()
         .padding(horizontal = 16.dp),
-      horizontalArrangement = Arrangement.SpaceBetween,
+      horizontalArrangement = Arrangement.Start,
       verticalAlignment = Alignment.CenterVertically,
     ) {
       // Glass UI Title Capsule
@@ -746,25 +741,6 @@ private fun HorizonRailSection(
             )
           }
         }
-      }
-
-      // Glass UI Action Pill
-      Surface(
-        shape = RoundedCornerShape(999.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.35f),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.30f)),
-        modifier = Modifier
-          .clip(RoundedCornerShape(999.dp))
-          .clickable(onClick = onViewAll),
-      ) {
-        Text(
-          text = "Swipe Deck →",
-          style = MaterialTheme.typography.labelSmall.copy(
-            fontWeight = FontWeight.SemiBold,
-          ),
-          color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.9f),
-          modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-        )
       }
     }
 
@@ -882,24 +858,22 @@ private fun BentoHorizonVideoCard(
           overflow = TextOverflow.Ellipsis,
         )
 
-        val statusText = if (progress != null && progress > 0f) {
-          if (item.isWatched) "Completed" else "Watched ${(progress * 100).toInt()}%"
-        } else {
-          video.durationFormatted
+        if (progress != null && progress > 0f) {
+          val statusText = if (item.isWatched) "Completed" else "Watched ${(progress * 100).toInt()}%"
+          Text(
+            text = statusText,
+            style = MaterialTheme.typography.bodySmall.copy(
+              fontSize = 10.sp,
+            ),
+            color = if (!item.isWatched) {
+              MaterialTheme.colorScheme.primary
+            } else {
+              MaterialTheme.colorScheme.onSurfaceVariant
+            },
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+          )
         }
-        Text(
-          text = statusText,
-          style = MaterialTheme.typography.bodySmall.copy(
-            fontSize = 10.sp,
-          ),
-          color = if (progress != null && progress > 0f && !item.isWatched) {
-            MaterialTheme.colorScheme.primary
-          } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
-          },
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-        )
       }
     }
   }
@@ -1002,27 +976,13 @@ private fun BentoHorizonAudioCard(
           .padding(horizontal = 8.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp),
       ) {
-        val (artist, title) = SortUtils.getAudioArtistAndTitle(video)
+        val (_, title) = SortUtils.getAudioArtistAndTitle(video)
         Text(
           text = title,
           style = MaterialTheme.typography.labelMedium.copy(
             fontWeight = FontWeight.Bold,
           ),
           color = MaterialTheme.colorScheme.onSurface,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
-        )
-
-        Text(
-          text = if (artist.isNotBlank() && !artist.equals("Unknown Artist", ignoreCase = true)) {
-            "$artist • ${if (video.durationFormatted.isNotBlank()) video.durationFormatted else "Audio"}"
-          } else {
-            if (video.durationFormatted.isNotBlank()) video.durationFormatted else "Audio Track"
-          },
-          style = MaterialTheme.typography.bodySmall.copy(
-            fontSize = 10.sp,
-          ),
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
         )
