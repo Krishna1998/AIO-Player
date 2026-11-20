@@ -1309,7 +1309,7 @@
   <string name="media_widget_empty">Nothing playing</string>
   <string name="media_widget_audio">Audio</string>
   <string name="media_widget_video">Video</string>
-  <string name="ui_home">Player</string>
+  <string name="ui_home">Home</string>
   <string name="ui_music">Music</string>
   <string name="ui_recents">Recents</string>
   <string name="ui_playlists">Playlists</string>
