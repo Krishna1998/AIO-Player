@@ -962,18 +962,18 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                     Icon(
                       imageVector = iconVector,
                       contentDescription = null,
-                      modifier = Modifier.size(16.dp),
+                      modifier = Modifier.size(18.dp),
                       tint = if (isSelected) {
                         MaterialTheme.colorScheme.onPrimaryContainer
                       } else {
                         MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = contentAlpha)
                       },
                     )
-                    Spacer(modifier = Modifier.width(5.dp))
+                    Spacer(modifier = Modifier.width(6.dp))
                     Text(
                       text = label,
-                      style = MaterialTheme.typography.labelMedium.copy(
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                      style = MaterialTheme.typography.titleSmall.copy(
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
                       ),
                       color = if (isSelected) {
                         MaterialTheme.colorScheme.onPrimaryContainer
@@ -984,11 +984,11 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                       overflow = TextOverflow.Ellipsis,
                     )
                     if (count > 0) {
-                      Spacer(modifier = Modifier.width(3.dp))
+                      Spacer(modifier = Modifier.width(4.dp))
                       Text(
                         text = "($count)",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                          fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                        style = MaterialTheme.typography.labelMedium.copy(
+                          fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                         ),
                         color = if (isSelected) {
                           MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f)
