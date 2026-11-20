@@ -190,6 +190,9 @@ class BrowserPreferences(
   // True once the user finished (or skipped through) the first-run permission flow.
   val onboardingCompleted = preferenceStore.getBoolean(ONBOARDING_COMPLETED_KEY, false)
 
+  // Feature discovery hint for BentoFusion (Audio Pulsing gestures & interactive highlights)
+  val bentoFusionHintDismissed = preferenceStore.getBoolean("bentofusion_hint_dismissed", false)
+
   // Watched threshold preference (percentage 1-100)
   val watchedThreshold = preferenceStore.getInt("watched_threshold", 95)
 

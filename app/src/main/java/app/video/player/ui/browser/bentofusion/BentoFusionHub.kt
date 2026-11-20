@@ -245,6 +245,7 @@ fun BentoFusionHeader(
   val recentlyPlayedRepo = koinInject<RecentlyPlayedRepository>()
   val recentEntities by recentlyPlayedRepo.observeRecentlyPlayed(limit = 50).collectAsState(initial = emptyList())
   val browserPreferences = koinInject<BrowserPreferences>()
+  val bentoFusionHintDismissed by browserPreferences.bentoFusionHintDismissed.collectAsState()
   val onlineMusicArtworkRepository = koinInject<OnlineMusicArtworkRepository>()
   val minVideoMinutes by browserPreferences.minimumVideoHorizonDurationMinutes.collectAsState()
   val minVideoDurationMs = remember(minVideoMinutes) { (minVideoMinutes * 60 * 1000L).coerceAtLeast(0L) }
@@ -472,6 +473,18 @@ fun BentoFusionHeader(
       .padding(bottom = 12.dp),
     verticalArrangement = Arrangement.spacedBy(14.dp),
   ) {
+    // 0. BentoFusion Audio Pulsing & Key Feature Discovery Hint
+    if (!bentoFusionHintDismissed) {
+      BentoFusionFeatureHintCard(
+        onDismiss = {
+          browserPreferences.bentoFusionHintDismissed.set(true)
+        },
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(horizontal = 16.dp),
+      )
+    }
+
     // 1. Video/Movie Rail
     if (videoItems.isNotEmpty()) {
       HorizonRailSection(
@@ -705,6 +718,178 @@ fun BentoFusionHeader(
         videoToDelete = null
       },
     )
+  }
+}
+
+/**
+ * BentoFusion Key Feature Discovery Card
+ * Displays an elegant Liquid Glass card introducing Audio Pulsing gestures
+ * and Horizon quick navigation right after permission setup.
+ */
+@Composable
+fun BentoFusionFeatureHintCard(
+  onDismiss: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
+  val primaryColor = MaterialTheme.colorScheme.primary
+  val tertiaryColor = MaterialTheme.colorScheme.tertiary
+
+  Surface(
+    modifier = modifier,
+    shape = RoundedCornerShape(20.dp),
+    color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+    tonalElevation = 4.dp,
+    shadowElevation = 8.dp,
+    border = BorderStroke(
+      1.dp,
+      Brush.linearGradient(
+        colors = listOf(
+          tertiaryColor.copy(alpha = 0.5f),
+          primaryColor.copy(alpha = 0.25f),
+          Color.Transparent,
+        ),
+      ),
+    ),
+  ) {
+    Column(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(16.dp),
+      verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+          Surface(
+            shape = CircleShape,
+            color = tertiaryColor.copy(alpha = 0.18f),
+            modifier = Modifier.size(34.dp),
+          ) {
+            Box(contentAlignment = Alignment.Center) {
+              Text(
+                text = "✨",
+                fontSize = 16.sp,
+              )
+            }
+          }
+          Column {
+            Text(
+              text = "BentoFusion Features",
+              style = MaterialTheme.typography.titleMedium,
+              fontWeight = FontWeight.Bold,
+              color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+              text = "Audio Pulsing & Gesture Controls",
+              style = MaterialTheme.typography.labelSmall,
+              color = tertiaryColor,
+              fontWeight = FontWeight.SemiBold,
+            )
+          }
+        }
+
+        Surface(
+          shape = CircleShape,
+          color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+          modifier = Modifier
+            .size(32.dp)
+            .clickable(onClick = onDismiss),
+        ) {
+          Box(contentAlignment = Alignment.Center) {
+            Text(
+              text = "✕",
+              fontSize = 14.sp,
+              fontWeight = FontWeight.Bold,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
+        }
+      }
+
+      Column(
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+      ) {
+        // Feature 1: Audio Pulsing Tap & Gestures
+        Row(
+          verticalAlignment = Alignment.Top,
+          horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+          Text(
+            text = "🎵",
+            fontSize = 16.sp,
+            modifier = Modifier.padding(top = 2.dp),
+          )
+          Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+              text = "Live Audio Pulsing Gestures",
+              style = MaterialTheme.typography.bodyMedium,
+              fontWeight = FontWeight.SemiBold,
+              color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+              text = "Tap the hero card to Play/Pause with pulsing aura. Swipe left or right anywhere on the card to skip songs instantly with haptics!",
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              lineHeight = 16.sp,
+            )
+          }
+        }
+
+        // Feature 2: Quick Long-Press Actions
+        Row(
+          verticalAlignment = Alignment.Top,
+          horizontalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+          Text(
+            text = "⚡",
+            fontSize = 16.sp,
+            modifier = Modifier.padding(top = 2.dp),
+          )
+          Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(
+              text = "Horizon Rails & Quick Actions",
+              style = MaterialTheme.typography.bodyMedium,
+              fontWeight = FontWeight.SemiBold,
+              color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+              text = "Long-press any media card to rename, hide, or delete. Long-press the Audio Pulsing hero card to expand into full player mode.",
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              lineHeight = 16.sp,
+            )
+          }
+        }
+      }
+
+      // Action button
+      Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.End,
+      ) {
+        Surface(
+          shape = RoundedCornerShape(12.dp),
+          color = MaterialTheme.colorScheme.primary,
+          modifier = Modifier
+            .clickable(onClick = onDismiss),
+        ) {
+          Text(
+            text = "Got it",
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onPrimary,
+          )
+        }
+      }
+    }
   }
 }
 
