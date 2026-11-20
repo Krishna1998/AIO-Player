@@ -10,6 +10,7 @@
 package app.video.player.ui.browser.medialibrary
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Environment
 import app.video.player.ui.components.AppToast as Toast
 import app.video.player.ui.utils.NavigationBackHandler as BackHandler
@@ -529,14 +530,27 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
     val index = playlistVideos.indexOfFirst { it.path == video.path }.coerceAtLeast(0)
     lastPlayRequestIndex.intValue = index
 
+    val onlineMusicRepo = runCatching {
+      org.koin.java.KoinJavaComponent.get<app.video.player.domain.thumbnail.OnlineMusicArtworkRepository>(
+        app.video.player.domain.thumbnail.OnlineMusicArtworkRepository::class.java,
+      )
+    }.getOrNull()
+
     val queueItems = playlistVideos.map { item ->
+      val isItemAudio = item.isAudio || currentTab == MediaLibraryType.Audio
+      val cachedArtUri = if (isItemAudio) {
+        item.artworkUrl ?: onlineMusicRepo?.getCachedArtworkFile(item)?.let { Uri.fromFile(it).toString() }
+      } else item.artworkUrl
+
       PlaybackItem.fromUri(
         uri = item.uri.toString(),
         stableId = if (app.video.player.BuildConfig.SCOPED_STORAGE_ONLY && item.uri.scheme == "content") {
           app.video.player.ui.browser.videolist.videoPlaybackIdentifiers(item).first()
         } else PlaybackIdentity.forLocalPath(item.path),
-        title = item.displayName,
-        mimeType = item.mimeType,
+        title = if (item.title.isNotBlank()) item.title else item.displayName,
+        artist = item.artist.takeIf { it.isNotBlank() },
+        mimeType = item.mimeType.ifBlank { if (isItemAudio) "audio/*" else "video/*" },
+        artworkUri = cachedArtUri,
         durationSeconds = (item.duration / 1000L).toInt().takeIf { it > 0 },
         videoWidth = item.width,
         videoHeight = item.height,

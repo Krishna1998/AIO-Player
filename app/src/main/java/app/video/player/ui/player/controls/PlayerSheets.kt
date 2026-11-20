@@ -633,6 +633,8 @@ fun PlayerSheets(
         val artwork = rememberAudioAlbumArt(
           pathOrUri = playback.currentItem?.originalUri,
           artworkUri = playback.currentItem?.artworkUri,
+          title = playback.currentItem?.title,
+          artist = playback.currentItem?.artist,
         )
         val properties by produceState<List<AudioPropertyItem>?>(
           null,

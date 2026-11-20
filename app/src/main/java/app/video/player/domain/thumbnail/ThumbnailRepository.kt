@@ -882,6 +882,8 @@ class ThumbnailRepository(
               synchronized(memoryCache) { memoryCache.put(key, scaled) }
             }
             _thumbnailReadyKeys.tryEmit(key)
+            if (video.path.isNotBlank()) _thumbnailReadyKeys.tryEmit(video.path)
+            if (video.uri != Uri.EMPTY) _thumbnailReadyKeys.tryEmit(video.uri.toString())
           }
         }
       }
@@ -932,6 +934,8 @@ class ThumbnailRepository(
                 synchronized(memoryCache) { memoryCache.put(key, scaled) }
               }
               _thumbnailReadyKeys.tryEmit(key)
+              if (video.path.isNotBlank()) _thumbnailReadyKeys.tryEmit(video.path)
+              if (video.uri != Uri.EMPTY) _thumbnailReadyKeys.tryEmit(video.uri.toString())
             }
           }
         }

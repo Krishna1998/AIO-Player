@@ -37,8 +37,10 @@ fun addVideosToPlaybackQueue(
           video.path
             .takeIf { path -> path.isNotBlank() && !path.contains("://") }
             ?.let(PlaybackIdentity::forLocalPath),
-        title = video.displayName.ifBlank { video.title },
+        title = video.title.ifBlank { video.displayName },
+        artist = video.artist.takeIf { it.isNotBlank() },
         mimeType = video.mimeType,
+        artworkUri = video.artworkUrl,
         durationSeconds = (video.duration / 1000L).toInt().takeIf { it > 0 },
         videoWidth = video.width,
         videoHeight = video.height,

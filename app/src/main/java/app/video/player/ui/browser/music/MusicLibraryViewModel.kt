@@ -6,6 +6,7 @@ package app.video.player.ui.browser.music
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.video.player.database.entities.PlaylistEntity
@@ -361,13 +362,20 @@ class MusicLibraryViewModel : ViewModel(), KoinComponent {
     SongPlayCountTracker.recordPlay(context, song.path)
     val index = songList.indexOfFirst { it.id == song.id }.coerceAtLeast(0)
 
+    val onlineMusicRepo = runCatching {
+      org.koin.java.KoinJavaComponent.get<app.video.player.domain.thumbnail.OnlineMusicArtworkRepository>(
+        app.video.player.domain.thumbnail.OnlineMusicArtworkRepository::class.java,
+      )
+    }.getOrNull()
+
     val queueItems = songList.map { item ->
+      val cachedArt = item.albumArtUri?.toString() ?: onlineMusicRepo?.getCachedArtworkFile(item.path, item.title, item.artist)?.let { Uri.fromFile(it).toString() }
       PlaybackItem.fromUri(
         uri = item.uri.toString(),
         title = item.title,
         artist = item.artist,
         mimeType = "audio/*",
-        artworkUri = item.albumArtUri?.toString(),
+        artworkUri = cachedArt,
         durationSeconds = (item.durationMs / 1000L).toInt().takeIf { it > 0 },
       )
     }
@@ -402,13 +410,20 @@ class MusicLibraryViewModel : ViewModel(), KoinComponent {
     val list = if (shuffle) songsToPlay.shuffled() else songsToPlay
     val firstSong = list.first()
 
+    val onlineMusicRepo = runCatching {
+      org.koin.java.KoinJavaComponent.get<app.video.player.domain.thumbnail.OnlineMusicArtworkRepository>(
+        app.video.player.domain.thumbnail.OnlineMusicArtworkRepository::class.java,
+      )
+    }.getOrNull()
+
     val queueItems = list.map { item ->
+      val cachedArt = item.albumArtUri?.toString() ?: onlineMusicRepo?.getCachedArtworkFile(item.path, item.title, item.artist)?.let { Uri.fromFile(it).toString() }
       PlaybackItem.fromUri(
         uri = item.uri.toString(),
         title = item.title,
         artist = item.artist,
         mimeType = "audio/*",
-        artworkUri = item.albumArtUri?.toString(),
+        artworkUri = cachedArt,
         durationSeconds = (item.durationMs / 1000L).toInt().takeIf { it > 0 },
       )
     }

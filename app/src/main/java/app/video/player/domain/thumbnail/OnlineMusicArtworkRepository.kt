@@ -12,11 +12,13 @@ package app.video.player.domain.thumbnail
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.util.Log
 import android.util.LruCache
 import app.video.player.domain.media.model.Video
 import app.video.player.network.awaitResponse
 import app.video.player.preferences.BrowserPreferences
+import app.video.player.ui.player.resolveLocalPath
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -159,24 +161,87 @@ class OnlineMusicArtworkRepository(
   fun artworkFileForTitleArtist(title: String, artist: String): File =
     File(artworkDir, "t_${sha256(title.lowercase().trim() + "_" + artist.lowercase().trim())}.jpg")
 
-  fun hasCachedArtwork(video: Video): Boolean {
-    val fileByPath = artworkFileForPath(video.path.ifBlank { video.uri.toString() })
-    if (fileByPath.isFile && fileByPath.length() > 500) return true
-    val parsed = MusicTrackInfoParser.parse(video)
-    if (parsed.title.isNotBlank()) {
-      val fileByTitle = artworkFileForTitleArtist(parsed.title, parsed.artist)
-      if (fileByTitle.isFile && fileByTitle.length() > 500) return true
-    }
-    return false
-  }
+  fun hasCachedArtwork(video: Video): Boolean =
+    getCachedArtworkFile(video) != null
 
   fun getCachedArtworkFile(video: Video): File? {
-    val fileByPath = artworkFileForPath(video.path.ifBlank { video.uri.toString() })
-    if (fileByPath.isFile && fileByPath.length() > 500) return fileByPath
+    val pathKey = video.path.ifBlank { video.uri.toString() }
+    if (pathKey.isNotBlank()) {
+      val fileByPath = artworkFileForPath(pathKey)
+      if (fileByPath.isFile && fileByPath.length() > 500) return fileByPath
+    }
+
+    if (video.uri.toString().isNotBlank() && video.uri.toString() != pathKey) {
+      val fileByUri = artworkFileForPath(video.uri.toString())
+      if (fileByUri.isFile && fileByUri.length() > 500) return fileByUri
+    }
+
+    if (pathKey.startsWith("content://", ignoreCase = true) || video.uri.scheme.equals("content", ignoreCase = true)) {
+      val targetUri = if (video.uri.scheme.equals("content", ignoreCase = true)) video.uri else Uri.parse(pathKey)
+      val resolvedPath = runCatching { targetUri.resolveLocalPath(context) }.getOrNull()
+      if (!resolvedPath.isNullOrBlank()) {
+        val fileByResolved = artworkFileForPath(resolvedPath)
+        if (fileByResolved.isFile && fileByResolved.length() > 500) return fileByResolved
+      }
+    }
+
     val parsed = MusicTrackInfoParser.parse(video)
     if (parsed.title.isNotBlank()) {
       val fileByTitle = artworkFileForTitleArtist(parsed.title, parsed.artist)
       if (fileByTitle.isFile && fileByTitle.length() > 500) return fileByTitle
+    }
+
+    val cleanTitle = video.title.ifBlank { video.displayName }.substringBeforeLast('.').trim()
+    if (cleanTitle.isNotBlank() && cleanTitle != parsed.title) {
+      val altFile = artworkFileForTitleArtist(cleanTitle, video.artist.trim())
+      if (altFile.isFile && altFile.length() > 500) return altFile
+    }
+
+    return null
+  }
+
+  fun getCachedArtworkFile(
+    pathOrUri: String?,
+    title: String? = null,
+    artist: String? = null,
+  ): File? {
+    if (pathOrUri.isNullOrBlank() && title.isNullOrBlank()) return null
+    if (!pathOrUri.isNullOrBlank()) {
+      val fileByPath = artworkFileForPath(pathOrUri)
+      if (fileByPath.isFile && fileByPath.length() > 500) return fileByPath
+
+      if (pathOrUri.startsWith("content://", ignoreCase = true)) {
+        val targetUri = Uri.parse(pathOrUri)
+        val resolvedPath = runCatching { targetUri.resolveLocalPath(context) }.getOrNull()
+        if (!resolvedPath.isNullOrBlank()) {
+          val fileByResolved = artworkFileForPath(resolvedPath)
+          if (fileByResolved.isFile && fileByResolved.length() > 500) return fileByResolved
+        }
+      } else if (pathOrUri.startsWith("file://", ignoreCase = true)) {
+        val clean = pathOrUri.removePrefix("file://")
+        val fileByClean = artworkFileForPath(clean)
+        if (fileByClean.isFile && fileByClean.length() > 500) return fileByClean
+      }
+    }
+
+    if (!title.isNullOrBlank()) {
+      val cleanTitle = title.substringBeforeLast('.').trim()
+      val cleanArtist = artist?.trim().orEmpty()
+      val fileByTitle = artworkFileForTitleArtist(cleanTitle, cleanArtist)
+      if (fileByTitle.isFile && fileByTitle.length() > 500) return fileByTitle
+
+      val dummyVideo = Video(
+        id = 0L, title = title, displayName = title, path = pathOrUri.orEmpty(),
+        uri = Uri.parse(pathOrUri.orEmpty()), duration = 0L, durationFormatted = "",
+        size = 0L, sizeFormatted = "", dateModified = 0L, dateAdded = 0L,
+        mimeType = "audio/*", bucketId = "", bucketDisplayName = "", width = 0, height = 0,
+        fps = 0f, resolution = "", isAudio = true, artist = cleanArtist,
+      )
+      val parsed = MusicTrackInfoParser.parse(dummyVideo)
+      if (parsed.title.isNotBlank()) {
+        val fileByParsed = artworkFileForTitleArtist(parsed.title, parsed.artist)
+        if (fileByParsed.isFile && fileByParsed.length() > 500) return fileByParsed
+      }
     }
     return null
   }
@@ -201,6 +266,28 @@ class OnlineMusicArtworkRepository(
       return bitmap
     }
     return null
+  }
+
+  fun getCachedArtworkBitmap(
+    pathOrUri: String?,
+    title: String? = null,
+    artist: String? = null,
+    widthPx: Int = 0,
+    heightPx: Int = 0,
+  ): Bitmap? {
+    val key = pathOrUri?.ifBlank { null } ?: (title.orEmpty() + "_" + artist.orEmpty())
+    if (key.isNotBlank()) {
+      memoryCache.get(key)?.let {
+        if (!it.isRecycled) return it
+        memoryCache.remove(key)
+      }
+    }
+    val fileToRead = getCachedArtworkFile(pathOrUri, title, artist) ?: return null
+    val bitmap = decodeBitmapFromFile(fileToRead, widthPx, heightPx) ?: return null
+    if (!bitmap.isRecycled && key.isNotBlank()) {
+      memoryCache.put(key, bitmap)
+    }
+    return bitmap
   }
 
   suspend fun getOrFetchArtwork(
@@ -268,6 +355,86 @@ class OnlineMusicArtworkRepository(
       }
     }
     ongoingFetches[cacheKey] = job
+  }
+
+  suspend fun getOrFetchArtworkForTrack(
+    pathOrUri: String?,
+    title: String?,
+    artist: String?,
+    widthPx: Int = 0,
+    heightPx: Int = 0,
+    timeoutMs: Long = ARTWORK_FETCH_TIMEOUT_MS,
+  ): Bitmap? = withContext(Dispatchers.IO) {
+    if (!browserPreferences.autoFetchOnlineMusicArtwork.get()) return@withContext null
+    getCachedArtworkBitmap(pathOrUri, title, artist, widthPx, heightPx)?.let { return@withContext it }
+
+    val cleanPath = pathOrUri.orEmpty()
+    val resolvedLocalPath = if (cleanPath.startsWith("content://", ignoreCase = true)) {
+      runCatching { Uri.parse(cleanPath).resolveLocalPath(context) }.getOrNull() ?: cleanPath
+    } else cleanPath
+
+    val effectiveUri = runCatching { Uri.parse(cleanPath) }.getOrNull() ?: Uri.EMPTY
+    val dummyVideo = Video(
+      id = 0L,
+      title = title.orEmpty(),
+      displayName = title.orEmpty().ifBlank { effectiveUri.lastPathSegment.orEmpty() },
+      path = resolvedLocalPath,
+      uri = effectiveUri,
+      duration = 0L,
+      durationFormatted = "",
+      size = 0L,
+      sizeFormatted = "",
+      dateModified = 0L,
+      dateAdded = 0L,
+      mimeType = "audio/*",
+      bucketId = "",
+      bucketDisplayName = "",
+      width = 0,
+      height = 0,
+      fps = 0f,
+      resolution = "",
+      isAudio = true,
+      artist = artist.orEmpty(),
+    )
+    getOrFetchArtwork(dummyVideo, widthPx, heightPx, timeoutMs)
+  }
+
+  fun fetchArtworkAsyncForTrack(
+    pathOrUri: String?,
+    title: String?,
+    artist: String?,
+    onCompleted: (Bitmap) -> Unit = {},
+  ) {
+    if (!browserPreferences.autoFetchOnlineMusicArtwork.get()) return
+    val cleanPath = pathOrUri.orEmpty()
+    val resolvedLocalPath = if (cleanPath.startsWith("content://", ignoreCase = true)) {
+      runCatching { Uri.parse(cleanPath).resolveLocalPath(context) }.getOrNull() ?: cleanPath
+    } else cleanPath
+
+    val effectiveUri = runCatching { Uri.parse(cleanPath) }.getOrNull() ?: Uri.EMPTY
+    val dummyVideo = Video(
+      id = 0L,
+      title = title.orEmpty(),
+      displayName = title.orEmpty().ifBlank { effectiveUri.lastPathSegment.orEmpty() },
+      path = resolvedLocalPath,
+      uri = effectiveUri,
+      duration = 0L,
+      durationFormatted = "",
+      size = 0L,
+      sizeFormatted = "",
+      dateModified = 0L,
+      dateAdded = 0L,
+      mimeType = "audio/*",
+      bucketId = "",
+      bucketDisplayName = "",
+      width = 0,
+      height = 0,
+      fps = 0f,
+      resolution = "",
+      isAudio = true,
+      artist = artist.orEmpty(),
+    )
+    fetchArtworkAsync(dummyVideo, onCompleted)
   }
 
   private suspend fun downloadArtworkForTrack(
@@ -381,6 +548,23 @@ class OnlineMusicArtworkRepository(
 
       val pathFile = artworkFileForPath(video.path.ifBlank { video.uri.toString() })
       FileOutputStream(pathFile).use { it.write(bytes) }
+
+      if (video.uri.toString().isNotBlank() && video.uri.toString() != video.path) {
+        runCatching {
+          val uriFile = artworkFileForPath(video.uri.toString())
+          FileOutputStream(uriFile).use { it.write(bytes) }
+        }
+      }
+
+      val targetUri = if (video.uri.scheme.equals("content", ignoreCase = true)) video.uri else runCatching { Uri.parse(video.path) }.getOrNull()
+      if (targetUri != null && targetUri.scheme.equals("content", ignoreCase = true)) {
+        runCatching {
+          targetUri.resolveLocalPath(context)?.takeIf(String::isNotBlank)?.let { resolvedPath ->
+            val resolvedFile = artworkFileForPath(resolvedPath)
+            FileOutputStream(resolvedFile).use { it.write(bytes) }
+          }
+        }
+      }
 
       val titleFile = artworkFileForTitleArtist(title, artist)
       if (!titleFile.exists() || titleFile.length() == 0L) {

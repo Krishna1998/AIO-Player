@@ -286,15 +286,63 @@ private object AudioPresentationMetadataCache {
     repository: app.video.player.domain.thumbnail.ThumbnailRepository,
     generator: app.video.player.preferences.ThumbnailGenerator,
     revision: Long,
+    title: String? = null,
+    artist: String? = null,
   ): AudioPresentationMetadata =
     withContext(Dispatchers.IO) {
-      val key = "${cacheKey(pathOrUri, artworkUri)}|$generator|$revision"
+      val key = "${cacheKey(pathOrUri, artworkUri)}|$title|$artist|$generator|$revision"
       synchronized(cache) { cache.get(key) }?.let { return@withContext it }
 
-      // An old native retriever may still be unwinding; Android artwork must not wait for it.
-      if (isLocalArtworkSource(pathOrUri) && generator != app.video.player.preferences.ThumbnailGenerator.Native) {
-        return@withContext AudioPresentationMetadata(artwork = repository.getArtwork(pathOrUri), artist = null)
+      val browserPrefs = org.koin.java.KoinJavaComponent.get<app.video.player.preferences.BrowserPreferences>(
+        app.video.player.preferences.BrowserPreferences::class.java,
+      )
+      val autoFetchOnline = browserPrefs.autoFetchOnlineMusicArtwork.get()
+
+      // 1. Check if online music artwork is already cached in memory or on disk
+      if (autoFetchOnline) {
+        val cachedOnline = repository.onlineMusicArtworkRepository.getCachedArtworkBitmap(
+          pathOrUri = pathOrUri,
+          title = title,
+          artist = artist,
+          widthPx = 960,
+          heightPx = 960,
+        )
+        if (cachedOnline != null) {
+          val loaded = AudioPresentationMetadata(artwork = cachedOnline, artist = artist)
+          synchronized(cache) { if (activeRevision == revision) cache.put(key, loaded) }
+          return@withContext loaded
+        }
       }
+
+      // 2. Decode explicit artwork URI if valid
+      val nativeArtworkUri = artworkUri?.takeUnless {
+        isLocalArtworkSource(pathOrUri) && runCatching { Uri.parse(it).authority == android.provider.MediaStore.AUTHORITY }.getOrDefault(false)
+      }
+      val explicitArtwork = EmbeddedArtworkResolver.decodeArtworkUri(context, nativeArtworkUri)
+      if (explicitArtwork != null) {
+        val loaded = AudioPresentationMetadata(artwork = explicitArtwork, artist = artist)
+        synchronized(cache) { if (activeRevision == revision) cache.put(key, loaded) }
+        return@withContext loaded
+      }
+
+      // 3. If local audio source and auto-fetch online artwork is enabled, try repository getArtwork (which fetches online)
+      if (isLocalArtworkSource(pathOrUri) && autoFetchOnline) {
+        val repoArtwork = repository.getArtwork(
+          source = pathOrUri,
+          artworkUri = artworkUri,
+          isAudio = true,
+          widthPx = 960,
+          heightPx = 960,
+          title = title,
+          artist = artist,
+        )
+        if (repoArtwork != null) {
+          val loaded = AudioPresentationMetadata(artwork = repoArtwork, artist = artist)
+          synchronized(cache) { if (activeRevision == revision) cache.put(key, loaded) }
+          return@withContext loaded
+        }
+      }
+
       loadMutex.withLock {
         synchronized(cache) { cache.get(key) }?.let { return@withLock it }
         val cleanPath =
@@ -306,10 +354,6 @@ private object AudioPresentationMetadataCache {
             }
             else -> pathOrUri
           }
-        val nativeArtworkUri = artworkUri?.takeUnless {
-          isLocalArtworkSource(pathOrUri) && Uri.parse(it).authority == android.provider.MediaStore.AUTHORITY
-        }
-        val explicitArtwork = EmbeddedArtworkResolver.decodeArtworkUri(context, nativeArtworkUri)
         val isNetworkStream = pathOrUri.startsWith("http://", ignoreCase = true) || pathOrUri.startsWith("https://", ignoreCase = true)
         val retriever = if (!isNetworkStream) MediaMetadataRetriever() else null
         val loaded =
@@ -331,22 +375,48 @@ private object AudioPresentationMetadataCache {
               }
             }
 
-            val pictureBytes = if (explicitArtwork == null) retriever?.embeddedPicture else null
+            val extractedArtist = retriever?.let {
+              it.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
+                ?: it.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST)
+                ?: it.extractMetadata(MediaMetadataRetriever.METADATA_KEY_AUTHOR)
+                ?: it.extractMetadata(MediaMetadataRetriever.METADATA_KEY_COMPOSER)
+            } ?: artist
+
+            val extractedTitle = retriever?.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE) ?: title
+
+            var onlinePoster: Bitmap? = null
+            if (autoFetchOnline) {
+              onlinePoster = repository.onlineMusicArtworkRepository.getCachedArtworkBitmap(
+                pathOrUri = pathOrUri,
+                title = extractedTitle,
+                artist = extractedArtist,
+                widthPx = 960,
+                heightPx = 960,
+              ) ?: repository.onlineMusicArtworkRepository.getOrFetchArtworkForTrack(
+                pathOrUri = pathOrUri,
+                title = extractedTitle,
+                artist = extractedArtist,
+                widthPx = 960,
+                heightPx = 960,
+                timeoutMs = 3000L,
+              )
+            }
+
+            val pictureBytes = if (explicitArtwork == null && onlinePoster == null) retriever?.embeddedPicture else null
+            val finalArtwork = onlinePoster ?: explicitArtwork ?: retriever?.let {
+              EmbeddedArtworkResolver.decodeEmbeddedArtwork(cleanPath ?: pathOrUri, it, pictureBytes)
+            }
+
             AudioPresentationMetadata(
-              artwork = explicitArtwork ?: retriever?.let { EmbeddedArtworkResolver.decodeEmbeddedArtwork(cleanPath ?: pathOrUri, it, pictureBytes) },
-              artist = retriever?.let {
-                it.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
-                  ?: it.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST)
-                  ?: it.extractMetadata(MediaMetadataRetriever.METADATA_KEY_AUTHOR)
-                  ?: it.extractMetadata(MediaMetadataRetriever.METADATA_KEY_COMPOSER)
-              },
+              artwork = finalArtwork,
+              artist = extractedArtist,
               motionArtwork = EmbeddedMotionArtwork.animatedBytes(pictureBytes),
             )
           } catch (_: Exception) {
             val fallbackArtwork = explicitArtwork ?: if (cleanPath != null && !isNetworkStream) {
               EmbeddedArtworkResolver.decodeSidecar(cleanPath)
             } else null
-            AudioPresentationMetadata(artwork = fallbackArtwork, artist = null)
+            AudioPresentationMetadata(artwork = fallbackArtwork, artist = artist)
           } finally {
             runCatching { retriever?.release() }
           }
@@ -361,20 +431,53 @@ private object AudioPresentationMetadataCache {
 private fun rememberAudioPresentationMetadata(
   pathOrUri: String?,
   artworkUri: String? = null,
+  title: String? = null,
+  artist: String? = null,
 ): AudioPresentationMetadata? {
   val context = LocalContext.current
   val repository = koinInject<app.video.player.domain.thumbnail.ThumbnailRepository>()
   val revision by repository.cacheRevision.collectAsState()
   val generator by koinInject<BrowserPreferences>().thumbnailGenerator.collectAsState()
   AudioPresentationMetadataCache.invalidate(revision)
-  var metadata by remember(pathOrUri, artworkUri, generator, revision) {
+  var metadata by remember(pathOrUri, artworkUri, title, artist, generator, revision) {
     mutableStateOf<AudioPresentationMetadata?>(null)
   }
-  LaunchedEffect(pathOrUri, artworkUri, generator, revision) {
+  LaunchedEffect(pathOrUri, artworkUri, title, artist, generator, revision) {
     metadata = if (pathOrUri.isNullOrBlank()) null else {
-      AudioPresentationMetadataCache.resolve(context, pathOrUri, artworkUri, repository, generator, revision)
+      AudioPresentationMetadataCache.resolve(
+        context = context,
+        pathOrUri = pathOrUri,
+        artworkUri = artworkUri,
+        repository = repository,
+        generator = generator,
+        revision = revision,
+        title = title,
+        artist = artist,
+      )
     }
   }
+
+  // Reactive listener: when background online artwork finishes fetching for this track, refresh instantly
+  LaunchedEffect(pathOrUri, title, artist) {
+    if (!pathOrUri.isNullOrBlank()) {
+      repository.thumbnailReadyKeys.collect {
+        val updated = AudioPresentationMetadataCache.resolve(
+          context = context,
+          pathOrUri = pathOrUri,
+          artworkUri = artworkUri,
+          repository = repository,
+          generator = generator,
+          revision = revision,
+          title = title,
+          artist = artist,
+        )
+        if (updated.artwork != null) {
+          metadata = updated
+        }
+      }
+    }
+  }
+
   return metadata
 }
 
@@ -382,7 +485,9 @@ private fun rememberAudioPresentationMetadata(
 internal fun rememberAudioAlbumArt(
   pathOrUri: String?,
   artworkUri: String? = null,
-): Bitmap? = rememberAudioPresentationMetadata(pathOrUri, artworkUri)?.artwork
+  title: String? = null,
+  artist: String? = null,
+): Bitmap? = rememberAudioPresentationMetadata(pathOrUri, artworkUri, title, artist)?.artwork
 
 private fun contrastingVisualizerTone(
   colorArgb: Int,
@@ -671,6 +776,8 @@ fun AudioPlayerControls(
     rememberAudioPresentationMetadata(
       pathOrUri = currentMediaSource?.takeIf { isAudiobook || isLocalArtworkSource(it) } ?: mediaPath?.takeIf { it.isNotBlank() } ?: currentMediaSource,
       artworkUri = currentArtworkUri,
+      title = currentItem?.title ?: mediaTitle,
+      artist = currentItem?.artist,
     )
   val albumArtBitmap = currentAudioPresentation?.artwork
 
@@ -1325,11 +1432,13 @@ fun AudioPlayerControls(
       rememberAudioAlbumArt(
         pathOrUri = nextItem?.let { it.path.ifBlank { it.uri.toString() } },
         artworkUri = nextItem?.tvgLogo,
+        title = nextItem?.fileName,
       )
     val prevCoverBitmap =
       rememberAudioAlbumArt(
         pathOrUri = prevItem?.let { it.path.ifBlank { it.uri.toString() } },
         artworkUri = prevItem?.tvgLogo,
+        title = prevItem?.fileName,
       )
     val swipeNextCoverBitmap by androidx.compose.runtime.rememberUpdatedState(nextCoverBitmap ?: albumArtBitmap)
     val swipePrevCoverBitmap by androidx.compose.runtime.rememberUpdatedState(prevCoverBitmap ?: albumArtBitmap)

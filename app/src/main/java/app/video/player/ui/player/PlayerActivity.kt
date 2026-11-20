@@ -6180,6 +6180,13 @@ private suspend fun restorePlaybackPosition(state: PlaybackStateEntity?, loadGen
             } else if (item.artworkUri.isNullOrBlank() && HttpUtils.isMusicStreamingUrl(resolvedOriginalUri)) {
               val artwork = HttpUtils.fetchMusicStreamingArtwork(resolvedOriginalUri)
               if (!artwork.isNullOrBlank()) item.copy(artworkUri = artwork) else item
+            } else if (isCurrentPlaybackAudio() && (item.artworkUri.isNullOrBlank() || item.artworkUri?.startsWith("content://") == true)) {
+              val cachedArt = thumbnailRepository.onlineMusicArtworkRepository.getCachedArtworkFile(
+                pathOrUri = item.originalUri,
+                title = item.title,
+                artist = item.artist,
+              )?.let { Uri.fromFile(it).toString() }
+              if (!cachedArt.isNullOrBlank()) item.copy(artworkUri = cachedArt) else item
             } else {
               item
             }
@@ -8025,7 +8032,14 @@ private suspend fun restorePlaybackPosition(state: PlaybackStateEntity?, loadGen
             withContext(Dispatchers.IO) {
               val source = currentQueueItem?.originalUri ?: currentPlayableUri
               if (isLocalArtworkSource(source)) {
-                thumbnailRepository.getArtwork(source, isAudio = isCurrentPlaybackAudio(), widthPx = 480)
+                thumbnailRepository.getArtwork(
+                  source = source,
+                  artworkUri = currentQueueItem?.artworkUri,
+                  isAudio = isCurrentPlaybackAudio(),
+                  widthPx = 480,
+                  title = currentQueueItem?.title ?: title,
+                  artist = currentQueueItem?.artist ?: artist,
+                )
               } else {
                 app.video.player.domain.thumbnail.EmbeddedArtworkResolver.decodeArtworkUri(
                   this@PlayerActivity, currentQueueItem?.artworkUri,

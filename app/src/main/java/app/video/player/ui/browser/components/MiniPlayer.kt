@@ -351,6 +351,8 @@ private fun MiniPlayerContent(
     rememberMiniPlayerArtwork(
       pathOrUri = if (isAudioOnlyItem) coverArtPath else null,
       artworkUri = if (isAudioOnlyItem) effectiveArtworkUri else null,
+      title = currentItem?.title,
+      artist = currentItem?.artist,
     )
   val coverArt = artwork?.bitmap
 
@@ -960,31 +962,48 @@ private data class MiniPlayerArtwork(
 private fun rememberMiniPlayerArtwork(
   pathOrUri: String?,
   artworkUri: String?,
+  title: String? = null,
+  artist: String? = null,
 ): MiniPlayerArtwork? {
   val context = LocalContext.current
   val repository = koinInject<app.video.player.domain.thumbnail.ThumbnailRepository>()
   val revision by repository.cacheRevision.collectAsState()
   val generator by koinInject<app.video.player.preferences.BrowserPreferences>().thumbnailGenerator.collectAsState()
-  var artwork by remember(pathOrUri, artworkUri, generator, revision) { mutableStateOf<MiniPlayerArtwork?>(null) }
+  var artwork by remember(pathOrUri, artworkUri, title, artist, generator, revision) { mutableStateOf<MiniPlayerArtwork?>(null) }
 
-  LaunchedEffect(pathOrUri, artworkUri, generator, revision) {
+  LaunchedEffect(pathOrUri, artworkUri, title, artist, generator, revision) {
     if (pathOrUri.isNullOrBlank() && artworkUri.isNullOrBlank()) {
       artwork = null
       return@LaunchedEffect
     }
     artwork = withContext(Dispatchers.IO) {
-      if (isLocalArtworkSource(pathOrUri) && generator != app.video.player.preferences.ThumbnailGenerator.Native) {
-        return@withContext MiniPlayerArtwork(bitmap = repository.getArtwork(pathOrUri))
+      val cached = repository.onlineMusicArtworkRepository.getCachedArtworkBitmap(pathOrUri, title, artist, 480, 480)
+      if (cached != null) {
+        return@withContext MiniPlayerArtwork(bitmap = cached)
+      }
+      val nativeArtworkUri = artworkUri?.takeUnless {
+        isLocalArtworkSource(pathOrUri) && runCatching { Uri.parse(it).authority == android.provider.MediaStore.AUTHORITY }.getOrDefault(false)
+      }
+      if (!nativeArtworkUri.isNullOrBlank()) {
+        EmbeddedArtworkResolver.decodeArtworkUri(context, nativeArtworkUri)?.let {
+          return@withContext MiniPlayerArtwork(bitmap = it)
+        }
+      }
+      if (isLocalArtworkSource(pathOrUri)) {
+        val repoArt = repository.getArtwork(
+          source = pathOrUri,
+          artworkUri = artworkUri,
+          isAudio = true,
+          widthPx = 480,
+          heightPx = 480,
+          title = title,
+          artist = artist,
+        )
+        if (repoArt != null) {
+          return@withContext MiniPlayerArtwork(bitmap = repoArt)
+        }
       }
       runCatching {
-        val nativeArtworkUri = artworkUri?.takeUnless {
-          isLocalArtworkSource(pathOrUri) && Uri.parse(it).authority == android.provider.MediaStore.AUTHORITY
-        }
-        if (!nativeArtworkUri.isNullOrBlank()) {
-          EmbeddedArtworkResolver.decodeArtworkUri(context, nativeArtworkUri)?.let {
-            return@runCatching MiniPlayerArtwork(bitmap = it)
-          }
-        }
         if (pathOrUri.isNullOrBlank()) return@runCatching null
         val cleanPath =
           when {
@@ -1010,5 +1029,20 @@ private fun rememberMiniPlayerArtwork(
       }.getOrNull()
     }
   }
+
+  LaunchedEffect(pathOrUri, title, artist) {
+    if (!pathOrUri.isNullOrBlank()) {
+      repository.thumbnailReadyKeys.collect {
+        val cached = withContext(Dispatchers.IO) {
+          repository.onlineMusicArtworkRepository.getCachedArtworkBitmap(pathOrUri, title, artist, 480, 480)
+            ?: repository.getArtwork(pathOrUri, artworkUri, isAudio = true, widthPx = 480, heightPx = 480, title = title, artist = artist)
+        }
+        if (cached != null) {
+          artwork = MiniPlayerArtwork(bitmap = cached)
+        }
+      }
+    }
+  }
+
   return artwork
 }
