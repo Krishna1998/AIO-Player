@@ -519,6 +519,7 @@ internal object PlayerSheetTransitions {
     motion?.let {
       if (it.host == destination) return true
       if (destination == PlayerSheetDestination.FULL && it.destination == destination && !it.revealed) return true
+      if (destination == PlayerSheetDestination.MINI && it.destination == destination) return true
     }
     return drag?.source == destination
   }
