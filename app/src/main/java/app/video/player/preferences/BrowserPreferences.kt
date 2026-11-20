@@ -117,10 +117,10 @@ class BrowserPreferences(
   val folderGridColumnsPortrait = preferenceStore.getInt("folder_grid_columns_portrait", 0)
   val folderGridColumnsLandscape = preferenceStore.getInt("folder_grid_columns_landscape", 0)
 
-  val videoGridColumnsPortrait = preferenceStore.getInt("video_grid_columns_portrait", 0)
+  val videoGridColumnsPortrait = preferenceStore.getInt("video_grid_columns_portrait", 2)
   val videoGridColumnsLandscape = preferenceStore.getInt("video_grid_columns_landscape", 0)
 
-  val musicGridColumnsPortrait = preferenceStore.getInt("music_grid_columns_portrait", 0)
+  val musicGridColumnsPortrait = preferenceStore.getInt("music_grid_columns_portrait", 2)
   val musicGridColumnsLandscape = preferenceStore.getInt("music_grid_columns_landscape", 0)
 
   val folderGridColumnsDualPanePortrait = preferenceStore.getInt("folder_grid_columns_dual_pane_portrait", 0)
@@ -157,11 +157,11 @@ class BrowserPreferences(
   val showProgressBar = preferenceStore.getBoolean("show_progress_bar", true)
   val grayscaleWatchedThumbnails = preferenceStore.getBoolean("grayscale_watched_thumbnails", true)
   val centerGridTitles = preferenceStore.getBoolean("center_grid_titles", true)
-  val mediaLayoutMode = preferenceStore.getEnum("media_layout_mode", MediaLayoutMode.LIST)
-  val folderViewFolderLayoutMode = preferenceStore.getEnum("folder_view_folder_layout_mode", MediaLayoutMode.LIST)
-  val folderViewVideoLayoutMode = preferenceStore.getEnum("folder_view_video_layout_mode", MediaLayoutMode.LIST)
+  val mediaLayoutMode = preferenceStore.getEnum("media_layout_mode", MediaLayoutMode.GRID)
+  val folderViewFolderLayoutMode = preferenceStore.getEnum("folder_view_folder_layout_mode", MediaLayoutMode.GRID)
+  val folderViewVideoLayoutMode = preferenceStore.getEnum("folder_view_video_layout_mode", MediaLayoutMode.GRID)
   val separateFolderVideoLayout = preferenceStore.getBoolean("separate_folder_video_layout", false)
-  val manualGridColumnsEnabled = preferenceStore.getBoolean("manual_grid_columns_enabled", false)
+  val manualGridColumnsEnabled = preferenceStore.getBoolean("manual_grid_columns_enabled", true)
   val musicCoverArtSize = preferenceStore.getInt("music_cover_art_size", 48)
   val musicGridCoverArtSize = preferenceStore.getInt("music_grid_cover_art_size", 145)
 
