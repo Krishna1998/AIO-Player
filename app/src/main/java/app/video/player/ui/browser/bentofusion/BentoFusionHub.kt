@@ -223,7 +223,7 @@ fun getAudioCodec(video: Video): String {
 fun BentoFusionHeader(
   videosWithInfo: List<VideoWithPlaybackInfo>,
   recentlyPlayedFilePath: String?,
-  onPlayMedia: (Video, Double?) -> Unit,
+  onPlayMedia: (Video, Double?, List<Video>?) -> Unit,
   onFilterSelected: ((MediaLibraryType) -> Unit)? = null,
   onRenameMedia: ((Video, String) -> Unit)? = null,
   onHideMedia: ((Video) -> Unit)? = null,
@@ -455,7 +455,7 @@ fun BentoFusionHeader(
       val targetIdx = sortedAudioByTitle.indexOfFirst { it.video.path == targetVideo.path }.coerceAtLeast(0)
       MediaUtils.playInMiniPlayer(context, audioQueue, targetIdx, startPositionSeconds = startPos?.takeIf { it > 0.0 })
     } else {
-      onPlayMedia(targetVideo, startPos)
+      onPlayMedia(targetVideo, startPos, sortedAudioByTitle.map { it.video })
     }
   }
 
@@ -490,7 +490,7 @@ fun BentoFusionHeader(
           ) { item ->
             BentoHorizonVideoCard(
               item = item,
-              onClick = { onPlayMedia(item.video, null) },
+              onClick = { onPlayMedia(item.video, null, videoItems.map { it.video }) },
               onLongClick = { actionTargetVideo = item.video },
             )
           }
@@ -557,7 +557,7 @@ fun BentoFusionHeader(
               playAudioInBackground(heroToDisplay.video, resumePos.takeIf { it > 0.0 })
             }
           } else {
-            onPlayMedia(heroToDisplay.video, resumePos.takeIf { it > 0.0 })
+            onPlayMedia(heroToDisplay.video, resumePos.takeIf { it > 0.0 }, videoItems.map { it.video })
           }
         },
         onLongClick = {
@@ -574,7 +574,7 @@ fun BentoFusionHeader(
                 context.startActivity(intent)
               } catch (_: Exception) {}
             } else {
-              onPlayMedia(heroToDisplay.video, resumePos.takeIf { it > 0.0 })
+              onPlayMedia(heroToDisplay.video, resumePos.takeIf { it > 0.0 }, sortedAudioByTitle.map { it.video })
             }
           }
         },
@@ -718,7 +718,7 @@ fun BentoFusionHeader(
 @Composable
 fun DualHorizonRails(
   videosWithInfo: List<VideoWithPlaybackInfo>,
-  onPlayMedia: (Video, Double?) -> Unit = { v, _ -> },
+  onPlayMedia: (Video, Double?, List<Video>?) -> Unit = { _, _, _ -> },
   onItemLongClick: ((Video) -> Unit)? = null,
   onFilterSelected: ((MediaLibraryType) -> Unit)? = null,
   modifier: Modifier = Modifier,
@@ -765,7 +765,7 @@ fun DualHorizonRails(
           ) { item ->
             BentoHorizonVideoCard(
               item = item,
-              onClick = { onPlayMedia(item.video, null) },
+              onClick = { onPlayMedia(item.video, null, videoItems.map { it.video }) },
               onLongClick = onItemLongClick?.let { { it(item.video) } },
             )
           }
@@ -791,7 +791,7 @@ fun DualHorizonRails(
           ) { item ->
             BentoHorizonAudioCard(
               item = item,
-              onClick = { onPlayMedia(item.video, null) },
+              onClick = { onPlayMedia(item.video, null, sortedAudioByTitle.map { it.video }) },
               onLongClick = onItemLongClick?.let { { it(item.video) } },
             )
           }

@@ -8578,21 +8578,21 @@ private suspend fun restorePlaybackPosition(state: PlaybackStateEntity?, loadGen
     expectedGeneration: Long = mediaRequestGeneration,
   ) {
     if (isAllVideosPlaylist(pid)) {
-      val isAllMediaTarget = sourceIntent.getBooleanExtra("media_library_all", false)
       val isAudioTarget = sourceIntent.getBooleanExtra("media_library_audio", false) || isKnownAudioLaunch(sourceIntent)
-      val mediaLibraryAudio = sourceIntent.getBooleanExtra("media_library_audio", false) || isAudioTarget
+      val isAllMediaTarget = sourceIntent.getBooleanExtra("media_library_all", false)
+      val mediaLibraryAudio = isAudioTarget
       val isMediaLibraryLaunch = sourceIntent.getStringExtra("launch_source") == "media_library" || isAudioTarget || isAllMediaTarget
       val allVideos =
         app.video.player.utils.sort.SortUtils.sortVideos(
           app.video.player.repository.MediaFileRepository
             .getAllVideos(
               context = this@PlayerActivity,
-              includeAudioOverride = if (isMediaLibraryLaunch || isAudioTarget || isAllMediaTarget) true else null,
+              includeAudioOverride = if (isMediaLibraryLaunch || isAudioTarget) true else null,
             ).let { media ->
-              when {
-                isAllMediaTarget -> media
-                isMediaLibraryLaunch || isAudioTarget -> media.filter { it.isAudio == mediaLibraryAudio }
-                else -> media.filter { !it.isAudio }
+              if (isAudioTarget) {
+                media.filter { it.isAudio }
+              } else {
+                media.filter { !it.isAudio }
               }
             },
           browserPreferences.videoSortType.get(),

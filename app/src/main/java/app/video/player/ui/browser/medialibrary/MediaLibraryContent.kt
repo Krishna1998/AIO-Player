@@ -521,7 +521,14 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
     startPositionSeconds: Double? = null,
     customPlaylist: List<Video>? = null,
   ) {
-    val playlistVideos = customPlaylist ?: currentVideosWithInfo.map { it.video }
+    val isAudio = currentTab == MediaLibraryType.Audio || video.isAudio
+    val sourceList = customPlaylist ?: currentVideosWithInfo.map { it.video }
+    // Ensure automatic playback queue NEVER mixes videos and audio tracks!
+    val playlistVideos = if (isAudio) {
+      sourceList.filter { it.isAudio }
+    } else {
+      sourceList.filter { !it.isAudio }
+    }
     if (!playerPreferences.shouldBuildAutomaticQueue(video.isAudio) || playlistVideos.size <= 1) {
       MediaUtils.playFile(video, context, "media_library", startPositionSeconds = startPositionSeconds)
       return
@@ -537,7 +544,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
     }.getOrNull()
 
     val queueItems = playlistVideos.map { item ->
-      val isItemAudio = item.isAudio || currentTab == MediaLibraryType.Audio
+      val isItemAudio = item.isAudio || isAudio
       val cachedArtUri = if (isItemAudio) {
         item.artworkUrl ?: onlineMusicRepo?.getCachedArtworkFile(item)?.let { Uri.fromFile(it).toString() }
       } else item.artworkUrl
@@ -556,7 +563,6 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
         videoHeight = item.height,
       )
     }
-    val isAudio = currentTab == MediaLibraryType.Audio || video.isAudio
     if (MediaUtils.shouldPlayInMiniPlayerOnly(isAudio)) {
       MediaUtils.playInMiniPlayer(context, queueItems, index, startPositionSeconds = startPositionSeconds)
       return
@@ -578,9 +584,9 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
         putExtra("playlist_id", ALL_VIDEOS_PLAYLIST_ID)
         putExtra("playlist_index", index)
         putExtra("launch_source", "media_library")
-        putExtra("media_library_all", currentTab == MediaLibraryType.All)
-        putExtra("media_library_audio", currentTab == MediaLibraryType.Audio)
-        putExtra("is_audio", video.isAudio)
+        putExtra("media_library_all", false)
+        putExtra("media_library_audio", isAudio)
+        putExtra("is_audio", isAudio)
         putExtra("title", video.displayName)
         putExtra("local_media_path", video.path)
         putExtra(PlayerActivity.EXTRA_VIDEO_WIDTH, video.width)
@@ -1338,7 +1344,9 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                       app.video.player.ui.browser.bentofusion.BentoFusionHeader(
                         videosWithInfo = pageVideosWithInfo,
                         recentlyPlayedFilePath = recentlyPlayedFilePath,
-                        onPlayMedia = { video, startPos -> playFromMediaLibrary(video, startPos) },
+                        onPlayMedia = { video, startPos, customQueue ->
+                          playFromMediaLibrary(video, startPos, customQueue)
+                        },
                         onFilterSelected = { type ->
                           val targetIdx = mediaLibraryTabs.indexOf(type)
                           if (targetIdx >= 0) navigateTab(targetIdx)
