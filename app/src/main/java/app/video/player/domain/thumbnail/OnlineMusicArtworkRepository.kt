@@ -380,22 +380,6 @@ class OnlineMusicArtworkRepository(
     return null
   }
 
-      val dummyVideo = Video(
-        id = 0L, title = title, displayName = title, path = pathOrUri.orEmpty(),
-        uri = Uri.parse(pathOrUri.orEmpty()), duration = 0L, durationFormatted = "",
-        size = 0L, sizeFormatted = "", dateModified = 0L, dateAdded = 0L,
-        mimeType = "audio/*", bucketId = "", bucketDisplayName = "", width = 0, height = 0,
-        fps = 0f, resolution = "", isAudio = true, artist = cleanArtist,
-      )
-      val parsed = MusicTrackInfoParser.parse(dummyVideo)
-      if (parsed.title.isNotBlank()) {
-        val fileByParsed = artworkFileForTitleArtist(parsed.title, parsed.artist)
-        if (fileByParsed.isFile && fileByParsed.length() > 500) return fileByParsed
-      }
-    }
-    return null
-  }
-
   fun getCachedArtworkBitmap(
     video: Video,
     widthPx: Int = 0,
