@@ -545,11 +545,11 @@ private fun NormalTopBar(
               contentDescription = profileName.ifBlank { stringResource(R.string.ui_settings) },
               contentScale = ContentScale.Crop,
               modifier = Modifier
-                .size(28.dp)
+                .size(36.dp)
                 .clip(CircleShape)
                 .border(
                   width = 1.5.dp,
-                  color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                  color = MaterialTheme.colorScheme.primary.copy(alpha = 0.85f),
                   shape = CircleShape,
                 ),
             )
