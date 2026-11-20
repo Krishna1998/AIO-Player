@@ -245,6 +245,7 @@ class OnlineMusicArtworkRepository(
   private val memoryCache = LruCache<String, Bitmap>(100)
   private val negativeCache = LruCache<String, Long>(500)
   private val ongoingFetches = ConcurrentHashMap<String, Job>()
+  private val renamedPathAliases = ConcurrentHashMap<String, String>()
   private val fetchSemaphore = Semaphore(3)
 
   init {
@@ -292,6 +293,16 @@ class OnlineMusicArtworkRepository(
     if (pathKey.isNotBlank()) {
       val fileByPath = artworkFileForPath(pathKey)
       if (fileByPath.isFile && fileByPath.length() > 500) return fileByPath
+      val oldPath = renamedPathAliases[pathKey]
+      if (oldPath != null) {
+        val oldFile = artworkFileForPath(oldPath)
+        if (oldFile.isFile && oldFile.length() > 500) {
+          if (!fileByPath.exists()) {
+            runCatching { oldFile.copyTo(fileByPath, overwrite = false) }
+          }
+          return if (fileByPath.isFile && fileByPath.length() > 500) fileByPath else oldFile
+        }
+      }
     }
 
     if (video.uri.toString().isNotBlank() && video.uri.toString() != pathKey) {
@@ -395,6 +406,15 @@ class OnlineMusicArtworkRepository(
     memoryCache.get(pathKey)?.let {
       if (!it.isRecycled) return it
       memoryCache.remove(pathKey)
+    }
+    val oldPath = renamedPathAliases[pathKey]
+    if (oldPath != null) {
+      memoryCache.get(oldPath)?.let {
+        if (!it.isRecycled) {
+          memoryCache.put(pathKey, it)
+          return it
+        }
+      }
     }
 
     val fileToRead = getCachedArtworkFile(video) ?: return null
@@ -772,20 +792,20 @@ class OnlineMusicArtworkRepository(
    * from the old path hash to the new path hash so album art doesn't vanish.
    */
   fun onMediaRenamed(oldPath: String, newPath: String) {
-    if (oldPath == newPath) return
+    if (oldPath.isBlank() || newPath.isBlank() || oldPath == newPath) return
+    renamedPathAliases[newPath] = oldPath
+    synchronized(memoryCache) {
+      val existing = memoryCache.get(oldPath)
+      if (existing != null && !existing.isRecycled) {
+        memoryCache.put(newPath, existing)
+      }
+    }
     scope.launch(Dispatchers.IO) {
       runCatching {
         val oldFile = artworkFileForPath(oldPath)
         val newFile = artworkFileForPath(newPath)
         if (oldFile.isFile && oldFile.length() > 500 && !newFile.exists()) {
           oldFile.copyTo(newFile, overwrite = false)
-        }
-        // Update memory cache
-        synchronized(memoryCache) {
-          val existing = memoryCache.get(oldPath)
-          if (existing != null && !existing.isRecycled) {
-            memoryCache.put(newPath, existing)
-          }
         }
       }
     }

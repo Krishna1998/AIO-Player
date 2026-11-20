@@ -94,6 +94,7 @@ class OnlineMoviePosterRepository(
   private val memoryCache = LruCache<String, Bitmap>(100)
   private val negativeCache = LruCache<String, Long>(500)
   private val ongoingFetches = ConcurrentHashMap<String, Job>()
+  private val renamedPathAliases = ConcurrentHashMap<String, String>()
   private val fetchSemaphore = Semaphore(3) // at most 3 concurrent downloads
 
   companion object {
@@ -110,8 +111,14 @@ class OnlineMoviePosterRepository(
     File(posterDir, "t_${sha256(title.lowercase().trim() + "_" + (year ?: "").trim())}.jpg")
 
   fun hasCachedPoster(video: Video): Boolean {
-    val fileByPath = posterFileForPath(video.path.ifBlank { video.uri.toString() })
+    val path = video.path.ifBlank { video.uri.toString() }
+    val fileByPath = posterFileForPath(path)
     if (fileByPath.isFile && fileByPath.length() > 500) return true
+    val oldPath = renamedPathAliases[path]
+    if (oldPath != null) {
+      val oldFile = posterFileForPath(oldPath)
+      if (oldFile.isFile && oldFile.length() > 500) return true
+    }
     val parsed = MediaInfoParser.parse(video.displayName.ifBlank { video.title })
     if (parsed.title.isNotBlank()) {
       val fileByTitle = posterFileForTitleYear(parsed.title, parsed.year)
@@ -121,8 +128,19 @@ class OnlineMoviePosterRepository(
   }
 
   fun getCachedPosterFile(video: Video): File? {
-    val fileByPath = posterFileForPath(video.path.ifBlank { video.uri.toString() })
+    val path = video.path.ifBlank { video.uri.toString() }
+    val fileByPath = posterFileForPath(path)
     if (fileByPath.isFile && fileByPath.length() > 500) return fileByPath
+    val oldPath = renamedPathAliases[path]
+    if (oldPath != null) {
+      val oldFile = posterFileForPath(oldPath)
+      if (oldFile.isFile && oldFile.length() > 500) {
+        if (!fileByPath.exists()) {
+          runCatching { oldFile.copyTo(fileByPath, overwrite = false) }
+        }
+        return if (fileByPath.isFile && fileByPath.length() > 500) fileByPath else oldFile
+      }
+    }
     val parsed = MediaInfoParser.parse(video.displayName.ifBlank { video.title })
     if (parsed.title.isNotBlank()) {
       val fileByTitle = posterFileForTitleYear(parsed.title, parsed.year)
@@ -141,6 +159,15 @@ class OnlineMoviePosterRepository(
     memoryCache.get(pathKey)?.let {
       if (!it.isRecycled) return it
       memoryCache.remove(pathKey)
+    }
+    val oldPath = renamedPathAliases[pathKey]
+    if (oldPath != null) {
+      memoryCache.get(oldPath)?.let {
+        if (!it.isRecycled) {
+          memoryCache.put(pathKey, it)
+          return it
+        }
+      }
     }
 
     val fileToRead = getCachedPosterFile(video) ?: return null
@@ -417,20 +444,20 @@ class OnlineMoviePosterRepository(
    * from the old path hash to the new path hash so the thumbnail doesn't vanish.
    */
   fun onMediaRenamed(oldPath: String, newPath: String) {
-    if (oldPath == newPath) return
+    if (oldPath.isBlank() || newPath.isBlank() || oldPath == newPath) return
+    renamedPathAliases[newPath] = oldPath
+    synchronized(memoryCache) {
+      val existing = memoryCache.get(oldPath)
+      if (existing != null && !existing.isRecycled) {
+        memoryCache.put(newPath, existing)
+      }
+    }
     scope.launch(Dispatchers.IO) {
       runCatching {
         val oldFile = posterFileForPath(oldPath)
         val newFile = posterFileForPath(newPath)
         if (oldFile.isFile && oldFile.length() > 500 && !newFile.exists()) {
           oldFile.copyTo(newFile, overwrite = false)
-        }
-        // Update memory cache: move the bitmap from oldPath key to newPath key
-        synchronized(memoryCache) {
-          val existing = memoryCache.get(oldPath)
-          if (existing != null && !existing.isRecycled) {
-            memoryCache.put(newPath, existing)
-          }
         }
       }
     }

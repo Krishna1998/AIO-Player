@@ -242,8 +242,13 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   }
   val navigateTab = rememberTabNavigation(pagerState)
 
+  var lastHandledAllMediaRequest by rememberSaveable { mutableStateOf(NavigationBarState.allMediaTabRequestId) }
+
   LaunchedEffect(NavigationBarState.allMediaTabRequestId) {
-    if (NavigationBarState.allMediaTabRequestId != 0L && !forceAudio) {
+    val currentId = NavigationBarState.allMediaTabRequestId
+    if (currentId != 0L && currentId != lastHandledAllMediaRequest && !forceAudio) {
+      lastHandledAllMediaRequest = currentId
+      NavigationBarState.clearAllMediaTabRequest()
       if (!includeAudioBrowser) {
         browserPreferences.includeAudioBrowser.set(true)
       }

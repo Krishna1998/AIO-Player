@@ -60,6 +60,10 @@ object NavigationBarState {
     allMediaTabRequestId = System.currentTimeMillis()
   }
 
+  fun clearAllMediaTabRequest() {
+    allMediaTabRequestId = 0L
+  }
+
   internal var miniPlayerConnectionEnabled: Boolean by mutableStateOf(false)
   internal var isMiniPlayerDocked: Boolean by mutableStateOf(false)
   internal var dockProgress: Float by mutableFloatStateOf(0f)

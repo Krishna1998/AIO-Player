@@ -519,6 +519,13 @@ object PermissionUtils {
             RecentlyPlayedOps.onVideoRenamed(oldFile.absolutePath, newFile.absolutePath)
             PlaybackStateOps.onVideoRenamed(oldFile.absolutePath, newFile.absolutePath)
 
+            // Notify thumbnail repository so thumbnail/poster does not vanish
+            runCatching {
+              org.koin.java.KoinJavaComponent.get<app.video.player.domain.thumbnail.ThumbnailRepository>(
+                app.video.player.domain.thumbnail.ThumbnailRepository::class.java,
+              ).onMediaRenamed(oldFile.absolutePath, newFile.absolutePath)
+            }
+
             // Notify that media library has changed
             MediaLibraryEvents.notifyChanged()
 
@@ -658,6 +665,11 @@ object PermissionUtils {
             val newPath = parent?.let { File(it, newDisplayName).absolutePath } ?: video.uri.toString()
 
             PlaybackStateOps.onScopedVideoRenamed(video, newPath, video.uri, newDisplayName)
+            runCatching {
+              org.koin.java.KoinJavaComponent.get<app.video.player.domain.thumbnail.ThumbnailRepository>(
+                app.video.player.domain.thumbnail.ThumbnailRepository::class.java,
+              ).onMediaRenamed(oldPath, newPath)
+            }
             MediaLibraryEvents.notifyChanged()
 
             Log.d(TAG, "✓ Renamed (scoped): ${video.displayName} -> $newDisplayName")

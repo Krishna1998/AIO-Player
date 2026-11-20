@@ -133,6 +133,7 @@ class ThumbnailRepository(
   private val _cacheRevision = MutableStateFlow(0L)
   val cacheRevision = _cacheRevision.asStateFlow()
   private val ongoingOperations = ConcurrentHashMap<String, Deferred<Bitmap?>>()
+  private val renamedPathAliases = ConcurrentHashMap<String, String>()
   private data class CachedIdentity<T>(val value: T, val savedAtMs: Long = SystemClock.elapsedRealtime()) {
     fun isFresh(): Boolean = SystemClock.elapsedRealtime() - savedAtMs < IDENTITY_CACHE_TTL_MS
   }
@@ -518,25 +519,30 @@ class ThumbnailRepository(
 
   /**
    * Called immediately after a local video or audio file is renamed.
-   * Copies the online-poster / album-art disk cache entry and invalidates
-   * the stale memory-cache keys so the renamed item shows its thumbnail
-   * without waiting for a full re-extraction.
+   * Copies the online-poster / album-art disk cache entry and aliases
+   * the memory-cache keys so the renamed item shows its thumbnail
+   * without vanishing or waiting for a full re-extraction.
    */
   fun onMediaRenamed(oldPath: String, newPath: String) {
     if (oldPath.isBlank() || newPath.isBlank() || oldPath == newPath) return
+    renamedPathAliases[newPath] = oldPath
     // Forward to online-poster repository (video/movie thumbnails)
     runCatching { onlinePosterRepository.onMediaRenamed(oldPath, newPath) }
     // Forward to online-music-artwork repository (audio thumbnails)
     runCatching { onlineMusicArtworkRepository.onMediaRenamed(oldPath, newPath) }
-    // Evict stale local disk-cache / memory-cache keys so the UI reloads.
-    // The next getThumbnail() call will re-extract or pick up the migrated poster.
-    diskCacheLock.write {
-      diskVideoBaseKeyCache.evictAll()
-      resolvedThumbnailKeys.evictAll()
-      localMetadataCache.evictAll()
+
+    // Mirror memory cache entries from oldPath to newPath so UI reloads seamlessly
+    synchronized(memoryCache) {
+      for ((key, bitmap) in memoryCache.snapshot()) {
+        if (key.contains(oldPath) && !bitmap.isRecycled) {
+          val newKey = key.replace(oldPath, newPath)
+          memoryCache.put(newKey, bitmap)
+        }
+      }
     }
-    // Notify any collectors that hold the old path so they re-fetch
+
     _thumbnailReadyKeys.tryEmit(newPath)
+    _thumbnailReadyKeys.tryEmit(oldPath)
   }
 
   fun startFolderThumbnailGeneration(
@@ -637,10 +643,34 @@ class ThumbnailRepository(
     widthPx: Int,
     heightPx: Int,
   ): Bitmap? {
-    val key = resolvedThumbnailKeys.get(peekIdentity(video, widthPx, heightPx)) ?: return null
-    return synchronized(memoryCache) {
-      memoryCache.get(key)
+    val key = resolvedThumbnailKeys.get(peekIdentity(video, widthPx, heightPx))
+    if (key != null) {
+      val b = synchronized(memoryCache) { memoryCache.get(key) }
+      if (b != null && !b.isRecycled) return b
     }
+    val oldPath = renamedPathAliases[video.path]
+    if (oldPath != null) {
+      val oldKey = resolvedThumbnailKeys.get(peekIdentity(video.copy(path = oldPath), widthPx, heightPx))
+      if (oldKey != null) {
+        val b = synchronized(memoryCache) { memoryCache.get(oldKey) }
+        if (b != null && !b.isRecycled) {
+          val targetKey = key ?: oldKey.replace(oldPath, video.path)
+          synchronized(memoryCache) { memoryCache.put(targetKey, b) }
+          return b
+        }
+      }
+    }
+    if (!video.isAudio && browserPreferences.autoFetchOnlinePosters.get()) {
+      onlinePosterRepository.getCachedPosterBitmap(video, widthPx, heightPx)?.let {
+        return it
+      }
+    }
+    if (video.isAudio && browserPreferences.autoFetchOnlineMusicArtwork.get()) {
+      onlineMusicArtworkRepository.getCachedArtworkBitmap(video, widthPx, heightPx)?.let {
+        return it
+      }
+    }
+    return null
   }
 
   private fun peekIdentity(
@@ -1142,6 +1172,16 @@ class ThumbnailRepository(
   ): Bitmap? =
     diskCacheLock.read {
       val file = File(if (network) networkDiskDir else localDiskDir, keyToFileName(key))
+      if (!file.isFile) {
+        val aliasPair = renamedPathAliases.entries.firstOrNull { (newP, _) -> key.contains(newP) }
+        if (aliasPair != null) {
+          val altKey = key.replace(aliasPair.key, aliasPair.value)
+          val altFile = File(if (network) networkDiskDir else localDiskDir, keyToFileName(altKey))
+          if (altFile.isFile && altFile.length() > 500) {
+            runCatching { altFile.copyTo(file, overwrite = false) }
+          }
+        }
+      }
       if (!file.isFile) return@read null
 
       runCatching {
