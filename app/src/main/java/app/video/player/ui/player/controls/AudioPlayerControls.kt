@@ -1432,13 +1432,15 @@ fun AudioPlayerControls(
       rememberAudioAlbumArt(
         pathOrUri = nextItem?.let { it.path.ifBlank { it.uri.toString() } },
         artworkUri = nextItem?.tvgLogo,
-        title = nextItem?.fileName,
+        title = nextItem?.title,
+        artist = nextItem?.artist,
       )
     val prevCoverBitmap =
       rememberAudioAlbumArt(
         pathOrUri = prevItem?.let { it.path.ifBlank { it.uri.toString() } },
         artworkUri = prevItem?.tvgLogo,
-        title = prevItem?.fileName,
+        title = prevItem?.title,
+        artist = prevItem?.artist,
       )
     val swipeNextCoverBitmap by androidx.compose.runtime.rememberUpdatedState(nextCoverBitmap ?: albumArtBitmap)
     val swipePrevCoverBitmap by androidx.compose.runtime.rememberUpdatedState(prevCoverBitmap ?: albumArtBitmap)

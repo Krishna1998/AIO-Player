@@ -115,6 +115,7 @@ import app.video.player.preferences.BrowserPreferences
 import app.video.player.preferences.MediaLibraryType
 import app.video.player.preferences.preference.collectAsState
 import app.video.player.domain.thumbnail.ThumbnailRepository
+import app.video.player.domain.thumbnail.OnlineMusicArtworkRepository
 import app.video.player.ui.browser.videolist.VideoWithPlaybackInfo
 import app.video.player.ui.browser.videolist.videoPlaybackIdentifiers
 import app.video.player.ui.player.PlaybackIdentity
@@ -244,6 +245,7 @@ fun BentoFusionHeader(
   val recentlyPlayedRepo = koinInject<RecentlyPlayedRepository>()
   val recentEntities by recentlyPlayedRepo.observeRecentlyPlayed(limit = 50).collectAsState(initial = emptyList())
   val browserPreferences = koinInject<BrowserPreferences>()
+  val onlineMusicArtworkRepository = koinInject<OnlineMusicArtworkRepository>()
   val minVideoMinutes by browserPreferences.minimumVideoHorizonDurationMinutes.collectAsState()
   val minVideoDurationMs = remember(minVideoMinutes) { (minVideoMinutes * 60 * 1000L).coerceAtLeast(0L) }
 
