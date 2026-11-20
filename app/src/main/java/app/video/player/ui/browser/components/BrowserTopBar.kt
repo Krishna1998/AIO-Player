@@ -96,6 +96,7 @@ import app.video.player.ui.theme.onWallpaper
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import app.video.player.ui.browser.NavigationBarState
 
 private fun Modifier.browserTopBarFocus(enabled: Boolean = true): Modifier =
   tvFocusHighlight(CircleShape, enabled = enabled, focusedScale = 1.06f)
@@ -296,7 +297,11 @@ private fun NormalTopBar(
   val preferences = koinInject<AppearancePreferences>()
   val isMainTabPage = app.video.player.ui.browser.LocalIsMainTabPage.current
   val legacyNavigationBar by preferences.legacyNavigationBar.collectAsState()
-  val showTopBarSearch = legacyNavigationBar || !isMainTabPage
+  val showMusicTab by preferences.showMusicTab.collectAsState()
+  val showProfileTab by preferences.showProfileTab.collectAsState()
+  val isOnlyHomeFilesTab = !showMusicTab && !showProfileTab
+  val isNavBarVisible = NavigationBarState.isNavBarVisible
+  val showTopBarSearch = legacyNavigationBar || !isMainTabPage || isOnlyHomeFilesTab || !isNavBarVisible
   val wallpaperActive = LocalAppWallpaperActive.current
   val darkMode by preferences.darkMode.collectAsState()
   val darkTheme = isSystemInDarkTheme()
