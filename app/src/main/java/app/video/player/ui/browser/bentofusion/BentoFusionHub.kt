@@ -74,6 +74,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
@@ -1745,12 +1747,28 @@ private fun BentoMediaThumbnail(
     contentAlignment = Alignment.Center,
   ) {
     if (thumbnail != null) {
-      Image(
-        bitmap = thumbnail!!.asImageBitmap(),
-        contentDescription = null,
-        modifier = Modifier.fillMaxSize(),
-        contentScale = ContentScale.Crop,
-      )
+      val isPortraitPoster = !video.isAudio && thumbnail!!.height > thumbnail!!.width * 1.05f
+      if (isPortraitPoster) {
+        Image(
+          bitmap = thumbnail!!.asImageBitmap(),
+          contentDescription = null,
+          modifier = Modifier.fillMaxSize().blur(16.dp).alpha(0.55f),
+          contentScale = ContentScale.Crop,
+        )
+        Image(
+          bitmap = thumbnail!!.asImageBitmap(),
+          contentDescription = null,
+          modifier = Modifier.fillMaxSize(),
+          contentScale = ContentScale.Fit,
+        )
+      } else {
+        Image(
+          bitmap = thumbnail!!.asImageBitmap(),
+          contentDescription = null,
+          modifier = Modifier.fillMaxSize(),
+          contentScale = ContentScale.Crop,
+        )
+      }
     } else {
       Box(
         modifier = Modifier

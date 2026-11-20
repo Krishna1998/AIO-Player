@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -88,7 +89,7 @@ data class FolderCardUiConfig(
   val showDateChip: Boolean = false,
   val showFolderPath: Boolean = false,
   val centerGridTitles: Boolean = false,
-  val showFolderThumbnails: Boolean = false,
+  val showFolderThumbnails: Boolean = true,
   val thumbnailQuality: app.video.player.preferences.ThumbnailQuality = app.video.player.preferences.ThumbnailQuality.High,
   val includeAudio: Boolean = false,
   val swipeLeft: VideoSwipeAction = VideoSwipeAction.None,
@@ -198,9 +199,11 @@ fun FolderCard(
   var thumbnailSize by remember { mutableStateOf(IntSize.Zero) }
   var folderThumbnail by remember(folder.bucketId, thumbnailGenerator, thumbnailCacheRevision) { mutableStateOf<android.graphics.Bitmap?>(null) }
   var folderPreviewFrames by remember(folder.bucketId, thumbnailGenerator, thumbnailCacheRevision) { mutableStateOf<List<android.graphics.Bitmap?>>(emptyList()) }
+  val density = LocalDensity.current
+  val listThumbSizePx = remember(density) { with(density) { 68.dp.roundToPx() } }
   // The available tile width, rather than device class alone, determines whether
   // four video previews remain readable at the current grid column count.
-  val showPreviewCollage = with(LocalDensity.current) { thumbnailSize.width >= 148.dp.roundToPx() }
+  val showPreviewCollage = with(density) { thumbnailSize.width >= 148.dp.roundToPx() }
 
   LaunchedEffect(
     folder.bucketId,
@@ -214,38 +217,43 @@ fun FolderCard(
     showPreviewCollage,
     allowThumbnailGeneration,
   ) {
-    if (folder.path.isNotBlank() && isGridMode && showFolderThumbnails && thumbnailSize.width > 0 && thumbnailSize.height > 0) {
-      delay(350L)
-      withContext(Dispatchers.IO) {
-        // On a fresh install there is nothing to reuse. Avoid querying every folder
-        // from the Home grid just to discover that the thumbnail cache is empty.
-        if (!allowThumbnailGeneration && !thumbnailRepository.hasLocalCachedThumbnails()) {
-          return@withContext
-        }
-        val videos =
-          app.video.player.repository.MediaFileRepository
-            .getVideosInFolder(context, folder.bucketId)
-        if (videos.isNotEmpty()) {
-          // On narrow cells keep one full cover instead of an unreadable 4-tile preview.
-          val preview = videos.take(if (showPreviewCollage) 4 else 1)
-          val columns = if (preview.size > 1) 2 else 1
-          val cellWidth = (thumbnailSize.width / columns).coerceAtLeast(1)
-          val cellHeight = (thumbnailSize.height / columns).coerceAtLeast(1)
-          val bitmaps = preview.map { video ->
-            if (allowThumbnailGeneration) {
-              thumbnailRepository.getThumbnail(video, cellWidth, cellHeight)
-            } else {
-              thumbnailRepository.getCachedThumbnail(video, cellWidth, cellHeight)
+    if (folder.path.isNotBlank() && showFolderThumbnails) {
+      val targetWidth = if (isGridMode) thumbnailSize.width else listThumbSizePx
+      val targetHeight = if (isGridMode) thumbnailSize.height else listThumbSizePx
+      if (targetWidth > 0 && targetHeight > 0) {
+        delay(250L)
+        withContext(Dispatchers.IO) {
+          // On a fresh install there is nothing to reuse. Avoid querying every folder
+          // from the Home grid just to discover that the thumbnail cache is empty.
+          if (!allowThumbnailGeneration && !thumbnailRepository.hasLocalCachedThumbnails()) {
+            return@withContext
+          }
+          val folderLookupPath = folder.path.ifBlank { folder.bucketId }
+          val videos =
+            app.video.player.repository.MediaFileRepository
+              .getVideosInFolder(context, folderLookupPath)
+          if (videos.isNotEmpty()) {
+            // On narrow cells keep one full cover instead of an unreadable 4-tile preview.
+            val preview = if (isGridMode && showPreviewCollage) videos.take(4) else videos.take(1)
+            val columns = if (preview.size > 1) 2 else 1
+            val cellWidth = (targetWidth / columns).coerceAtLeast(1)
+            val cellHeight = (targetHeight / columns).coerceAtLeast(1)
+            val bitmaps = preview.map { video ->
+              if (allowThumbnailGeneration) {
+                thumbnailRepository.getThumbnail(video, cellWidth, cellHeight)
+              } else {
+                thumbnailRepository.getCachedThumbnail(video, cellWidth, cellHeight)
+              }
             }
-          }
-          withContext(Dispatchers.Main) {
-            folderPreviewFrames = bitmaps
-            folderThumbnail = bitmaps.firstOrNull()
-          }
-        } else {
-          withContext(Dispatchers.Main) {
-            folderPreviewFrames = emptyList()
-            folderThumbnail = null
+            withContext(Dispatchers.Main) {
+              folderPreviewFrames = bitmaps
+              folderThumbnail = bitmaps.firstOrNull()
+            }
+          } else {
+            withContext(Dispatchers.Main) {
+              folderPreviewFrames = emptyList()
+              folderThumbnail = null
+            }
           }
         }
       }
@@ -515,6 +523,23 @@ fun FolderCard(
                     .align(Alignment.TopStart)
                     .padding(6.dp),
               )
+            } else if (hasPreviewMosaic || resolvedThumbnail != null) {
+              Box(
+                modifier =
+                  Modifier
+                    .align(Alignment.TopStart)
+                    .padding(6.dp)
+                    .size(22.dp)
+                    .background(Color.Black.copy(alpha = 0.65f), CircleShape),
+                contentAlignment = Alignment.Center,
+              ) {
+                Icon(
+                  customIcon ?: if (isAudioOnly) Icons.RoundedFilled.Audiotrack else Icons.RoundedFilled.Folder,
+                  contentDescription = null,
+                  modifier = Modifier.size(13.dp),
+                  tint = Color.White,
+                )
+              }
             }
 
             if (showTotalDurationChip && folder.totalDuration > 0) {
@@ -620,13 +645,42 @@ fun FolderCard(
                 ),
             contentAlignment = Alignment.Center,
           ) {
-            if (thumbnail != null) {
+            val folderImageBitmap = remember(folderThumbnail) { folderThumbnail?.asImageBitmap() }
+            val resolvedThumbnail = thumbnail ?: folderImageBitmap.takeIf { showFolderThumbnails }
+            if (resolvedThumbnail != null) {
               androidx.compose.foundation.Image(
-                bitmap = thumbnail,
+                bitmap = resolvedThumbnail,
                 contentDescription = null,
                 modifier = Modifier.matchParentSize().clip(AppShapeScale.large),
                 contentScale = ContentScale.Crop,
               )
+              Box(
+                modifier = Modifier
+                  .matchParentSize()
+                  .background(
+                    Brush.verticalGradient(
+                      listOf(
+                        Color.Transparent,
+                        Color.Black.copy(alpha = 0.45f),
+                      ),
+                    ),
+                  ),
+              )
+              Box(
+                modifier = Modifier
+                  .align(Alignment.BottomEnd)
+                  .padding(4.dp)
+                  .size(18.dp)
+                  .background(Color.Black.copy(alpha = 0.65f), CircleShape),
+                contentAlignment = Alignment.Center,
+              ) {
+                Icon(
+                  customIcon ?: if (isAudioOnly) Icons.RoundedFilled.Audiotrack else Icons.RoundedFilled.Folder,
+                  contentDescription = null,
+                  modifier = Modifier.size(11.dp),
+                  tint = Color.White,
+                )
+              }
             } else {
               Box(
                 modifier = Modifier

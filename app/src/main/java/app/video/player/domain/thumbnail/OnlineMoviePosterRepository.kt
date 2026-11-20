@@ -137,13 +137,19 @@ class OnlineMoviePosterRepository(
   ): Bitmap? {
     if (video.isAudio) return null
     val pathKey = video.path.ifBlank { video.uri.toString() }
-    memoryCache.get(pathKey)?.let { return it }
+    memoryCache.get(pathKey)?.let {
+      if (!it.isRecycled) return it
+      memoryCache.remove(pathKey)
+    }
 
     val fileToRead = getCachedPosterFile(video) ?: return null
 
     val bitmap = decodeBitmapFromFile(fileToRead, widthPx, heightPx) ?: return null
-    memoryCache.put(pathKey, bitmap)
-    return bitmap
+    if (!bitmap.isRecycled) {
+      memoryCache.put(pathKey, bitmap)
+      return bitmap
+    }
+    return null
   }
 
   suspend fun getOrFetchPoster(
@@ -176,7 +182,7 @@ class OnlineMoviePosterRepository(
       }
     }
 
-    if (fetchedBitmap != null) {
+    if (fetchedBitmap != null && !fetchedBitmap.isRecycled) {
       memoryCache.put(video.path.ifBlank { video.uri.toString() }, fetchedBitmap)
       return@withContext fetchedBitmap
     } else {

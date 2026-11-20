@@ -1722,7 +1722,7 @@ private fun ListContent(
           customIcon = if (archiveFolder) Icons.RoundedFilled.FolderZip else null,
           isGridMode = false,
           uiConfig = folderCardUiConfig,
-          allowThumbnailGeneration = false,
+          allowThumbnailGeneration = folderCardUiConfig.showFolderThumbnails,
           onSwipeAction = onFolderSwipe.takeUnless { archiveFolder },
           isPinned = folder.path in pinnedFolderPaths,
           onPinClick =

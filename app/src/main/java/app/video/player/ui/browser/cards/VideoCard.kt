@@ -43,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
@@ -462,15 +463,35 @@ fun VideoCard(
                   colorFilter = thumbnailColorFilter,
                 )
               } else thumbnailBitmap?.let {
-                Image(
-                  bitmap = it,
-                  contentDescription =
-                    androidx.compose.ui.res
-                      .stringResource(app.video.player.R.string.ui_thumbnail),
-                  modifier = Modifier.matchParentSize().then(if (showingSoftPreview) Modifier.blur(2.dp) else Modifier),
-                  contentScale = ContentScale.Crop,
-                  colorFilter = thumbnailColorFilter,
-                )
+                val isPortraitPoster = !video.isAudio && it.height > it.width * 1.05f
+                if (isPortraitPoster) {
+                  Image(
+                    bitmap = it,
+                    contentDescription = null,
+                    modifier = Modifier.matchParentSize().blur(16.dp).alpha(0.55f),
+                    contentScale = ContentScale.Crop,
+                    colorFilter = thumbnailColorFilter,
+                  )
+                  Image(
+                    bitmap = it,
+                    contentDescription =
+                      androidx.compose.ui.res
+                        .stringResource(app.video.player.R.string.ui_thumbnail),
+                    modifier = Modifier.matchParentSize().then(if (showingSoftPreview) Modifier.blur(2.dp) else Modifier),
+                    contentScale = ContentScale.Fit,
+                    colorFilter = thumbnailColorFilter,
+                  )
+                } else {
+                  Image(
+                    bitmap = it,
+                    contentDescription =
+                      androidx.compose.ui.res
+                        .stringResource(app.video.player.R.string.ui_thumbnail),
+                    modifier = Modifier.matchParentSize().then(if (showingSoftPreview) Modifier.blur(2.dp) else Modifier),
+                    contentScale = ContentScale.Crop,
+                    colorFilter = thumbnailColorFilter,
+                  )
+                }
               } ?: run {
                 if (video.isAudio) {
                   Box(
@@ -886,15 +907,35 @@ fun VideoCard(
                   colorFilter = thumbnailColorFilter,
                 )
               } else listThumbnailBitmap?.let {
-                Image(
-                  bitmap = it,
-                  contentDescription =
-                    androidx.compose.ui.res
-                      .stringResource(app.video.player.R.string.ui_thumbnail),
-                  modifier = Modifier.matchParentSize().then(if (showingSoftPreview) Modifier.blur(2.dp) else Modifier),
-                  contentScale = ContentScale.Crop,
-                  colorFilter = thumbnailColorFilter,
-                )
+                val isPortraitPoster = !video.isAudio && it.height > it.width * 1.05f
+                if (isPortraitPoster) {
+                  Image(
+                    bitmap = it,
+                    contentDescription = null,
+                    modifier = Modifier.matchParentSize().blur(16.dp).alpha(0.55f),
+                    contentScale = ContentScale.Crop,
+                    colorFilter = thumbnailColorFilter,
+                  )
+                  Image(
+                    bitmap = it,
+                    contentDescription =
+                      androidx.compose.ui.res
+                        .stringResource(app.video.player.R.string.ui_thumbnail),
+                    modifier = Modifier.matchParentSize().then(if (showingSoftPreview) Modifier.blur(2.dp) else Modifier),
+                    contentScale = ContentScale.Fit,
+                    colorFilter = thumbnailColorFilter,
+                  )
+                } else {
+                  Image(
+                    bitmap = it,
+                    contentDescription =
+                      androidx.compose.ui.res
+                        .stringResource(app.video.player.R.string.ui_thumbnail),
+                    modifier = Modifier.matchParentSize().then(if (showingSoftPreview) Modifier.blur(2.dp) else Modifier),
+                    contentScale = ContentScale.Crop,
+                    colorFilter = thumbnailColorFilter,
+                  )
+                }
               } ?: run {
                 if (video.isAudio) {
                   Box(

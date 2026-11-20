@@ -257,7 +257,9 @@ class ThumbnailRepository(
           // Audio art is generated at its cache tier; store that before scaling to this request.
           writeBitmapToDisk(diskKey, generated, isNetworkUrl(video.path), revision)
           val bitmap = scaleBitmap(generated, widthPx, heightPx)
-          bitmap.prepareToDraw()
+          if (!bitmap.isRecycled) {
+            runCatching { bitmap.prepareToDraw() }
+          }
           diskCacheLock.read {
             if (revision != cacheRevision.value) return@async null
             synchronized(memoryCache) { memoryCache.put(key, bitmap) }
@@ -313,7 +315,9 @@ class ThumbnailRepository(
         if (!isNetwork && !isAudio && browserPreferences.autoFetchOnlinePosters.get()) {
           onlinePosterRepository.getCachedPosterBitmap(video, widthPx, heightPx)?.let { cachedPoster ->
             val scaled = scaleBitmap(cachedPoster, widthPx, heightPx)
-            scaled.prepareToDraw()
+            if (!scaled.isRecycled) {
+              runCatching { scaled.prepareToDraw() }
+            }
             diskCacheLock.read {
               if (revision != cacheRevision.value) return@withPermit null
               synchronized(memoryCache) { memoryCache.put(key, scaled) }
@@ -344,7 +348,9 @@ class ThumbnailRepository(
 
         val scaled = scaleBitmap(decoded, widthPx, heightPx)
         currentCoroutineContext().ensureActive()
-        scaled.prepareToDraw()
+        if (!scaled.isRecycled) {
+          runCatching { scaled.prepareToDraw() }
+        }
         diskCacheLock.read {
           if (revision != cacheRevision.value) return@withPermit null
           synchronized(memoryCache) { memoryCache.put(key, scaled) }
@@ -820,7 +826,9 @@ class ThumbnailRepository(
           val revision = diskCacheLock.read { cacheRevision.value }
           writeBitmapToDisk(diskKey, posterBitmap, false, revision)
           val scaled = scaleBitmap(posterBitmap, widthPx, heightPx)
-          scaled.prepareToDraw()
+          if (!scaled.isRecycled) {
+            runCatching { scaled.prepareToDraw() }
+          }
           diskCacheLock.read {
             synchronized(memoryCache) { memoryCache.put(key, scaled) }
           }
@@ -1128,13 +1136,9 @@ class ThumbnailRepository(
     val scaled =
       try {
         Bitmap.createScaledBitmap(bitmap, scaledWidth, scaledHeight, true)
-      } catch (_: IllegalArgumentException) {
-        // Bitmap was recycled between the check and the scale call
+      } catch (_: Throwable) {
         return bitmap
       }
-    if (scaled != bitmap && !bitmap.isRecycled) {
-      bitmap.recycle()
-    }
     return scaled
   }
 
