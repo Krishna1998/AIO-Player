@@ -122,6 +122,7 @@ import app.video.player.ui.theme.onWallpaper
 import app.video.player.ui.theme.wallpaperAwareBackgroundColor
 import app.video.player.ui.utils.LocalBackStack
 import app.video.player.ui.utils.navigateTo
+import app.video.player.ui.utils.popSafely
 import app.video.player.ui.utils.rememberAppHaptics
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
