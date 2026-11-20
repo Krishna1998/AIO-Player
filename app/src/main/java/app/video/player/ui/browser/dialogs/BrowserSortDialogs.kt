@@ -381,6 +381,7 @@ fun FolderSortDialog(
   pickerMode: Boolean = false,
   availableWidthDp: Int? = null,
   fixedLayoutMode: MediaLayoutMode? = null,
+  isAudio: Boolean = false,
 ) {
   val browserPreferences = koinInject<BrowserPreferences>()
   val appearancePreferences = koinInject<AppearancePreferences>()
@@ -403,10 +404,14 @@ fun FolderSortDialog(
   val folderGridColumnsLandscape by browserPreferences.folderGridColumnsLandscape.collectAsState()
   val videoGridColumnsPortrait by browserPreferences.videoGridColumnsPortrait.collectAsState()
   val videoGridColumnsLandscape by browserPreferences.videoGridColumnsLandscape.collectAsState()
+  val musicGridColumnsPortrait by browserPreferences.musicGridColumnsPortrait.collectAsState()
+  val musicGridColumnsLandscape by browserPreferences.musicGridColumnsLandscape.collectAsState()
   val folderGridColumnsDualPanePortrait by browserPreferences.folderGridColumnsDualPanePortrait.collectAsState()
   val folderGridColumnsDualPaneLandscape by browserPreferences.folderGridColumnsDualPaneLandscape.collectAsState()
   val videoGridColumnsDualPanePortrait by browserPreferences.videoGridColumnsDualPanePortrait.collectAsState()
   val videoGridColumnsDualPaneLandscape by browserPreferences.videoGridColumnsDualPaneLandscape.collectAsState()
+  val musicGridColumnsDualPanePortrait by browserPreferences.musicGridColumnsDualPanePortrait.collectAsState()
+  val musicGridColumnsDualPaneLandscape by browserPreferences.musicGridColumnsDualPaneLandscape.collectAsState()
 
   val configuration = androidx.compose.ui.platform.LocalConfiguration.current
   val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
@@ -425,8 +430,10 @@ fun FolderSortDialog(
     app.video.player.utils.device.DeviceFormFactor.isTelevision(androidx.compose.ui.platform.LocalContext.current)
   val folderMinWidth = if (isTelevision) 160.dp else 90.dp
   val videoMinWidth = if (isTelevision) 240.dp else 130.dp
+  val musicMinWidth = if (isTelevision) 180.dp else 110.dp
   val dynamicFolderColumns = (usableFolderWidth / folderMinWidth).toInt().coerceAtLeast(1)
   val dynamicVideoColumns = (usableVideoWidth / videoMinWidth).toInt().coerceAtLeast(1)
+  val dynamicMusicColumns = (usableVideoWidth / musicMinWidth).toInt().coerceAtLeast(1)
 
   val folderGridColumns =
     if (isDualPane) {
@@ -444,6 +451,14 @@ fun FolderSortDialog(
       val pref = if (isLandscape) videoGridColumnsLandscape else videoGridColumnsPortrait
       if (pref > 0) pref else dynamicVideoColumns
     }
+  val musicGridColumns =
+    if (isDualPane) {
+      val dualPref = if (isLandscape) musicGridColumnsDualPaneLandscape else musicGridColumnsDualPanePortrait
+      if (dualPref > 0) dualPref else dynamicMusicColumns
+    } else {
+      val pref = if (isLandscape) musicGridColumnsLandscape else musicGridColumnsPortrait
+      if (pref > 0) pref else dynamicMusicColumns
+    }
 
   val maxFolderColumns = if (pickerMode) {
     app.video.player.ui.browser.playlist.playlistGridColumnLimit(screenWidthDp.value.toInt(), true)
@@ -451,6 +466,9 @@ fun FolderSortDialog(
   val maxVideoColumns = if (pickerMode) {
     app.video.player.ui.browser.playlist.playlistGridColumnLimit(screenWidthDp.value.toInt())
   } else maxOf(if (isTablet || isLandscape) 8 else 4, dynamicVideoColumns + 3).coerceIn(4, 16)
+  val maxMusicColumns = if (pickerMode) {
+    app.video.player.ui.browser.playlist.playlistGridColumnLimit(screenWidthDp.value.toInt())
+  } else maxOf(if (isTablet || isLandscape) 8 else 5, dynamicMusicColumns + 3).coerceIn(4, 16)
 
   // The Music > Folders tab embeds the album-style folder list regardless of the Home screen's
   // selected folder view. Its controls must therefore read and update the album-view preferences,
@@ -486,27 +504,45 @@ fun FolderSortDialog(
     }
 
   val videoGridColumnSelector =
-    if (activeLayoutMode == MediaLayoutMode.GRID && manualGridColumnsEnabled && maxVideoColumns > 1) {
+    if (activeLayoutMode == MediaLayoutMode.GRID && manualGridColumnsEnabled && (if (isAudio) maxMusicColumns else maxVideoColumns) > 1) {
+      val maxCols = if (isAudio) maxMusicColumns else maxVideoColumns
+      val currentCols = if (isAudio) musicGridColumns else videoGridColumns
       GridColumnSelector(
-        label = "Video (${if (isLandscape) "Landscape" else "Portrait"})",
-        currentValue = videoGridColumns.coerceIn(1, maxVideoColumns),
+        label = "${if (isAudio) "Music" else "Video"} (${if (isLandscape) "Landscape" else "Portrait"})",
+        currentValue = currentCols.coerceIn(1, maxCols),
         onValueChange = {
-          if (isDualPane) {
-            if (isLandscape) {
-              browserPreferences.videoGridColumnsDualPaneLandscape.set(it)
+          if (isAudio) {
+            if (isDualPane) {
+              if (isLandscape) {
+                browserPreferences.musicGridColumnsDualPaneLandscape.set(it)
+              } else {
+                browserPreferences.musicGridColumnsDualPanePortrait.set(it)
+              }
             } else {
-              browserPreferences.videoGridColumnsDualPanePortrait.set(it)
+              if (isLandscape) {
+                browserPreferences.musicGridColumnsLandscape.set(it)
+              } else {
+                browserPreferences.musicGridColumnsPortrait.set(it)
+              }
             }
           } else {
-            if (isLandscape) {
-              browserPreferences.videoGridColumnsLandscape.set(it)
+            if (isDualPane) {
+              if (isLandscape) {
+                browserPreferences.videoGridColumnsDualPaneLandscape.set(it)
+              } else {
+                browserPreferences.videoGridColumnsDualPanePortrait.set(it)
+              }
             } else {
-              browserPreferences.videoGridColumnsPortrait.set(it)
+              if (isLandscape) {
+                browserPreferences.videoGridColumnsLandscape.set(it)
+              } else {
+                browserPreferences.videoGridColumnsPortrait.set(it)
+              }
             }
           }
         },
-        valueRange = 1f..maxVideoColumns.toFloat(),
-        steps = maxVideoColumns - 2,
+        valueRange = 1f..maxCols.toFloat(),
+        steps = maxCols - 2,
       )
     } else {
       null
@@ -640,7 +676,7 @@ fun FolderSortDialog(
         )
         add(
           VisibilityToggle(
-            label = "Total Media",
+            label = if (isAudio) "Total Songs" else "Total Media",
             checked = showTotalVideosChip,
             onCheckedChange = { browserPreferences.showTotalVideosChip.set(it) },
           ),
@@ -695,17 +731,21 @@ fun FolderSortDialog(
               if (isLandscape) {
                 browserPreferences.folderGridColumnsDualPaneLandscape.set(dynamicFolderColumns)
                 browserPreferences.videoGridColumnsDualPaneLandscape.set(dynamicVideoColumns)
+                browserPreferences.musicGridColumnsDualPaneLandscape.set(dynamicMusicColumns)
               } else {
                 browserPreferences.folderGridColumnsDualPanePortrait.set(dynamicFolderColumns)
                 browserPreferences.videoGridColumnsDualPanePortrait.set(dynamicVideoColumns)
+                browserPreferences.musicGridColumnsDualPanePortrait.set(dynamicMusicColumns)
               }
             } else {
               if (isLandscape) {
                 browserPreferences.folderGridColumnsLandscape.set(dynamicFolderColumns)
                 browserPreferences.videoGridColumnsLandscape.set(dynamicVideoColumns)
+                browserPreferences.musicGridColumnsLandscape.set(dynamicMusicColumns)
               } else {
                 browserPreferences.folderGridColumnsPortrait.set(dynamicFolderColumns)
                 browserPreferences.videoGridColumnsPortrait.set(dynamicVideoColumns)
+                browserPreferences.musicGridColumnsPortrait.set(dynamicMusicColumns)
               }
             }
           } else {
@@ -713,10 +753,14 @@ fun FolderSortDialog(
             browserPreferences.folderGridColumnsLandscape.set(0)
             browserPreferences.videoGridColumnsPortrait.set(0)
             browserPreferences.videoGridColumnsLandscape.set(0)
+            browserPreferences.musicGridColumnsPortrait.set(0)
+            browserPreferences.musicGridColumnsLandscape.set(0)
             browserPreferences.folderGridColumnsDualPanePortrait.set(0)
             browserPreferences.folderGridColumnsDualPaneLandscape.set(0)
             browserPreferences.videoGridColumnsDualPanePortrait.set(0)
             browserPreferences.videoGridColumnsDualPaneLandscape.set(0)
+            browserPreferences.musicGridColumnsDualPanePortrait.set(0)
+            browserPreferences.musicGridColumnsDualPaneLandscape.set(0)
           }
           browserPreferences.manualGridColumnsEnabled.set(enabled)
         },
@@ -772,10 +816,14 @@ fun VideoSortDialog(
   val folderGridColumnsLandscape by browserPreferences.folderGridColumnsLandscape.collectAsState()
   val videoGridColumnsPortrait by browserPreferences.videoGridColumnsPortrait.collectAsState()
   val videoGridColumnsLandscape by browserPreferences.videoGridColumnsLandscape.collectAsState()
+  val musicGridColumnsPortrait by browserPreferences.musicGridColumnsPortrait.collectAsState()
+  val musicGridColumnsLandscape by browserPreferences.musicGridColumnsLandscape.collectAsState()
   val folderGridColumnsDualPanePortrait by browserPreferences.folderGridColumnsDualPanePortrait.collectAsState()
   val folderGridColumnsDualPaneLandscape by browserPreferences.folderGridColumnsDualPaneLandscape.collectAsState()
   val videoGridColumnsDualPanePortrait by browserPreferences.videoGridColumnsDualPanePortrait.collectAsState()
   val videoGridColumnsDualPaneLandscape by browserPreferences.videoGridColumnsDualPaneLandscape.collectAsState()
+  val musicGridColumnsDualPanePortrait by browserPreferences.musicGridColumnsDualPanePortrait.collectAsState()
+  val musicGridColumnsDualPaneLandscape by browserPreferences.musicGridColumnsDualPaneLandscape.collectAsState()
 
   val activeLayoutMode = fixedLayoutMode ?: if (isFolderView) folderViewVideoLayoutMode else mediaLayoutMode
 
@@ -796,8 +844,10 @@ fun VideoSortDialog(
     app.video.player.utils.device.DeviceFormFactor.isTelevision(androidx.compose.ui.platform.LocalContext.current)
   val folderMinWidth = if (isTelevision) 160.dp else 90.dp
   val videoMinWidth = if (isTelevision) 240.dp else 130.dp
+  val musicMinWidth = if (isTelevision) 180.dp else 110.dp
   val dynamicFolderColumns = (usableFolderWidth / folderMinWidth).toInt().coerceAtLeast(1)
   val dynamicVideoColumns = (usableVideoWidth / videoMinWidth).toInt().coerceAtLeast(1)
+  val dynamicMusicColumns = (usableVideoWidth / musicMinWidth).toInt().coerceAtLeast(1)
 
   val folderGridColumns =
     if (isDualPane) {
@@ -815,6 +865,14 @@ fun VideoSortDialog(
       val pref = if (isLandscape) videoGridColumnsLandscape else videoGridColumnsPortrait
       if (pref > 0) pref else dynamicVideoColumns
     }
+  val musicGridColumns =
+    if (isDualPane) {
+      val dualPref = if (isLandscape) musicGridColumnsDualPaneLandscape else musicGridColumnsDualPanePortrait
+      if (dualPref > 0) dualPref else dynamicMusicColumns
+    } else {
+      val pref = if (isLandscape) musicGridColumnsLandscape else musicGridColumnsPortrait
+      if (pref > 0) pref else dynamicMusicColumns
+    }
 
   val maxFolderColumns = if (pickerMode) {
     app.video.player.ui.browser.playlist.playlistGridColumnLimit(screenWidthDp.value.toInt(), true)
@@ -822,6 +880,9 @@ fun VideoSortDialog(
   val maxVideoColumns = if (pickerMode) {
     app.video.player.ui.browser.playlist.playlistGridColumnLimit(screenWidthDp.value.toInt())
   } else maxOf(if (isTablet || isLandscape) 8 else 4, dynamicVideoColumns + 3).coerceIn(4, 16)
+  val maxMusicColumns = if (pickerMode) {
+    app.video.player.ui.browser.playlist.playlistGridColumnLimit(screenWidthDp.value.toInt())
+  } else maxOf(if (isTablet || isLandscape) 8 else 5, dynamicMusicColumns + 3).coerceIn(4, 16)
 
   val folderGridColumnSelector =
     if (isFolderView && activeLayoutMode == MediaLayoutMode.GRID &&
@@ -853,27 +914,45 @@ fun VideoSortDialog(
     }
 
   val videoGridColumnSelector =
-    if (activeLayoutMode == MediaLayoutMode.GRID && manualGridColumnsEnabled && maxVideoColumns > 1) {
+    if (activeLayoutMode == MediaLayoutMode.GRID && manualGridColumnsEnabled && (if (isAudio) maxMusicColumns else maxVideoColumns) > 1) {
+      val maxCols = if (isAudio) maxMusicColumns else maxVideoColumns
+      val currentCols = if (isAudio) musicGridColumns else videoGridColumns
       GridColumnSelector(
-        label = "Video (${if (isLandscape) "Landscape" else "Portrait"})",
-        currentValue = videoGridColumns.coerceIn(1, maxVideoColumns),
+        label = "${if (isAudio) "Music" else "Video"} (${if (isLandscape) "Landscape" else "Portrait"})",
+        currentValue = currentCols.coerceIn(1, maxCols),
         onValueChange = {
-          if (isDualPane) {
-            if (isLandscape) {
-              browserPreferences.videoGridColumnsDualPaneLandscape.set(it)
+          if (isAudio) {
+            if (isDualPane) {
+              if (isLandscape) {
+                browserPreferences.musicGridColumnsDualPaneLandscape.set(it)
+              } else {
+                browserPreferences.musicGridColumnsDualPanePortrait.set(it)
+              }
             } else {
-              browserPreferences.videoGridColumnsDualPanePortrait.set(it)
+              if (isLandscape) {
+                browserPreferences.musicGridColumnsLandscape.set(it)
+              } else {
+                browserPreferences.musicGridColumnsPortrait.set(it)
+              }
             }
           } else {
-            if (isLandscape) {
-              browserPreferences.videoGridColumnsLandscape.set(it)
+            if (isDualPane) {
+              if (isLandscape) {
+                browserPreferences.videoGridColumnsDualPaneLandscape.set(it)
+              } else {
+                browserPreferences.videoGridColumnsDualPanePortrait.set(it)
+              }
             } else {
-              browserPreferences.videoGridColumnsPortrait.set(it)
+              if (isLandscape) {
+                browserPreferences.videoGridColumnsLandscape.set(it)
+              } else {
+                browserPreferences.videoGridColumnsPortrait.set(it)
+              }
             }
           }
         },
-        valueRange = 1f..maxVideoColumns.toFloat(),
-        steps = maxVideoColumns - 2,
+        valueRange = 1f..maxCols.toFloat(),
+        steps = maxCols - 2,
       )
     } else {
       null
@@ -1113,17 +1192,21 @@ fun VideoSortDialog(
               if (isLandscape) {
                 browserPreferences.folderGridColumnsDualPaneLandscape.set(dynamicFolderColumns)
                 browserPreferences.videoGridColumnsDualPaneLandscape.set(dynamicVideoColumns)
+                browserPreferences.musicGridColumnsDualPaneLandscape.set(dynamicMusicColumns)
               } else {
                 browserPreferences.folderGridColumnsDualPanePortrait.set(dynamicFolderColumns)
                 browserPreferences.videoGridColumnsDualPanePortrait.set(dynamicVideoColumns)
+                browserPreferences.musicGridColumnsDualPanePortrait.set(dynamicMusicColumns)
               }
             } else {
               if (isLandscape) {
                 browserPreferences.folderGridColumnsLandscape.set(dynamicFolderColumns)
                 browserPreferences.videoGridColumnsLandscape.set(dynamicVideoColumns)
+                browserPreferences.musicGridColumnsLandscape.set(dynamicMusicColumns)
               } else {
                 browserPreferences.folderGridColumnsPortrait.set(dynamicFolderColumns)
                 browserPreferences.videoGridColumnsPortrait.set(dynamicVideoColumns)
+                browserPreferences.musicGridColumnsPortrait.set(dynamicMusicColumns)
               }
             }
           } else {
@@ -1131,10 +1214,14 @@ fun VideoSortDialog(
             browserPreferences.folderGridColumnsLandscape.set(0)
             browserPreferences.videoGridColumnsPortrait.set(0)
             browserPreferences.videoGridColumnsLandscape.set(0)
+            browserPreferences.musicGridColumnsPortrait.set(0)
+            browserPreferences.musicGridColumnsLandscape.set(0)
             browserPreferences.folderGridColumnsDualPanePortrait.set(0)
             browserPreferences.folderGridColumnsDualPaneLandscape.set(0)
             browserPreferences.videoGridColumnsDualPanePortrait.set(0)
             browserPreferences.videoGridColumnsDualPaneLandscape.set(0)
+            browserPreferences.musicGridColumnsDualPanePortrait.set(0)
+            browserPreferences.musicGridColumnsDualPaneLandscape.set(0)
           }
           browserPreferences.manualGridColumnsEnabled.set(enabled)
         },
@@ -1142,7 +1229,7 @@ fun VideoSortDialog(
       ),
     folderGridColumnSelector = folderGridColumnSelector.takeUnless { pickerMode },
     videoGridColumnSelector =
-      if ((isAudio || includeAudioBrowser) && activeLayoutMode == MediaLayoutMode.LIST) {
+      if (isAudio && activeLayoutMode == MediaLayoutMode.LIST) {
         coverArtSizeSelector(musicCoverArtSize) { browserPreferences.musicCoverArtSize.set(it) }
       } else {
         videoGridColumnSelector
@@ -1410,7 +1497,7 @@ fun FileSystemSortDialog(
         )
         add(
           VisibilityToggle(
-            label = "Total Media",
+            label = if (isAudio) "Total Songs" else "Total Media",
             checked = showTotalVideosChip,
             onCheckedChange = { browserPreferences.showTotalVideosChip.set(it) },
           ),

@@ -120,10 +120,15 @@ class BrowserPreferences(
   val videoGridColumnsPortrait = preferenceStore.getInt("video_grid_columns_portrait", 0)
   val videoGridColumnsLandscape = preferenceStore.getInt("video_grid_columns_landscape", 0)
 
+  val musicGridColumnsPortrait = preferenceStore.getInt("music_grid_columns_portrait", 0)
+  val musicGridColumnsLandscape = preferenceStore.getInt("music_grid_columns_landscape", 0)
+
   val folderGridColumnsDualPanePortrait = preferenceStore.getInt("folder_grid_columns_dual_pane_portrait", 0)
   val folderGridColumnsDualPaneLandscape = preferenceStore.getInt("folder_grid_columns_dual_pane_landscape", 0)
   val videoGridColumnsDualPanePortrait = preferenceStore.getInt("video_grid_columns_dual_pane_portrait", 0)
   val videoGridColumnsDualPaneLandscape = preferenceStore.getInt("video_grid_columns_dual_pane_landscape", 0)
+  val musicGridColumnsDualPanePortrait = preferenceStore.getInt("music_grid_columns_dual_pane_portrait", 0)
+  val musicGridColumnsDualPaneLandscape = preferenceStore.getInt("music_grid_columns_dual_pane_landscape", 0)
 
   val showExtensionField = preferenceStore.getBoolean("show_extension_field", false)
   // Off by default: files without a MediaStore duration are probed one by one to fill it.

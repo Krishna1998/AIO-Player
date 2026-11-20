@@ -854,6 +854,10 @@ internal fun VideoListContent(
   val videoGridColumnsLandscape by browserPreferences.videoGridColumnsLandscape.collectAsState()
   val videoGridColumnsDualPanePortrait by browserPreferences.videoGridColumnsDualPanePortrait.collectAsState()
   val videoGridColumnsDualPaneLandscape by browserPreferences.videoGridColumnsDualPaneLandscape.collectAsState()
+  val musicGridColumnsPortrait by browserPreferences.musicGridColumnsPortrait.collectAsState()
+  val musicGridColumnsLandscape by browserPreferences.musicGridColumnsLandscape.collectAsState()
+  val musicGridColumnsDualPanePortrait by browserPreferences.musicGridColumnsDualPanePortrait.collectAsState()
+  val musicGridColumnsDualPaneLandscape by browserPreferences.musicGridColumnsDualPaneLandscape.collectAsState()
   val aspect = if (isAudio) 1f else if (mediaLayoutMode == MediaLayoutMode.GRID) 16f / 10f else 16f / 9f
 
   val videoCardUiConfig =
@@ -938,20 +942,36 @@ internal fun VideoListContent(
             130.dp
           }
         val dynamicVideos = (usableWidth / videoMinWidth).toInt().coerceAtLeast(1)
+        val musicGridColumnsPref = if (isLandscape) musicGridColumnsLandscape else musicGridColumnsPortrait
+        val audioMinWidth = if (app.video.player.utils.device.DeviceFormFactor.isTelevision(LocalContext.current)) 180.dp else 110.dp
+        val dynamicMusic = (usableWidth / audioMinWidth).toInt().coerceAtLeast(1)
+
         val videoGridColumns =
-          if (isAudio) {
-            val audioMinWidth = musicGridCoverArtSize.dp
-            (usableWidth / audioMinWidth).toInt().coerceAtLeast(1)
-          } else if (manualGridColumnsEnabled) {
-            val maxSafeVideos = maxOf(dynamicVideos + 3, (usableWidth / 90.dp).toInt()).coerceAtLeast(1)
-            if (isDualPane) {
-              val dualVideoPref = if (isLandscape) videoGridColumnsDualPaneLandscape else videoGridColumnsDualPanePortrait
-              if (dualVideoPref > 0) dualVideoPref.coerceIn(1, maxSafeVideos) else dynamicVideos
+          if (manualGridColumnsEnabled) {
+            if (isAudio) {
+              val maxSafeMusic = maxOf(dynamicMusic + 3, (usableWidth / 80.dp).toInt()).coerceAtLeast(1)
+              if (isDualPane) {
+                val dualMusicPref = if (isLandscape) musicGridColumnsDualPaneLandscape else musicGridColumnsDualPanePortrait
+                if (dualMusicPref > 0) dualMusicPref.coerceIn(1, maxSafeMusic) else dynamicMusic
+              } else {
+                if (musicGridColumnsPref > 0) musicGridColumnsPref.coerceIn(1, maxSafeMusic) else dynamicMusic
+              }
             } else {
-              if (videoGridColumnsPref > 0) videoGridColumnsPref.coerceIn(1, maxSafeVideos) else dynamicVideos
+              val maxSafeVideos = maxOf(dynamicVideos + 3, (usableWidth / 90.dp).toInt()).coerceAtLeast(1)
+              if (isDualPane) {
+                val dualVideoPref = if (isLandscape) videoGridColumnsDualPaneLandscape else videoGridColumnsDualPanePortrait
+                if (dualVideoPref > 0) dualVideoPref.coerceIn(1, maxSafeVideos) else dynamicVideos
+              } else {
+                if (videoGridColumnsPref > 0) videoGridColumnsPref.coerceIn(1, maxSafeVideos) else dynamicVideos
+              }
             }
           } else {
-            dynamicVideos
+            if (isAudio) {
+              val customAudioMinWidth = musicGridCoverArtSize.dp
+              (usableWidth / customAudioMinWidth).toInt().coerceAtLeast(1)
+            } else {
+              dynamicVideos
+            }
           }
 
         // Must match the thumbnail size logic inside `VideoCard` for this screen,

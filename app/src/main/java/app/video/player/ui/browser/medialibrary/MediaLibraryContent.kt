@@ -1427,6 +1427,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
           onSortTypeChange = { browserPreferences.folderSortType.set(it) },
           onSortOrderChange = { browserPreferences.folderSortOrder.set(it) },
           embeddedAlbumView = true,
+          isAudio = currentTab == MediaLibraryType.Audio,
         )
       } else if (currentTab == MediaLibraryType.Audio && audioSubTab == 3 && !isSearching) {
         PlaylistSortDialog(

@@ -1337,6 +1337,7 @@ object FolderListScreen : Screen {
       onSortTypeChange = { browserPreferences.folderSortType.set(it) },
       onSortOrderChange = { browserPreferences.folderSortOrder.set(it) },
       isDualPane = isDualPaneActive && selectedFolderBucketId != null,
+      isAudio = audioOnly,
     )
 
     if (!BuildConfig.SCOPED_STORAGE_ONLY && pendingDeleteFolders.isNotEmpty()) {
