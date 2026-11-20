@@ -209,7 +209,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   val mediaLayoutMode by browserPreferences.mediaLayoutMode.collectAsState()
   val includeAudioBrowser by browserPreferences.includeAudioBrowser.collectAsState()
   val savedMediaType by browserPreferences.mediaLibraryType.collectAsState()
-  val mediaType = if (forceAudio) MediaLibraryType.Audio else if (includeAudioBrowser) savedMediaType else MediaLibraryType.Video
+  val mediaType = if (forceAudio) MediaLibraryType.Audio else if (includeAudioBrowser || browserPreferences.folderViewMode.get() == app.video.player.preferences.FolderViewMode.BentoFusion) savedMediaType else MediaLibraryType.Video
   val musicCoverArtSize by browserPreferences.musicCoverArtSize.collectAsState()
   var videoSubTab by rememberSaveable { mutableIntStateOf(0) }
   var audioSubTab by rememberSaveable { mutableIntStateOf(0) }
@@ -496,7 +496,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   }
 
   LaunchedEffect(includeAudioBrowser, savedMediaType, forceAudio) {
-    if (!forceAudio && !includeAudioBrowser && savedMediaType != MediaLibraryType.Video) {
+    if (!forceAudio && !includeAudioBrowser && browserPreferences.folderViewMode.get() != app.video.player.preferences.FolderViewMode.BentoFusion && savedMediaType != MediaLibraryType.Video) {
       browserPreferences.mediaLibraryType.set(MediaLibraryType.Video)
     }
   }
@@ -699,8 +699,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
             !selectionManager.isInSelectionMode &&
             isFabVisible.value &&
             !MainScreen.getPermissionDeniedState() &&
-            !(currentTab == MediaLibraryType.Video && videoSubTab == 0 && !isSearching) &&
-            !(currentTab == MediaLibraryType.Audio && (audioSubTab == 2 || audioSubTab == 3) && !isSearching)
+            !(currentTab == MediaLibraryType.Audio && audioSubTab == 2 && !isSearching)
 
         FloatingActionButtonMenu(
         modifier = Modifier.padding(bottom = FabPlacement.scaffoldBottomPadding()),

@@ -430,26 +430,30 @@ fun BentoFusionHeader(
     ?: sortedAudioByTitle.firstOrNull()
 
   fun playAudioInBackground(targetVideo: Video, startPos: Double?) {
-    val audioQueue = sortedAudioByTitle.map { item ->
-      val v = item.video
-      PlaybackItem.fromUri(
-        uri = v.uri.toString(),
-        stableId = if (app.video.player.BuildConfig.SCOPED_STORAGE_ONLY && v.uri.scheme == "content") {
-          videoPlaybackIdentifiers(v).first()
-        } else PlaybackIdentity.forLocalPath(v.path),
-        title = if (v.title.isNotBlank()) v.title else FileTypeUtils.stripExtension(v.displayName),
-        artist = v.artist,
-        mimeType = v.mimeType.ifBlank { "audio/*" },
-        artworkUri = v.artworkUrl,
-        durationSeconds = (v.duration / 1000L).toInt().takeIf { it > 0 },
-        videoWidth = v.width,
-        videoHeight = v.height,
-      )
-    }
-    val targetIdx = sortedAudioByTitle.indexOfFirst { it.video.path == targetVideo.path }.coerceAtLeast(0)
     rememberedAudioPath = targetVideo.path
     browserPreferences.lastPlayedAudioPath.set(targetVideo.path)
-    MediaUtils.playInMiniPlayer(context, audioQueue, targetIdx, startPositionSeconds = startPos?.takeIf { it > 0.0 })
+    if (MediaUtils.shouldPlayInMiniPlayerOnly(isAudio = true) && PlaybackSession.isInitialized) {
+      val audioQueue = sortedAudioByTitle.map { item ->
+        val v = item.video
+        PlaybackItem.fromUri(
+          uri = v.uri.toString(),
+          stableId = if (app.video.player.BuildConfig.SCOPED_STORAGE_ONLY && v.uri.scheme == "content") {
+            videoPlaybackIdentifiers(v).first()
+          } else PlaybackIdentity.forLocalPath(v.path),
+          title = if (v.title.isNotBlank()) v.title else FileTypeUtils.stripExtension(v.displayName),
+          artist = v.artist,
+          mimeType = v.mimeType.ifBlank { "audio/*" },
+          artworkUri = v.artworkUrl,
+          durationSeconds = (v.duration / 1000L).toInt().takeIf { it > 0 },
+          videoWidth = v.width,
+          videoHeight = v.height,
+        )
+      }
+      val targetIdx = sortedAudioByTitle.indexOfFirst { it.video.path == targetVideo.path }.coerceAtLeast(0)
+      MediaUtils.playInMiniPlayer(context, audioQueue, targetIdx, startPositionSeconds = startPos?.takeIf { it > 0.0 })
+    } else {
+      onPlayMedia(targetVideo, startPos)
+    }
   }
 
   val heroVideo = remember(videoItems, recentlyPlayedFilePath) {
@@ -555,16 +559,20 @@ fun BentoFusionHeader(
         },
         onLongClick = {
           if (heroToDisplay.video.isAudio) {
-            val intent = Intent(context, PlayerActivity::class.java).apply {
-              action = MediaPlaybackService.ACTION_OPEN_PLAYER
-              putExtra("is_audio", true)
-              putExtra("internal_launch", true)
-              putExtra("launch_source", "audio_pulsing")
-              flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            if (PlaybackSession.isInitialized) {
+              val intent = Intent(context, PlayerActivity::class.java).apply {
+                action = MediaPlaybackService.ACTION_OPEN_PLAYER
+                putExtra("is_audio", true)
+                putExtra("internal_launch", true)
+                putExtra("launch_source", "audio_pulsing")
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+              }
+              try {
+                context.startActivity(intent)
+              } catch (_: Exception) {}
+            } else {
+              onPlayMedia(heroToDisplay.video, resumePos.takeIf { it > 0.0 })
             }
-            try {
-              context.startActivity(intent)
-            } catch (_: Exception) {}
           }
         },
         onPrevious = {
@@ -824,12 +832,13 @@ private fun HorizonRailSection(
         ) {
           Text(
             text = icon,
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.titleMedium.copy(fontSize = 16.sp),
           )
           Text(
             text = title,
-            style = MaterialTheme.typography.labelLarge.copy(
+            style = MaterialTheme.typography.titleMedium.copy(
               fontWeight = FontWeight.ExtraBold,
+              fontSize = 15.sp,
               letterSpacing = 0.5.sp,
             ),
             color = MaterialTheme.colorScheme.onSurface,
@@ -843,7 +852,7 @@ private fun HorizonRailSection(
               text = "$count",
               style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.Bold,
-                fontSize = 10.sp,
+                fontSize = 11.sp,
               ),
               color = accentColor,
               modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
@@ -970,8 +979,10 @@ private fun BentoHorizonVideoCard(
       ) {
         Text(
           text = FileTypeUtils.stripExtension(video.displayName),
-          style = MaterialTheme.typography.labelMedium.copy(
+          style = MaterialTheme.typography.titleSmall.copy(
+            fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
+            lineHeight = 18.sp,
           ),
           color = MaterialTheme.colorScheme.onSurface,
           maxLines = 1,
@@ -1110,8 +1121,10 @@ private fun BentoHorizonAudioCard(
         val (artist, title) = SortUtils.getAudioArtistAndTitle(video)
         Text(
           text = title,
-          style = MaterialTheme.typography.labelMedium.copy(
+          style = MaterialTheme.typography.titleSmall.copy(
+            fontSize = 13.5.sp,
             fontWeight = FontWeight.Bold,
+            lineHeight = 17.sp,
           ),
           color = MaterialTheme.colorScheme.onSurface,
           maxLines = 1,
@@ -1120,8 +1133,8 @@ private fun BentoHorizonAudioCard(
         if (artist.isNotBlank()) {
           Text(
             text = artist,
-            style = MaterialTheme.typography.labelSmall.copy(
-              fontSize = 10.sp,
+            style = MaterialTheme.typography.bodySmall.copy(
+              fontSize = 11.5.sp,
             ),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,

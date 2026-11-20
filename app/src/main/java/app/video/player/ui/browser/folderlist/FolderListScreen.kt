@@ -826,7 +826,8 @@ object FolderListScreen : Screen {
           }
         },
         floatingActionButton = {
-          val isFabShouldBeVisible =
+          if (!embedded) {
+            val isFabShouldBeVisible =
             showQuickPlayFab &&
               !selectionManager.isInSelectionMode &&
               isFabVisible.value &&
@@ -940,7 +941,8 @@ object FolderListScreen : Screen {
 
             }
           }
-        },
+        }
+      },
       ) { padding ->
         Box(modifier = Modifier.padding(padding)) {
           if ((isPermissionSetupCompleted && permissionState.status == PermissionStatus.Granted) || canBrowseSelectedFolders) {
