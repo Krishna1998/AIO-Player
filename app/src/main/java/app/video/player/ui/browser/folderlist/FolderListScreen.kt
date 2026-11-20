@@ -987,6 +987,15 @@ object FolderListScreen : Screen {
                             internalSearchQuery = ""
                             NavigationBarState.clearHomeSearchTrigger()
                           }
+                          // Persist the current tab type before navigating into the folder so that
+                          // pressing back returns to this tab rather than defaulting to All Media.
+                          coroutineScope.launch {
+                            if (videoOnly && !audioOnly) {
+                              browserPreferences.mediaLibraryType.set(app.video.player.preferences.MediaLibraryType.Video)
+                            } else if (audioOnly) {
+                              browserPreferences.mediaLibraryType.set(app.video.player.preferences.MediaLibraryType.Audio)
+                            }
+                          }
                           backstack.navigateTo(
                             app.video.player.ui.browser.videolist
                               .VideoListScreen(folder.bucketId, folder.name, isAudio = audioOnly, videoOnly = videoOnly),
@@ -1027,6 +1036,15 @@ object FolderListScreen : Screen {
                         selectedFolderBucketId = folder.bucketId
                         selectedFolderName = folder.name
                       } else {
+                        // Persist the current tab type before navigating into the folder so that
+                        // pressing back returns to this tab rather than defaulting to All Media.
+                        coroutineScope.launch {
+                          if (videoOnly && !audioOnly) {
+                            browserPreferences.mediaLibraryType.set(app.video.player.preferences.MediaLibraryType.Video)
+                          } else if (audioOnly) {
+                            browserPreferences.mediaLibraryType.set(app.video.player.preferences.MediaLibraryType.Audio)
+                          }
+                        }
                         backstack.navigateTo(
                           app.video.player.ui.browser.videolist
                             .VideoListScreen(folder.bucketId, folder.name, isAudio = audioOnly, videoOnly = videoOnly),

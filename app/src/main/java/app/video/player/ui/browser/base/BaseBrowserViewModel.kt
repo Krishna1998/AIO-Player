@@ -14,6 +14,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import app.video.player.database.repository.VideoMetadataCacheRepository
 import app.video.player.domain.media.model.Video
+import app.video.player.domain.thumbnail.ThumbnailRepository
 import app.video.player.utils.history.RecentlyPlayedOps
 import app.video.player.utils.permission.PermissionUtils.StorageOps
 import kotlinx.coroutines.flow.SharingStarted
@@ -30,6 +31,7 @@ abstract class BaseBrowserViewModel(
 ) : AndroidViewModel(application),
   KoinComponent {
   protected val metadataCache: VideoMetadataCacheRepository by inject()
+  private val thumbnailRepository: ThumbnailRepository by inject()
 
   /**
    * Observable recently played file path for highlighting
@@ -84,6 +86,9 @@ abstract class BaseBrowserViewModel(
     // Invalidate cache for old path (new path will be re-cached on next access)
     result.onSuccess {
       metadataCache.invalidateVideo(oldPath)
+      // Migrate thumbnail cache so the renamed file still shows its poster/artwork
+      val newFile = java.io.File(java.io.File(video.path).parentFile, newDisplayName)
+      thumbnailRepository.onMediaRenamed(oldPath, newFile.absolutePath)
     }
 
     return result

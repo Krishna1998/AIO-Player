@@ -767,6 +767,30 @@ class OnlineMusicArtworkRepository(
     )
   }.getOrNull()
 
+  /**
+   * When an audio file is renamed, migrate its path-based cached artwork
+   * from the old path hash to the new path hash so album art doesn't vanish.
+   */
+  fun onMediaRenamed(oldPath: String, newPath: String) {
+    if (oldPath == newPath) return
+    scope.launch(Dispatchers.IO) {
+      runCatching {
+        val oldFile = artworkFileForPath(oldPath)
+        val newFile = artworkFileForPath(newPath)
+        if (oldFile.isFile && oldFile.length() > 500 && !newFile.exists()) {
+          oldFile.copyTo(newFile, overwrite = false)
+        }
+        // Update memory cache
+        synchronized(memoryCache) {
+          val existing = memoryCache.get(oldPath)
+          if (existing != null && !existing.isRecycled) {
+            memoryCache.put(newPath, existing)
+          }
+        }
+      }
+    }
+  }
+
   fun clearOnlineArtworkCache() {
     artworkDir.listFiles()?.forEach { it.delete() }
     memoryCache.evictAll()

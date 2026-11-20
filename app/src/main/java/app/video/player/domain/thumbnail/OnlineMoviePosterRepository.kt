@@ -412,6 +412,30 @@ class OnlineMoviePosterRepository(
     }
   }.getOrNull()
 
+  /**
+   * When a video/movie file is renamed, migrate its path-based cached poster
+   * from the old path hash to the new path hash so the thumbnail doesn't vanish.
+   */
+  fun onMediaRenamed(oldPath: String, newPath: String) {
+    if (oldPath == newPath) return
+    scope.launch(Dispatchers.IO) {
+      runCatching {
+        val oldFile = posterFileForPath(oldPath)
+        val newFile = posterFileForPath(newPath)
+        if (oldFile.isFile && oldFile.length() > 500 && !newFile.exists()) {
+          oldFile.copyTo(newFile, overwrite = false)
+        }
+        // Update memory cache: move the bitmap from oldPath key to newPath key
+        synchronized(memoryCache) {
+          val existing = memoryCache.get(oldPath)
+          if (existing != null && !existing.isRecycled) {
+            memoryCache.put(newPath, existing)
+          }
+        }
+      }
+    }
+  }
+
   fun clearOnlinePosterCache() {
     posterDir.listFiles()?.forEach { it.delete() }
     memoryCache.evictAll()

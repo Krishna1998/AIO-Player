@@ -906,6 +906,15 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                 Surface(
                   onClick = {
                     if (currentTab != type) {
+                      // Eagerly persist the target tab type so that if the user
+                      // navigates into a folder before the pager settle fires,
+                      // back-press returns to this tab instead of All Media.
+                      coroutineScope.launch {
+                        if (!includeAudioBrowser && (type == MediaLibraryType.Audio || type == MediaLibraryType.All)) {
+                          browserPreferences.includeAudioBrowser.set(true)
+                        }
+                        browserPreferences.mediaLibraryType.set(type)
+                      }
                       navigateTab(index)
                     }
                   },

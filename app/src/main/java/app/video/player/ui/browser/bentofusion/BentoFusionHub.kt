@@ -663,7 +663,15 @@ fun BentoFusionHeader(
           onRenameMedia(target, newName)
         } else {
           coroutineScope.launch(Dispatchers.IO) {
+            val oldPath = target.path
             PermissionUtils.StorageOps.renameVideo(context, target, newName)
+            // Migrate thumbnail/poster cache so renamed item keeps its artwork
+            if (oldPath.isNotBlank()) {
+              val newFile = java.io.File(java.io.File(oldPath).parentFile, newName)
+              val thumbnailRepo = org.koin.core.context.GlobalContext.get()
+                .get<ThumbnailRepository>(ThumbnailRepository::class)
+              thumbnailRepo.onMediaRenamed(oldPath, newFile.absolutePath)
+            }
           }
         }
         isRenameOpen = false

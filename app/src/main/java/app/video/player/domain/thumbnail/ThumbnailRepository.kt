@@ -516,6 +516,29 @@ class ThumbnailRepository(
     }
   }
 
+  /**
+   * Called immediately after a local video or audio file is renamed.
+   * Copies the online-poster / album-art disk cache entry and invalidates
+   * the stale memory-cache keys so the renamed item shows its thumbnail
+   * without waiting for a full re-extraction.
+   */
+  fun onMediaRenamed(oldPath: String, newPath: String) {
+    if (oldPath.isBlank() || newPath.isBlank() || oldPath == newPath) return
+    // Forward to online-poster repository (video/movie thumbnails)
+    runCatching { onlinePosterRepository.onMediaRenamed(oldPath, newPath) }
+    // Forward to online-music-artwork repository (audio thumbnails)
+    runCatching { onlineMusicArtworkRepository.onMediaRenamed(oldPath, newPath) }
+    // Evict stale local disk-cache / memory-cache keys so the UI reloads.
+    // The next getThumbnail() call will re-extract or pick up the migrated poster.
+    diskCacheLock.write {
+      diskVideoBaseKeyCache.evictAll()
+      resolvedThumbnailKeys.evictAll()
+      localMetadataCache.evictAll()
+    }
+    // Notify any collectors that hold the old path so they re-fetch
+    _thumbnailReadyKeys.tryEmit(newPath)
+  }
+
   fun startFolderThumbnailGeneration(
     folderId: String,
     videos: List<Video>,
