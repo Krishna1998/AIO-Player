@@ -1124,10 +1124,9 @@ object AppearancePreferencesScreen : Screen {
           }
 
           item {
-            val showMusicTab by preferences.showMusicTab.collectAsState()
-            val showProfileTab by preferences.showProfileTab.collectAsState()
+            val showNetworkTab by preferences.showNetworkTab.collectAsState()
             val savedOrder by preferences.bottomNavigationOrder.collectAsState()
-            val names = listOf("HOME", "MUSIC", "PROFILE")
+            val names = listOf("HOME", "NETWORK")
             val ordered =
               listOf("HOME") +
                 (savedOrder.filter { it in names } + names)
@@ -1136,8 +1135,7 @@ object AppearancePreferencesScreen : Screen {
             val tabItems = ordered.map { id ->
               when (id) {
                 "HOME" -> ReorderableTabItem(id, stringResource(R.string.pref_nav_home_title), stringResource(R.string.pref_nav_home_summary), true, required = true)
-                "MUSIC" -> ReorderableTabItem(id, stringResource(R.string.pref_nav_music_title), stringResource(R.string.pref_nav_music_summary), showMusicTab, titleRes = R.string.pref_nav_music_title)
-                else -> ReorderableTabItem(id, stringResource(R.string.pref_nav_profile_title), stringResource(R.string.pref_nav_profile_summary), showProfileTab, titleRes = R.string.pref_nav_profile_title)
+                else -> ReorderableTabItem(id, stringResource(R.string.pref_nav_network_title), stringResource(R.string.pref_nav_network_summary), showNetworkTab, titleRes = R.string.pref_nav_network_title)
               }
             }
             ExpressivePreferenceGroup {
@@ -1145,8 +1143,7 @@ object AppearancePreferencesScreen : Screen {
                 tabs = tabItems,
                 onEnabledChange = { id, enabled ->
                   when (id) {
-                    "MUSIC" -> preferences.showMusicTab.set(enabled)
-                    "PROFILE" -> preferences.showProfileTab.set(enabled)
+                    "NETWORK" -> preferences.showNetworkTab.set(enabled)
                   }
                 },
                 onMove = { id, destination ->

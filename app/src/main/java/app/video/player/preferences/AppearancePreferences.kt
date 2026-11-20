@@ -130,17 +130,18 @@ class AppearancePreferences(
   // A new key, because "player_buttons_opacity" stored a multiplier whose 100% kept buttons translucent.
   val playerButtonsBackgroundOpacity = preferenceStore.getFloat("player_buttons_background_opacity", 0.55f)
   val showMusicTab = preferenceStore.getBoolean("show_music_tab", false)
-  val showProfileTab = preferenceStore.getBoolean("show_profile_tab", true)
+  val showProfileTab = preferenceStore.getBoolean("show_profile_tab", false)
+  val showNetworkTab = preferenceStore.getBoolean("show_network_tab", true)
   val profileName = preferenceStore.getString("profile_name", "")
   val profileImagePath = preferenceStore.getString("profile_image_path", "")
   val showJellyfinTab = preferenceStore.getBoolean("show_jellyfin_tab", false)
   /** Persistent visual order of bottom navigation tabs. Home remains the root destination. */
   val bottomNavigationOrder = preferenceStore.getObject(
     key = "bottom_navigation_tab_order",
-    defaultValue = listOf("HOME", "MUSIC", "PROFILE"),
+    defaultValue = listOf("HOME", "NETWORK"),
     serializer = { order -> order.joinToString(",") },
     deserializer = { stored ->
-      val defaults = listOf("HOME", "MUSIC", "PROFILE")
+      val defaults = listOf("HOME", "NETWORK")
       val parsed = stored.split(",").map(String::trim).filter { it in defaults }.distinct()
       listOf("HOME") + parsed.filterNot { it == "HOME" } + defaults.drop(1).filterNot { it in parsed }
     },

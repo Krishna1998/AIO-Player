@@ -187,6 +187,7 @@ import app.video.player.ui.tv.tryRequestFocus
 object MainScreen : Screen, TvEdgeToEdgeScreen {
   internal enum class MainTab {
     HOME,
+    NETWORK,
     MUSIC,
     PROFILE,
   }
@@ -243,6 +244,7 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
     val localMusicTabs by musicLibraryViewModel.visibleTabs.collectAsStateWithLifecycle()
     val showMusicTab by appearancePreferences.showMusicTab.collectAsState()
     val showProfileTab by appearancePreferences.showProfileTab.collectAsState()
+    val showNetworkTab by appearancePreferences.showNetworkTab.collectAsState()
     val liquidGlassEnabled by appearancePreferences.liquidGlassEnabled.collectAsState()
     val legacyNavigationBar by appearancePreferences.legacyNavigationBar.collectAsState()
     val progressiveNavigationBlur by appearancePreferences.progressiveNavigationBlur.collectAsState()
@@ -268,10 +270,11 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
 
     val bottomNavigationOrder by appearancePreferences.bottomNavigationOrder.collectAsState()
     val visibleTabs =
-      remember(showMusicTab, showProfileTab, bottomNavigationOrder) {
+      remember(showMusicTab, showProfileTab, showNetworkTab, bottomNavigationOrder) {
         mainNavigationTabs(
           showMusic = showMusicTab,
           showProfile = showProfileTab,
+          showNetwork = showNetworkTab,
           order = bottomNavigationOrder,
         )
       }
@@ -632,6 +635,7 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
               val tab = visibleTabs.getOrNull(page) ?: return@NavigationPager
               when (tab) {
                 MainTab.HOME -> FolderListScreen.Content()
+                MainTab.NETWORK -> NetworkStreamingScreen.Content()
                 MainTab.MUSIC -> {
                   if (musicSourceProvider == MusicSourceProvider.JELLYFIN) {
                     val jellyfinUiState by jellyfinViewModel.uiState.collectAsStateWithLifecycle()
@@ -992,6 +996,13 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
                       onClick = {
                         when (selectedTab) {
                           MainTab.HOME -> NavigationBarState.triggerHomeSearch()
+                          MainTab.NETWORK -> {
+                            onTabSelected(MainTab.HOME)
+                            coroutineScope.launch {
+                              delay(50L)
+                              NavigationBarState.triggerHomeSearch()
+                            }
+                          }
                           MainTab.MUSIC -> NavigationBarState.triggerMusicSearch()
                           MainTab.PROFILE -> {
                             onTabSelected(MainTab.HOME)
@@ -1333,6 +1344,7 @@ internal fun ExpressivePillNavigationBar(
 internal fun mainNavigationLabel(tab: MainScreen.MainTab): String =
   stringResource(when (tab) {
     MainScreen.MainTab.HOME -> R.string.ui_home
+    MainScreen.MainTab.NETWORK -> R.string.ui_network
     MainScreen.MainTab.MUSIC -> R.string.ui_music
     MainScreen.MainTab.PROFILE -> R.string.ui_profile
   })
@@ -1391,6 +1403,7 @@ internal fun MainTabIcon(
   }
   val icon = when (tab) {
     MainScreen.MainTab.HOME -> Icons.RoundedFilled.Home
+    MainScreen.MainTab.NETWORK -> Icons.RoundedFilled.CloudDownload
     MainScreen.MainTab.MUSIC -> Icons.RoundedFilled.Audiotrack
     MainScreen.MainTab.PROFILE -> Icons.RoundedFilled.AccountCircle
   }
@@ -1416,10 +1429,12 @@ private const val TV_TAB_FOCUS_RETRY_MS = 100L
 internal fun mainNavigationTabs(
   showMusic: Boolean,
   showProfile: Boolean,
+  showNetwork: Boolean = false,
   order: List<String> = emptyList(),
 ): List<MainScreen.MainTab> {
   val available = buildList {
     add(MainScreen.MainTab.HOME)
+    if (showNetwork) add(MainScreen.MainTab.NETWORK)
     if (showMusic) add(MainScreen.MainTab.MUSIC)
     if (showProfile) add(MainScreen.MainTab.PROFILE)
   }
