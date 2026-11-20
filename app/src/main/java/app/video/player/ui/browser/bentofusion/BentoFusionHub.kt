@@ -881,7 +881,7 @@ private fun BentoHorizonVideoCard(
 
   Card(
     modifier = modifier
-      .width(180.dp)
+      .width(216.dp)
       .clip(RoundedCornerShape(18.dp))
       .combinedClickable(
         onClick = onClick,
@@ -903,7 +903,7 @@ private fun BentoHorizonVideoCard(
       Box(
         modifier = Modifier
           .fillMaxWidth()
-          .height(102.dp)
+          .height(122.dp)
           .clip(RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp)),
       ) {
         BentoMediaThumbnail(
@@ -921,7 +921,7 @@ private fun BentoHorizonVideoCard(
         }
         Surface(
           modifier = Modifier
-            .padding(6.dp)
+            .padding(7.dp)
             .align(Alignment.TopStart),
           shape = RoundedCornerShape(6.dp),
           color = Color.Black.copy(alpha = 0.72f),
@@ -930,18 +930,18 @@ private fun BentoHorizonVideoCard(
           Text(
             text = resBadge,
             style = MaterialTheme.typography.labelSmall.copy(
-              fontSize = 9.sp,
+              fontSize = 9.5.sp,
               fontWeight = FontWeight.Bold,
             ),
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
           )
         }
 
         // Bottom-right duration pill
         Surface(
           modifier = Modifier
-            .padding(6.dp)
+            .padding(7.dp)
             .align(Alignment.BottomEnd),
           shape = RoundedCornerShape(6.dp),
           color = Color.Black.copy(alpha = 0.75f),
@@ -949,11 +949,11 @@ private fun BentoHorizonVideoCard(
           Text(
             text = video.durationFormatted,
             style = MaterialTheme.typography.labelSmall.copy(
-              fontSize = 9.sp,
+              fontSize = 9.5.sp,
               fontWeight = FontWeight.Medium,
             ),
             color = Color.White,
-            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+            modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.5.dp),
           )
         }
 
@@ -963,7 +963,7 @@ private fun BentoHorizonVideoCard(
             progress = { progress },
             modifier = Modifier
               .fillMaxWidth()
-              .height(3.dp)
+              .height(3.5.dp)
               .align(Alignment.BottomCenter),
             color = MaterialTheme.colorScheme.primary,
             trackColor = Color.Black.copy(alpha = 0.4f),
@@ -975,15 +975,15 @@ private fun BentoHorizonVideoCard(
       Column(
         modifier = Modifier
           .fillMaxWidth()
-          .padding(horizontal = 10.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
+          .padding(horizontal = 12.dp, vertical = 9.dp),
+        verticalArrangement = Arrangement.spacedBy(3.dp),
       ) {
         Text(
           text = FileTypeUtils.stripExtension(video.displayName),
           style = MaterialTheme.typography.titleSmall.copy(
-            fontSize = 14.sp,
+            fontSize = 14.5.sp,
             fontWeight = FontWeight.Bold,
-            lineHeight = 18.sp,
+            lineHeight = 19.sp,
           ),
           color = MaterialTheme.colorScheme.onSurface,
           maxLines = 1,
@@ -995,7 +995,7 @@ private fun BentoHorizonVideoCard(
           Text(
             text = statusText,
             style = MaterialTheme.typography.bodySmall.copy(
-              fontSize = 10.sp,
+              fontSize = 10.5.sp,
             ),
             color = if (!item.isWatched) {
               MaterialTheme.colorScheme.primary
@@ -1029,7 +1029,7 @@ private fun BentoHorizonAudioCard(
 
   Card(
     modifier = modifier
-      .width(140.dp)
+      .width(164.dp)
       .clip(RoundedCornerShape(18.dp))
       .combinedClickable(
         onClick = onClick,
@@ -1047,11 +1047,11 @@ private fun BentoHorizonAudioCard(
     border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.25f)),
   ) {
     Column(modifier = Modifier.fillMaxWidth()) {
-      // Artwork Area - Portrait Music Poster
+      // Artwork Area - Wider Portrait Music Poster
       Box(
         modifier = Modifier
           .fillMaxWidth()
-          .height(175.dp)
+          .height(186.dp)
           .clip(RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp)),
       ) {
         BentoMediaThumbnail(
@@ -1062,7 +1062,7 @@ private fun BentoHorizonAudioCard(
         // Top-left Lossless / Original Audio Codec Badge
         Surface(
           modifier = Modifier
-            .padding(6.dp)
+            .padding(7.dp)
             .align(Alignment.TopStart),
           shape = RoundedCornerShape(6.dp),
           color = Color.Black.copy(alpha = 0.72f),
@@ -1071,18 +1071,18 @@ private fun BentoHorizonAudioCard(
           Text(
             text = originalCodec,
             style = MaterialTheme.typography.labelSmall.copy(
-              fontSize = 8.5.sp,
+              fontSize = 9.sp,
               fontWeight = FontWeight.Bold,
             ),
             color = MaterialTheme.colorScheme.tertiary,
-            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.5.dp),
+            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
           )
         }
 
         // Bottom-right Duration / Remaining Time Pill
         Surface(
           modifier = Modifier
-            .padding(6.dp)
+            .padding(7.dp)
             .align(Alignment.BottomEnd),
           shape = RoundedCornerShape(6.dp),
           color = Color.Black.copy(alpha = 0.75f),
@@ -1090,11 +1090,11 @@ private fun BentoHorizonAudioCard(
           Text(
             text = displayTime,
             style = MaterialTheme.typography.labelSmall.copy(
-              fontSize = 9.sp,
+              fontSize = 9.5.sp,
               fontWeight = FontWeight.Medium,
             ),
             color = Color.White,
-            modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+            modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.5.dp),
           )
         }
 
@@ -1104,7 +1104,7 @@ private fun BentoHorizonAudioCard(
             progress = { progress },
             modifier = Modifier
               .fillMaxWidth()
-              .height(3.dp)
+              .height(3.5.dp)
               .align(Alignment.BottomCenter),
             color = MaterialTheme.colorScheme.tertiary,
             trackColor = Color.Transparent,
@@ -1116,16 +1116,16 @@ private fun BentoHorizonAudioCard(
       Column(
         modifier = Modifier
           .fillMaxWidth()
-          .padding(horizontal = 8.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(2.dp),
+          .padding(horizontal = 10.dp, vertical = 9.dp),
+        verticalArrangement = Arrangement.spacedBy(3.dp),
       ) {
         val (artist, title) = SortUtils.getAudioArtistAndTitle(video)
         Text(
           text = title,
           style = MaterialTheme.typography.titleSmall.copy(
-            fontSize = 13.5.sp,
+            fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
-            lineHeight = 17.sp,
+            lineHeight = 18.sp,
           ),
           color = MaterialTheme.colorScheme.onSurface,
           maxLines = 1,
@@ -1135,7 +1135,7 @@ private fun BentoHorizonAudioCard(
           Text(
             text = artist,
             style = MaterialTheme.typography.bodySmall.copy(
-              fontSize = 11.5.sp,
+              fontSize = 12.sp,
             ),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
@@ -2095,8 +2095,8 @@ private fun BentoMediaThumbnail(
   val thumbnailRepository = koinInject<ThumbnailRepository>()
   val density = LocalDensity.current
   val isAudio = video.isAudio
-  val thumbWidthPx = with(density) { (if (isAudio) 280.dp else 360.dp).roundToPx() }
-  val thumbHeightPx = with(density) { (if (isAudio) 350.dp else 202.dp).roundToPx() }
+  val thumbWidthPx = with(density) { (if (isAudio) 328.dp else 432.dp).roundToPx() }
+  val thumbHeightPx = with(density) { (if (isAudio) 372.dp else 244.dp).roundToPx() }
 
   var thumbnail by remember(video.path) {
     mutableStateOf<Bitmap?>(thumbnailRepository.peekThumbnailFromMemory(video, thumbWidthPx, thumbHeightPx))
@@ -2115,9 +2115,9 @@ private fun BentoMediaThumbnail(
   ) {
     if (thumbnail != null) {
       val bmp = thumbnail!!
-      val targetAspect = if (video.isAudio) (140f / 175f) else 16f / 9f
+      val targetAspect = if (video.isAudio) (164f / 186f) else 16f / 9f
       val bmpAspect = bmp.width.toFloat() / bmp.height.toFloat()
-      val aspectMismatch = kotlin.math.abs(bmpAspect - targetAspect) > 0.18f || (!video.isAudio && bmp.height > bmp.width * 1.05f)
+      val aspectMismatch = kotlin.math.abs(bmpAspect - targetAspect) > 0.20f || (!video.isAudio && bmp.height > bmp.width * 1.05f)
       if (aspectMismatch) {
         Image(
           bitmap = bmp.asImageBitmap(),
