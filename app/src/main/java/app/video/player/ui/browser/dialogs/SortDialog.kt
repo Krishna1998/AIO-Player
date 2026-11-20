@@ -104,6 +104,7 @@ fun SortDialog(
   showSortOptions: Boolean = true,
   enableViewModeOptions: Boolean = true,
   enableLayoutModeOptions: Boolean = true,
+  enableFieldOptions: Boolean = true,
 ) {
   if (!isOpen) return
 
@@ -183,7 +184,9 @@ fun SortDialog(
 
           if (layoutModeSelector != null) {
             HorizontalDivider(modifier = Modifier.padding(top = 10.dp))
-            DialogSectionTitle(text = layoutModeSelector.label)
+            DialogSectionTitle(
+              text = layoutModeSelector.label + if (!enableLayoutModeOptions) " (Disabled in BentoFusion)" else "",
+            )
             // A page with three layouts owns its own selection, so the third option decides whether
             // the middle one is the one showing; with only two the flag still describes both.
             val thirdSelected = layoutModeSelector.thirdOption?.isSelected == true
@@ -235,8 +238,8 @@ fun SortDialog(
                 }
               }
             }
-            val showSeparateLayout = !isFirstSelected && layoutModeSelector.checkboxLabel != null && layoutModeSelector.onCheckboxChange != null
-            val showManualGrid = manualGridToggle != null && !isFirstSelected
+            val showSeparateLayout = enableLayoutModeOptions && !isFirstSelected && layoutModeSelector.checkboxLabel != null && layoutModeSelector.onCheckboxChange != null
+            val showManualGrid = enableLayoutModeOptions && manualGridToggle != null && !isFirstSelected
             if (showSeparateLayout || showManualGrid) {
               Spacer(modifier = Modifier.height(4.dp))
               Row(
@@ -329,7 +332,7 @@ fun SortDialog(
                   Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(8.dp))
-                    .clickable { isFieldsExpanded = !isFieldsExpanded }
+                    .clickable(enabled = enableFieldOptions) { isFieldsExpanded = !isFieldsExpanded }
                     .padding(vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
@@ -337,8 +340,10 @@ fun SortDialog(
                 Text(
                   text =
                     androidx.compose.ui.res
-                      .stringResource(app.video.player.R.string.ui_fields),
+                      .stringResource(app.video.player.R.string.ui_fields) +
+                      if (!enableFieldOptions) " (Disabled in BentoFusion)" else "",
                   style = MaterialTheme.typography.titleSmall,
+                  color = if (enableFieldOptions) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
                 )
                 Icon(
                   imageVector = if (isFieldsExpanded) Icons.RoundedFilled.KeyboardArrowUp else Icons.RoundedFilled.KeyboardArrowDown,
@@ -350,12 +355,14 @@ fun SortDialog(
                         app.video.player.R.string.generic_expand
                       },
                     ),
-                  tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                  tint = if (enableFieldOptions) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
                   modifier = Modifier.size(20.dp),
                 )
               }
               if (isFieldsExpanded) {
-                FieldToggleChipRow(visibilityToggles)
+                FieldToggleChipRow(
+                  if (enableFieldOptions) visibilityToggles else visibilityToggles.map { it.copy(enabled = false) }
+                )
               }
             }
           }

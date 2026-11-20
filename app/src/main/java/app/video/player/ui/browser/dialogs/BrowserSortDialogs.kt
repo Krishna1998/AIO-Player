@@ -783,6 +783,7 @@ fun VideoSortDialog(
   isFolderView: Boolean = true,
   enableViewModeOptions: Boolean = true,
   enableLayoutModeOptions: Boolean = true,
+  enableFieldOptions: Boolean = true,
   pickerMode: Boolean = false,
   availableWidthDp: Int? = null,
   fixedLayoutMode: MediaLayoutMode? = null,
@@ -1028,7 +1029,7 @@ fun VideoSortDialog(
         )
       else null,
     layoutModeSelector =
-      if (enableLayoutModeOptions && fixedLayoutMode == null)
+      if (fixedLayoutMode == null)
         ViewModeSelector(
           label = "Layout",
           firstOptionLabel = "List",
@@ -1227,13 +1228,18 @@ fun VideoSortDialog(
         },
         enabled = !pickerMode || activeLayoutMode == MediaLayoutMode.GRID,
       ),
-    folderGridColumnSelector = folderGridColumnSelector.takeUnless { pickerMode },
+    folderGridColumnSelector = if (enableLayoutModeOptions) folderGridColumnSelector.takeUnless { pickerMode } else null,
     videoGridColumnSelector =
-      if (isAudio && activeLayoutMode == MediaLayoutMode.LIST) {
+      if (!enableLayoutModeOptions) {
+        null
+      } else if (isAudio && activeLayoutMode == MediaLayoutMode.LIST) {
         coverArtSizeSelector(musicCoverArtSize) { browserPreferences.musicCoverArtSize.set(it) }
       } else {
         videoGridColumnSelector
       },
+    enableViewModeOptions = enableViewModeOptions,
+    enableLayoutModeOptions = enableLayoutModeOptions,
+    enableFieldOptions = enableFieldOptions,
   )
 }
 

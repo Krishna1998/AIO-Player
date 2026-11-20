@@ -1437,6 +1437,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
           isAudio = true,
         )
       } else {
+        val isBentoFusion = currentTab == MediaLibraryType.All && !isSearching
         VideoSortDialog(
           isOpen = sortDialogOpen.value,
           onDismiss = { sortDialogOpen.value = false },
@@ -1446,6 +1447,8 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
           onSortOrderChange = { browserPreferences.videoSortOrder.set(it) },
           isFolderView = false,
           enableViewModeOptions = !forceAudio,
+          enableLayoutModeOptions = !isBentoFusion,
+          enableFieldOptions = !isBentoFusion,
           isAudio = currentTab == MediaLibraryType.Audio,
           onMetadataFieldEnabled = viewModel::refresh,
         )
