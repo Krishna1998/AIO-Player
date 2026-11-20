@@ -308,6 +308,8 @@ private fun NormalTopBar(
   val profileName by preferences.profileName.collectAsState()
   val profileImagePath by preferences.profileImagePath.collectAsState()
   val profileAvatar = rememberProfileAvatar(profileImagePath)
+  val isProfileActiveInNavBar = isNavBarVisible && showProfileTab
+  val showProfilePictureInSettings = profileAvatar != null && !isProfileActiveInNavBar
   val appName = stringResource(R.string.app_name)
   val effectiveTitle = if (title == appName && profileName.isNotBlank()) profileName else title
   val wallpaperActive = LocalAppWallpaperActive.current
@@ -537,7 +539,7 @@ private fun NormalTopBar(
           onClick = onSettingsClick,
           modifier = Modifier.padding(horizontal = 2.dp).browserTopBarFocus(),
         ) {
-          if (profileAvatar != null) {
+          if (showProfilePictureInSettings && profileAvatar != null) {
             Image(
               bitmap = profileAvatar,
               contentDescription = profileName.ifBlank { stringResource(R.string.ui_settings) },
