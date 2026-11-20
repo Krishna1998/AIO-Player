@@ -781,7 +781,7 @@ fun BentoFusionFeatureHintCard(
           }
           Column {
             Text(
-              text = "Player Features",
+              text = "Fusion Features",
               style = MaterialTheme.typography.titleMedium,
               fontWeight = FontWeight.Bold,
               color = MaterialTheme.colorScheme.onSurface,
