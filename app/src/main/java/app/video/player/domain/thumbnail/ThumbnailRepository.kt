@@ -94,7 +94,7 @@ class ThumbnailRepository(
       app.video.player.preferences.AppearancePreferences::class.java,
     )
   }
-  private val browserPreferences by lazy {
+  val browserPreferences by lazy {
     KoinJavaComponent.get<app.video.player.preferences.BrowserPreferences>(
       app.video.player.preferences.BrowserPreferences::class.java,
     )
