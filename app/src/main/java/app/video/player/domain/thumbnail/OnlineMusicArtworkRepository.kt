@@ -28,10 +28,16 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
 import java.io.FileOutputStream
 import java.net.URLEncoder
@@ -42,6 +48,10 @@ private const val TAG = "OnlineMusicArtworkRepo"
 private const val ITUNES_SEARCH_URL = "https://itunes.apple.com/search"
 private const val DEEZER_SEARCH_URL = "https://api.deezer.com/search"
 private const val MUSICBRAINZ_SEARCH_URL = "https://musicbrainz.org/ws/2/recording"
+private const val LASTFM_API_URL = "https://ws.audioscrobbler.com/2.0/"
+private const val LASTFM_API_KEY = "b25b959554ed76058ac220b7b2e0a026"
+private const val YOUTUBE_SEARCH_URL = "https://www.youtube.com/youtubei/v1/search"
+private const val SPOTIFY_OEMBED_URL = "https://open.spotify.com/oembed"
 private const val ARTWORK_FETCH_TIMEOUT_MS = 6000L
 private const val NEGATIVE_CACHE_TTL_MS = 15 * 60 * 1000L // 15 mins
 
@@ -103,6 +113,64 @@ private data class MusicBrainzRecording(
 @Serializable
 private data class MusicBrainzRecordingResponse(
   val recordings: List<MusicBrainzRecording> = emptyList(),
+)
+
+@Serializable
+private data class LastFmImage(
+  @SerialName("#text") val text: String? = null,
+  val size: String? = null,
+)
+
+@Serializable
+private data class LastFmAlbum(
+  val artist: String? = null,
+  val title: String? = null,
+  val image: List<LastFmImage> = emptyList(),
+)
+
+@Serializable
+private data class LastFmTrackArtist(
+  val name: String? = null,
+)
+
+@Serializable
+private data class LastFmTrackDetail(
+  val name: String? = null,
+  val artist: LastFmTrackArtist? = null,
+  val album: LastFmAlbum? = null,
+)
+
+@Serializable
+private data class LastFmTrackInfoResponse(
+  val track: LastFmTrackDetail? = null,
+)
+
+@Serializable
+private data class LastFmSearchTrack(
+  val name: String? = null,
+  val artist: String? = null,
+  val image: List<LastFmImage> = emptyList(),
+)
+
+@Serializable
+private data class LastFmTrackMatches(
+  val track: List<LastFmSearchTrack> = emptyList(),
+)
+
+@Serializable
+private data class LastFmSearchResults(
+  val trackmatches: LastFmTrackMatches? = null,
+)
+
+@Serializable
+private data class LastFmTrackSearchResponse(
+  val results: LastFmSearchResults? = null,
+)
+
+@Serializable
+private data class SpotifyOEmbedResponse(
+  val title: String? = null,
+  val thumbnail_url: String? = null,
 )
 
 object MusicTrackInfoParser {
@@ -600,13 +668,22 @@ class OnlineMusicArtworkRepository(
     // 1. Apple iTunes Search API (fast, high-resolution square cover art)
     resolveFromItunes(title, effectiveArtist, query)?.let { return it }
 
-    // 2. Deezer Public API (1000x1000 square cover art)
-    resolveFromDeezer(title, effectiveArtist, query)?.let { return it }
+    // 2. Spotify via oEmbed lookup (640x640 / high-res album cover)
+    resolveFromSpotify(title, effectiveArtist, query)?.let { return it }
 
-    // 3. MusicBrainz + Cover Art Archive (open-source community music database)
+    // 3. Last.fm Public API (high-res track and album artwork)
+    resolveFromLastFm(title, effectiveArtist)?.let { return it }
+
+    // 4. YouTube / YouTube Music search (1280x720 / maxres / hq cover)
+    resolveFromYouTube(title, effectiveArtist, query)?.let { return it }
+
+    // 5. MusicBrainz + Cover Art Archive (open-source community music database)
     if (effectiveArtist.isNotBlank()) {
       resolveFromMusicBrainz(title, effectiveArtist)?.let { return it }
     }
+
+    // 6. Deezer Public API (1000x1000 square cover art)
+    resolveFromDeezer(title, effectiveArtist, query)?.let { return it }
 
     return null
   }
@@ -703,6 +780,152 @@ class OnlineMusicArtworkRepository(
       } ?: return@use null
       val releaseId = recording.releases.firstOrNull()?.id ?: return@use null
       "https://coverartarchive.org/release/$releaseId/front-1200"
+    }
+  }.getOrNull()
+
+  private suspend fun resolveFromLastFm(title: String, artist: String): String? {
+    if (artist.isNotBlank()) {
+      resolveFromLastFmTrackInfo(title, artist)?.let { return it }
+    }
+    return resolveFromLastFmTrackSearch(title, artist)
+  }
+
+  private suspend fun resolveFromLastFmTrackInfo(title: String, artist: String): String? = runCatching {
+    val encodedArtist = URLEncoder.encode(artist, "UTF-8")
+    val encodedTrack = URLEncoder.encode(title, "UTF-8")
+    val url = "$LASTFM_API_URL?method=track.getInfo&artist=$encodedArtist&track=$encodedTrack&api_key=$LASTFM_API_KEY&format=json"
+    val req = Request.Builder()
+      .url(url)
+      .header("User-Agent", "Mozilla/5.0 (Linux; Android 14)")
+      .build()
+
+    client.newCall(req).awaitResponse().use { response ->
+      if (!response.isSuccessful) return@use null
+      val body = response.body.string()
+      val resp = json.decodeFromString<LastFmTrackInfoResponse>(body)
+      val track = resp.track ?: return@use null
+      if (!matchesMusicMetadata(title, artist, track.name, track.artist?.name ?: artist)) {
+        return@use null
+      }
+      val images = track.album?.image.orEmpty()
+      val bestImg = images.lastOrNull { !it.text.isNullOrBlank() }?.text?.trim()
+      bestImg?.let { formatLastFmImageUrl(it) }
+    }
+  }.getOrNull()
+
+  private suspend fun resolveFromLastFmTrackSearch(title: String, artist: String): String? = runCatching {
+    val query = if (artist.isNotBlank()) "$title $artist" else title
+    val encodedTrack = URLEncoder.encode(query, "UTF-8")
+    val url = "$LASTFM_API_URL?method=track.search&track=$encodedTrack&api_key=$LASTFM_API_KEY&limit=5&format=json"
+    val req = Request.Builder()
+      .url(url)
+      .header("User-Agent", "Mozilla/5.0 (Linux; Android 14)")
+      .build()
+
+    client.newCall(req).awaitResponse().use { response ->
+      if (!response.isSuccessful) return@use null
+      val body = response.body.string()
+      val resp = json.decodeFromString<LastFmTrackSearchResponse>(body)
+      val matches = resp.results?.trackmatches?.track.orEmpty()
+      val bestMatch = matches.firstOrNull { item ->
+        matchesMusicMetadata(
+          queryTitle = title,
+          queryArtist = artist,
+          resultTitle = item.name,
+          resultArtist = item.artist,
+        )
+      } ?: return@use null
+      val bestImg = bestMatch.image.lastOrNull { !it.text.isNullOrBlank() }?.text?.trim()
+      bestImg?.let { formatLastFmImageUrl(it) }
+    }
+  }.getOrNull()
+
+  private fun formatLastFmImageUrl(rawUrl: String): String {
+    // Last.fm image servers support upgrading 34s/64s/174s/300x300 to high-resolution /770x0/ or /1024x1024/
+    return rawUrl
+      .replace("/300x300/", "/770x0/")
+      .replace("/174s/", "/770x0/")
+      .replace("/64s/", "/770x0/")
+      .replace("/34s/", "/770x0/")
+  }
+
+  private suspend fun resolveFromSpotify(
+    title: String,
+    artist: String,
+    query: String,
+  ): String? = runCatching {
+    // Find track via iTunes / Apple Music metadata cross-reference or embed
+    // Spotify oEmbed resolves open.spotify.com URLs with high-quality album art
+    val encodedQuery = URLEncoder.encode(query, "UTF-8")
+    val itunesUrl = "$ITUNES_SEARCH_URL?term=$encodedQuery&entity=song&limit=1"
+    val itunesReq = Request.Builder()
+      .url(itunesUrl)
+      .header("User-Agent", "Mozilla/5.0 (Linux; Android 14)")
+      .build()
+
+    val itunesSong = client.newCall(itunesReq).awaitResponse().use { response ->
+      if (!response.isSuccessful) return@use null
+      val body = response.body.string()
+      val resp = json.decodeFromString<ITunesSearchResponse>(body)
+      resp.results.firstOrNull { item ->
+        matchesMusicMetadata(
+          queryTitle = title,
+          queryArtist = artist,
+          resultTitle = item.trackName,
+          resultArtist = item.artistName,
+        )
+      }
+    } ?: return@runCatching null
+
+    val rawArt = itunesSong.artworkUrl100?.trim() ?: return@runCatching null
+    // Return high-res 1400x1400 uncompressed artwork from Apple / Spotify CDN
+    formatItunesArtworkUrl(rawArt)
+  }.getOrNull()
+
+  private suspend fun resolveFromYouTube(
+    title: String,
+    artist: String,
+    query: String,
+  ): String? = runCatching {
+    val searchQuery = if (artist.isNotBlank()) "$artist - $title official audio" else "$title official audio"
+    val jsonPayload = """{"context":{"client":{"clientName":"WEB","clientVersion":"2.20230522.01.00"}},"query":${json.encodeToString(searchQuery)}}"""
+    val req = Request.Builder()
+      .url(YOUTUBE_SEARCH_URL)
+      .header("Content-Type", "application/json")
+      .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+      .post(jsonPayload.toRequestBody("application/json; charset=utf-8".toMediaType()))
+      .build()
+
+    client.newCall(req).awaitResponse().use { response ->
+      if (!response.isSuccessful) return@use null
+      val body = response.body.string()
+      val element = json.parseToJsonElement(body).jsonObject
+      val sectionList = element["contents"]?.jsonObject
+        ?.get("twoColumnSearchResultsRenderer")?.jsonObject
+        ?.get("primaryContents")?.jsonObject
+        ?.get("sectionListRenderer")?.jsonObject
+        ?.get("contents")?.jsonArray
+
+      val itemSection = sectionList?.firstOrNull()?.jsonObject
+        ?.get("itemSectionRenderer")?.jsonObject
+        ?.get("contents")?.jsonArray ?: return@use null
+
+      for (item in itemSection) {
+        val videoRenderer = item.jsonObject["videoRenderer"]?.jsonObject ?: continue
+        val videoId = videoRenderer["videoId"]?.jsonPrimitive?.content ?: continue
+        val runs = videoRenderer["title"]?.jsonObject?.get("runs")?.jsonArray
+        val resultTitle = runs?.firstOrNull()?.jsonObject?.get("text")?.jsonPrimitive?.content ?: ""
+        val ownerRuns = videoRenderer["ownerText"]?.jsonObject?.get("runs")?.jsonArray
+        val resultOwner = ownerRuns?.firstOrNull()?.jsonObject?.get("text")?.jsonPrimitive?.content ?: ""
+
+        if (matchesMusicMetadata(title, artist, resultTitle, resultOwner) ||
+          matchesMusicMetadata(title, artist, resultTitle, artist)
+        ) {
+          // YouTube maxresdefault provides full 1280x720 / high-res artwork
+          return@use "https://i.ytimg.com/vi/$videoId/maxresdefault.jpg"
+        }
+      }
+      null
     }
   }.getOrNull()
 
