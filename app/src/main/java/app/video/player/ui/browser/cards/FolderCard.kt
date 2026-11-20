@@ -221,7 +221,6 @@ fun FolderCard(
       val targetWidth = if (isGridMode) thumbnailSize.width else listThumbSizePx
       val targetHeight = if (isGridMode) thumbnailSize.height else listThumbSizePx
       if (targetWidth > 0 && targetHeight > 0) {
-        delay(250L)
         withContext(Dispatchers.IO) {
           // On a fresh install there is nothing to reuse. Avoid querying every folder
           // from the Home grid just to discover that the thumbnail cache is empty.

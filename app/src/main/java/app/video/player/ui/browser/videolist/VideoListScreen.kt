@@ -1053,7 +1053,6 @@ internal fun VideoListContent(
                 // Visible cards have priority: bulk work resumes only after the scroll settles.
                 thumbnailRepository.pauseFolderThumbnailGeneration(generationId)
                 if (!scrolling) {
-                  delay(1_500L)
                   thumbnailRepository.startFolderThumbnailGeneration(
                     folderId = generationId,
                     videos = latestVideosWithInfo.map { it.video },

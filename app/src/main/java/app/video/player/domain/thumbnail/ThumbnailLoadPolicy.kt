@@ -7,7 +7,13 @@ internal fun thumbnailParallelism(
   processorCount: Int,
   sdkInt: Int,
 ): Int =
-  if (lowRam || memoryClassMb in 1..192 || sdkInt <= 29 || processorCount <= 2) 1 else 2
+  if (lowRam || memoryClassMb in 1..192 || sdkInt <= 29 || processorCount <= 2) {
+    1
+  } else if (processorCount >= 6) {
+    4
+  } else {
+    2
+  }
 
 /** Highest value offered in settings: more parallel frame decodes than cores only add memory use. */
 internal fun maxThumbnailParallelism(): Int = Runtime.getRuntime().availableProcessors().coerceIn(1, 8)
