@@ -131,8 +131,8 @@
   <string name="pref_appearance_replace_embedded_music_artwork_summary">Prefer official high-resolution online artwork over existing local embedded ID3 tags</string>
   <string name="pref_nav_music_title">Show Music tab</string>
   <string name="pref_nav_music_summary">Show or hide Music in the bottom navigation bar</string>
-  <string name="pref_nav_network_title">Show Online Streaming tab</string>
-  <string name="pref_nav_network_summary">Show or hide Online Streaming in the bottom navigation bar</string>
+  <string name="pref_nav_network_title">Show Network tab</string>
+  <string name="pref_nav_network_summary">Show or hide Network in the bottom navigation bar</string>
   <string name="pref_appearance_category_bentofusion">BentoFusion &amp; Media Library</string>
   <string name="pref_bentofusion_show_video_card_title">Show Video/Movie Rail</string>
   <string name="pref_bentofusion_show_video_card_summary">Display the horizontal Video/Movie rail in BentoFusion / All Media</string>
@@ -1326,7 +1326,7 @@
   <string name="ui_albums">Albums</string>
   <string name="ui_artists">Artists</string>
   <string name="ui_favorites">Favorites</string>
-  <string name="ui_network">Online Streaming</string>
+  <string name="ui_network">Network</string>
   <string name="ui_pinned_folder">Pinned folder</string>
   <string name="ui_pin_videos">Pin videos</string>
   <string name="ui_unpin_videos">Unpin videos</string>
