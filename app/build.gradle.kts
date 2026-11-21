@@ -315,9 +315,6 @@ dependencies {
   "standardImplementation"(variantOf(libs.mpvlib.standard) { artifactType("aar") })
 
   implementation(libs.nanohttpd)
-  implementation(libs.commons.net)
-  implementation(libs.smbj)
-  implementation(libs.sardine.android)
   implementation(libs.reorderable)
   implementation(libs.androidx.biometric)
   implementation(libs.telephoto.zoomable)
