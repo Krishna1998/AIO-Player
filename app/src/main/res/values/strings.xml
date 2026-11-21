@@ -217,9 +217,9 @@
   <string name="theme_rosso_prism">Rosso Prism</string>
   <string name="theme_solar_amber">Solar Amber</string>
   <string name="theme_stealth_acid_lime">Stealth Acid Lime</string>
-  <string name="theme_electric_cyan">Deep Midnight Cyan</string>
-  <string name="theme_aurora_mint">Nordic Glacial Mint</string>
-  <string name="theme_holo_opal">Velvet Nebula Violet</string>
+  <string name="theme_electric_cyan">Deep Midnight</string>
+  <string name="theme_aurora_mint">Nordic Glacial</string>
+  <string name="theme_holo_opal">Velvet Nebula</string>
   <string name="theme_hyper_crimson">Hyper Crimson</string>
   <string name="theme_cyber_magenta">Cyber Magenta</string>
   <string name="theme_quantum_violet">Quantum Violet</string>
