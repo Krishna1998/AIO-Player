@@ -27,8 +27,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -238,9 +241,30 @@ object PreferencesScreen : Screen {
             onClick = { backstack.navigateTo(SettingsSearchScreen) },
             modifier =
               Modifier
-                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 18.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 12.dp)
                 .tvFocusMemory("settings-search"),
           )
+        }
+
+        if (!television) {
+          item {
+            QuickSettingsRow(
+              onDestinationClick = { targetScreen, targetAnchor ->
+                if (targetAnchor != null) {
+                  SettingsSearchNavigation.open(
+                    SearchablePreference(
+                      titleRes = targetAnchor,
+                      category = "Quick",
+                      screen = targetScreen,
+                      targetRes = targetAnchor,
+                    ),
+                  )
+                }
+                onScreenSelected(targetScreen)
+              },
+              modifier = Modifier.padding(bottom = 14.dp),
+            )
+          }
         }
 
         items(sections, key = { it.title }) { section ->
@@ -277,8 +301,8 @@ object PreferencesScreen : Screen {
           ),
       ),
       SettingsSection(
-        title = stringResource(R.string.pref_section_appearance),
-        tint = colorScheme.onSurfaceVariant,
+        title = stringResource(R.string.pref_section_appearance_theme),
+        tint = colorScheme.primary,
         items =
           listOf(
             SettingsDestination(
@@ -301,8 +325,8 @@ object PreferencesScreen : Screen {
           ),
       ),
       SettingsSection(
-        title = stringResource(R.string.pref_section_playback),
-        tint = colorScheme.onSurfaceVariant,
+        title = stringResource(R.string.pref_section_player_gestures),
+        tint = colorScheme.secondary,
         items =
           listOf(
             SettingsDestination(
@@ -318,31 +342,6 @@ object PreferencesScreen : Screen {
               screen = PlayerPreferencesScreen,
             ),
             SettingsDestination(
-              title = stringResource(R.string.pref_audio),
-              summary = stringResource(R.string.pref_audio_summary),
-              icon = Icons.RoundedFilled.Audiotrack,
-              screen = AudioPreferencesScreen,
-            ),
-            SettingsDestination(
-              title = stringResource(R.string.pref_subtitles),
-              summary = stringResource(R.string.pref_subtitles_summary),
-              icon = Icons.RoundedFilled.Subtitles,
-              screen = SubtitlesPreferencesScreen,
-            ),
-            SettingsDestination(
-              title = stringResource(R.string.pref_decoder),
-              summary = stringResource(R.string.pref_decoder_summary),
-              icon = Icons.RoundedFilled.DeveloperBoard,
-              screen = DecoderPreferencesScreen,
-            ),
-          ),
-      ),
-      SettingsSection(
-        title = stringResource(if (television) R.string.pref_section_display_controls else R.string.pref_section_gestures_controls),
-        tint = colorScheme.onSurfaceVariant,
-        items =
-          listOf(
-            SettingsDestination(
               title = stringResource(if (television) R.string.pref_section_display_controls else R.string.pref_layout_title),
               summary = stringResource(if (television) R.string.pref_persistent_status_summary else R.string.pref_layout_summary),
               icon = Icons.RoundedFilled.GridView,
@@ -354,11 +353,42 @@ object PreferencesScreen : Screen {
               icon = Icons.RoundedFilled.Gesture,
               screen = GesturePreferencesScreen,
             ),
+            SettingsDestination(
+              title = stringResource(R.string.pref_subtitles),
+              summary = stringResource(R.string.pref_subtitles_summary),
+              icon = Icons.RoundedFilled.Subtitles,
+              screen = SubtitlesPreferencesScreen,
+            ),
           ),
       ),
       SettingsSection(
-        title = stringResource(R.string.pref_section_storage),
-        tint = colorScheme.onSurfaceVariant,
+        title = stringResource(R.string.pref_section_engine_codecs),
+        tint = colorScheme.tertiary,
+        items =
+          listOf(
+            SettingsDestination(
+              title = stringResource(R.string.pref_decoder),
+              summary = stringResource(R.string.pref_decoder_summary),
+              icon = Icons.RoundedFilled.DeveloperBoard,
+              screen = DecoderPreferencesScreen,
+            ),
+            SettingsDestination(
+              title = stringResource(R.string.pref_audio),
+              summary = stringResource(R.string.pref_audio_summary),
+              icon = Icons.RoundedFilled.Audiotrack,
+              screen = AudioPreferencesScreen,
+            ),
+            SettingsDestination(
+              title = stringResource(R.string.pref_codecs_title),
+              summary = stringResource(R.string.pref_codecs_summary),
+              icon = Icons.RoundedFilled.Memory,
+              screen = CodecCapabilitiesScreen,
+            ),
+          ),
+      ),
+      SettingsSection(
+        title = stringResource(R.string.pref_section_library_storage),
+        tint = colorScheme.primary,
         items =
           listOfNotNull(
             SettingsDestination(
@@ -377,13 +407,6 @@ object PreferencesScreen : Screen {
             } else {
               null
             },
-          ),
-      ),
-      SettingsSection(
-        title = stringResource(R.string.pref_section_advanced),
-        tint = colorScheme.onSurfaceVariant,
-        items =
-          listOf(
             SettingsDestination(
               title = stringResource(R.string.pref_advanced),
               summary =
@@ -393,12 +416,6 @@ object PreferencesScreen : Screen {
                 ).joinToString(", "),
               icon = Icons.Alternatives.AdvancedSettings,
               screen = AdvancedPreferencesScreen,
-            ),
-            SettingsDestination(
-              title = stringResource(R.string.pref_codecs_title),
-              summary = stringResource(R.string.pref_codecs_summary),
-              icon = Icons.RoundedFilled.Memory,
-              screen = CodecCapabilitiesScreen,
             ),
           ),
       ),
@@ -416,6 +433,65 @@ object PreferencesScreen : Screen {
           ),
       ),
     )
+  }
+}
+
+@Composable
+private fun QuickSettingsRow(
+  onDestinationClick: (Screen, Int?) -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  val chips = remember {
+    listOf(
+      Triple("Theme", Icons.RoundedFilled.Palette, AppearancePreferencesScreen to R.string.pref_appearance_theme_picker_label),
+      Triple("Thumbnails", Icons.RoundedFilled.Image, AppearancePreferencesScreen to R.string.pref_clear_thumbnail_cache_title),
+      Triple("Player Controls", Icons.RoundedFilled.GridView, PlayerControlsPreferencesScreen to null),
+      Triple("Gestures", Icons.RoundedFilled.Gesture, GesturePreferencesScreen to null),
+      Triple("Audio & Wavy", Icons.RoundedFilled.Audiotrack, AudioPreferencesScreen to null),
+      Triple("Folders", Icons.RoundedFilled.Folder, FoldersPreferencesScreen to null),
+    )
+  }
+
+  Column(modifier = modifier.fillMaxWidth()) {
+    Text(
+      text = stringResource(R.string.pref_quick_settings_title),
+      style = MaterialTheme.typography.labelMedium,
+      color = MaterialTheme.colorScheme.primary,
+      fontWeight = FontWeight.Bold,
+      modifier = Modifier.padding(horizontal = 20.dp, vertical = 2.dp),
+    )
+    Spacer(modifier = Modifier.height(4.dp))
+    LazyRow(
+      modifier = Modifier.fillMaxWidth(),
+      contentPadding = PaddingValues(horizontal = 16.dp),
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+      items(chips, key = { it.first }) { (label, icon, destination) ->
+        FilterChip(
+          selected = false,
+          onClick = { onDestinationClick(destination.first, destination.second) },
+          label = { Text(label, style = MaterialTheme.typography.labelMedium) },
+          leadingIcon = {
+            Icon(
+              imageVector = icon,
+              contentDescription = null,
+              modifier = Modifier.size(16.dp),
+              tint = MaterialTheme.colorScheme.primary,
+            )
+          },
+          colors = FilterChipDefaults.filterChipColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.7f),
+            labelColor = MaterialTheme.colorScheme.onSurface,
+          ),
+          border = FilterChipDefaults.filterChipBorder(
+            enabled = true,
+            selected = false,
+            borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f),
+          ),
+          shape = RoundedCornerShape(999.dp),
+        )
+      }
+    }
   }
 }
 
