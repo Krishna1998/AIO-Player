@@ -101,6 +101,13 @@ class NetworkStreamEntryRepository(
     dao.replaceTorrentFiles(canonicalInfoHash, entries)
   }
 
+  suspend fun renameStreamEntry(stableKey: String, newName: String) {
+    val trimmed = newName.trim()
+    if (stableKey.isNotBlank() && trimmed.isNotEmpty()) {
+      dao.updateFileName(stableKey, trimmed)
+    }
+  }
+
   suspend fun delete(stableKey: String) {
     if (stableKey.isNotBlank()) dao.deleteByStableKey(stableKey)
   }

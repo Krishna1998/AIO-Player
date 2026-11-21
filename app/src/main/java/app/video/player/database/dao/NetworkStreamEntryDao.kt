@@ -57,6 +57,15 @@ interface NetworkStreamEntryDao {
   )
   suspend fun trimNormalEntries(keepCount: Int)
 
+  @Query(
+    """
+    UPDATE network_stream_entries
+    SET fileName = :newName
+    WHERE stableKey = :stableKey
+    """,
+  )
+  suspend fun updateFileName(stableKey: String, newName: String)
+
   @Query("DELETE FROM network_stream_entries WHERE entryType = 'TORRENT_FILE' AND infoHash = :infoHash")
   suspend fun deleteTorrentFiles(infoHash: String)
 

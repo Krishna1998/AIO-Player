@@ -86,6 +86,7 @@ import app.video.player.ui.browser.cards.NetworkConnectionCard
 import app.video.player.ui.browser.components.BrowserTopBar
 import app.video.player.ui.browser.dialogs.AddConnectionSheet
 import app.video.player.ui.browser.dialogs.EditConnectionSheet
+import app.video.player.ui.browser.dialogs.RenameDialog
 import app.video.player.ui.components.InlineSearchBar
 import app.video.player.ui.icons.AppIcon
 import app.video.player.ui.icons.Icon
@@ -123,6 +124,7 @@ object NetworkStreamingScreen : Screen {
     val folderBookmarks by bookmarkPreferences.bookmarks.collectAsState()
     val connectionStatuses by viewModel.connectionStatuses.collectAsState()
     val recentLinks by viewModel.recentLinks.collectAsState()
+    var renamingEntry by remember { mutableStateOf<NetworkStreamEntryEntity?>(null) }
     var showAddSheet by remember { mutableStateOf(false) }
     var editingConnection by remember { mutableStateOf<NetworkConnection?>(null) }
     val coroutineScope = rememberCoroutineScope()
@@ -308,19 +310,7 @@ object NetworkStreamingScreen : Screen {
                 onSelectAll = null,
                 onInvertSelection = null,
                 onDeselectAll = null,
-                additionalActions = {
-                  IconButton(
-                    onClick = { backstack.navigateTo(app.video.player.ui.downloads.DownloadsScreen) },
-                    modifier = Modifier.padding(horizontal = 2.dp),
-                  ) {
-                    Icon(
-                      imageVector = Icons.RoundedFilled.Download,
-                      contentDescription = stringResource(R.string.downloads_open_downloads),
-                      modifier = Modifier.size(24.dp),
-                      tint = MaterialTheme.colorScheme.secondary,
-                    )
-                  }
-                },
+                additionalActions = {},
               )
             }
           }
@@ -357,19 +347,7 @@ object NetworkStreamingScreen : Screen {
               title = entry.fileName,
             )
           },
-          onSaveToMedia = { entry ->
-            val playableSource = entry.canonicalSourceUri.trim()
-            when (linkDownloadCoordinator.enqueue(playableSource, entry.fileName)) {
-              app.video.player.domain.download.LinkDownloadCoordinator.Route.UNSUPPORTED ->
-                app.video.player.ui.components.AppToast
-                  .makeText(context, R.string.downloads_location_invalid, app.video.player.ui.components.AppToast.LENGTH_SHORT)
-                  .show()
-              else ->
-                app.video.player.ui.components.AppToast
-                  .makeText(context, R.string.downloads_started, app.video.player.ui.components.AppToast.LENGTH_SHORT)
-                  .show()
-            }
-          },
+          onRenameRecent = { entry -> renamingEntry = entry },
           onDeleteRecent = viewModel::deleteStreamEntry,
           onConnect = { viewModel.connect(it) },
           onDisconnect = { viewModel.disconnect(it) },
@@ -473,6 +451,19 @@ object NetworkStreamingScreen : Screen {
           },
         )
       }
+
+      renamingEntry?.let { entry ->
+        RenameDialog(
+          isOpen = true,
+          onDismiss = { renamingEntry = null },
+          onConfirm = { newName ->
+            viewModel.renameStreamEntry(entry.stableKey, newName)
+            renamingEntry = null
+          },
+          currentName = entry.fileName,
+          itemType = stringResource(R.string.stream_link),
+        )
+      }
     }
   }
 }
@@ -486,7 +477,7 @@ private fun LocalNetworkContent(
   isPreparingLink: Boolean,
   onPlayLink: (String) -> Unit,
   onPlayRecent: (NetworkStreamEntryEntity) -> Unit,
-  onSaveToMedia: (NetworkStreamEntryEntity) -> Unit,
+  onRenameRecent: (NetworkStreamEntryEntity) -> Unit,
   onDeleteRecent: (String) -> Unit,
   onConnect: (NetworkConnection) -> Unit,
   onDisconnect: (NetworkConnection) -> Unit,
@@ -504,14 +495,14 @@ private fun LocalNetworkContent(
     contentPadding = PaddingValues(start = 16.dp, top = 12.dp, end = 16.dp, bottom = bottomOverlayClearance + 16.dp),
     verticalArrangement = Arrangement.spacedBy(16.dp),
   ) {
-    // 1. Stream Link Section (URL input & recent streams with Save to Media action)
+    // 1. Stream Link Section (URL input & recent streams)
     item {
       StreamLinkSection(
         recentLinks = recentLinks,
         isPreparing = isPreparingLink,
         onPlayLink = onPlayLink,
         onPlayRecent = onPlayRecent,
-        onSaveToMedia = onSaveToMedia,
+        onRenameRecent = onRenameRecent,
         onDeleteRecent = onDeleteRecent,
       )
     }
@@ -599,7 +590,7 @@ private fun StreamLinkSection(
   isPreparing: Boolean,
   onPlayLink: (String) -> Unit,
   onPlayRecent: (NetworkStreamEntryEntity) -> Unit,
-  onSaveToMedia: (NetworkStreamEntryEntity) -> Unit,
+  onRenameRecent: (NetworkStreamEntryEntity) -> Unit,
   onDeleteRecent: (String) -> Unit,
 ) {
   val context = LocalContext.current
@@ -841,12 +832,12 @@ private fun StreamLinkSection(
                 )
               }
               IconButton(
-                onClick = { onSaveToMedia(entry) },
+                onClick = { onRenameRecent(entry) },
                 modifier = Modifier.size(32.dp),
               ) {
                 Icon(
-                  imageVector = Icons.RoundedFilled.Download,
-                  contentDescription = stringResource(R.string.downloads_download),
+                  imageVector = Icons.RoundedFilled.Edit,
+                  contentDescription = stringResource(R.string.action_rename),
                   tint = MaterialTheme.colorScheme.secondary,
                   modifier = Modifier.size(18.dp),
                 )

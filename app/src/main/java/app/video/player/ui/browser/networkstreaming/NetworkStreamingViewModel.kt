@@ -370,6 +370,10 @@ class NetworkStreamingViewModel(
     }
   }
 
+  fun renameStreamEntry(stableKey: String, newName: String) {
+    viewModelScope.launch { streamEntryRepository.renameStreamEntry(stableKey, newName) }
+  }
+
   fun deleteStreamEntry(stableKey: String) {
     viewModelScope.launch { streamEntryRepository.delete(stableKey) }
   }
