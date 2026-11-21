@@ -87,6 +87,7 @@ import app.video.player.ui.preferences.components.PreferenceAction
 import app.video.player.ui.preferences.components.AppPreference as Preference
 import app.video.player.ui.preferences.components.AppSliderPreference as SliderPreference
 import org.koin.compose.koinInject
+import java.io.File
 import kotlin.math.roundToInt
 
 @Serializable
@@ -130,6 +131,25 @@ object AppearancePreferencesScreen : Screen {
     val dualPaneForTablet by browserPreferences.dualPaneForTablet.collectAsState()
     val treeFlattenDepth by browserPreferences.treeFlattenDepth.collectAsState()
     val thumbnailCacheClearedMessage = stringResource(R.string.pref_thumbnail_cache_cleared)
+    var isClearThumbsConfirmShown by rememberSaveable { mutableStateOf(false) }
+    var thumbnailCacheSize by remember { mutableStateOf(0L) }
+
+    LaunchedEffect(Unit) {
+      withContext(Dispatchers.IO) {
+        var size = 0L
+        listOf(
+          File(context.cacheDir, "thumbnails"),
+          File(context.filesDir, "thumbnails"),
+          File(context.cacheDir, "remote_images"),
+          File(context.cacheDir, "network_images"),
+        ).forEach { dir ->
+          if (dir.exists()) {
+            dir.walkTopDown().filter { it.isFile }.forEach { size += it.length() }
+          }
+        }
+        thumbnailCacheSize = size
+      }
+    }
 
     val thumbnailMode = storedThumbnailMode
     val customThemes = remember(customTheme) { CustomThemeDefinition.parseCollection(customTheme) }
@@ -160,6 +180,7 @@ object AppearancePreferencesScreen : Screen {
                 }
               result
                 .onSuccess {
+                  thumbnailCacheSize = 0L
                   Toast
                     .makeText(
                       context,
@@ -181,6 +202,45 @@ object AppearancePreferencesScreen : Screen {
           }
         },
         onCancel = { pendingThumbnailMode = null },
+      )
+    }
+
+    if (isClearThumbsConfirmShown) {
+      ConfirmDialog(
+        title = stringResource(R.string.pref_thumbnail_cache_confirm_title),
+        subtitle = stringResource(R.string.pref_thumbnail_cache_confirm_subtitle),
+        onConfirm = {
+          scope.launch(Dispatchers.IO) {
+            runCatching {
+              thumbnailRepository.clearThumbnailCache()
+            }.onSuccess {
+              withContext(Dispatchers.Main) {
+                isClearThumbsConfirmShown = false
+                thumbnailCacheSize = 0L
+                Toast
+                  .makeText(
+                    context,
+                    thumbnailCacheClearedMessage,
+                    Toast.LENGTH_SHORT,
+                  ).show()
+              }
+            }.onFailure { error ->
+              withContext(Dispatchers.Main) {
+                isClearThumbsConfirmShown = false
+                Toast
+                  .makeText(
+                    context,
+                    context.getString(
+                      R.string.pref_failed_to_clear,
+                      error.message ?: context.getString(R.string.generic_unknown_error),
+                    ),
+                    Toast.LENGTH_LONG,
+                  ).show()
+              }
+            }
+          }
+        },
+        onCancel = { isClearThumbsConfirmShown = false },
       )
     }
 
@@ -830,7 +890,7 @@ object AppearancePreferencesScreen : Screen {
               val replaceEmbeddedWithOnlinePosters by browserPreferences.replaceEmbeddedWithOnlinePosters.collectAsState()
               val autoFetchOnlineMusicArtwork by browserPreferences.autoFetchOnlineMusicArtwork.collectAsState()
               val baseCount = if (showFramePosition) 7 else 6
-              val itemCount = baseCount + 3
+              val itemCount = baseCount + 4
               val showVideoThumbnails by browserPreferences.showVideoThumbnails.collectAsState()
               SwitchPreference(
                 modifier = Modifier.settingsSearchTarget(R.string.pref_appearance_show_video_thumbnails_title),
@@ -1029,6 +1089,8 @@ object AppearancePreferencesScreen : Screen {
               val autoFetchIndex = if (showFramePosition) 6 else 5
               val replaceEmbeddedIndex = if (showFramePosition) 7 else 6
               val autoFetchMusicIndex = if (showFramePosition) 8 else 7
+              val tapThumbnailIndex = if (showFramePosition) 9 else 8
+              val clearThumbnailCacheIndex = if (showFramePosition) 10 else 9
 
               ExpressivePreferenceTile(index = autoFetchIndex, itemCount = itemCount) {
                 SwitchPreference(
@@ -1075,28 +1137,51 @@ object AppearancePreferencesScreen : Screen {
               }
 
               val tapThumbnailToSelect by gesturePreferences.tapThumbnailToSelect.collectAsState()
-              SwitchPreference(
-                modifier = Modifier.settingsSearchTarget(R.string.pref_gesture_tap_thumbnail_to_select_title),
-                value = tapThumbnailToSelect,
-                onValueChange = { gesturePreferences.tapThumbnailToSelect.set(it) },
-                title = {
-                  Text(
-                    text = stringResource(id = R.string.pref_gesture_tap_thumbnail_to_select_title),
-                  )
-                },
-                summary = {
-                  Text(
-                    text =
-                      stringResource(
-                        id = R.string.pref_gesture_tap_thumbnail_to_select_summary,
-                      ),
-                    color = MaterialTheme.colorScheme.outline,
-                  )
-                },
-                enabled = showVideoThumbnails,
-                groupIndex = itemCount - 1,
-                groupSize = itemCount,
-              )
+              ExpressivePreferenceTile(index = tapThumbnailIndex, itemCount = itemCount) {
+                SwitchPreference(
+                  modifier = Modifier.settingsSearchTarget(R.string.pref_gesture_tap_thumbnail_to_select_title),
+                  value = tapThumbnailToSelect,
+                  onValueChange = { gesturePreferences.tapThumbnailToSelect.set(it) },
+                  title = {
+                    Text(
+                      text = stringResource(id = R.string.pref_gesture_tap_thumbnail_to_select_title),
+                    )
+                  },
+                  summary = {
+                    Text(
+                      text =
+                        stringResource(
+                          id = R.string.pref_gesture_tap_thumbnail_to_select_summary,
+                        ),
+                      color = MaterialTheme.colorScheme.outline,
+                    )
+                  },
+                  enabled = showVideoThumbnails,
+                )
+              }
+
+              ExpressivePreferenceTile(index = clearThumbnailCacheIndex, itemCount = itemCount) {
+                Preference(
+                  modifier = Modifier.settingsSearchTarget(R.string.pref_clear_thumbnail_cache_title),
+                  title = { Text(text = stringResource(R.string.pref_clear_thumbnail_cache_title)) },
+                  summary = {
+                    val sizeStr = formatFileSize(thumbnailCacheSize)
+                    Column {
+                      Text(
+                        text = stringResource(R.string.pref_thumbnail_cache_summary),
+                        color = MaterialTheme.colorScheme.outline,
+                      )
+                      Text(
+                        text = stringResource(R.string.pref_thumbnail_cache_size, sizeStr),
+                        color = MaterialTheme.colorScheme.outline,
+                        style = MaterialTheme.typography.bodySmall,
+                      )
+                    }
+                  },
+                  onClick = { isClearThumbsConfirmShown = true },
+                  action = PreferenceAction.Dialog,
+                )
+              }
             }
           }
 
@@ -1390,3 +1475,10 @@ object AppearancePreferencesScreen : Screen {
     }
   }
 }
+
+private fun formatFileSize(bytes: Long): String =
+  when {
+    bytes < 1024 -> "$bytes B"
+    bytes < 1024 * 1024 -> "%.1f KB".format(bytes / 1024.0)
+    else -> "%.1f MB".format(bytes / (1024.0 * 1024.0))
+  }
