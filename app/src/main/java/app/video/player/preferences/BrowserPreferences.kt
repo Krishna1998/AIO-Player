@@ -206,6 +206,16 @@ class BrowserPreferences(
     },
   )
   val libraryShowMusicTab = preferenceStore.getBoolean("library_show_music_tab", true)
+  val mediaLibrarySubTabsOrder = preferenceStore.getObject(
+    key = "media_library_sub_tabs_order",
+    defaultValue = listOf("ALL", "VIDEO", "AUDIO"),
+    serializer = { order -> order.joinToString(",") },
+    deserializer = { stored ->
+      val defaults = listOf("ALL", "VIDEO", "AUDIO")
+      val parsed = stored.split(",").map(String::trim).filter { it in defaults }.distinct()
+      parsed + defaults.filterNot { it in parsed }
+    },
+  )
 
   // Feature discovery hint for BentoFusion (Audio Pulsing gestures & interactive highlights)
   val bentoFusionHintDismissed = preferenceStore.getBoolean("bentofusion_hint_dismissed", false)

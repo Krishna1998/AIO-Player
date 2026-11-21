@@ -1281,6 +1281,13 @@ object AppearancePreferencesScreen : Screen {
           }
 
           item {
+            PreferenceSectionHeader(
+              position = PreferenceSectionPosition.Middle,
+              title = stringResource(R.string.pref_bentofusion_section_order_title),
+            )
+          }
+
+          item {
             val bentoSectionOrder by browserPreferences.bentoFusionSectionOrder.collectAsState()
             val bentoShowVideo by browserPreferences.bentoFusionShowVideoRail.collectAsState()
             val bentoShowPulsing by browserPreferences.bentoFusionShowAudioPulsing.collectAsState()
@@ -1327,6 +1334,63 @@ object AppearancePreferencesScreen : Screen {
                   next.remove(id)
                   next.add(destination.coerceIn(0, next.size), id)
                   browserPreferences.bentoFusionSectionOrder.set(next)
+                },
+              )
+            }
+          }
+
+          item {
+            PreferenceSectionHeader(
+              position = PreferenceSectionPosition.Middle,
+              title = stringResource(R.string.pref_library_sub_tabs_order_title),
+            )
+          }
+
+          item {
+            val librarySubTabsOrder by browserPreferences.mediaLibrarySubTabsOrder.collectAsState()
+            val libraryShowMusicTab by browserPreferences.libraryShowMusicTab.collectAsState()
+            val subTabDefaults = listOf("ALL", "VIDEO", "AUDIO")
+            val orderedSubTabs = (librarySubTabsOrder.filter { it in subTabDefaults } + subTabDefaults).distinct()
+            val subTabItems = orderedSubTabs.map { id ->
+              when (id) {
+                "ALL" -> ReorderableTabItem(
+                  id = id,
+                  title = stringResource(R.string.ui_all_media),
+                  summary = stringResource(R.string.pref_bentofusion_show_video_card_summary),
+                  enabled = true,
+                  required = true,
+                  titleRes = R.string.ui_all_media,
+                )
+                "VIDEO" -> ReorderableTabItem(
+                  id = id,
+                  title = stringResource(R.string.ui_videos),
+                  summary = stringResource(R.string.pref_appearance_show_video_thumbnails_summary),
+                  enabled = true,
+                  required = true,
+                  titleRes = R.string.ui_videos,
+                )
+                else -> ReorderableTabItem(
+                  id = id,
+                  title = stringResource(R.string.ui_music),
+                  summary = stringResource(R.string.pref_library_show_music_tab_summary),
+                  enabled = libraryShowMusicTab,
+                  titleRes = R.string.ui_music,
+                )
+              }
+            }
+            ExpressivePreferenceGroup {
+              ReorderableTabPreferences(
+                tabs = subTabItems,
+                onEnabledChange = { id, enabled ->
+                  if (id == "AUDIO") {
+                    browserPreferences.libraryShowMusicTab.set(enabled)
+                  }
+                },
+                onMove = { id, destination ->
+                  val next = orderedSubTabs.toMutableList()
+                  next.remove(id)
+                  next.add(destination.coerceIn(0, next.size), id)
+                  browserPreferences.mediaLibrarySubTabsOrder.set(next)
                 },
               )
             }

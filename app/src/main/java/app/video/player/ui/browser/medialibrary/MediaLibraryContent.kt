@@ -232,13 +232,22 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   val favoriteAudioVideos = remember(audioVideosWithInfo, favoriteAudioPaths) {
     audioVideosWithInfo.filter { favoriteAudioPaths.contains(it.video.path) }
   }
-  val mediaLibraryTabs = remember(forceAudio, libraryShowMusicTab) {
+  val mediaLibrarySubTabsOrder by browserPreferences.mediaLibrarySubTabsOrder.collectAsState()
+  val mediaLibraryTabs = remember(forceAudio, libraryShowMusicTab, mediaLibrarySubTabsOrder) {
     if (forceAudio) {
       listOf(MediaLibraryType.Audio)
-    } else if (!libraryShowMusicTab) {
-      listOf(MediaLibraryType.All, MediaLibraryType.Video)
     } else {
-      MediaLibraryType.entries.toList()
+      val defaults = listOf("ALL", "VIDEO", "AUDIO")
+      val orderedIds = (mediaLibrarySubTabsOrder.filter { it in defaults } + defaults).distinct()
+      val candidateTabs = orderedIds.mapNotNull { id ->
+        when (id) {
+          "ALL" -> MediaLibraryType.All
+          "VIDEO" -> MediaLibraryType.Video
+          "AUDIO" -> if (libraryShowMusicTab) MediaLibraryType.Audio else null
+          else -> null
+        }
+      }
+      if (candidateTabs.isNotEmpty()) candidateTabs else listOf(MediaLibraryType.All, MediaLibraryType.Video)
     }
   }
   val initialPageIndex = remember(mediaLibraryTabs) {
