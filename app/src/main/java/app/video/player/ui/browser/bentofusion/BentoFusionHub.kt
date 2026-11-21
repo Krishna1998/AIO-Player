@@ -1791,13 +1791,21 @@ private fun BentoHeroSpotlightCard(
               if (isAudio) {
                 val isPaused by PlaybackSession.propBoolean["pause"].collectAsState()
                 val isPlaying = isCurrentlyPlayingInSession && (isPaused == false)
-                val currentProgress = if (isCurrentlyPlayingInSession && totalSec > 0L && livePositionSec != null) {
+                val targetProgress = if (isCurrentlyPlayingInSession && totalSec > 0L && livePositionSec != null) {
                   (livePositionSec!!.toFloat() / totalSec.toFloat()).coerceIn(0f, 1f)
                 } else if (progress > 0f) {
                   progress
                 } else {
                   0f
                 }
+
+                // Smooth progressive interpolation: eliminates 1-second discretised jumping/ticking clock effect
+                val animatedProgress by animateFloatAsState(
+                  targetValue = targetProgress,
+                  animationSpec = if (isPlaying) tween(durationMillis = 1000, easing = LinearEasing) else spring(),
+                  label = "audioPulsingProgress",
+                )
+                val currentProgress = if (isPlaying) animatedProgress else targetProgress
 
                 if (audioPulsingProgressStyle == app.video.player.preferences.AudioPulsingProgressStyle.WavyVisualizer) {
                   OneUi9WaveformVisualizer(
