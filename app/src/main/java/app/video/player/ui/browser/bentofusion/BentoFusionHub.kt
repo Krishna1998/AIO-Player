@@ -1891,10 +1891,13 @@ fun OneUi9WaveformVisualizer(
     }
   }
 
-  // Smoothly damp amplitude when paused
+  // Smoothly damp amplitude from flat (0f) to active wave height (1f) with a spring spec for fluid startup and flatline on pause
   val animatedAmpScale by animateFloatAsState(
-    targetValue = if (isPlaying) 1f else 0.25f,
-    animationSpec = tween(350),
+    targetValue = if (isPlaying) 1f else 0f,
+    animationSpec = spring(
+      dampingRatio = 0.82f,
+      stiffness = Spring.StiffnessLow,
+    ),
     label = "waveAmpScale",
   )
 
