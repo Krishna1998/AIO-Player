@@ -140,6 +140,13 @@
   <string name="pref_audio_pulsing_progress_style_summary">Choose between fluid wavy visualizer or seekbar progress for Audio Pulsing</string>
   <string name="pref_audio_pulsing_style_wavy">Wavy visualizer</string>
   <string name="pref_audio_pulsing_style_seekbar">Seekbar (Progress bar)</string>
+  <string name="pref_bentofusion_header_style_title">Fusion rail header style</string>
+  <string name="pref_bentofusion_header_style_summary">Choose the design style for Movies/Videos and Music titles</string>
+  <string name="pref_bentofusion_header_style_capsule">Liquid Glass Capsule (Default)</string>
+  <string name="pref_bentofusion_header_style_pillar">Cyber Glow Pillar</string>
+  <string name="pref_bentofusion_header_style_card">Frosted Bento Strip</string>
+  <string name="pref_bentofusion_header_style_pulse">Fluid Pulse Dot</string>
+  <string name="pref_bentofusion_header_style_luxury">Studio Luxury Aperture</string>
   <string name="pref_bentofusion_show_music_card_title">Show Music</string>
   <string name="pref_bentofusion_show_music_card_summary">Display the horizontal Music in Fusion / All Media</string>
   <string name="pref_bentofusion_section_order_title">Fusion Section Order</string>

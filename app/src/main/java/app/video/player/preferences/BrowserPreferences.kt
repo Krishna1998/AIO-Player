@@ -194,6 +194,7 @@ class BrowserPreferences(
   val bentoFusionShowVideoRail = preferenceStore.getBoolean("bentofusion_show_video_rail", true)
   val bentoFusionShowAudioPulsing = preferenceStore.getBoolean("bentofusion_show_audio_pulsing", true)
   val audioPulsingProgressStyle = preferenceStore.getEnum("audio_pulsing_progress_style", AudioPulsingProgressStyle.WavyVisualizer)
+  val bentoFusionHeaderStyle = preferenceStore.getEnum("bentofusion_header_style", BentoFusionHeaderStyle.LiquidCapsule)
   val bentoFusionShowMusicRail = preferenceStore.getBoolean("bentofusion_show_music_rail", true)
   val bentoFusionSectionOrder = preferenceStore.getObject(
     key = "bentofusion_section_order",
@@ -492,6 +493,16 @@ enum class AudioPulsingProgressStyle(
 ) {
   WavyVisualizer(app.video.player.R.string.pref_audio_pulsing_style_wavy),
   Seekbar(app.video.player.R.string.pref_audio_pulsing_style_seekbar),
+}
+
+enum class BentoFusionHeaderStyle(
+  val titleRes: Int,
+) {
+  LiquidCapsule(app.video.player.R.string.pref_bentofusion_header_style_capsule),
+  CyberPillar(app.video.player.R.string.pref_bentofusion_header_style_pillar),
+  BentoStrip(app.video.player.R.string.pref_bentofusion_header_style_card),
+  FluidPulse(app.video.player.R.string.pref_bentofusion_header_style_pulse),
+  StudioLuxury(app.video.player.R.string.pref_bentofusion_header_style_luxury),
 }
 
 enum class ThumbnailGenerator {

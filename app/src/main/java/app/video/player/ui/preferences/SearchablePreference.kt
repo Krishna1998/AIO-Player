@@ -1360,6 +1360,7 @@ object SearchablePreferences {
         SearchEntrySpec(R.string.pref_bentofusion_show_video_card_title, listOf("bentofusion", "video", "movie", "rail", "card", "hide", "show")),
         SearchEntrySpec(R.string.pref_bentofusion_show_audio_pulsing_title, listOf("bentofusion", "audio", "pulsing", "hero", "card", "hide", "show")),
         SearchEntrySpec(R.string.pref_audio_pulsing_progress_style_title, listOf("bentofusion", "audio", "pulsing", "progress", "seekbar", "wavy", "visualizer")),
+        SearchEntrySpec(R.string.pref_bentofusion_header_style_title, listOf("bentofusion", "header", "title", "style", "capsule", "pillar", "bento", "pulse", "luxury")),
         SearchEntrySpec(R.string.pref_bentofusion_show_music_card_title, listOf("bentofusion", "music", "rail", "card", "hide", "show")),
         SearchEntrySpec(R.string.pref_bentofusion_section_order_title, listOf("bentofusion", "order", "reorder", "drag", "video", "audio pulsing", "music")),
         SearchEntrySpec(R.string.pref_library_sub_tabs_order_title, listOf("bentofusion", "library", "tabs", "order", "reorder", "drag", "all media", "video", "music")),

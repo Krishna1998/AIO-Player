@@ -1130,7 +1130,7 @@ object AppearancePreferencesScreen : Screen {
 
           item {
             ExpressivePreferenceGroup {
-              val bentoItemCount = 5
+              val bentoItemCount = 6
               val bentoFusionShowVideoRail by browserPreferences.bentoFusionShowVideoRail.collectAsState()
               SwitchPreference(
                 modifier = Modifier.settingsSearchTarget(R.string.pref_bentofusion_show_video_card_title),
@@ -1182,6 +1182,24 @@ object AppearancePreferencesScreen : Screen {
                 )
               }
 
+              val bentoFusionHeaderStyle by browserPreferences.bentoFusionHeaderStyle.collectAsState()
+              ExpressivePreferenceTile(index = 3, itemCount = bentoItemCount) {
+                ListPreference(
+                  modifier = Modifier.settingsSearchTarget(R.string.pref_bentofusion_header_style_title),
+                  value = bentoFusionHeaderStyle,
+                  onValueChange = { browserPreferences.bentoFusionHeaderStyle.set(it) },
+                  values = BentoFusionHeaderStyle.entries,
+                  valueToText = { AnnotatedString(stringResource(it.titleRes)) },
+                  title = { Text(stringResource(R.string.pref_bentofusion_header_style_title)) },
+                  summary = {
+                    Text(
+                      stringResource(bentoFusionHeaderStyle.titleRes),
+                      color = MaterialTheme.colorScheme.outline,
+                    )
+                  },
+                )
+              }
+
               val bentoFusionShowMusicRail by browserPreferences.bentoFusionShowMusicRail.collectAsState()
               SwitchPreference(
                 modifier = Modifier.settingsSearchTarget(R.string.pref_bentofusion_show_music_card_title),
@@ -1194,7 +1212,7 @@ object AppearancePreferencesScreen : Screen {
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
-                groupIndex = 3,
+                groupIndex = 4,
                 groupSize = bentoItemCount,
               )
 
@@ -1210,7 +1228,7 @@ object AppearancePreferencesScreen : Screen {
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
-                groupIndex = 4,
+                groupIndex = 5,
                 groupSize = bentoItemCount,
               )
             }

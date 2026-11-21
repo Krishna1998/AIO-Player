@@ -113,6 +113,7 @@ import androidx.compose.ui.unit.sp
 import app.video.player.domain.media.model.Video
 import app.video.player.domain.recentlyplayed.repository.RecentlyPlayedRepository
 import android.net.Uri
+import app.video.player.preferences.BentoFusionHeaderStyle
 import app.video.player.preferences.BrowserPreferences
 import app.video.player.preferences.MediaLibraryType
 import app.video.player.preferences.preference.collectAsState
@@ -250,6 +251,7 @@ fun BentoFusionHeader(
   val bentoFusionHintDismissed by browserPreferences.bentoFusionHintDismissed.collectAsState()
   val showVideoRail by browserPreferences.bentoFusionShowVideoRail.collectAsState()
   val showAudioPulsing by browserPreferences.bentoFusionShowAudioPulsing.collectAsState()
+  val bentoFusionHeaderStyle by browserPreferences.bentoFusionHeaderStyle.collectAsState()
   val showMusicRail by browserPreferences.bentoFusionShowMusicRail.collectAsState()
   val sectionOrder by browserPreferences.bentoFusionSectionOrder.collectAsState()
   val onlineMusicArtworkRepository = koinInject<OnlineMusicArtworkRepository>()
@@ -506,6 +508,7 @@ fun BentoFusionHeader(
               icon = "🎬",
               accentColor = MaterialTheme.colorScheme.primary,
               count = videoItems.size,
+              style = bentoFusionHeaderStyle,
             ) {
               LazyRow(
                 contentPadding = PaddingValues(horizontal = 16.dp),
@@ -629,6 +632,7 @@ fun BentoFusionHeader(
               icon = "🎵",
               accentColor = MaterialTheme.colorScheme.tertiary,
               count = sortedAudioByTitle.size,
+              style = bentoFusionHeaderStyle,
             ) {
               LazyRow(
                 contentPadding = PaddingValues(horizontal = 16.dp),
@@ -929,6 +933,7 @@ fun DualHorizonRails(
 ) {
   val browserPreferences = koinInject<BrowserPreferences>()
   val showVideoRail by browserPreferences.bentoFusionShowVideoRail.collectAsState()
+  val bentoFusionHeaderStyle by browserPreferences.bentoFusionHeaderStyle.collectAsState()
   val showMusicRail by browserPreferences.bentoFusionShowMusicRail.collectAsState()
   val minVideoMinutes by browserPreferences.minimumVideoHorizonDurationMinutes.collectAsState()
   val minVideoDurationMs = remember(minVideoMinutes) { (minVideoMinutes * 60 * 1000L).coerceAtLeast(0L) }
@@ -960,6 +965,7 @@ fun DualHorizonRails(
         icon = "🎬",
         accentColor = MaterialTheme.colorScheme.primary,
         count = videoItems.size,
+        style = bentoFusionHeaderStyle,
       ) {
         LazyRow(
           contentPadding = PaddingValues(horizontal = 16.dp),
@@ -986,6 +992,7 @@ fun DualHorizonRails(
         icon = "🎵",
         accentColor = MaterialTheme.colorScheme.tertiary,
         count = sortedAudioByTitle.size,
+        style = bentoFusionHeaderStyle,
       ) {
         LazyRow(
           contentPadding = PaddingValues(horizontal = 16.dp),
@@ -1013,8 +1020,12 @@ private fun HorizonRailSection(
   icon: String,
   accentColor: Color,
   count: Int,
+  style: BentoFusionHeaderStyle = BentoFusionHeaderStyle.LiquidCapsule,
   content: @Composable () -> Unit,
 ) {
+  val isMusic = title.contains("Music", ignoreCase = true)
+  val subtitleLabel = if (isMusic) "Lossless soundstage" else "Cinema collection"
+
   Column(
     modifier = Modifier.fillMaxWidth(),
     verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -1026,53 +1037,251 @@ private fun HorizonRailSection(
       horizontalArrangement = Arrangement.Start,
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      // Glass UI Title Capsule
-      Surface(
-        shape = RoundedCornerShape(999.dp),
-        color = accentColor.copy(alpha = 0.16f),
-        border = BorderStroke(
-          width = 1.dp,
-          brush = Brush.linearGradient(
-            colors = listOf(
-              accentColor.copy(alpha = 0.75f),
-              Color.White.copy(alpha = 0.35f),
-              accentColor.copy(alpha = 0.25f),
-            ),
-          ),
-        ),
-        shadowElevation = 3.dp,
-      ) {
-        Row(
-          modifier = Modifier.padding(horizontal = 11.dp, vertical = 5.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(7.dp),
-        ) {
-          Text(
-            text = icon,
-            style = MaterialTheme.typography.titleMedium.copy(fontSize = 16.sp),
-          )
-          Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium.copy(
-              fontWeight = FontWeight.ExtraBold,
-              fontSize = 15.sp,
-              letterSpacing = 0.5.sp,
-            ),
-            color = MaterialTheme.colorScheme.onSurface,
-          )
+      when (style) {
+        // 1. Liquid Glass Aura Capsule (Original / Enhanced)
+        BentoFusionHeaderStyle.LiquidCapsule -> {
           Surface(
             shape = RoundedCornerShape(999.dp),
-            color = accentColor.copy(alpha = 0.25f),
-            border = BorderStroke(0.6.dp, accentColor.copy(alpha = 0.60f)),
-          ) {
-            Text(
-              text = "$count",
-              style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.Bold,
-                fontSize = 11.sp,
+            color = accentColor.copy(alpha = 0.16f),
+            border = BorderStroke(
+              width = 1.dp,
+              brush = Brush.linearGradient(
+                colors = listOf(
+                  accentColor.copy(alpha = 0.75f),
+                  Color.White.copy(alpha = 0.35f),
+                  accentColor.copy(alpha = 0.25f),
+                ),
               ),
-              color = accentColor,
-              modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+            ),
+            shadowElevation = 3.dp,
+          ) {
+            Row(
+              modifier = Modifier.padding(horizontal = 11.dp, vertical = 5.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(7.dp),
+            ) {
+              Text(
+                text = icon,
+                style = MaterialTheme.typography.titleMedium.copy(fontSize = 16.sp),
+              )
+              Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium.copy(
+                  fontWeight = FontWeight.ExtraBold,
+                  fontSize = 15.sp,
+                  letterSpacing = 0.5.sp,
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
+              )
+              Surface(
+                shape = RoundedCornerShape(999.dp),
+                color = accentColor.copy(alpha = 0.25f),
+                border = BorderStroke(0.6.dp, accentColor.copy(alpha = 0.60f)),
+              ) {
+                Text(
+                  text = "$count",
+                  style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 11.sp,
+                  ),
+                  color = accentColor,
+                  modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                )
+              }
+            }
+          }
+        }
+
+        // 2. Cyber Glow Pillar
+        BentoFusionHeaderStyle.CyberPillar -> {
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.fillMaxWidth(),
+          ) {
+            Box(
+              modifier = Modifier
+                .width(4.dp)
+                .height(24.dp)
+                .clip(RoundedCornerShape(2.dp))
+                .background(accentColor),
+            )
+            Column(modifier = Modifier.weight(1f)) {
+              Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium.copy(
+                  fontWeight = FontWeight.ExtraBold,
+                  fontSize = 16.sp,
+                  letterSpacing = (-0.2).sp,
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
+              )
+              Text(
+                text = subtitleLabel,
+                style = MaterialTheme.typography.labelSmall.copy(
+                  fontWeight = FontWeight.SemiBold,
+                  fontSize = 10.sp,
+                  letterSpacing = 1.sp,
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+              )
+            }
+            Surface(
+              shape = RoundedCornerShape(8.dp),
+              color = accentColor.copy(alpha = 0.14f),
+              border = BorderStroke(1.dp, accentColor.copy(alpha = 0.35f)),
+            ) {
+              Row(
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+              ) {
+                Text(text = icon, fontSize = 12.sp)
+                Text(
+                  text = "$count",
+                  style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                  color = accentColor,
+                )
+              }
+            }
+          }
+        }
+
+        // 3. Frosted Bento Strip
+        BentoFusionHeaderStyle.BentoStrip -> {
+          Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)),
+            modifier = Modifier.fillMaxWidth(),
+          ) {
+            Row(
+              modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 7.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+              Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+              ) {
+                Surface(
+                  shape = RoundedCornerShape(10.dp),
+                  color = accentColor.copy(alpha = 0.20f),
+                  border = BorderStroke(1.dp, accentColor.copy(alpha = 0.40f)),
+                  modifier = Modifier.size(30.dp),
+                ) {
+                  Box(contentAlignment = Alignment.Center) {
+                    Text(text = icon, fontSize = 14.sp)
+                  }
+                }
+                Column {
+                  Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                      fontWeight = FontWeight.ExtraBold,
+                      fontSize = 14.sp,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                  )
+                  Text(
+                    text = "$count items",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                      fontWeight = FontWeight.Normal,
+                      fontSize = 11.sp,
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  )
+                }
+              }
+
+              Surface(
+                shape = RoundedCornerShape(999.dp),
+                color = Color.White.copy(alpha = 0.06f),
+                border = BorderStroke(0.8.dp, Color.White.copy(alpha = 0.12f)),
+              ) {
+                Text(
+                  text = "Browse",
+                  style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                )
+              }
+            }
+          }
+        }
+
+        // 4. Fluid Pulse Dot
+        BentoFusionHeaderStyle.FluidPulse -> {
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth(),
+          ) {
+            Box(
+              modifier = Modifier
+                .size(8.dp)
+                .clip(CircleShape)
+                .background(accentColor),
+            )
+            Text(
+              text = title,
+              style = MaterialTheme.typography.titleLarge.copy(
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 17.sp,
+                letterSpacing = (-0.3).sp,
+              ),
+              color = MaterialTheme.colorScheme.onSurface,
+            )
+            Surface(
+              shape = RoundedCornerShape(999.dp),
+              color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f),
+            ) {
+              Text(
+                text = "$count",
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp),
+              )
+            }
+          }
+        }
+
+        // 5. Studio Luxury Aperture
+        BentoFusionHeaderStyle.StudioLuxury -> {
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.Bottom,
+            horizontalArrangement = Arrangement.SpaceBetween,
+          ) {
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+              Text(
+                text = subtitleLabel.uppercase(),
+                style = MaterialTheme.typography.labelSmall.copy(
+                  fontWeight = FontWeight.ExtraBold,
+                  fontSize = 9.sp,
+                  letterSpacing = 1.4.sp,
+                ),
+                color = accentColor,
+              )
+              Text(
+                text = title,
+                style = MaterialTheme.typography.headlineSmall.copy(
+                  fontWeight = FontWeight.Black,
+                  fontSize = 18.sp,
+                  letterSpacing = (-0.4).sp,
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
+              )
+            }
+            Text(
+              text = "[$count]",
+              style = MaterialTheme.typography.labelMedium.copy(
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 0.5.sp,
+              ),
+              color = MaterialTheme.colorScheme.outline,
             )
           }
         }
