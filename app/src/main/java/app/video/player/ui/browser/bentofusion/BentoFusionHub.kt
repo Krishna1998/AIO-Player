@@ -437,25 +437,29 @@ fun BentoFusionHeader(
   fun playAudioInBackground(targetVideo: Video, startPos: Double?) {
     rememberedAudioPath = targetVideo.path
     browserPreferences.lastPlayedAudioPath.set(targetVideo.path)
-    val audioQueue = sortedAudioByTitle.map { item ->
-      val v = item.video
-      val cachedArt = v.artworkUrl ?: onlineMusicArtworkRepository.getCachedArtworkFile(v)?.let { Uri.fromFile(it).toString() }
-      PlaybackItem.fromUri(
-        uri = v.uri.toString(),
-        stableId = if (app.video.player.BuildConfig.SCOPED_STORAGE_ONLY && v.uri.scheme == "content") {
-          videoPlaybackIdentifiers(v).first()
-        } else PlaybackIdentity.forLocalPath(v.path),
-        title = if (v.title.isNotBlank()) v.title else FileTypeUtils.stripExtension(v.displayName),
-        artist = v.artist,
-        mimeType = v.mimeType.ifBlank { "audio/*" },
-        artworkUri = cachedArt,
-        durationSeconds = (v.duration / 1000L).toInt().takeIf { it > 0 },
-        videoWidth = v.width,
-        videoHeight = v.height,
-      )
+    if (MediaUtils.shouldPlayInMiniPlayerOnly(isAudio = true) && PlaybackSession.isInitialized) {
+      val audioQueue = sortedAudioByTitle.map { item ->
+        val v = item.video
+        val cachedArt = v.artworkUrl ?: onlineMusicArtworkRepository.getCachedArtworkFile(v)?.let { Uri.fromFile(it).toString() }
+        PlaybackItem.fromUri(
+          uri = v.uri.toString(),
+          stableId = if (app.video.player.BuildConfig.SCOPED_STORAGE_ONLY && v.uri.scheme == "content") {
+            videoPlaybackIdentifiers(v).first()
+          } else PlaybackIdentity.forLocalPath(v.path),
+          title = if (v.title.isNotBlank()) v.title else FileTypeUtils.stripExtension(v.displayName),
+          artist = v.artist,
+          mimeType = v.mimeType.ifBlank { "audio/*" },
+          artworkUri = cachedArt,
+          durationSeconds = (v.duration / 1000L).toInt().takeIf { it > 0 },
+          videoWidth = v.width,
+          videoHeight = v.height,
+        )
+      }
+      val targetIdx = sortedAudioByTitle.indexOfFirst { it.video.path == targetVideo.path }.coerceAtLeast(0)
+      MediaUtils.playInMiniPlayer(context, audioQueue, targetIdx, startPositionSeconds = startPos?.takeIf { it > 0.0 })
+    } else {
+      onPlayMedia(targetVideo, startPos, sortedAudioByTitle.map { it.video })
     }
-    val targetIdx = sortedAudioByTitle.indexOfFirst { it.video.path == targetVideo.path }.coerceAtLeast(0)
-    MediaUtils.playInMiniPlayer(context, audioQueue, targetIdx, startPositionSeconds = startPos?.takeIf { it > 0.0 })
   }
 
   val heroVideo = remember(videoItems, recentlyPlayedFilePath) {
