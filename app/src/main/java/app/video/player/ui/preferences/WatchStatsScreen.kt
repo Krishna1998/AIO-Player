@@ -156,9 +156,23 @@ internal fun ProfileWatchStatistics() {
           .map { it.value.copy(isAudio = true) }
       }
 
-    TopMediaLeaderboardBentoCard(
-      topVideos = topVideos,
-      topAudios = topAudios,
+    // Separate Glass UI Cards for Most Watched (Video) and Most Listened (Audio)
+    MediaLeaderboardBentoCard(
+      title = stringResource(R.string.watch_stats_top_media),
+      emptyText = stringResource(R.string.watch_stats_empty_video),
+      icon = Icons.RoundedFilled.Videocam,
+      badgeColor = MaterialTheme.colorScheme.primaryContainer,
+      badgeContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+      mediaList = topVideos,
+    )
+
+    MediaLeaderboardBentoCard(
+      title = stringResource(R.string.watch_stats_top_media_audio),
+      emptyText = stringResource(R.string.watch_stats_empty_audio),
+      icon = Icons.RoundedFilled.Audiotrack,
+      badgeColor = MaterialTheme.colorScheme.tertiaryContainer,
+      badgeContentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+      mediaList = topAudios,
     )
   }
 
@@ -495,16 +509,15 @@ private fun WeeklyActivityBentoCard(days: Map<String, Long>) {
   }
 }
 
-private enum class MostWatchedMediaType { VIDEO, AUDIO }
-
 @Composable
-private fun TopMediaLeaderboardBentoCard(
-  topVideos: List<WatchMediaStats>,
-  topAudios: List<WatchMediaStats>,
+private fun MediaLeaderboardBentoCard(
+  title: String,
+  emptyText: String,
+  icon: androidx.compose.ui.graphics.vector.ImageVector,
+  badgeColor: Color,
+  badgeContentColor: Color,
+  mediaList: List<WatchMediaStats>,
 ) {
-  var selectedTab by rememberSaveable { mutableStateOf(MostWatchedMediaType.VIDEO) }
-  val currentList = if (selectedTab == MostWatchedMediaType.VIDEO) topVideos else topAudios
-
   BentoCard(modifier = Modifier.fillMaxWidth()) {
     Column(
       modifier = Modifier.padding(20.dp),
@@ -522,23 +535,20 @@ private fun TopMediaLeaderboardBentoCard(
         ) {
           Surface(
             shape = CircleShape,
-            color = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            color = badgeColor,
+            contentColor = badgeContentColor,
             modifier = Modifier.size(36.dp),
           ) {
             Box(contentAlignment = Alignment.Center) {
               Icon(
-                imageVector = Icons.RoundedFilled.Star,
+                imageVector = icon,
                 contentDescription = null,
                 modifier = Modifier.size(18.dp),
               )
             }
           }
           Text(
-            text = stringResource(
-              if (selectedTab == MostWatchedMediaType.VIDEO) R.string.watch_stats_top_media
-              else R.string.watch_stats_top_media_audio
-            ),
+            text = title,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             maxLines = 1,
@@ -546,68 +556,23 @@ private fun TopMediaLeaderboardBentoCard(
           )
         }
 
-        // Separate Tabs for Video and Audio
-        Row(
-          modifier = Modifier
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.65f))
-            .padding(2.dp),
-          horizontalArrangement = Arrangement.spacedBy(2.dp),
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          val isVideo = selectedTab == MostWatchedMediaType.VIDEO
+        if (mediaList.isNotEmpty()) {
           Surface(
-            onClick = { selectedTab = MostWatchedMediaType.VIDEO },
             shape = CircleShape,
-            color = if (isVideo) MaterialTheme.colorScheme.primary else Color.Transparent,
-            contentColor = if (isVideo) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+            color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.65f),
           ) {
-            Row(
-              modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-              Icon(
-                imageVector = Icons.RoundedFilled.Videocam,
-                contentDescription = null,
-                modifier = Modifier.size(16.dp),
-              )
-              Text(
-                text = stringResource(R.string.watch_stats_video),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = if (isVideo) FontWeight.Bold else FontWeight.Medium,
-              )
-            }
-          }
-
-          val isAudio = selectedTab == MostWatchedMediaType.AUDIO
-          Surface(
-            onClick = { selectedTab = MostWatchedMediaType.AUDIO },
-            shape = CircleShape,
-            color = if (isAudio) MaterialTheme.colorScheme.primary else Color.Transparent,
-            contentColor = if (isAudio) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-          ) {
-            Row(
-              modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-              Icon(
-                imageVector = Icons.RoundedFilled.Audiotrack,
-                contentDescription = null,
-                modifier = Modifier.size(16.dp),
-              )
-              Text(
-                text = stringResource(R.string.watch_stats_audio),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = if (isAudio) FontWeight.Bold else FontWeight.Medium,
-              )
-            }
+            Text(
+              text = "${mediaList.size}",
+              style = MaterialTheme.typography.labelSmall,
+              fontWeight = FontWeight.Bold,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            )
           }
         }
       }
 
-      if (currentList.isEmpty()) {
+      if (mediaList.isEmpty()) {
         Box(
           modifier = Modifier
             .fillMaxWidth()
@@ -615,24 +580,21 @@ private fun TopMediaLeaderboardBentoCard(
           contentAlignment = Alignment.Center,
         ) {
           Text(
-            text = stringResource(
-              if (selectedTab == MostWatchedMediaType.VIDEO) R.string.watch_stats_empty_video
-              else R.string.watch_stats_empty_audio
-            ),
+            text = emptyText,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
           )
         }
       } else {
-        val maxSeconds = currentList.firstOrNull()?.seconds?.coerceAtLeast(1L) ?: 1L
+        val maxSeconds = mediaList.firstOrNull()?.seconds?.coerceAtLeast(1L) ?: 1L
         Column(verticalArrangement = Arrangement.spacedBy(AppConnectedShapeTokens.spacing)) {
-          currentList.forEachIndexed { index, media ->
+          mediaList.forEachIndexed { index, media ->
             LeaderboardMediaRow(
               rank = index + 1,
               media = media,
               maxSeconds = maxSeconds,
               index = index,
-              itemCount = currentList.size,
+              itemCount = mediaList.size,
             )
           }
         }
