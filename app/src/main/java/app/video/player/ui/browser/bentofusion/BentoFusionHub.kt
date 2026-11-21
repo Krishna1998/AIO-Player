@@ -511,35 +511,7 @@ fun BentoFusionHeader(
       }
     }
 
-    // 2. Music Rail (ALL songs sorted by title)
-    if (sortedAudioByTitle.isNotEmpty()) {
-      HorizonRailSection(
-        title = "Music",
-        icon = "🎵",
-        accentColor = MaterialTheme.colorScheme.tertiary,
-        count = sortedAudioByTitle.size,
-      ) {
-        LazyRow(
-          contentPadding = PaddingValues(horizontal = 16.dp),
-          horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-          items(
-            items = sortedAudioByTitle,
-            key = { it.video.path },
-          ) { item ->
-            BentoHorizonAudioCard(
-              item = item,
-              onClick = {
-                playAudioInBackground(item.video, null)
-              },
-              onLongClick = { actionTargetVideo = item.video },
-            )
-          }
-        }
-      }
-    }
-
-    // 3. Audio Pulsing Hero Spotlight Card
+    // 2. Audio Pulsing Hero Spotlight Card
     val heroToDisplay = heroAudio ?: (if (videoItems.isEmpty()) heroVideo else null)
     if (heroToDisplay != null) {
       val isCurrentlyInSession = remember(currentSessionItem, heroToDisplay.video) {
@@ -632,6 +604,34 @@ fun BentoFusionHeader(
           }
         },
       )
+    }
+
+    // 3. Music Rail (ALL songs sorted by title)
+    if (sortedAudioByTitle.isNotEmpty()) {
+      HorizonRailSection(
+        title = "Music",
+        icon = "🎵",
+        accentColor = MaterialTheme.colorScheme.tertiary,
+        count = sortedAudioByTitle.size,
+      ) {
+        LazyRow(
+          contentPadding = PaddingValues(horizontal = 16.dp),
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+          items(
+            items = sortedAudioByTitle,
+            key = { it.video.path },
+          ) { item ->
+            BentoHorizonAudioCard(
+              item = item,
+              onClick = {
+                playAudioInBackground(item.video, null)
+              },
+              onLongClick = { actionTargetVideo = item.video },
+            )
+          }
+        }
+      }
     }
   }
 
