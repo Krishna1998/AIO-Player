@@ -445,7 +445,7 @@ private fun QuickSettingsRow(
   val chips = remember {
     listOf(
       Triple("Theme", Icons.RoundedFilled.Palette, AppearancePreferencesScreen to R.string.pref_appearance_theme_picker_label),
-      Triple("Thumbnails", Icons.RoundedFilled.Image, AppearancePreferencesScreen to R.string.pref_clear_thumbnail_cache_title),
+      Triple("Thumbnails", Icons.RoundedFilled.Image, AppearancePreferencesScreen to R.string.pref_appearance_show_video_thumbnails_title),
       Triple("Player Controls", Icons.RoundedFilled.GridView, PlayerControlsPreferencesScreen to null),
       Triple("Gestures", Icons.RoundedFilled.Gesture, GesturePreferencesScreen to null),
       Triple("Audio & Wavy", Icons.RoundedFilled.Audiotrack, AudioPreferencesScreen to null),

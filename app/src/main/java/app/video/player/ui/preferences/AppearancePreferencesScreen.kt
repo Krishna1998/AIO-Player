@@ -131,7 +131,6 @@ object AppearancePreferencesScreen : Screen {
     val dualPaneForTablet by browserPreferences.dualPaneForTablet.collectAsState()
     val treeFlattenDepth by browserPreferences.treeFlattenDepth.collectAsState()
     val thumbnailCacheClearedMessage = stringResource(R.string.pref_thumbnail_cache_cleared)
-    var isClearThumbsConfirmShown by rememberSaveable { mutableStateOf(false) }
     var thumbnailCacheSize by remember { mutableStateOf(0L) }
 
     LaunchedEffect(Unit) {
@@ -202,45 +201,6 @@ object AppearancePreferencesScreen : Screen {
           }
         },
         onCancel = { pendingThumbnailMode = null },
-      )
-    }
-
-    if (isClearThumbsConfirmShown) {
-      ConfirmDialog(
-        title = stringResource(R.string.pref_thumbnail_cache_confirm_title),
-        subtitle = stringResource(R.string.pref_thumbnail_cache_confirm_subtitle),
-        onConfirm = {
-          scope.launch(Dispatchers.IO) {
-            runCatching {
-              thumbnailRepository.clearThumbnailCache()
-            }.onSuccess {
-              withContext(Dispatchers.Main) {
-                isClearThumbsConfirmShown = false
-                thumbnailCacheSize = 0L
-                Toast
-                  .makeText(
-                    context,
-                    thumbnailCacheClearedMessage,
-                    Toast.LENGTH_SHORT,
-                  ).show()
-              }
-            }.onFailure { error ->
-              withContext(Dispatchers.Main) {
-                isClearThumbsConfirmShown = false
-                Toast
-                  .makeText(
-                    context,
-                    context.getString(
-                      R.string.pref_failed_to_clear,
-                      error.message ?: context.getString(R.string.generic_unknown_error),
-                    ),
-                    Toast.LENGTH_LONG,
-                  ).show()
-              }
-            }
-          }
-        },
-        onCancel = { isClearThumbsConfirmShown = false },
       )
     }
 
@@ -906,7 +866,7 @@ object AppearancePreferencesScreen : Screen {
               val replaceEmbeddedWithOnlinePosters by browserPreferences.replaceEmbeddedWithOnlinePosters.collectAsState()
               val autoFetchOnlineMusicArtwork by browserPreferences.autoFetchOnlineMusicArtwork.collectAsState()
               val baseCount = if (showFramePosition) 7 else 6
-              val itemCount = baseCount + 4
+              val itemCount = baseCount + 3
               val showVideoThumbnails by browserPreferences.showVideoThumbnails.collectAsState()
               SwitchPreference(
                 modifier = Modifier.settingsSearchTarget(R.string.pref_appearance_show_video_thumbnails_title),
@@ -1106,7 +1066,6 @@ object AppearancePreferencesScreen : Screen {
               val replaceEmbeddedIndex = if (showFramePosition) 7 else 6
               val autoFetchMusicIndex = if (showFramePosition) 8 else 7
               val tapThumbnailIndex = if (showFramePosition) 9 else 8
-              val clearThumbnailCacheIndex = if (showFramePosition) 10 else 9
 
               ExpressivePreferenceTile(index = autoFetchIndex, itemCount = itemCount) {
                 SwitchPreference(
@@ -1173,29 +1132,6 @@ object AppearancePreferencesScreen : Screen {
                     )
                   },
                   enabled = showVideoThumbnails,
-                )
-              }
-
-              ExpressivePreferenceTile(index = clearThumbnailCacheIndex, itemCount = itemCount) {
-                Preference(
-                  modifier = Modifier.settingsSearchTarget(R.string.pref_clear_thumbnail_cache_title),
-                  title = { Text(text = stringResource(R.string.pref_clear_thumbnail_cache_title)) },
-                  summary = {
-                    val sizeStr = formatFileSize(thumbnailCacheSize)
-                    Column {
-                      Text(
-                        text = stringResource(R.string.pref_thumbnail_cache_summary),
-                        color = MaterialTheme.colorScheme.outline,
-                      )
-                      Text(
-                        text = stringResource(R.string.pref_thumbnail_cache_size, sizeStr),
-                        color = MaterialTheme.colorScheme.outline,
-                        style = MaterialTheme.typography.bodySmall,
-                      )
-                    }
-                  },
-                  onClick = { isClearThumbsConfirmShown = true },
-                  action = PreferenceAction.Dialog,
                 )
               }
             }
