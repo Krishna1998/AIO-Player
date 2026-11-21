@@ -1372,6 +1372,8 @@ private fun BentoHeroSpotlightCard(
   modifier: Modifier = Modifier,
 ) {
   val appearancePreferences = koinInject<AppearancePreferences>()
+  val browserPreferences = koinInject<BrowserPreferences>()
+  val audioPulsingProgressStyle by browserPreferences.audioPulsingProgressStyle.collectAsState()
   val currentAppTheme by appearancePreferences.appTheme.collectAsState()
   val colorScheme = MaterialTheme.colorScheme
   val (wave1Color, wave2Color, wave3Color) = remember(currentAppTheme, colorScheme) {
@@ -1767,17 +1769,42 @@ private fun BentoHeroSpotlightCard(
                   0f
                 }
 
-                OneUi9WaveformVisualizer(
-                  modifier = Modifier
-                    .fillMaxWidth()
-                    .height(24.dp)
-                    .padding(top = 2.dp),
-                  wave1Color = wave1Color,
-                  wave2Color = wave2Color,
-                  wave3Color = wave3Color,
-                  isPlaying = isPlaying,
-                  progress = currentProgress,
-                )
+                if (audioPulsingProgressStyle == app.video.player.preferences.AudioPulsingProgressStyle.WavyVisualizer) {
+                  OneUi9WaveformVisualizer(
+                    modifier = Modifier
+                      .fillMaxWidth()
+                      .height(24.dp)
+                      .padding(top = 2.dp),
+                    wave1Color = wave1Color,
+                    wave2Color = wave2Color,
+                    wave3Color = wave3Color,
+                    isPlaying = isPlaying,
+                    progress = currentProgress,
+                  )
+                } else {
+                  Row(
+                    modifier = Modifier
+                      .fillMaxWidth()
+                      .padding(top = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                  ) {
+                    LinearProgressIndicator(
+                      progress = { currentProgress },
+                      modifier = Modifier
+                        .weight(1f)
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(999.dp)),
+                      color = MaterialTheme.colorScheme.tertiary,
+                      trackColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                    )
+                    Text(
+                      text = "${(currentProgress * 100).toInt()}%",
+                      style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                      color = MaterialTheme.colorScheme.tertiary,
+                    )
+                  }
+                }
               }
 
               if (!isAudio && progress > 0f) {

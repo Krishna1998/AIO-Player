@@ -137,7 +137,11 @@
   <string name="pref_bentofusion_show_video_card_title">Show Video/Movie Rail</string>
   <string name="pref_bentofusion_show_video_card_summary">Display the horizontal Video/Movie rail in BentoFusion / All Media</string>
   <string name="pref_bentofusion_show_audio_pulsing_title">Show Audio Pulsing Hero</string>
-  <string name="pref_bentofusion_show_audio_pulsing_summary">Display the dynamic Audio Pulsing spotlight card with visualizer</string>
+  <string name="pref_bentofusion_show_audio_pulsing_summary">Display the dynamic Audio Pulsing spotlight card</string>
+  <string name="pref_audio_pulsing_progress_style_title">Audio Pulsing progress style</string>
+  <string name="pref_audio_pulsing_progress_style_summary">Choose between fluid wavy visualizer or seekbar progress for Audio Pulsing</string>
+  <string name="pref_audio_pulsing_style_wavy">Wavy visualizer</string>
+  <string name="pref_audio_pulsing_style_seekbar">Seekbar (Progress bar)</string>
   <string name="pref_bentofusion_show_music_card_title">Show Music Rail</string>
   <string name="pref_bentofusion_show_music_card_summary">Display the horizontal Music rail in BentoFusion / All Media</string>
   <string name="pref_library_show_music_tab_title">Show Music Tab in Library</string>

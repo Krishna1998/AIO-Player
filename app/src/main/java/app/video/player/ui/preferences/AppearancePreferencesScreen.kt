@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import app.video.player.R
 import app.video.player.domain.thumbnail.ThumbnailRepository
 import app.video.player.preferences.AppearancePreferences
+import app.video.player.preferences.AudioPulsingProgressStyle
 import app.video.player.preferences.BrowserPreferences
 import app.video.player.preferences.GesturePreferences
 import app.video.player.preferences.MultiChoiceSegmentedButton
@@ -1108,7 +1109,7 @@ object AppearancePreferencesScreen : Screen {
 
           item {
             ExpressivePreferenceGroup {
-              val bentoItemCount = 4
+              val bentoItemCount = 5
               val bentoFusionShowVideoRail by browserPreferences.bentoFusionShowVideoRail.collectAsState()
               SwitchPreference(
                 modifier = Modifier.settingsSearchTarget(R.string.pref_bentofusion_show_video_card_title),
@@ -1141,6 +1142,25 @@ object AppearancePreferencesScreen : Screen {
                 groupSize = bentoItemCount,
               )
 
+              val audioPulsingProgressStyle by browserPreferences.audioPulsingProgressStyle.collectAsState()
+              ExpressivePreferenceTile(index = 2, itemCount = bentoItemCount) {
+                ListPreference(
+                  modifier = Modifier.settingsSearchTarget(R.string.pref_audio_pulsing_progress_style_title),
+                  value = audioPulsingProgressStyle,
+                  onValueChange = { browserPreferences.audioPulsingProgressStyle.set(it) },
+                  values = AudioPulsingProgressStyle.entries,
+                  valueToText = { AnnotatedString(stringResource(it.titleRes)) },
+                  title = { Text(stringResource(R.string.pref_audio_pulsing_progress_style_title)) },
+                  summary = {
+                    Text(
+                      stringResource(audioPulsingProgressStyle.titleRes),
+                      color = MaterialTheme.colorScheme.outline,
+                    )
+                  },
+                  enabled = bentoFusionShowAudioPulsing,
+                )
+              }
+
               val bentoFusionShowMusicRail by browserPreferences.bentoFusionShowMusicRail.collectAsState()
               SwitchPreference(
                 modifier = Modifier.settingsSearchTarget(R.string.pref_bentofusion_show_music_card_title),
@@ -1153,7 +1173,7 @@ object AppearancePreferencesScreen : Screen {
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
-                groupIndex = 2,
+                groupIndex = 3,
                 groupSize = bentoItemCount,
               )
 
@@ -1169,7 +1189,7 @@ object AppearancePreferencesScreen : Screen {
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
-                groupIndex = 3,
+                groupIndex = 4,
                 groupSize = bentoItemCount,
               )
             }

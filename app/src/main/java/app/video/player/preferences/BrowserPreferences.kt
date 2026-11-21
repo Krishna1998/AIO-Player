@@ -193,6 +193,7 @@ class BrowserPreferences(
   // BentoFusion & Media Library section visibility toggles
   val bentoFusionShowVideoRail = preferenceStore.getBoolean("bentofusion_show_video_rail", true)
   val bentoFusionShowAudioPulsing = preferenceStore.getBoolean("bentofusion_show_audio_pulsing", true)
+  val audioPulsingProgressStyle = preferenceStore.getEnum("audio_pulsing_progress_style", AudioPulsingProgressStyle.WavyVisualizer)
   val bentoFusionShowMusicRail = preferenceStore.getBoolean("bentofusion_show_music_rail", true)
   val libraryShowMusicTab = preferenceStore.getBoolean("library_show_music_tab", true)
 
@@ -461,6 +462,13 @@ enum class MediaLibraryType {
   All,
   Video,
   Audio,
+}
+
+enum class AudioPulsingProgressStyle(
+  val titleRes: Int,
+) {
+  WavyVisualizer(app.video.player.R.string.pref_audio_pulsing_style_wavy),
+  Seekbar(app.video.player.R.string.pref_audio_pulsing_style_seekbar),
 }
 
 enum class ThumbnailGenerator {
