@@ -132,20 +132,20 @@
   <string name="pref_nav_network_title">Show Streaming tab</string>
   <string name="pref_nav_network_summary">Show or hide Streaming in the bottom navigation bar</string>
   <string name="pref_appearance_category_bentofusion">Fusion &amp; Media Library</string>
-  <string name="pref_bentofusion_show_video_card_title">Show Video/Movie Rail</string>
-  <string name="pref_bentofusion_show_video_card_summary">Display the horizontal Video/Movie rail in BentoFusion / All Media</string>
-  <string name="pref_bentofusion_show_audio_pulsing_title">Show Audio Pulsing Hero</string>
+  <string name="pref_bentofusion_show_video_card_title">Show Video / Movie</string>
+  <string name="pref_bentofusion_show_video_card_summary">Display the horizontal Video / Movie in Fusion / All Media</string>
+  <string name="pref_bentofusion_show_audio_pulsing_title">Show Audio Pulsing</string>
   <string name="pref_bentofusion_show_audio_pulsing_summary">Display the dynamic Audio Pulsing spotlight card</string>
   <string name="pref_audio_pulsing_progress_style_title">Audio Pulsing progress style</string>
   <string name="pref_audio_pulsing_progress_style_summary">Choose between fluid wavy visualizer or seekbar progress for Audio Pulsing</string>
   <string name="pref_audio_pulsing_style_wavy">Wavy visualizer</string>
   <string name="pref_audio_pulsing_style_seekbar">Seekbar (Progress bar)</string>
-  <string name="pref_bentofusion_show_music_card_title">Show Music Rail</string>
-  <string name="pref_bentofusion_show_music_card_summary">Display the horizontal Music rail in BentoFusion / All Media</string>
+  <string name="pref_bentofusion_show_music_card_title">Show Music</string>
+  <string name="pref_bentofusion_show_music_card_summary">Display the horizontal Music in Fusion / All Media</string>
   <string name="pref_bentofusion_section_order_title">Fusion Section Order</string>
-  <string name="pref_bentofusion_section_video">Video/Movie Rail</string>
-  <string name="pref_bentofusion_section_audio_pulsing">Audio Pulsing Hero</string>
-  <string name="pref_bentofusion_section_music">Music Rail</string>
+  <string name="pref_bentofusion_section_video">Video / Movie</string>
+  <string name="pref_bentofusion_section_audio_pulsing">Audio Pulsing</string>
+  <string name="pref_bentofusion_section_music">Music</string>
   <string name="pref_library_sub_tabs_order_title">Media Library sub-tabs order</string>
   <string name="pref_library_sub_tabs_order_summary">Drag to reorder All Media, Videos, and Music sub-tabs</string>
   <string name="pref_library_show_music_tab_title">Show Music Tab in Library</string>
@@ -2912,7 +2912,7 @@
   <string name="pref_audio_visualizer_style_cuboid">Cuboid</string>
   <string name="pref_audio_visualizer_style_particle">Particles</string>
 
-  <string name="pref_bentofusion_all_media_hidden_summary">Hidden (All BentoFusion rails and cards are turned off)</string>
+  <string name="pref_bentofusion_all_media_hidden_summary">Hidden (All Fusion rails and cards are turned off)</string>
   <string name="pref_audio_visualizer_galaxy_credit">Inspired by Zain Raza on CodePen</string>
   <string name="pref_audio_ambient_mode_title">Ambient Mode</string>
   <string name="pref_audio_ambient_mode_summary">Display dynamic color gradients derived from album cover art in music player (disabled when visualizer is active)</string>
