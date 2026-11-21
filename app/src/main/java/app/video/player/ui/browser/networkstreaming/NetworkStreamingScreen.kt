@@ -735,6 +735,27 @@ private fun StreamLinkSection(
       }
     }
 
+    // Magic hint banner for Telegram & Web stream links
+    Row(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 4.dp, vertical = 2.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+      Icon(
+        imageVector = Icons.RoundedFilled.AutoAwesome,
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.size(15.dp),
+      )
+      Text(
+        text = stringResource(R.string.ui_network_telegram_magic_hint),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+      )
+    }
+
     // 2. Recent Stream Links (Top 10) with Quick Autofill & Media Save
     val topRecent = remember(recentLinks) { recentLinks.take(10) }
     if (topRecent.isNotEmpty()) {
