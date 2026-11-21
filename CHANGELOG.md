@@ -2,6 +2,45 @@
 
 These notes are written in plain English and focus on what changed for real use.
 
+## 1.0.1
+
+### 🔊 Audio Player Vertical Volume Gestures & Floating HUD Pill
+- **Vertical Volume Swipe on Album Cover:**
+  - Implemented vertical touch gesture control directly on the Audio Player cover art with seamless horizontal swipe track-switching coexistence.
+  - Smoothly drives master volume (0–100%) and seamlessly engages MPV volume boost (up to the configured boost cap) when volume reaches 100%.
+  - Added tactile haptic ticks via `volumeHaptics` and real-time floating `VolumeSlider` liquid glass HUD pill with auto-hide timer.
+  - Added user toggle `Audio Volume Gesture` in both **Audio Preferences** and **Gesture Preferences**.
+
+### 🎨 Fusion Rail Header Styles & Customization
+- **5 Attractive Rail Header Aesthetics:**
+  - Added `Fusion rail header style` setting under **Settings > Appearance > Fusion & Media Library**:
+    - **Liquid Glass Capsule (Default)**: Floating frosted capsule with glowing circular glyph and luminous pill counter.
+    - **Cyber Glow Pillar**: Laser accent bar with uppercase subtitle track label and high-contrast badge.
+    - **Frosted Bento Strip**: Enclosed glass card bar with count subtitle and shortcut action chip.
+    - **Fluid Pulse Dot**: Minimalist living pulse dot indicator with soft pill counter.
+    - **Studio Luxury Aperture**: Micro-eyebrow category title with bold editorial headline and item bracket.
+  - Dynamically updates section titles for Movies/Videos and Music across the Fusion hub.
+
+### 🔄 Interface Restart Prompt for Smooth Experience
+- **Restart Recommended Dialog:**
+  - Automatically prompts an intuitive restart dialog whenever changing key visual appearance settings (App Theme, Custom Themes, Fusion Rail Header Style, Audio Pulsing Progress Style) to keep app performance and UI rendering silky smooth across all activities.
+
+### ⚙️ Clean Default Preferences Alignment
+- **Optimized Defaults for Modern Media Playback:**
+  - Set default `showRepeatShuffleOverlay` = **Off**.
+  - Set default `showActionFeedbackOverlay` = **Off**.
+  - Set default `showResumeIndicatorOverlay` = **Off**.
+  - Set default `pinchToZoomSubtitles` = **Off**.
+  - Set default `swipeSubtitlesToSeekDialog` = **Off**.
+  - Set default `batterySaver` = **On**.
+  - Set default `thumbnailGenerator` = **Auto** (tries MediaStore first with Native fallback for maximum coverage).
+
+### 🚀 Performance & Visual Enhancements
+- **Ultra-Smooth Audio Pulsing Seekbar:**
+  - Eliminated 1-second step ticking on the Audio Pulsing hero card seekbar with continuous vsync frame-clock animation.
+- **Branding Assets Clean-up:**
+  - Streamlined branding SVG assets and updated primary identity icon to the Velvet Nebula Aura Aperture design.
+
 ## 1.0.0
 
 ### 🔮 Fusion Experience, Music Sub-Categories & Performance Architecture
