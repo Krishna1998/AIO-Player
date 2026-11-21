@@ -546,6 +546,16 @@ object AudioPreferencesScreen : Screen {
               }
 
               PreferenceDivider()
+              val audioVolumeGesture by preferences.audioVolumeGesture.collectAsState()
+              SwitchPreference(
+                modifier = Modifier.settingsSearchTarget(R.string.pref_audio_volume_gesture_title),
+                value = audioVolumeGesture,
+                onValueChange = preferences.audioVolumeGesture::set,
+                title = { Text(stringResource(R.string.pref_audio_volume_gesture_title)) },
+                summary = { Text(stringResource(R.string.pref_audio_volume_gesture_summary)) },
+              )
+
+              PreferenceDivider()
               val volumeStep by preferences.volumeStep.collectAsState()
               ExpressivePreferenceItem {
                 SliderPreference(

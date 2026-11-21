@@ -4923,10 +4923,10 @@ fun restartFromBeginning() {
     changeVolumeTo(currentSystemVolume + change, showUi)
   }
 
-  fun changeVolumePercentTo(volumePercent: Int) {
+  fun changeVolumePercentTo(volumePercent: Int, showSystemUi: Boolean = isAudioOnly.value) {
     val newPercent = volumePercent.coerceIn(0, 100)
     val newVolume = percentToSystemVolume(newPercent)
-    val flags = if (isAudioOnly.value) AudioManager.FLAG_SHOW_UI else 0
+    val flags = if (showSystemUi) AudioManager.FLAG_SHOW_UI else 0
     (appContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager).setStreamVolume(AudioManager.STREAM_MUSIC, newVolume, flags)
     currentVolume.value = syncCurrentSystemVolume()
     currentVolumePercent.value = newPercent

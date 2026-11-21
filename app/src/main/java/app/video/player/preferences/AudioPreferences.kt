@@ -32,6 +32,7 @@ class AudioPreferences(
   val audioPitchCorrection = preferenceStore.getBoolean("audio_pitch_correction", true)
   val audioChannels = preferenceStore.getEnum("audio_channels", AudioChannels.AutoSafe)
   val volumeBoostCap = preferenceStore.getInt("audio_volume_boost_cap", 0)
+  val audioVolumeGesture = preferenceStore.getBoolean("audio_volume_gesture", true)
   val volumeStep = preferenceStore.getInt("audio_volume_step", 10)
   val ignoreAudioFocus = preferenceStore.getBoolean("ignore_audio_focus", false)
   val backgroundPlayback = preferenceStore.getBoolean("automatic_background_playback", false)

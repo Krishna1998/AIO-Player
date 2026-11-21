@@ -156,6 +156,7 @@ private val settingsSearchListAnchors: Map<Screen, List<SettingsSearchListAnchor
         SettingsSearchListAnchor(titleRes = R.string.pref_video_swipe_title, itemIndex = 1),
         SettingsSearchListAnchor(titleRes = R.string.pref_player_gestures_brightness, itemIndex = 1),
         SettingsSearchListAnchor(titleRes = R.string.pref_player_gestures_volume, itemIndex = 1),
+        SettingsSearchListAnchor(titleRes = R.string.pref_audio_volume_gesture_title, itemIndex = 1),
         SettingsSearchListAnchor(titleRes = R.string.pref_player_gestures_pinch_to_zoom, itemIndex = 1),
         SettingsSearchListAnchor(titleRes = R.string.pref_player_gestures_horizontal_swipe_to_seek, itemIndex = 1),
         SettingsSearchListAnchor(titleRes = R.string.pref_player_gestures_horizontal_swipe_sensitivity, itemIndex = 1),

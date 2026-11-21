@@ -89,6 +89,7 @@ private val liveAudioSettings = setOf(
   R.string.pref_audio_spatial_title,
   R.string.pref_audio_channels,
   R.string.pref_audio_volume_boost_cap,
+  R.string.pref_audio_volume_gesture_title,
   R.string.pref_audio_volume_step_title,
 )
 

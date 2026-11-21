@@ -430,6 +430,8 @@
   <string name="pref_audio_channels_stereo_reversed">Reversed Stereo</string>
   <string name="pref_audio_preferred_language">Audio language(s) to be selected by default on a video with multiple audio streams, Two- or three-letter languages codes work. Multiple values can be delimited by comma.</string>
   <string name="pref_audio_volume_boost_cap">Volume boost cap</string>
+  <string name="pref_audio_volume_gesture_title">Audio volume gesture</string>
+  <string name="pref_audio_volume_gesture_summary">Vertical swipe on album art to adjust volume in the music player</string>
   <string name="pref_audio_volume_step_title">Volume step</string>
   <string name="pref_audio_volume_step_default">1 step (Default)</string>
   <string name="pref_audio_volume_step_summary">%d steps per press</string>
@@ -2306,7 +2308,7 @@
   <string name="pref_haptic_feedback_title">Haptic feedback</string>
   <string name="pref_haptic_feedback_summary">Tactile feedback for selection, dragging, and control adjustments. Respects system settings.</string>
   <string name="pref_nested_tab_swipes_title">Swipe between inner tabs</string>
-  <string name="pref_nested_tab_swipes_summary">Enable left/right swipes between inner tabs such as Network, Playlists, and Recently Played. Main navigation and item swipe actions are unchanged.</string>
+  <string name="pref_nested_tab_swipes_summary">Enable left/right swipes between inner tabs such as All Media, Video and Music. Main navigation and item swipe actions are unchanged.</string>
 
   <!-- Post-Processing Effects -->
   <string name="btn_label_post_processing">Post-Processing</string>

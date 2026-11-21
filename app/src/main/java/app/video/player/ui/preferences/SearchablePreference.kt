@@ -1178,6 +1178,14 @@ object SearchablePreferences {
       )
       add(
         SearchablePreference(
+          titleRes = R.string.pref_audio_volume_gesture_title,
+          keywords = listOf("volume", "gesture", "swipe", "audio", "music", "album", "cover"),
+          category = "Audio",
+          screen = AudioPreferencesScreen,
+        ),
+      )
+      add(
+        SearchablePreference(
           titleRes = R.string.pref_audio_volume_step_title,
           keywords = listOf("volume", "step", "hardware", "keys", "buttons", "increment"),
           category = "Audio",
