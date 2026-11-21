@@ -1893,8 +1893,8 @@
   <string name="secure_folder_save">Save</string>
   <string name="secure_folder_pin_changed">PIN changed successfully</string>
   <string name="secure_folder_security_question_changed">Security question updated</string>
-  <string name="secure_folder_use_fingerprint">Use Fingerprint</string>
-  <string name="secure_folder_use_face_unlock">Use Face Unlock</string>
+  <string name="secure_folder_use_fingerprint">Use Device Fingerprint</string>
+  <string name="secure_folder_use_face_unlock">Use Device Biometric</string>
 
   <!-- Security Questions Presets -->
   <string name="secure_folder_sq_pet">What was your first pet\'s name?</string>
@@ -1925,8 +1925,8 @@
   <string name="secure_folder_settings_help">Help</string>
   <string name="secure_folder_settings_help_text">Double-tap or long-press the app name at the top of the Home screen to open the Secure Folder.</string>
   <string name="secure_folder_settings_setup_first">Open the Secure Folder and set a PIN first.</string>
-  <string name="secure_folder_biometric_title">Enable Biometric Unlock</string>
-  <string name="secure_folder_biometric_summary">Use your fingerprint or face to unlock</string>
+  <string name="secure_folder_biometric_title">Device Fingerprint / Biometric</string>
+  <string name="secure_folder_biometric_summary">Unlock Secure Folder with device fingerprint or biometrics</string>
   <string name="secure_folder_reset_pin">Reset PIN</string>
   <string name="secure_folder_reset_pin_summary">Create a 4-digit PIN</string>
   <string name="secure_folder_reset_security_question">Reset Security Question</string>
