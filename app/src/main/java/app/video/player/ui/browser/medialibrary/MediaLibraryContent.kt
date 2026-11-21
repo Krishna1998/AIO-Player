@@ -210,6 +210,10 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   val mediaLayoutMode by browserPreferences.mediaLayoutMode.collectAsState()
   val includeAudioBrowser by browserPreferences.includeAudioBrowser.collectAsState()
   val libraryShowMusicTab by browserPreferences.libraryShowMusicTab.collectAsState()
+  val bentoFusionShowVideoRail by browserPreferences.bentoFusionShowVideoRail.collectAsState()
+  val bentoFusionShowAudioPulsing by browserPreferences.bentoFusionShowAudioPulsing.collectAsState()
+  val bentoFusionShowMusicRail by browserPreferences.bentoFusionShowMusicRail.collectAsState()
+  val isAnyBentoFusionSectionEnabled = bentoFusionShowVideoRail || bentoFusionShowAudioPulsing || bentoFusionShowMusicRail
   val savedMediaType by browserPreferences.mediaLibraryType.collectAsState()
   val mediaType = if (forceAudio) MediaLibraryType.Audio else if (includeAudioBrowser || browserPreferences.folderViewMode.get() == app.video.player.preferences.FolderViewMode.BentoFusion) savedMediaType else MediaLibraryType.Video
   val musicCoverArtSize by browserPreferences.musicCoverArtSize.collectAsState()
@@ -233,7 +237,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
     audioVideosWithInfo.filter { favoriteAudioPaths.contains(it.video.path) }
   }
   val mediaLibrarySubTabsOrder by browserPreferences.mediaLibrarySubTabsOrder.collectAsState()
-  val mediaLibraryTabs = remember(forceAudio, libraryShowMusicTab, mediaLibrarySubTabsOrder) {
+  val mediaLibraryTabs = remember(forceAudio, libraryShowMusicTab, isAnyBentoFusionSectionEnabled, mediaLibrarySubTabsOrder) {
     if (forceAudio) {
       listOf(MediaLibraryType.Audio)
     } else {
@@ -241,13 +245,13 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
       val orderedIds = (mediaLibrarySubTabsOrder.filter { it in defaults } + defaults).distinct()
       val candidateTabs = orderedIds.mapNotNull { id ->
         when (id) {
-          "ALL" -> MediaLibraryType.All
+          "ALL" -> if (isAnyBentoFusionSectionEnabled) MediaLibraryType.All else null
           "VIDEO" -> MediaLibraryType.Video
           "AUDIO" -> if (libraryShowMusicTab) MediaLibraryType.Audio else null
           else -> null
         }
       }
-      if (candidateTabs.isNotEmpty()) candidateTabs else listOf(MediaLibraryType.All, MediaLibraryType.Video)
+      if (candidateTabs.isNotEmpty()) candidateTabs else listOf(MediaLibraryType.Video)
     }
   }
   val initialPageIndex = remember(mediaLibraryTabs) {
@@ -514,6 +518,13 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
       isSearching = false
       searchQuery = ""
       keyboardController?.hide()
+    }
+  }
+
+  LaunchedEffect(isAnyBentoFusionSectionEnabled, savedMediaType, mediaLibraryTabs) {
+    if (!isAnyBentoFusionSectionEnabled && savedMediaType == MediaLibraryType.All) {
+      val fallbackType = mediaLibraryTabs.firstOrNull() ?: MediaLibraryType.Video
+      browserPreferences.mediaLibraryType.set(fallbackType)
     }
   }
 

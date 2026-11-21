@@ -1349,6 +1349,10 @@ object AppearancePreferencesScreen : Screen {
           item {
             val librarySubTabsOrder by browserPreferences.mediaLibrarySubTabsOrder.collectAsState()
             val libraryShowMusicTab by browserPreferences.libraryShowMusicTab.collectAsState()
+            val bentoShowVideo by browserPreferences.bentoFusionShowVideoRail.collectAsState()
+            val bentoShowPulsing by browserPreferences.bentoFusionShowAudioPulsing.collectAsState()
+            val bentoShowMusic by browserPreferences.bentoFusionShowMusicRail.collectAsState()
+            val isAllMediaActive = bentoShowVideo || bentoShowPulsing || bentoShowMusic
             val subTabDefaults = listOf("ALL", "VIDEO", "AUDIO")
             val orderedSubTabs = (librarySubTabsOrder.filter { it in subTabDefaults } + subTabDefaults).distinct()
             val subTabItems = orderedSubTabs.map { id ->
@@ -1356,9 +1360,9 @@ object AppearancePreferencesScreen : Screen {
                 "ALL" -> ReorderableTabItem(
                   id = id,
                   title = stringResource(R.string.ui_all_media),
-                  summary = stringResource(R.string.pref_bentofusion_show_video_card_summary),
-                  enabled = true,
-                  required = true,
+                  summary = if (isAllMediaActive) stringResource(R.string.pref_bentofusion_show_video_card_summary) else "Hidden (All BentoFusion rails & cards are turned off)",
+                  enabled = isAllMediaActive,
+                  required = isAllMediaActive,
                   titleRes = R.string.ui_all_media,
                 )
                 "VIDEO" -> ReorderableTabItem(
@@ -1382,7 +1386,11 @@ object AppearancePreferencesScreen : Screen {
               ReorderableTabPreferences(
                 tabs = subTabItems,
                 onEnabledChange = { id, enabled ->
-                  if (id == "AUDIO") {
+                  if (id == "ALL") {
+                    browserPreferences.bentoFusionShowVideoRail.set(enabled)
+                    browserPreferences.bentoFusionShowAudioPulsing.set(enabled)
+                    browserPreferences.bentoFusionShowMusicRail.set(enabled)
+                  } else if (id == "AUDIO") {
                     browserPreferences.libraryShowMusicTab.set(enabled)
                   }
                 },
