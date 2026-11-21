@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import app.video.player.preferences.MpvConfigControlledFeatures
 import app.video.player.ui.player.Panels
@@ -71,7 +72,7 @@ fun PlayerPanels(
           fadeOut(AppMotion.Effect.Alpha) + slideOutHorizontally(spatial) { it / 2 }
       }
     },
-    modifier = modifier,
+    modifier = modifier.graphicsLayer { clip = false },
   ) { currentPanel ->
     val configOwned =
       when (currentPanel) {
