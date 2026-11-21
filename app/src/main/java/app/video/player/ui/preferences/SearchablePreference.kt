@@ -1662,6 +1662,7 @@ object SearchablePreferences {
         SearchEntrySpec(R.string.secure_folder_reset_security_question, listOf("secure", "folder", "security", "question")),
         SearchEntrySpec(R.string.secure_folder_forgot_pin_title, listOf("secure", "folder", "forgot", "pin", "recover")),
         SearchEntrySpec(R.string.secure_folder_hide_settings, listOf("secure", "folder", "hide", "entry")),
+        SearchEntrySpec(R.string.secure_folder_restore_on_destroy_title, listOf("secure", "folder", "restore", "destroy", "uninstall")),
         SearchEntrySpec(R.string.secure_folder_destroy_title, listOf("secure", "folder", "destroy", "delete", "reset")),
       )
 

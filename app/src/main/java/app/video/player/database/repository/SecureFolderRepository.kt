@@ -511,17 +511,28 @@ class SecureFolderRepository(
   // ============================================================================
 
   /**
-   * Permanently deletes every secured file, then sweeps any orphaned files left in the secure
-   * directory. Fails (without partial success) if anything could not be removed, so the caller
-   * only resets the PIN once nothing recoverable is left behind.
+   * Destroys the whole Secure Folder.
+   * If [restoreFiles] is true, restores all secured files back to their original locations in shared storage/file manager
+   * before wiping. If false, permanently deletes every secured file.
+   * Fails if anything could not be safely restored/removed, so the caller only resets the PIN once nothing is left behind in limbo.
    */
-  suspend fun destroyAll(context: Context): Result<Int> =
+  suspend fun destroyAll(
+    context: Context,
+    restoreFiles: Boolean = false,
+  ): Result<Int> =
     withContext(Dispatchers.IO) {
       val entities = dao.getAll()
       if (entities.isNotEmpty()) {
-        val batch = deleteForever(entities).getOrElse { return@withContext Result.failure(it) }
-        if (batch.failedIds.isNotEmpty()) {
-          return@withContext Result.failure(IOException("Failed to delete ${batch.failedIds.size} file(s)"))
+        if (restoreFiles) {
+          val batch = restore(context, entities).getOrElse { return@withContext Result.failure(it) }
+          if (batch.failedIds.isNotEmpty()) {
+            return@withContext Result.failure(IOException("Failed to restore ${batch.failedIds.size} file(s)"))
+          }
+        } else {
+          val batch = deleteForever(entities).getOrElse { return@withContext Result.failure(it) }
+          if (batch.failedIds.isNotEmpty()) {
+            return@withContext Result.failure(IOException("Failed to delete ${batch.failedIds.size} file(s)"))
+          }
         }
       }
 

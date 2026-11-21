@@ -220,15 +220,18 @@ class SecureFolderViewModel(
   }
 
   /**
-   * Permanently deletes all secured videos and resets the PIN/question/flags. Preferences are
-   * only reset when every file was actually removed. [onFinished] receives the success flag.
+   * Destroys the Secure Folder and resets the PIN/question/flags.
+   * If [SecureFolderPreferences.restoreOnDestroy] is true, restores all secured files back to their
+   * original locations in shared storage/File Manager instead of deleting them.
+   * Preferences are only reset when the operation fully succeeds. [onFinished] receives the success flag.
    */
   fun destroySecureFolder(onFinished: (Boolean) -> Unit) {
     if (_isBusy.value) return
     viewModelScope.launch {
       _isBusy.value = true
+      val restoreFiles = preferences.restoreOnDestroy.get()
       val success =
-        runCatching { repository.destroyAll(getApplication()) }
+        runCatching { repository.destroyAll(getApplication(), restoreFiles = restoreFiles) }
           .getOrElse { Result.failure<Int>(it) }
           .onFailure { Log.e(TAG, "Destroy failed", it) }
           .isSuccess

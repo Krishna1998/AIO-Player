@@ -1973,8 +1973,11 @@
   <string name="secure_folder_pin_length">PIN length</string>
   <string name="secure_folder_pin_length_option">%1$d digits</string>
   <string name="secure_folder_proceed">Proceed</string>
+  <string name="secure_folder_restore_on_destroy_title">Restore files on destroy</string>
+  <string name="secure_folder_restore_on_destroy_summary">Restore secured files to their original locations in File Manager when destroying Secure Folder instead of deleting them</string>
   <string name="secure_folder_destroy_title">Destroy Secure Folder</string>
   <string name="secure_folder_destroy_summary">Permanently delete all secured videos and reset PIN</string>
+  <string name="secure_folder_destroy_summary_restore">Restore all secured videos to original folders and reset PIN</string>
   <string name="secure_folder_destroyed">Secure Folder destroyed</string>
   <string name="secure_folder_destroy_failed">Couldn\'t delete everything. Nothing was reset, try again.</string>
   <string name="secure_folder_destroy_no_screen_lock">Set a phone screen lock (PIN, pattern or password) to use this.</string>
