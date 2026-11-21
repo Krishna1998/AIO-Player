@@ -87,6 +87,8 @@
   <string name="pref_appearance_ui_scale_restart_title">Restart required</string>
   <string name="pref_appearance_ui_scale_restart_message">Restart V&amp;M Player to apply the new app UI scale of %1$d%%.</string>
   <string name="pref_appearance_ui_scale_restart_now">Restart now</string>
+  <string name="pref_appearance_interface_restart_title">Restart recommended</string>
+  <string name="pref_appearance_interface_restart_message">Restart V&amp;M Player to apply your new interface changes smoothly across all screens.</string>
   <string name="pref_appearance_unlimited_name_lines_title">Show full names</string>
   <string name="pref_appearance_unlimited_name_lines_summary">Show full folder and video names without truncation</string>
   <string name="pref_appearance_force_dark_player_buttons_background_title">Always use dark button backgrounds</string>

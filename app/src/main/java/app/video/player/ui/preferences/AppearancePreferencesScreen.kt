@@ -114,6 +114,7 @@ object AppearancePreferencesScreen : Screen {
     var changingThumbnailGenerator by remember { mutableStateOf(false) }
     var pendingThumbnailMode by remember { mutableStateOf<ThumbnailMode?>(null) }
     var pendingAppUiScale by remember { mutableStateOf<Float?>(null) }
+    var showInterfaceRestartDialog by remember { mutableStateOf(false) }
     var isThemeSectionExpanded by rememberSaveable { mutableStateOf(true) }
     val searchTarget by SettingsSearchNavigation.target.collectAsState()
     LaunchedEffect(searchTarget) {
@@ -217,6 +218,19 @@ object AppearancePreferencesScreen : Screen {
         onConfirm = {
           pendingAppUiScale = null
           preferences.appUiScale.set(scale)
+          (context as? Activity)?.recreate()
+        },
+      )
+    }
+
+    if (showInterfaceRestartDialog) {
+      RestartRequiredDialog(
+        title = stringResource(R.string.pref_appearance_interface_restart_title),
+        message = stringResource(R.string.pref_appearance_interface_restart_message),
+        confirmLabel = stringResource(R.string.pref_appearance_ui_scale_restart_now),
+        onDismiss = { showInterfaceRestartDialog = false },
+        onConfirm = {
+          showInterfaceRestartDialog = false
           (context as? Activity)?.recreate()
         },
       )
@@ -346,6 +360,7 @@ object AppearancePreferencesScreen : Screen {
                           delay(50)
                           preferences.appTheme.set(theme)
                           preferences.selectedCustomThemeName.set("")
+                          showInterfaceRestartDialog = true
                         }
                       }
                     },
@@ -356,6 +371,7 @@ object AppearancePreferencesScreen : Screen {
                         scope.launch {
                           delay(50)
                           preferences.selectedCustomThemeName.set(theme.name)
+                          showInterfaceRestartDialog = true
                         }
                       }
                     },
@@ -1168,7 +1184,12 @@ object AppearancePreferencesScreen : Screen {
                 ListPreference(
                   modifier = Modifier.settingsSearchTarget(R.string.pref_audio_pulsing_progress_style_title),
                   value = audioPulsingProgressStyle,
-                  onValueChange = { browserPreferences.audioPulsingProgressStyle.set(it) },
+                  onValueChange = {
+                    if (it != audioPulsingProgressStyle) {
+                      browserPreferences.audioPulsingProgressStyle.set(it)
+                      showInterfaceRestartDialog = true
+                    }
+                  },
                   values = AudioPulsingProgressStyle.entries,
                   valueToText = { AnnotatedString(stringResource(it.titleRes)) },
                   title = { Text(stringResource(R.string.pref_audio_pulsing_progress_style_title)) },
@@ -1187,7 +1208,12 @@ object AppearancePreferencesScreen : Screen {
                 ListPreference(
                   modifier = Modifier.settingsSearchTarget(R.string.pref_bentofusion_header_style_title),
                   value = bentoFusionHeaderStyle,
-                  onValueChange = { browserPreferences.bentoFusionHeaderStyle.set(it) },
+                  onValueChange = {
+                    if (it != bentoFusionHeaderStyle) {
+                      browserPreferences.bentoFusionHeaderStyle.set(it)
+                      showInterfaceRestartDialog = true
+                    }
+                  },
                   values = BentoFusionHeaderStyle.entries,
                   valueToText = { AnnotatedString(stringResource(it.titleRes)) },
                   title = { Text(stringResource(R.string.pref_bentofusion_header_style_title)) },
