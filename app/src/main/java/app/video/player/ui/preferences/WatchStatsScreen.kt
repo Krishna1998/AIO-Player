@@ -513,7 +513,7 @@ private fun WeeklyActivityBentoCard(days: Map<String, Long>) {
 private fun MediaLeaderboardBentoCard(
   title: String,
   emptyText: String,
-  icon: androidx.compose.ui.graphics.vector.ImageVector,
+  icon: app.video.player.ui.icons.AppIcon,
   badgeColor: Color,
   badgeContentColor: Color,
   mediaList: List<WatchMediaStats>,
