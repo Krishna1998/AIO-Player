@@ -512,7 +512,7 @@ fun BentoFusionHeader(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
               ) {
                 items(
-                  items = videoItems.take(20),
+                  items = videoItems,
                   key = { it.video.path },
                 ) { item ->
                   BentoHorizonVideoCard(
@@ -966,7 +966,7 @@ fun DualHorizonRails(
           horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
           items(
-            items = videoItems.take(20),
+            items = videoItems,
             key = { it.video.path },
           ) { item ->
             BentoHorizonVideoCard(
