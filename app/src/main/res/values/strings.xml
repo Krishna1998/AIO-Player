@@ -102,10 +102,10 @@
   <string name="pref_appearance_show_video_thumbnails_summary">Display generated thumbnails in video lists and folders</string>
   <string name="pref_appearance_thumbnail_generator_title">Thumbnail generator</string>
   <string name="pref_appearance_thumbnail_generator_summary">Choose Auto, Native or MediaStore for local thumbnails and song covers</string>
-  <string name="pref_thumbnail_generator_auto">Auto (Default)</string>
+  <string name="pref_thumbnail_generator_auto">Auto</string>
   <string name="pref_thumbnail_generator_auto_summary">Try MediaStore first; use Native if a thumbnail or song cover is unavailable, including in hidden folders. Switching clears cached thumbnails.</string>
   <string name="pref_thumbnail_generator_native">Native</string>
-  <string name="pref_thumbnail_generator_mediastore">MediaStore</string>
+  <string name="pref_thumbnail_generator_mediastore">MediaStore (Default)</string>
   <string name="pref_thumbnail_generator_native_summary">Extract local video thumbnails and song covers from the media file. Switching clears cached thumbnails.</string>
   <string name="pref_thumbnail_generator_mediastore_summary">Use Android thumbnails and album art for local videos and songs. Switching clears cached thumbnails; unavailable artwork shows a placeholder. Network previews use Native.</string>
   <string name="pref_appearance_thumbnail_generation_title">Thumbnail generation strategy</string>

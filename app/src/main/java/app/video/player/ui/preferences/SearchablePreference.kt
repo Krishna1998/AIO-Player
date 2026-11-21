@@ -301,6 +301,15 @@ object SearchablePreferences {
           screen = AppearancePreferencesScreen,
         ),
       )
+      add(
+        SearchablePreference(
+          titleRes = R.string.pref_clear_thumbnail_cache_title,
+          summaryRes = R.string.pref_thumbnail_cache_summary,
+          keywords = listOf("clear", "thumbnail", "cache", "preview", "images", "delete", "storage"),
+          category = "Appearance",
+          screen = AppearancePreferencesScreen,
+        ),
+      )
       // Layout preferences
       add(
         SearchablePreference(
