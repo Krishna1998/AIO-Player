@@ -195,6 +195,16 @@ class BrowserPreferences(
   val bentoFusionShowAudioPulsing = preferenceStore.getBoolean("bentofusion_show_audio_pulsing", true)
   val audioPulsingProgressStyle = preferenceStore.getEnum("audio_pulsing_progress_style", AudioPulsingProgressStyle.WavyVisualizer)
   val bentoFusionShowMusicRail = preferenceStore.getBoolean("bentofusion_show_music_rail", true)
+  val bentoFusionSectionOrder = preferenceStore.getObject(
+    key = "bentofusion_section_order",
+    defaultValue = listOf("VIDEO", "PULSING", "MUSIC"),
+    serializer = { order -> order.joinToString(",") },
+    deserializer = { stored ->
+      val defaults = listOf("VIDEO", "PULSING", "MUSIC")
+      val parsed = stored.split(",").map(String::trim).filter { it in defaults }.distinct()
+      parsed + defaults.filterNot { it in parsed }
+    },
+  )
   val libraryShowMusicTab = preferenceStore.getBoolean("library_show_music_tab", true)
 
   // Feature discovery hint for BentoFusion (Audio Pulsing gestures & interactive highlights)

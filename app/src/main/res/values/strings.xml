@@ -144,6 +144,10 @@
   <string name="pref_audio_pulsing_style_seekbar">Seekbar (Progress bar)</string>
   <string name="pref_bentofusion_show_music_card_title">Show Music Rail</string>
   <string name="pref_bentofusion_show_music_card_summary">Display the horizontal Music rail in BentoFusion / All Media</string>
+  <string name="pref_bentofusion_section_order_title">BentoFusion section order</string>
+  <string name="pref_bentofusion_section_video">Video/Movie Rail</string>
+  <string name="pref_bentofusion_section_audio_pulsing">Audio Pulsing Hero</string>
+  <string name="pref_bentofusion_section_music">Music Rail</string>
   <string name="pref_library_show_music_tab_title">Show Music Tab in Library</string>
   <string name="pref_library_show_music_tab_summary">Display the Music sub-tab in the Media Library header</string>
   <string name="pref_nav_jellyfin_title">Show Jellyfin tab</string>
