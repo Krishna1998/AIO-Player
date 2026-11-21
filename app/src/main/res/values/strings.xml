@@ -133,7 +133,7 @@
   <string name="pref_nav_music_summary">Show or hide Music in the bottom navigation bar</string>
   <string name="pref_nav_network_title">Show Streaming tab</string>
   <string name="pref_nav_network_summary">Show or hide Streaming in the bottom navigation bar</string>
-  <string name="pref_appearance_category_bentofusion">BentoFusion &amp; Media Library</string>
+  <string name="pref_appearance_category_bentofusion">Fusion &amp; Media Library</string>
   <string name="pref_bentofusion_show_video_card_title">Show Video/Movie Rail</string>
   <string name="pref_bentofusion_show_video_card_summary">Display the horizontal Video/Movie rail in BentoFusion / All Media</string>
   <string name="pref_bentofusion_show_audio_pulsing_title">Show Audio Pulsing Hero</string>
@@ -144,7 +144,7 @@
   <string name="pref_audio_pulsing_style_seekbar">Seekbar (Progress bar)</string>
   <string name="pref_bentofusion_show_music_card_title">Show Music Rail</string>
   <string name="pref_bentofusion_show_music_card_summary">Display the horizontal Music rail in BentoFusion / All Media</string>
-  <string name="pref_bentofusion_section_order_title">BentoFusion section order</string>
+  <string name="pref_bentofusion_section_order_title">Fusion Section Order</string>
   <string name="pref_bentofusion_section_video">Video/Movie Rail</string>
   <string name="pref_bentofusion_section_audio_pulsing">Audio Pulsing Hero</string>
   <string name="pref_bentofusion_section_music">Music Rail</string>
