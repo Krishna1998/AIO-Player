@@ -131,8 +131,8 @@
   <string name="pref_appearance_replace_embedded_music_artwork_summary">Prefer official high-resolution online artwork over existing local embedded ID3 tags</string>
   <string name="pref_nav_music_title">Show Music tab</string>
   <string name="pref_nav_music_summary">Show or hide Music in the bottom navigation bar</string>
-  <string name="pref_nav_network_title">Show Network tab</string>
-  <string name="pref_nav_network_summary">Show or hide Network in the bottom navigation bar</string>
+  <string name="pref_nav_network_title">Show Streaming tab</string>
+  <string name="pref_nav_network_summary">Show or hide Streaming in the bottom navigation bar</string>
   <string name="pref_appearance_category_bentofusion">BentoFusion &amp; Media Library</string>
   <string name="pref_bentofusion_show_video_card_title">Show Video/Movie Rail</string>
   <string name="pref_bentofusion_show_video_card_summary">Display the horizontal Video/Movie rail in BentoFusion / All Media</string>
@@ -1341,8 +1341,8 @@
   <string name="ui_albums">Albums</string>
   <string name="ui_artists">Artists</string>
   <string name="ui_favorites">Favorites</string>
-  <string name="ui_network">Network</string>
-  <string name="ui_online_streaming">Online Streaming</string>
+  <string name="ui_network">Streaming</string>
+  <string name="ui_online_streaming">Streaming</string>
   <string name="ui_pinned_folder">Pinned folder</string>
   <string name="ui_pin_videos">Pin videos</string>
   <string name="ui_unpin_videos">Unpin videos</string>
@@ -1691,8 +1691,8 @@
   <string name="ui_already_using_latest_version">Already using latest version</string>
   <string name="ui_install_and_update_yt_dlp_for_streaming_support">Install and update yt-dlp for streaming support</string>
   <string name="ui_refresh">Refresh</string>
-  <string name="ui_dual_pane_view">Dual Pane View</string>
-  <string name="ui_enable_dual_pane_layout_on_tablets_in_folder_view">Enable dual pane layout on tablets in folder view</string>
+  <string name="ui_dual_pane_view">Dual Panel View</string>
+  <string name="ui_enable_dual_pane_layout_on_tablets_in_folder_view">Enable dual panel layout on tablets in folder view</string>
   <string name="ui_delete_folder_all_contents">Delete folder + all contents</string>
   <string name="ui_include_audio_files">Include audio files</string>
   <string name="ui_show_audio_files_in_the_browser">Show audio files in the browser</string>
