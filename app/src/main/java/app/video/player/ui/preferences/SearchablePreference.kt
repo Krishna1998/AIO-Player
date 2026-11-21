@@ -1515,7 +1515,6 @@ object SearchablePreferences {
         anchorItemIndex = 1,
         SearchEntrySpec(R.string.ui_include_audio_files, listOf("audio", "files", "browser", "folders", "library")),
         SearchEntrySpec(R.string.ui_minimum_audio_duration, listOf("audio", "minimum", "duration", "short", "filter")),
-        SearchEntrySpec(R.string.pref_music_tabs_title, listOf("music", "library", "tabs", "order", "songs", "albums")),
       )
       addSearchEntries(
         category = "Audio",
