@@ -141,6 +141,6 @@ class NetworkStreamEntryRepository(
   ): String = "torrent:$infoHash:$fileIndex"
 
   companion object {
-    const val NORMAL_ENTRY_LIMIT = 3
+    const val NORMAL_ENTRY_LIMIT = 10
   }
 }

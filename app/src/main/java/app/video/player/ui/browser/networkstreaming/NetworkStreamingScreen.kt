@@ -327,18 +327,7 @@ object NetworkStreamingScreen : Screen {
 
         }
       },
-      floatingActionButton = {
-        ExtendedFloatingActionButton(
-          onClick = { showAddSheet = true },
-          icon = { Icon(Icons.RoundedFilled.Add, contentDescription = null) },
-          text = {
-            Text(
-              stringResource(R.string.ui_add_connection),
-            )
-          },
-          modifier = Modifier.padding(bottom = app.video.player.ui.browser.fab.FabPlacement.scaffoldBottomPadding()),
-        )
-      },
+      floatingActionButton = {},
     ) { padding ->
       Box(
         modifier =
@@ -538,15 +527,7 @@ private fun LocalNetworkContent(
     }
 
     // 2. Saved Network Connections Section
-    if (connections.isEmpty()) {
-      item {
-        EmptyStateCard(
-          icon = Icons.RoundedFilled.SignalWifiStatusbarConnectedNoInternet4,
-          title = stringResource(R.string.ui_no_network_connections),
-          subtitle = stringResource(R.string.ui_add_smb_ftp_or_webdav_connections_to_browse_network_files),
-        )
-      }
-    } else {
+    if (connections.isNotEmpty()) {
       items(connections, key = { it.id }) { connection ->
         val status = connectionStatuses[connection.id]
         NetworkConnectionCard(
@@ -763,8 +744,8 @@ private fun StreamLinkSection(
       }
     }
 
-    // 2. Top 3 Recent Stream Links with Quick Autofill & Media Save
-    val topRecent = remember(recentLinks) { recentLinks.take(3) }
+    // 2. Recent Stream Links (Top 10) with Quick Autofill & Media Save
+    val topRecent = remember(recentLinks) { recentLinks.take(10) }
     if (topRecent.isNotEmpty()) {
       Column(
         modifier = Modifier.fillMaxWidth(),
