@@ -1496,7 +1496,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
           onSortTypeChange = { browserPreferences.videoSortType.set(it) },
           onSortOrderChange = { browserPreferences.videoSortOrder.set(it) },
           isFolderView = false,
-          enableViewModeOptions = !forceAudio,
+          enableViewModeOptions = !forceAudio && !isBentoFusion,
           enableLayoutModeOptions = !isBentoFusion,
           enableFieldOptions = !isBentoFusion,
           isAudio = currentTab == MediaLibraryType.Audio,
