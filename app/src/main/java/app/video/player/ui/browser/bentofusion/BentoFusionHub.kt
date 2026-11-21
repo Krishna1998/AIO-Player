@@ -1983,7 +1983,7 @@ fun OneUi9WaveformVisualizer(
       }
     }
 
-    // Layer 1: Ambient Luminous Bass Veil (soft background rolling harmonic wave - 1st wave)
+    // Layer 1: Ambient Luminous Bass Veil (1st wave)
     drawWaveRibbon(
       wavelength = 92.dp.toPx(),
       lift = availableLift * 0.95f,
@@ -1996,10 +1996,10 @@ fun OneUi9WaveformVisualizer(
       glowWidth = 5.dp.toPx(),
     )
 
-    // Layer 2: Harmonic Mid Veil (vibrant gradient curtain - 2nd wave)
+    // Layer 2: Harmonic Mid Veil (2nd wave - matched height with first and last)
     drawWaveRibbon(
       wavelength = 62.dp.toPx(),
-      lift = availableLift * 0.80f,
+      lift = availableLift * 0.95f,
       phaseOffset = phase2,
       fillTopColor = wave2Color.copy(alpha = 0.42f),
       fillBottomColor = wave1Color.copy(alpha = 0.10f),
@@ -2009,10 +2009,10 @@ fun OneUi9WaveformVisualizer(
       glowWidth = 5.5.dp.toPx(),
     )
 
-    // Layer 3: Vibrant Lead Luminous Wave with Specular Core (crisp foreground crest - Last wave)
+    // Layer 3: Vibrant Lead Luminous Wave with Specular Core (Last wave - matched height)
     drawWaveRibbon(
       wavelength = 42.dp.toPx(),
-      lift = availableLift * 0.65f,
+      lift = availableLift * 0.95f,
       phaseOffset = phase3,
       fillTopColor = wave3Color.copy(alpha = 0.62f),
       fillBottomColor = wave2Color.copy(alpha = 0.12f),

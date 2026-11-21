@@ -432,7 +432,7 @@ internal fun SeekbarWithTimers(
         modifier
           .fillMaxWidth()
           .then(if (applyHorizontalPadding) Modifier.padding(horizontal = MaterialTheme.spacing.large) else Modifier),
-      verticalArrangement = Arrangement.spacedBy(4.dp),
+      verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
       SeekbarContent(
         positionProvider = {
@@ -460,11 +460,11 @@ internal fun SeekbarWithTimers(
         onValueChangeFinished = onValueChangeFinished,
         scope = scope,
         animatedPosition = animatedPosition,
-        modifier = Modifier.fillMaxWidth().height(if (showWavyVisualizer) 70.dp else 44.dp),
+        modifier = Modifier.fillMaxWidth().height(if (showWavyVisualizer) 64.dp else 36.dp),
       )
 
       Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().padding(top = 0.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
       ) {

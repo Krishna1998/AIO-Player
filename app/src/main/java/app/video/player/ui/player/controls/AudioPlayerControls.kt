@@ -2705,9 +2705,9 @@ fun AudioPlayerControls(
               Spacer(modifier = Modifier.height(4.dp))
             }
             seekbarView()
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(18.dp))
             playbackControlsRow()
-            Spacer(modifier = Modifier.height(30.dp))
+            Spacer(modifier = Modifier.height(26.dp))
             bottomActionRow()
           }
         }
