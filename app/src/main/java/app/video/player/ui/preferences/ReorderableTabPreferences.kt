@@ -3,6 +3,7 @@ package app.video.player.ui.preferences
 
 import androidx.annotation.StringRes
 
+import androidx.compose.runtime.key
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
@@ -52,47 +53,49 @@ internal fun ReorderableTabPreferences(
     modifier = Modifier.fillMaxWidth(),
     verticalArrangement = Arrangement.spacedBy(4.dp),
   ) { index, tab, isDragging ->
-    ReorderableItem {
-      ExpressivePreferenceTile(
-        index = index,
-        itemCount = tabs.size,
-        modifier = Modifier
-          .then(tab.titleRes?.let { Modifier.settingsSearchTarget(it) } ?: Modifier)
-          .graphicsLayer { alpha = if (isDragging) 0.95f else 1f },
-      ) {
-        Row(
-          modifier = Modifier.fillMaxWidth().heightIn(min = 72.dp)
-            .padding(start = 12.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(12.dp),
+    key(tab.id) {
+      ReorderableItem {
+        ExpressivePreferenceTile(
+          index = index,
+          itemCount = tabs.size,
+          modifier = Modifier
+            .then(tab.titleRes?.let { Modifier.settingsSearchTarget(it) } ?: Modifier)
+            .graphicsLayer { alpha = if (isDragging) 0.95f else 1f },
         ) {
-          if (isTelevision && !tab.required) {
-            // A remote cannot drag: explicit steps, and the moved row keeps focus.
-            TvReorderButtons(
-              canMoveUp = index > 0,
-              canMoveDown = index < tabs.lastIndex,
-              onMoveUp = { onMove(tab.id, index - 1) },
-              onMoveDown = { onMove(tab.id, index + 1) },
-            )
-          } else {
-            Icon(
-              imageVector = Icons.RoundedFilled.DragHandle,
-              contentDescription = if (tab.required) "Fixed tab" else "Drag to reorder ${tab.title}",
-              modifier = Modifier.size(32.dp).then(if (tab.required) Modifier else Modifier.draggableHandle()),
-              tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-          }
-          Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(tab.title, style = MaterialTheme.typography.bodyLarge)
-            if (tab.summary.isNotBlank()) {
-              Text(tab.summary, style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant)
+          Row(
+            modifier = Modifier.fillMaxWidth().heightIn(min = 72.dp)
+              .padding(start = 12.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+          ) {
+            if (isTelevision && !tab.required) {
+              // A remote cannot drag: explicit steps, and the moved row keeps focus.
+              TvReorderButtons(
+                canMoveUp = index > 0,
+                canMoveDown = index < tabs.lastIndex,
+                onMoveUp = { onMove(tab.id, index - 1) },
+                onMoveDown = { onMove(tab.id, index + 1) },
+              )
+            } else {
+              Icon(
+                imageVector = Icons.RoundedFilled.DragHandle,
+                contentDescription = if (tab.required) "Fixed tab" else "Drag to reorder ${tab.title}",
+                modifier = Modifier.size(32.dp).then(if (tab.required) Modifier else Modifier.draggableHandle()),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
             }
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+              Text(tab.title, style = MaterialTheme.typography.bodyLarge)
+              if (tab.summary.isNotBlank()) {
+                Text(tab.summary, style = MaterialTheme.typography.bodySmall,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant)
+              }
+            }
+            IconSwitch(
+              checked = tab.enabled,
+              onCheckedChange = if (tab.required) null else { value -> onEnabledChange(tab.id, value) },
+            )
           }
-          IconSwitch(
-            checked = tab.enabled,
-            onCheckedChange = if (tab.required) null else { value -> onEnabledChange(tab.id, value) },
-          )
         }
       }
     }
