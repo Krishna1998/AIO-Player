@@ -48,6 +48,7 @@ import app.video.player.R
 import app.video.player.domain.thumbnail.ThumbnailRepository
 import app.video.player.preferences.AppearancePreferences
 import app.video.player.preferences.AudioPulsingProgressStyle
+import app.video.player.preferences.BentoFusionHeaderStyle
 import app.video.player.preferences.BrowserPreferences
 import app.video.player.preferences.GesturePreferences
 import app.video.player.preferences.MultiChoiceSegmentedButton
