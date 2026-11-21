@@ -220,6 +220,9 @@ class BrowserPreferences(
   // Feature discovery hint for BentoFusion (Audio Pulsing gestures & interactive highlights)
   val bentoFusionHintDismissed = preferenceStore.getBoolean("bentofusion_hint_dismissed", false)
 
+  // How to play / stream hint dismissal state for Network Streaming screen
+  val networkStreamHintDismissed = preferenceStore.getBoolean("network_stream_hint_dismissed", false)
+
   // Watched threshold preference (percentage 1-100)
   val watchedThreshold = preferenceStore.getInt("watched_threshold", 95)
 

@@ -11,6 +11,12 @@ package app.video.player.ui.browser.networkstreaming
 
 import android.content.Context
 import app.video.player.ui.utils.NavigationBackHandler as BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +32,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -59,6 +66,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -70,12 +78,14 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import app.video.player.R
 import app.video.player.database.entities.NetworkStreamEntryEntity
 import app.video.player.database.repository.NetworkStreamEntryRepository
 import app.video.player.domain.network.ConnectionStatus
 import app.video.player.domain.network.NetworkConnection
+import app.video.player.preferences.BrowserPreferences
 import app.video.player.preferences.YtdlPreferences
 import app.video.player.preferences.NetworkBookmarkPreferences
 import app.video.player.preferences.preference.collectAsState
@@ -594,6 +604,8 @@ private fun StreamLinkSection(
   onDeleteRecent: (String) -> Unit,
 ) {
   val context = LocalContext.current
+  val browserPreferences = koinInject<BrowserPreferences>()
+  val isHintDismissed by browserPreferences.networkStreamHintDismissed.collectAsState()
   val keyboardController = LocalSoftwareKeyboardController.current
   val playStreamContentDescription = stringResource(R.string.ui_play_stream)
   var linkUrl by rememberSaveable { mutableStateOf("") }
@@ -735,25 +747,117 @@ private fun StreamLinkSection(
       }
     }
 
-    // Magic hint banner for Telegram & Web stream links
-    Row(
-      modifier = Modifier
-        .fillMaxWidth()
-        .padding(horizontal = 4.dp, vertical = 2.dp),
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.spacedBy(6.dp),
+    // Hidable / Dismissible Smart Hint Card for Telegram Bots & Web Streams
+    AnimatedVisibility(
+      visible = !isHintDismissed,
+      enter = fadeIn() + expandVertically(),
+      exit = fadeOut() + shrinkVertically(),
     ) {
-      Icon(
-        imageVector = Icons.RoundedFilled.AutoAwesome,
-        contentDescription = null,
-        tint = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.size(15.dp),
-      )
-      Text(
-        text = stringResource(R.string.ui_network_telegram_magic_hint),
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
-      )
+      Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
+        tonalElevation = 2.dp,
+        border = BorderStroke(
+          1.dp,
+          Brush.linearGradient(
+            colors = listOf(
+              MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+              MaterialTheme.colorScheme.tertiary.copy(alpha = 0.25f),
+              Color.Transparent,
+            ),
+          ),
+        ),
+      ) {
+        Column(
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(14.dp),
+          verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+          // Header with Icon, Title, and Dismiss 'X' Button
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+              Surface(
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                modifier = Modifier.size(30.dp),
+              ) {
+                Box(contentAlignment = Alignment.Center) {
+                  Text(
+                    text = "💡",
+                    fontSize = 15.sp,
+                  )
+                }
+              }
+              Text(
+                text = stringResource(R.string.ui_network_stream_hint_title),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+              )
+            }
+
+            Surface(
+              shape = CircleShape,
+              color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+              modifier = Modifier
+                .size(28.dp)
+                .clickable {
+                  browserPreferences.networkStreamHintDismissed.set(true)
+                },
+            ) {
+              Box(contentAlignment = Alignment.Center) {
+                Icon(
+                  imageVector = Icons.RoundedFilled.Close,
+                  contentDescription = stringResource(R.string.bento_action_hide),
+                  tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                  modifier = Modifier.size(16.dp),
+                )
+              }
+            }
+          }
+
+          // Section 1: Telegram Bots
+          Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+            Text(
+              text = stringResource(R.string.ui_network_stream_hint_tg_title),
+              style = MaterialTheme.typography.labelMedium,
+              fontWeight = FontWeight.SemiBold,
+              color = MaterialTheme.colorScheme.primary,
+            )
+            Text(
+              text = stringResource(R.string.ui_network_stream_hint_tg_desc),
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              lineHeight = 17.sp,
+            )
+          }
+
+          // Section 2: Browser Extraction
+          Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
+            Text(
+              text = stringResource(R.string.ui_network_stream_hint_browser_title),
+              style = MaterialTheme.typography.labelMedium,
+              fontWeight = FontWeight.SemiBold,
+              color = MaterialTheme.colorScheme.tertiary,
+            )
+            Text(
+              text = stringResource(R.string.ui_network_stream_hint_browser_desc),
+              style = MaterialTheme.typography.bodySmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              lineHeight = 17.sp,
+            )
+          }
+        }
+      }
     }
 
     // 2. Recent Stream Links (Top 10) with Quick Autofill & Media Save
