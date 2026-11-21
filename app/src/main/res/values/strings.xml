@@ -2907,6 +2907,7 @@
   <string name="pref_audio_visualizer_style_cuboid">Cuboid</string>
   <string name="pref_audio_visualizer_style_particle">Particles</string>
 
+  <string name="pref_bentofusion_all_media_hidden_summary">Hidden (All BentoFusion rails and cards are turned off)</string>
   <string name="pref_audio_visualizer_galaxy_credit">Inspired by Zain Raza on CodePen</string>
   <string name="pref_audio_ambient_mode_title">Ambient Mode</string>
   <string name="pref_audio_ambient_mode_summary">Display dynamic color gradients derived from album cover art in music player (disabled when visualizer is active)</string>

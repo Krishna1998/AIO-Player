@@ -1360,7 +1360,7 @@ object AppearancePreferencesScreen : Screen {
                 "ALL" -> ReorderableTabItem(
                   id = id,
                   title = stringResource(R.string.ui_all_media),
-                  summary = if (isAllMediaActive) stringResource(R.string.pref_bentofusion_show_video_card_summary) else "Hidden (All BentoFusion rails & cards are turned off)",
+                  summary = if (isAllMediaActive) stringResource(R.string.pref_bentofusion_show_video_card_summary) else stringResource(R.string.pref_bentofusion_all_media_hidden_summary),
                   enabled = isAllMediaActive,
                   required = isAllMediaActive,
                   titleRes = R.string.ui_all_media,
