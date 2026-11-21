@@ -203,6 +203,7 @@ object PreferencesScreen : Screen {
     val backstack = LocalBackStack.current
     val colorScheme = MaterialTheme.colorScheme
     val emphasizedTypography = LocalEmphasizedTypography.current
+    val television = isTelevision()
 
     Scaffold(
       topBar = {
