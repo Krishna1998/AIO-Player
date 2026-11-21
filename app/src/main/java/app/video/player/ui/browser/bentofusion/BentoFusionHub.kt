@@ -499,10 +499,10 @@ fun BentoFusionHeader(
     orderedSections.forEach { sectionId ->
       when (sectionId) {
         "VIDEO" -> {
-          // 1. Video / Movie Rail
+          // 1. Movies / Videos Rail
           if (showVideoRail && videoItems.isNotEmpty()) {
             HorizonRailSection(
-              title = "Video / Movie",
+              title = "Movies / Videos",
               icon = "🎬",
               accentColor = MaterialTheme.colorScheme.primary,
               count = videoItems.size,
@@ -916,7 +916,7 @@ fun BentoFusionFeatureHintCard(
  * Dual-Horizon Rails component
  * Provides synchronized horizontal media rails:
  * 1. Upper Rail: Music (ALL songs sorted by title)
- * 2. Lower Rail: Video / Movie
+ * 2. Lower Rail: Movies / Videos
  * 3. Bottom Rail: Recently Played (recent 10 files audio + video combined)
  */
 @Composable
@@ -953,10 +953,10 @@ fun DualHorizonRails(
     modifier = modifier.fillMaxWidth(),
     verticalArrangement = Arrangement.spacedBy(14.dp),
   ) {
-    // 1. Video / Movie
+    // 1. Movies / Videos
     if (showVideoRail && videoItems.isNotEmpty()) {
       HorizonRailSection(
-        title = "Video / Movie",
+        title = "Movies / Videos",
         icon = "🎬",
         accentColor = MaterialTheme.colorScheme.primary,
         count = videoItems.size,

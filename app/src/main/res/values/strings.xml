@@ -132,8 +132,8 @@
   <string name="pref_nav_network_title">Show Streaming tab</string>
   <string name="pref_nav_network_summary">Show or hide Streaming in the bottom navigation bar</string>
   <string name="pref_appearance_category_bentofusion">Fusion &amp; Media Library</string>
-  <string name="pref_bentofusion_show_video_card_title">Show Video / Movie</string>
-  <string name="pref_bentofusion_show_video_card_summary">Display the horizontal Video / Movie in Fusion / All Media</string>
+  <string name="pref_bentofusion_show_video_card_title">Show Movies / Videos</string>
+  <string name="pref_bentofusion_show_video_card_summary">Display the horizontal Movies / Videos in Fusion / All Media</string>
   <string name="pref_bentofusion_show_audio_pulsing_title">Show Audio Pulsing</string>
   <string name="pref_bentofusion_show_audio_pulsing_summary">Display the dynamic Audio Pulsing spotlight card</string>
   <string name="pref_audio_pulsing_progress_style_title">Audio Pulsing progress style</string>
@@ -143,7 +143,7 @@
   <string name="pref_bentofusion_show_music_card_title">Show Music</string>
   <string name="pref_bentofusion_show_music_card_summary">Display the horizontal Music in Fusion / All Media</string>
   <string name="pref_bentofusion_section_order_title">Fusion Section Order</string>
-  <string name="pref_bentofusion_section_video">Video / Movie</string>
+  <string name="pref_bentofusion_section_video">Movies / Videos</string>
   <string name="pref_bentofusion_section_audio_pulsing">Audio Pulsing</string>
   <string name="pref_bentofusion_section_music">Music</string>
   <string name="pref_library_sub_tabs_order_title">Media Library sub-tabs order</string>
