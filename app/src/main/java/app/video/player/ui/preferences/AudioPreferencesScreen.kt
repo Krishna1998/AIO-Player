@@ -219,7 +219,7 @@ object AudioPreferencesScreen : Screen {
           item {
             val enabledMusicTabs by preferences.enabledMusicTabs.collectAsState()
             val musicTabOrder by preferences.musicTabOrder.collectAsState()
-            val defaultOrder = listOf("ALL_MUSIC", "FAVORITES", "PLAYLISTS", "FOLDERS")
+            val defaultOrder = listOf("ALL_MUSIC", "FAVORITES", "PLAYLISTS", "FOLDERS", "ALBUMS", "ARTISTS")
             val orderedTabs = (musicTabOrder.filter { it in defaultOrder } + defaultOrder).distinct()
 
             ExpressivePreferenceGroup {
@@ -235,7 +235,9 @@ object AudioPreferencesScreen : Screen {
                     "ALL_MUSIC" -> Pair(R.string.pref_music_subtab_all_songs, R.string.ui_songs)
                     "FAVORITES" -> Pair(R.string.pref_music_subtab_favorites, R.string.ui_favorites)
                     "PLAYLISTS" -> Pair(R.string.pref_music_subtab_playlists, R.string.ui_playlists)
-                    else -> Pair(R.string.pref_music_subtab_folders, R.string.search_category_folders)
+                    "FOLDERS" -> Pair(R.string.pref_music_subtab_folders, R.string.search_category_folders)
+                    "ALBUMS" -> Pair(R.string.pref_music_subtab_albums, R.string.ui_albums)
+                    else -> Pair(R.string.pref_music_subtab_artists, R.string.ui_artists)
                   }
                   ReorderableTabItem(
                     id = tabId,

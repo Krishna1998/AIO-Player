@@ -2105,7 +2105,7 @@ private fun SongListItem(
 }
 
 @Composable
-private fun AlbumsTabContent(
+internal fun AlbumsTabContent(
   albums: List<MusicAlbum>,
   viewMode: MusicViewMode,
   coverArtSizeDp: Int = 48,
@@ -2367,7 +2367,7 @@ private fun AlbumListCard(
 }
 
 @Composable
-private fun ArtistsTabContent(
+internal fun ArtistsTabContent(
   artists: List<MusicArtist>,
   viewMode: MusicViewMode,
   coverArtSizeDp: Int = 48,
@@ -3003,7 +3003,7 @@ private fun PlaylistsTabContent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AlbumDetailSheet(
+internal fun AlbumDetailSheet(
   album: MusicAlbum,
   songs: List<MusicSong>,
   recentlyPlayedFilePath: String?,
@@ -3101,7 +3101,7 @@ private fun AlbumDetailSheet(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ArtistDetailSheet(
+internal fun ArtistDetailSheet(
   artist: MusicArtist,
   songs: List<MusicSong>,
   recentlyPlayedFilePath: String?,

@@ -122,6 +122,17 @@ import app.video.player.ui.browser.dialogs.rememberBrowserSortDialogOpen
 import app.video.player.ui.browser.playlist.ALL_VIDEOS_PLAYLIST_ID
 import app.video.player.database.repository.PlaylistRepository
 import app.video.player.ui.browser.selection.rememberSelectionManager
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import app.video.player.ui.browser.music.MusicLibraryViewModel
+import app.video.player.ui.browser.music.MusicAlbum
+import app.video.player.ui.browser.music.MusicArtist
+import app.video.player.ui.browser.music.MusicSong
+import app.video.player.ui.browser.music.AlbumsTabContent
+import app.video.player.ui.browser.music.ArtistsTabContent
+import app.video.player.ui.browser.music.AlbumDetailSheet
+import app.video.player.ui.browser.music.ArtistDetailSheet
+import app.video.player.ui.browser.music.sortedByAlbumTrack
 import app.video.player.ui.browser.states.EmptyState
 import app.video.player.ui.browser.videolist.VideoListContent
 import app.video.player.ui.browser.videolist.VideoWithPlaybackInfo
@@ -161,6 +172,33 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   val favoriteAudioPaths by playlistRepository.observeFavoriteAudioPaths().collectAsState(initial = emptySet())
   val audioPlaylists by playlistRepository.observeAllPlaylists(isAudio = true).collectAsState(initial = emptyList())
   val navigationBarHeight = LocalNavigationBarHeight.current
+
+  val musicViewModel: MusicLibraryViewModel = viewModel()
+  LaunchedEffect(musicViewModel) { musicViewModel.ensureLibraryLoaded() }
+  val musicSongs by musicViewModel.filteredSongs.collectAsState()
+  val musicAlbums by musicViewModel.filteredAlbums.collectAsState()
+  val musicArtists by musicViewModel.filteredArtists.collectAsState()
+  val musicViewMode by musicViewModel.viewMode.collectAsState()
+  val selectedAlbum by musicViewModel.selectedAlbum.collectAsState()
+  val selectedArtist by musicViewModel.selectedArtist.collectAsState()
+  val isMusicPlaybackActive by musicViewModel.isPlaybackActive.collectAsState()
+  val gridCoverArtSizeDp by browserPreferences.musicGridCoverArtSize.collectAsState()
+
+  val albumSelectionManager = rememberSelectionManager(
+    items = musicAlbums,
+    getId = { it.id },
+    onDeleteItems = { _, _ -> Pair(0, 0) }
+  )
+  val artistSelectionManager = rememberSelectionManager(
+    items = musicArtists,
+    getId = { it.id },
+    onDeleteItems = { _, _ -> Pair(0, 0) }
+  )
+
+  val albumsListState = rememberLazyListState()
+  val albumsGridState = rememberLazyGridState()
+  val artistsListState = rememberLazyListState()
+  val artistsGridState = rememberLazyGridState()
 
   val viewModel: MediaLibraryViewModel =
     viewModel(
@@ -221,7 +259,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   val enabledMusicTabs by audioPreferences.enabledMusicTabs.collectAsState()
   val musicTabOrder by audioPreferences.musicTabOrder.collectAsState()
   val activeMusicSubTabs = remember(enabledMusicTabs, musicTabOrder) {
-    val defaultOrder = listOf("ALL_MUSIC", "FAVORITES", "PLAYLISTS", "FOLDERS")
+    val defaultOrder = listOf("ALL_MUSIC", "FAVORITES", "PLAYLISTS", "FOLDERS", "ALBUMS", "ARTISTS")
     val ordered = (musicTabOrder.filter { it in defaultOrder } + defaultOrder).distinct()
     val filtered = ordered.filter { it in enabledMusicTabs }
     if (filtered.isNotEmpty()) filtered else listOf("ALL_MUSIC")
@@ -1276,6 +1314,42 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                               ),
                             )
                           }
+                          "ALBUMS" -> {
+                            androidx.compose.material3.FilterChip(
+                              selected = currentAudioSubTab == "ALBUMS",
+                              onClick = { audioSubTabId = "ALBUMS" },
+                              label = { Text(if (musicAlbums.isNotEmpty()) "Albums (${musicAlbums.size})" else "Albums") },
+                              leadingIcon = {
+                                app.video.player.ui.icons.Icon(
+                                  imageVector = app.video.player.ui.icons.Icons.RoundedFilled.VideoLibrary,
+                                  contentDescription = null,
+                                  modifier = Modifier.size(16.dp),
+                                )
+                              },
+                              colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                              ),
+                            )
+                          }
+                          "ARTISTS" -> {
+                            androidx.compose.material3.FilterChip(
+                              selected = currentAudioSubTab == "ARTISTS",
+                              onClick = { audioSubTabId = "ARTISTS" },
+                              label = { Text(if (musicArtists.isNotEmpty()) "Artists (${musicArtists.size})" else "Artists") },
+                              leadingIcon = {
+                                app.video.player.ui.icons.Icon(
+                                  imageVector = app.video.player.ui.icons.Icons.RoundedFilled.Person,
+                                  contentDescription = null,
+                                  modifier = Modifier.size(16.dp),
+                                )
+                              },
+                              colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                              ),
+                            )
+                          }
                         }
                       }
                     }
@@ -1365,6 +1439,48 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                           videoOnly = false,
                           embedded = true,
                           searchQuery = searchQuery,
+                        )
+                      }
+                      "ALBUMS" -> {
+                        AlbumsTabContent(
+                          albums = musicAlbums,
+                          viewMode = musicViewMode,
+                          coverArtSizeDp = musicCoverArtSize,
+                          gridCoverArtSizeDp = gridCoverArtSizeDp,
+                          onAlbumClick = { album ->
+                            if (albumSelectionManager.isInSelectionMode) {
+                              albumSelectionManager.toggleFromUser(album)
+                            } else {
+                              musicViewModel.selectAlbum(album)
+                            }
+                          },
+                          onAlbumLongClick = { album ->
+                            albumSelectionManager.toggle(album)
+                          },
+                          selectionManager = albumSelectionManager,
+                          listState = albumsListState,
+                          gridState = albumsGridState,
+                        )
+                      }
+                      "ARTISTS" -> {
+                        ArtistsTabContent(
+                          artists = musicArtists,
+                          viewMode = musicViewMode,
+                          coverArtSizeDp = musicCoverArtSize,
+                          gridCoverArtSizeDp = gridCoverArtSizeDp,
+                          onArtistClick = { artist ->
+                            if (artistSelectionManager.isInSelectionMode) {
+                              artistSelectionManager.toggleFromUser(artist)
+                            } else {
+                              musicViewModel.selectArtist(artist)
+                            }
+                          },
+                          onArtistLongClick = { artist ->
+                            artistSelectionManager.toggle(artist)
+                          },
+                          selectionManager = artistSelectionManager,
+                          listState = artistsListState,
+                          gridState = artistsGridState,
                         )
                       }
                     }
@@ -1677,4 +1793,38 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
       label = stringResource(R.string.secure_folder_moving_progress),
       onCancel = { secureFolderRepository.cancelOperation() },
     )
+
+    // Album Detail Sheet
+    selectedAlbum?.let { album ->
+      val albumSongs = remember(musicSongs, album) {
+        musicSongs.filter { it.albumKey == album.id }.sortedByAlbumTrack()
+      }
+      AlbumDetailSheet(
+        album = album,
+        songs = albumSongs,
+        recentlyPlayedFilePath = recentlyPlayedFilePath,
+        isPlaybackActive = isMusicPlaybackActive,
+        onDismiss = { musicViewModel.selectAlbum(null) },
+        onSongClick = { song -> musicViewModel.playSong(context, song, albumSongs) },
+        onSongLongClick = { /* no-op */ },
+        onPlayAlbum = { musicViewModel.playAllSongs(context, albumSongs, shuffle = false) },
+      )
+    }
+
+    // Artist Detail Sheet
+    selectedArtist?.let { artist ->
+      val artistSongs = remember(musicSongs, artist) {
+        musicSongs.filter { it.artist.equals(artist.name, ignoreCase = true) }
+      }
+      ArtistDetailSheet(
+        artist = artist,
+        songs = artistSongs,
+        recentlyPlayedFilePath = recentlyPlayedFilePath,
+        isPlaybackActive = isMusicPlaybackActive,
+        onDismiss = { musicViewModel.selectArtist(null) },
+        onSongClick = { song -> musicViewModel.playSong(context, song, artistSongs) },
+        onSongLongClick = { /* no-op */ },
+        onPlayArtist = { musicViewModel.playAllSongs(context, artistSongs, shuffle = false) },
+      )
+    }
   }
