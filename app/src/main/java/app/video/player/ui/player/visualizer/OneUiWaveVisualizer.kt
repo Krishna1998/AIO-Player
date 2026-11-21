@@ -184,10 +184,16 @@ internal fun WaveVisualizerOverlay(
 
   val lowFilledPath = remember { Path() }
   val lowContourPath = remember { Path() }
+  val lowBottomFilledPath = remember { Path() }
+  val lowBottomContourPath = remember { Path() }
   val midFilledPath = remember { Path() }
   val midContourPath = remember { Path() }
+  val midBottomFilledPath = remember { Path() }
+  val midBottomContourPath = remember { Path() }
   val highFilledPath = remember { Path() }
   val highContourPath = remember { Path() }
+  val highBottomFilledPath = remember { Path() }
+  val highBottomContourPath = remember { Path() }
   val tones = remember(palette) { ribbonTones(palette) }
 
   Canvas(modifier = modifier) {
@@ -200,6 +206,7 @@ internal fun WaveVisualizerOverlay(
 
     val trackHalf = trackHeight.toPx() / 2f
     val trackTop = centerY - trackHalf
+    val trackBottom = centerY + trackHalf
     val progress = progressProvider().coerceIn(0f, 1f)
     val waveEnd = (width * progress).coerceIn(0f, width)
     val twoPi = (2.0 * PI).toFloat()
@@ -212,6 +219,8 @@ internal fun WaveVisualizerOverlay(
     fun drawRibbon(
       filledPath: Path,
       contourPath: Path,
+      bottomFilledPath: Path,
+      bottomContourPath: Path,
       color: Color,
       wavelength: Float,
       baseLift: Float,
@@ -232,36 +241,55 @@ internal fun WaveVisualizerOverlay(
       val ribbonEnd = (waveEnd - joinInset).coerceAtLeast(ribbonStart)
       if (ribbonEnd - ribbonStart <= 1f || lift <= 0.25f) return
 
-      fun ribbonTop(x: Float): Float {
+      fun waveDisplacement(x: Float): Float {
         val edgeIn = smoothstep((x - ribbonStart) / (wavelength * 0.5f))
         val edgeOut = smoothstep((ribbonEnd - x) / (wavelength * 0.55f))
         val envelope = edgeIn * edgeOut
         val undulation = 0.60f + 0.40f * sin((x / wavelength) * twoPi - phase)
-        return trackTop - lift * undulation * envelope
+        return lift * undulation * envelope
       }
 
       val step = 1.5.dp.toPx().coerceAtLeast(1f)
-      val baseline = trackTop + min(trackHalf, 1.5.dp.toPx())
+      val topBaseline = trackTop + min(trackHalf, 1.5.dp.toPx())
+      val bottomBaseline = trackBottom - min(trackHalf, 1.5.dp.toPx())
+
       filledPath.reset()
       contourPath.reset()
+      bottomFilledPath.reset()
+      bottomContourPath.reset()
 
-      val startY = ribbonTop(ribbonStart)
-      filledPath.moveTo(ribbonStart, baseline)
-      filledPath.lineTo(ribbonStart, startY)
-      contourPath.moveTo(ribbonStart, startY)
+      val startDisp = waveDisplacement(ribbonStart)
+      filledPath.moveTo(ribbonStart, topBaseline)
+      filledPath.lineTo(ribbonStart, trackTop - startDisp)
+      contourPath.moveTo(ribbonStart, trackTop - startDisp)
+
+      bottomFilledPath.moveTo(ribbonStart, bottomBaseline)
+      bottomFilledPath.lineTo(ribbonStart, trackBottom + startDisp)
+      bottomContourPath.moveTo(ribbonStart, trackBottom + startDisp)
 
       var x = ribbonStart
       while (x < ribbonEnd) {
         x = min(x + step, ribbonEnd)
-        val y = ribbonTop(x)
-        filledPath.lineTo(x, y)
-        contourPath.lineTo(x, y)
+        val disp = waveDisplacement(x)
+        val yTop = trackTop - disp
+        val yBottom = trackBottom + disp
+
+        filledPath.lineTo(x, yTop)
+        contourPath.lineTo(x, yTop)
+
+        bottomFilledPath.lineTo(x, yBottom)
+        bottomContourPath.lineTo(x, yBottom)
       }
-      filledPath.lineTo(ribbonEnd, baseline)
+
+      filledPath.lineTo(ribbonEnd, topBaseline)
       filledPath.close()
 
-      // 1. One UI 9.5 Frosted Glass Gradient Body Fill (curtain down to baseline)
+      bottomFilledPath.lineTo(ribbonEnd, bottomBaseline)
+      bottomFilledPath.close()
+
+      // --- 1. Frosted Glass Gradient Body Fill (Top & Bottom Mirrors) ---
       val topY = trackTop - lift
+      val bottomY = trackBottom + lift
       drawPath(
         path = filledPath,
         brush = Brush.verticalGradient(
@@ -270,45 +298,41 @@ internal fun WaveVisualizerOverlay(
             color.copy(alpha = (bodyBottomAlpha * amplitudeFraction).coerceIn(0f, 1f)),
           ),
           startY = topY,
-          endY = baseline,
+          endY = topBaseline,
+        ),
+      )
+      drawPath(
+        path = bottomFilledPath,
+        brush = Brush.verticalGradient(
+          colors = listOf(
+            color.copy(alpha = (bodyBottomAlpha * amplitudeFraction).coerceIn(0f, 1f)),
+            color.copy(alpha = (bodyTopAlpha * amplitudeFraction).coerceIn(0f, 1f)),
+          ),
+          startY = bottomBaseline,
+          endY = bottomY,
         ),
       )
 
-      // 2. Diffused Luminous Gaussian Glow Halo along wave crests
+      // --- 2. Diffused Luminous Glow Halo along crests (Top & Bottom) ---
       if (glowWidth > 0f && lift > 1.dp.toPx()) {
-        drawPath(
-          path = contourPath,
-          color = color.copy(alpha = (glowAlpha * amplitudeFraction).coerceIn(0f, 1f)),
-          style = Stroke(
-            width = glowWidth,
-            cap = StrokeCap.Round,
-            join = StrokeJoin.Round,
-          ),
-        )
+        val glowAlphaVal = (glowAlpha * amplitudeFraction).coerceIn(0f, 1f)
+        val glowStroke = Stroke(width = glowWidth, cap = StrokeCap.Round, join = StrokeJoin.Round)
+        drawPath(path = contourPath, color = color.copy(alpha = glowAlphaVal), style = glowStroke)
+        drawPath(path = bottomContourPath, color = color.copy(alpha = glowAlphaVal), style = glowStroke)
       }
 
-      // 3. Crisp Luminous Crest Contour Stroke
-      drawPath(
-        path = contourPath,
-        color = color.copy(alpha = (0.95f * amplitudeFraction).coerceIn(0f, 1f)),
-        style = Stroke(
-          width = contourWidth,
-          cap = StrokeCap.Round,
-          join = StrokeJoin.Round,
-        ),
-      )
+      // --- 3. Crisp Luminous Crest Contour Stroke (Top & Bottom) ---
+      val crestStroke = Stroke(width = contourWidth, cap = StrokeCap.Round, join = StrokeJoin.Round)
+      val crestAlphaVal = (0.95f * amplitudeFraction).coerceIn(0f, 1f)
+      drawPath(path = contourPath, color = color.copy(alpha = crestAlphaVal), style = crestStroke)
+      drawPath(path = bottomContourPath, color = color.copy(alpha = crestAlphaVal), style = crestStroke)
 
-      // 4. Foreground White Specular Highlight Core for crisp liquid glass reflection
+      // --- 4. Foreground White Specular Highlight Core (Top & Bottom) ---
       if (hasWhiteHighlight && lift > 2.dp.toPx()) {
-        drawPath(
-          path = contourPath,
-          color = Color.White.copy(alpha = (0.65f * amplitudeFraction).coerceIn(0f, 1f)),
-          style = Stroke(
-            width = 1.0.dp.toPx(),
-            cap = StrokeCap.Round,
-            join = StrokeJoin.Round,
-          ),
-        )
+        val whiteAlphaVal = (0.65f * amplitudeFraction).coerceIn(0f, 1f)
+        val whiteStroke = Stroke(width = 1.0.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
+        drawPath(path = contourPath, color = Color.White.copy(alpha = whiteAlphaVal), style = whiteStroke)
+        drawPath(path = bottomContourPath, color = Color.White.copy(alpha = whiteAlphaVal), style = whiteStroke)
       }
     }
 
@@ -317,11 +341,13 @@ internal fun WaveVisualizerOverlay(
     val frontLiftScale = ribbonLiftScale(outputVolume, loudness, highLevel)
     val beatImpact = beatPulse * outputVolume
 
-    // One UI 9.5 Aurora Frosted Glass Veil: 3-tier multi-depth wave curtains
-    // Layer 1: Ambient Deep Bass Veil (Back wave - goes highest at the top)
+    // One UI 9.5 Aurora Frosted Glass Veil: 3-tier multi-depth wave curtains (symmetrical both sides)
+    // Layer 1: Ambient Deep Bass Veil (Back wave - goes highest at the top & bottom)
     drawRibbon(
       filledPath = lowFilledPath,
       contourPath = lowContourPath,
+      bottomFilledPath = lowBottomFilledPath,
+      bottomContourPath = lowBottomContourPath,
       color = wave1Color,
       wavelength = 112.dp.toPx(),
       baseLift = 28.0.dp.toPx(),
@@ -339,6 +365,8 @@ internal fun WaveVisualizerOverlay(
     drawRibbon(
       filledPath = midFilledPath,
       contourPath = midContourPath,
+      bottomFilledPath = midBottomFilledPath,
+      bottomContourPath = midBottomContourPath,
       color = wave2Color,
       wavelength = 72.dp.toPx(),
       baseLift = 23.0.dp.toPx(),
@@ -356,6 +384,8 @@ internal fun WaveVisualizerOverlay(
     drawRibbon(
       filledPath = highFilledPath,
       contourPath = highContourPath,
+      bottomFilledPath = highBottomFilledPath,
+      bottomContourPath = highBottomContourPath,
       color = wave3Color,
       wavelength = 46.dp.toPx(),
       baseLift = 18.0.dp.toPx(),
