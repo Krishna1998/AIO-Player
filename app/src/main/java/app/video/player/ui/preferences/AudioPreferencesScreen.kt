@@ -47,6 +47,7 @@ import app.video.player.domain.lyrics.LyricsProvider
 import app.video.player.preferences.AudioChannels
 import app.video.player.preferences.AudioPlayerOrientation
 import app.video.player.preferences.AudioPreferences
+import app.video.player.preferences.WavyVisualizerMode
 import app.video.player.preferences.BrowserPreferences
 import app.video.player.preferences.LyricsTranslationDisplayMode
 import app.video.player.preferences.MediaLibraryType
@@ -298,19 +299,26 @@ object AudioPreferencesScreen : Screen {
               )
 
               PreferenceDivider()
-              val audioWavySeekbar by preferences.audioWavySeekbar.collectAsState()
-              SwitchPreference(
-                modifier = Modifier.settingsSearchTarget(R.string.pref_audio_wavy_seekbar_title),
-                value = audioWavySeekbar,
-                onValueChange = { preferences.audioWavySeekbar.set(it) },
-                title = { Text(stringResource(R.string.pref_audio_wavy_seekbar_title)) },
-                summary = {
-                  Text(
-                    stringResource(R.string.pref_audio_wavy_seekbar_summary),
-                    color = MaterialTheme.colorScheme.outline,
-                  )
-                },
-              )
+              val wavyVisualizerMode by preferences.wavyVisualizerMode.collectAsState()
+              ExpressivePreferenceItem {
+                ListPreference(
+                  modifier = Modifier.settingsSearchTarget(R.string.pref_audio_wavy_seekbar_title),
+                  value = wavyVisualizerMode,
+                  onValueChange = { mode ->
+                    preferences.wavyVisualizerMode.set(mode)
+                    preferences.audioWavySeekbar.set(mode != WavyVisualizerMode.Disabled)
+                  },
+                  values = WavyVisualizerMode.entries,
+                  valueToText = { AnnotatedString(resources.getString(it.titleRes)) },
+                  title = { Text(stringResource(R.string.pref_audio_wavy_seekbar_title)) },
+                  summary = {
+                    Text(
+                      stringResource(wavyVisualizerMode.titleRes),
+                      color = MaterialTheme.colorScheme.outline,
+                    )
+                  },
+                )
+              }
             }
           }
         }

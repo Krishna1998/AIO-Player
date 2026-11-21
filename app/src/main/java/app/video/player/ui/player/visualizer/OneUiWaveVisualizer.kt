@@ -33,6 +33,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.video.player.preferences.AppearancePreferences
+import app.video.player.preferences.AudioPreferences
+import app.video.player.preferences.WavyVisualizerMode
 import app.video.player.preferences.preference.collectAsState
 import org.koin.compose.koinInject
 import kotlin.math.PI
@@ -86,6 +88,10 @@ internal fun WaveVisualizerOverlay(
   modifier: Modifier = Modifier,
 ) {
   val appearancePreferences = koinInject<AppearancePreferences>()
+  val audioPreferences = koinInject<AudioPreferences>()
+  val wavyVisualizerMode by audioPreferences.wavyVisualizerMode.collectAsState()
+  if (wavyVisualizerMode == WavyVisualizerMode.Disabled) return
+  val renderBottom = wavyVisualizerMode == WavyVisualizerMode.BothSides
   val currentAppTheme by appearancePreferences.appTheme.collectAsState()
   val colorScheme = MaterialTheme.colorScheme
   val (wave1Color, wave2Color, wave3Color) = remember(currentAppTheme, colorScheme) {
@@ -287,7 +293,7 @@ internal fun WaveVisualizerOverlay(
       bottomFilledPath.lineTo(ribbonEnd, bottomBaseline)
       bottomFilledPath.close()
 
-      // --- 1. Frosted Glass Gradient Body Fill (Top & Bottom Mirrors) ---
+      // --- 1. Frosted Glass Gradient Body Fill ---
       val topY = trackTop - lift
       val bottomY = trackBottom + lift
       drawPath(
@@ -301,38 +307,46 @@ internal fun WaveVisualizerOverlay(
           endY = topBaseline,
         ),
       )
-      drawPath(
-        path = bottomFilledPath,
-        brush = Brush.verticalGradient(
-          colors = listOf(
-            color.copy(alpha = (bodyBottomAlpha * amplitudeFraction).coerceIn(0f, 1f)),
-            color.copy(alpha = (bodyTopAlpha * amplitudeFraction).coerceIn(0f, 1f)),
+      if (renderBottom) {
+        drawPath(
+          path = bottomFilledPath,
+          brush = Brush.verticalGradient(
+            colors = listOf(
+              color.copy(alpha = (bodyBottomAlpha * amplitudeFraction).coerceIn(0f, 1f)),
+              color.copy(alpha = (bodyTopAlpha * amplitudeFraction).coerceIn(0f, 1f)),
+            ),
+            startY = bottomBaseline,
+            endY = bottomY,
           ),
-          startY = bottomBaseline,
-          endY = bottomY,
-        ),
-      )
+        )
+      }
 
-      // --- 2. Diffused Luminous Glow Halo along crests (Top & Bottom) ---
+      // --- 2. Diffused Luminous Glow Halo along crests ---
       if (glowWidth > 0f && lift > 1.dp.toPx()) {
         val glowAlphaVal = (glowAlpha * amplitudeFraction).coerceIn(0f, 1f)
         val glowStroke = Stroke(width = glowWidth, cap = StrokeCap.Round, join = StrokeJoin.Round)
         drawPath(path = contourPath, color = color.copy(alpha = glowAlphaVal), style = glowStroke)
-        drawPath(path = bottomContourPath, color = color.copy(alpha = glowAlphaVal), style = glowStroke)
+        if (renderBottom) {
+          drawPath(path = bottomContourPath, color = color.copy(alpha = glowAlphaVal), style = glowStroke)
+        }
       }
 
-      // --- 3. Crisp Luminous Crest Contour Stroke (Top & Bottom) ---
+      // --- 3. Crisp Luminous Crest Contour Stroke ---
       val crestStroke = Stroke(width = contourWidth, cap = StrokeCap.Round, join = StrokeJoin.Round)
       val crestAlphaVal = (0.95f * amplitudeFraction).coerceIn(0f, 1f)
       drawPath(path = contourPath, color = color.copy(alpha = crestAlphaVal), style = crestStroke)
-      drawPath(path = bottomContourPath, color = color.copy(alpha = crestAlphaVal), style = crestStroke)
+      if (renderBottom) {
+        drawPath(path = bottomContourPath, color = color.copy(alpha = crestAlphaVal), style = crestStroke)
+      }
 
-      // --- 4. Foreground White Specular Highlight Core (Top & Bottom) ---
+      // --- 4. Foreground White Specular Highlight Core ---
       if (hasWhiteHighlight && lift > 2.dp.toPx()) {
         val whiteAlphaVal = (0.65f * amplitudeFraction).coerceIn(0f, 1f)
         val whiteStroke = Stroke(width = 1.0.dp.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
         drawPath(path = contourPath, color = Color.White.copy(alpha = whiteAlphaVal), style = whiteStroke)
-        drawPath(path = bottomContourPath, color = Color.White.copy(alpha = whiteAlphaVal), style = whiteStroke)
+        if (renderBottom) {
+          drawPath(path = bottomContourPath, color = Color.White.copy(alpha = whiteAlphaVal), style = whiteStroke)
+        }
       }
     }
 
