@@ -129,8 +129,6 @@
   <string name="pref_appearance_auto_fetch_online_music_artwork_summary">Automatically download official high-res square covers via iTunes, Deezer &amp; MusicBrainz for songs missing artwork</string>
   <string name="pref_appearance_replace_embedded_music_artwork_title">Replace embedded music covers</string>
   <string name="pref_appearance_replace_embedded_music_artwork_summary">Prefer official high-resolution online artwork over existing local embedded ID3 tags</string>
-  <string name="pref_nav_music_title">Show Music tab</string>
-  <string name="pref_nav_music_summary">Show or hide Music in the bottom navigation bar</string>
   <string name="pref_nav_network_title">Show Streaming tab</string>
   <string name="pref_nav_network_summary">Show or hide Streaming in the bottom navigation bar</string>
   <string name="pref_appearance_category_bentofusion">Fusion &amp; Media Library</string>

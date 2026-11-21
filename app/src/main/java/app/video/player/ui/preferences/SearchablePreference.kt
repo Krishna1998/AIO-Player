@@ -1374,7 +1374,6 @@ object SearchablePreferences {
         SearchEntrySpec(R.string.pref_bentofusion_section_order_title, listOf("bentofusion", "order", "reorder", "drag", "video", "audio pulsing", "music")),
         SearchEntrySpec(R.string.pref_library_sub_tabs_order_title, listOf("bentofusion", "library", "tabs", "order", "reorder", "drag", "all media", "video", "music")),
         SearchEntrySpec(R.string.pref_library_show_music_tab_title, listOf("library", "music", "tab", "hide", "show")),
-        SearchEntrySpec(R.string.pref_nav_music_title, listOf("music", "audio", "tab", "navigation")),
         SearchEntrySpec(R.string.pref_nav_profile_title, listOf("profile", "you", "library", "tab", "navigation")),
         SearchEntrySpec(R.string.navbar_glow_title, listOf("glass", "glow", "navbar", "rim", "highlight", "liquid glass")),
         SearchEntrySpec(

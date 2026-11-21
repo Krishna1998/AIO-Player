@@ -300,10 +300,9 @@ private fun NormalTopBar(
   val preferences = koinInject<AppearancePreferences>()
   val isMainTabPage = app.video.player.ui.browser.LocalIsMainTabPage.current
   val legacyNavigationBar by preferences.legacyNavigationBar.collectAsState()
-  val showMusicTab by preferences.showMusicTab.collectAsState()
   val showProfileTab by preferences.showProfileTab.collectAsState()
   val showNetworkTab by preferences.showNetworkTab.collectAsState()
-  val isOnlyHomeFilesTab = !showMusicTab && !showProfileTab && !showNetworkTab
+  val isOnlyHomeFilesTab = !showProfileTab && !showNetworkTab
   val isNavBarVisible = NavigationBarState.isNavBarVisible
   val showTopBarSearch = legacyNavigationBar || !isMainTabPage || isOnlyHomeFilesTab || !isNavBarVisible
   val profileName by preferences.profileName.collectAsState()

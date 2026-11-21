@@ -1427,9 +1427,8 @@ object AppearancePreferencesScreen : Screen {
 
           item {
             val showNetworkTab by preferences.showNetworkTab.collectAsState()
-            val showMusicTab by preferences.showMusicTab.collectAsState()
             val savedOrder by preferences.bottomNavigationOrder.collectAsState()
-            val names = listOf("HOME", "NETWORK", "MUSIC")
+            val names = listOf("HOME", "NETWORK")
             val ordered =
               listOf("HOME") +
                 (savedOrder.filter { it in names } + names)
@@ -1438,8 +1437,7 @@ object AppearancePreferencesScreen : Screen {
             val tabItems = ordered.map { id ->
               when (id) {
                 "HOME" -> ReorderableTabItem(id, stringResource(R.string.pref_nav_home_title), stringResource(R.string.pref_nav_home_summary), true, required = true)
-                "NETWORK" -> ReorderableTabItem(id, stringResource(R.string.pref_nav_network_title), stringResource(R.string.pref_nav_network_summary), showNetworkTab, titleRes = R.string.pref_nav_network_title)
-                else -> ReorderableTabItem(id, stringResource(R.string.pref_nav_music_title), stringResource(R.string.pref_nav_music_summary), showMusicTab, titleRes = R.string.pref_nav_music_title)
+                else -> ReorderableTabItem(id, stringResource(R.string.pref_nav_network_title), stringResource(R.string.pref_nav_network_summary), showNetworkTab, titleRes = R.string.pref_nav_network_title)
               }
             }
             ExpressivePreferenceGroup {
@@ -1448,7 +1446,6 @@ object AppearancePreferencesScreen : Screen {
                 onEnabledChange = { id, enabled ->
                   when (id) {
                     "NETWORK" -> preferences.showNetworkTab.set(enabled)
-                    "MUSIC" -> preferences.showMusicTab.set(enabled)
                   }
                 },
                 onMove = { id, destination ->

@@ -242,7 +242,6 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
     val musicSourceProvider by mediaServerPreferences.musicSourceProvider.collectAsState()
     val musicLibraryViewModel: MusicLibraryViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
     val localMusicTabs by musicLibraryViewModel.visibleTabs.collectAsStateWithLifecycle()
-    val showMusicTab by appearancePreferences.showMusicTab.collectAsState()
     val showProfileTab by appearancePreferences.showProfileTab.collectAsState()
     val showNetworkTab by appearancePreferences.showNetworkTab.collectAsState()
     val liquidGlassEnabled by appearancePreferences.liquidGlassEnabled.collectAsState()
@@ -270,9 +269,8 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
 
     val bottomNavigationOrder by appearancePreferences.bottomNavigationOrder.collectAsState()
     val visibleTabs =
-      remember(showMusicTab, showProfileTab, showNetworkTab, bottomNavigationOrder) {
+      remember(showProfileTab, showNetworkTab, bottomNavigationOrder) {
         mainNavigationTabs(
-          showMusic = showMusicTab,
           showProfile = showProfileTab,
           showNetwork = showNetworkTab,
           order = bottomNavigationOrder,
@@ -1427,7 +1425,6 @@ private const val TV_TAB_FOCUS_RETRY_MS = 100L
  * tab. The Profile tab absorbs Recents, Playlists and Snapshots, which stay reachable from inside it.
  */
 internal fun mainNavigationTabs(
-  showMusic: Boolean,
   showProfile: Boolean,
   showNetwork: Boolean = false,
   order: List<String> = emptyList(),
@@ -1435,7 +1432,6 @@ internal fun mainNavigationTabs(
   val available = buildList {
     add(MainScreen.MainTab.HOME)
     if (showNetwork) add(MainScreen.MainTab.NETWORK)
-    if (showMusic) add(MainScreen.MainTab.MUSIC)
     if (showProfile) add(MainScreen.MainTab.PROFILE)
   }
   val byName = available.associateBy { it.name }
