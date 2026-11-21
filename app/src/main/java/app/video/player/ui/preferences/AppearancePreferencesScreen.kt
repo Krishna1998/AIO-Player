@@ -109,6 +109,7 @@ object AppearancePreferencesScreen : Screen {
 
     val darkMode by preferences.darkMode.collectAsState()
     val appTheme by preferences.appTheme.collectAsState()
+    val brandEmblemColor by preferences.brandEmblemColor.collectAsState()
     val customTheme by preferences.customTheme.collectAsState()
     val selectedCustomThemeName by preferences.selectedCustomThemeName.collectAsState()
     var changingThumbnailGenerator by remember { mutableStateOf(false) }
@@ -410,6 +411,22 @@ object AppearancePreferencesScreen : Screen {
 
                   PreferenceCard {
                     DevicePreference(R.string.pref_app_icon_title) {
+                      app.video.player.ui.preferences.components.BrandEmblemColorRow(
+                        selectedColor = brandEmblemColor,
+                        onColorSelected = { color ->
+                          preferences.brandEmblemColor.set(color)
+                          color.matchingLauncherAlias?.let { alias ->
+                            val targetIcon = LauncherIcon.entries.firstOrNull { it.aliasName == alias }
+                            if (targetIcon != null) {
+                              LauncherIconManager.select(context, targetIcon)
+                              (context as? Activity)?.let(LauncherIconManager::refreshTaskIcon)
+                            }
+                          }
+                        },
+                      )
+
+                      PreferenceDivider()
+
                       ExpressivePreferenceItem {
                         Preference(
                           modifier = Modifier.settingsSearchTarget(R.string.pref_app_icon_title),

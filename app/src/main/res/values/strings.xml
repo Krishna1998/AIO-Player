@@ -30,6 +30,16 @@
   <string name="pref_appearance_title">Appearance</string>
   <string name="pref_appearance_summary">Dark mode, Material You</string>
   <string name="pref_appearance_category_theme">Theme</string>
+  <string name="pref_emblem_color_title">Brand Emblem Colour</string>
+  <string name="pref_emblem_color_summary">Customize the glowing brand emblem accent and launcher icon style</string>
+  <string name="pref_emblem_color_sync_theme">Match App Theme</string>
+  <string name="pref_emblem_color_sync_theme_summary">Automatically adapt brand emblem colour to the active theme</string>
+  <string name="pref_emblem_color_lime">Acid Lime (Flagship)</string>
+  <string name="pref_emblem_color_cyan">Cyber Cyan</string>
+  <string name="pref_emblem_color_crimson">Hyper Crimson</string>
+  <string name="pref_emblem_color_violet">Electric Violet</string>
+  <string name="pref_emblem_color_magenta">Cyber Magenta</string>
+  <string name="pref_emblem_color_white">Diamond White</string>
   <string name="pref_appearance_darkmode_system">System</string>
   <string name="pref_appearance_darkmode_light">Light</string>
   <string name="pref_appearance_darkmode_dark">Dark</string>

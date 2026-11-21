@@ -87,6 +87,8 @@ object AboutScreen : Screen {
     val backstack = LocalBackStack.current
     val packageManager: PackageManager = context.packageManager
     val packageInfo = packageManager.getPackageInfo(context.packageName, 0)
+    val preferences = org.koin.compose.koinInject<app.video.player.preferences.AppearancePreferences>()
+    val brandEmblemColor by preferences.brandEmblemColor.collectAsState()
     val versionName =
       packageInfo.versionName
         ?.let { value ->
@@ -156,7 +158,14 @@ object AboutScreen : Screen {
           ) {
             Column {
               Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(modifier = Modifier.size(64.dp)) {
+                val emblemTint = brandEmblemColor.resolveColor(cs.primary)
+                Box(
+                  modifier = Modifier
+                    .size(64.dp)
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(Color(0xFF0E1017)),
+                  contentAlignment = Alignment.Center,
+                ) {
                   AndroidView(
                     modifier = Modifier.matchParentSize(),
                     factory = { ctx ->
@@ -169,6 +178,16 @@ object AboutScreen : Screen {
                       val selectedPreview = LauncherIconManager.current(view.context).preview
                       view.setImageResource(selectedPreview)
                     },
+                  )
+                  // Ambient neon glow ring reflecting the selected brand emblem colour
+                  Box(
+                    modifier = Modifier
+                      .matchParentSize()
+                      .border(
+                        width = 1.8.dp,
+                        brush = Brush.radialGradient(listOf(emblemTint, emblemTint.copy(alpha = 0.25f))),
+                        shape = RoundedCornerShape(18.dp),
+                      ),
                   )
                 }
 

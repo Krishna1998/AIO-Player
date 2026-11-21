@@ -67,6 +67,7 @@ class AppearancePreferences(
 
   val darkMode = preferenceStore.getEnum("dark_mode", DarkMode.System)
   val appTheme = preferenceStore.getEnum("app_theme", AppTheme.StealthAcidLime)
+  val brandEmblemColor = preferenceStore.getEnum("brand_emblem_color", app.video.player.ui.theme.BrandEmblemColor.AcidLime)
   val customTheme = preferenceStore.getString("custom_theme", "")
   val selectedCustomThemeName = preferenceStore.getString("selected_custom_theme_name", "")
   val customWallpaperUri = preferenceStore.getString(CUSTOM_WALLPAPER_URI_KEY, "")
