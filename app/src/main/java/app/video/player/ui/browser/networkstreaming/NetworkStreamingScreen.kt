@@ -285,7 +285,7 @@ object NetworkStreamingScreen : Screen {
           } else {
             Box {
               BrowserTopBar(
-                title = stringResource(R.string.ui_network),
+                title = stringResource(R.string.ui_online_streaming),
                 isInSelectionMode = false,
                 selectedCount = 0,
                 totalCount = connections.size + recentLinks.size + resolvedFolderBookmarks.size,
