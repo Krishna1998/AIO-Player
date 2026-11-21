@@ -1029,21 +1029,21 @@ private fun HorizonRailSection(
       // Glass UI Title Capsule
       Surface(
         shape = RoundedCornerShape(999.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.45f),
+        color = accentColor.copy(alpha = 0.16f),
         border = BorderStroke(
           width = 1.dp,
           brush = Brush.linearGradient(
             colors = listOf(
-              accentColor.copy(alpha = 0.65f),
-              Color.White.copy(alpha = 0.25f),
-              accentColor.copy(alpha = 0.15f),
+              accentColor.copy(alpha = 0.75f),
+              Color.White.copy(alpha = 0.35f),
+              accentColor.copy(alpha = 0.25f),
             ),
           ),
         ),
-        shadowElevation = 2.dp,
+        shadowElevation = 3.dp,
       ) {
         Row(
-          modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+          modifier = Modifier.padding(horizontal = 11.dp, vertical = 5.dp),
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(7.dp),
         ) {
@@ -1062,8 +1062,8 @@ private fun HorizonRailSection(
           )
           Surface(
             shape = RoundedCornerShape(999.dp),
-            color = accentColor.copy(alpha = 0.20f),
-            border = BorderStroke(0.5.dp, accentColor.copy(alpha = 0.45f)),
+            color = accentColor.copy(alpha = 0.25f),
+            border = BorderStroke(0.6.dp, accentColor.copy(alpha = 0.60f)),
           ) {
             Text(
               text = "$count",
@@ -1191,6 +1191,14 @@ private fun BentoHorizonVideoCard(
       Column(
         modifier = Modifier
           .fillMaxWidth()
+          .background(
+            Brush.verticalGradient(
+              colors = listOf(
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                Color.Transparent,
+              ),
+            ),
+          )
           .padding(horizontal = 12.dp, vertical = 9.dp),
         verticalArrangement = Arrangement.spacedBy(3.dp),
       ) {
@@ -1332,6 +1340,14 @@ private fun BentoHorizonAudioCard(
       Column(
         modifier = Modifier
           .fillMaxWidth()
+          .background(
+            Brush.verticalGradient(
+              colors = listOf(
+                MaterialTheme.colorScheme.tertiary.copy(alpha = 0.12f),
+                Color.Transparent,
+              ),
+            ),
+          )
           .padding(horizontal = 10.dp, vertical = 9.dp),
         verticalArrangement = Arrangement.spacedBy(3.dp),
       ) {
