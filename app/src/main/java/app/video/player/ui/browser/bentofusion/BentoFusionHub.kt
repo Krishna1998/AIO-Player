@@ -1746,6 +1746,16 @@ private fun BentoHeroSpotlightCard(
               )
 
               if (isAudio) {
+                val isPaused by PlaybackSession.propBoolean["pause"].collectAsState()
+                val isPlaying = isCurrentlyPlayingInSession && (isPaused == false)
+                val currentProgress = if (isCurrentlyPlayingInSession && totalSec > 0L && livePositionSec != null) {
+                  (livePositionSec!!.toFloat() / totalSec.toFloat()).coerceIn(0f, 1f)
+                } else if (progress > 0f) {
+                  progress
+                } else {
+                  0f
+                }
+
                 OneUi9WaveformVisualizer(
                   modifier = Modifier
                     .fillMaxWidth()
@@ -1754,6 +1764,8 @@ private fun BentoHeroSpotlightCard(
                   wave1Color = wave1Color,
                   wave2Color = wave2Color,
                   wave3Color = wave3Color,
+                  isPlaying = isPlaying,
+                  progress = currentProgress,
                 )
               }
 
@@ -1802,6 +1814,8 @@ fun OneUi9WaveformVisualizer(
   wave1Color: Color = Color(0xFF4338CA), // One UI 9 Liquid Aura: Luminous Royal Indigo (1st wave: bass veil)
   wave2Color: Color = Color(0xFF8B5CF6), // One UI 9 Liquid Aura: Electric Violet (2nd wave: mid veil)
   wave3Color: Color = Color(0xFF38BDF8), // One UI 9 Liquid Aura: Galaxy Sky Cyan (Last wave: lead crest)
+  isPlaying: Boolean = true,
+  progress: Float = 0f,
 ) {
   var frameNanos by remember { mutableLongStateOf(0L) }
   var phase1 by remember { mutableFloatStateOf(0f) }
@@ -1810,7 +1824,8 @@ fun OneUi9WaveformVisualizer(
 
   val twoPi = (2.0 * PI).toFloat()
 
-  LaunchedEffect(Unit) {
+  LaunchedEffect(isPlaying) {
+    if (!isPlaying) return@LaunchedEffect
     var previous = 0L
     while (true) {
       withFrameNanos { now ->
@@ -1824,6 +1839,13 @@ fun OneUi9WaveformVisualizer(
     }
   }
 
+  // Smoothly damp amplitude when paused
+  val animatedAmpScale by animateFloatAsState(
+    targetValue = if (isPlaying) 1f else 0.25f,
+    animationSpec = tween(350),
+    label = "waveAmpScale",
+  )
+
   val filledPath = remember { Path() }
   val contourPath = remember { Path() }
 
@@ -1835,9 +1857,38 @@ fun OneUi9WaveformVisualizer(
     if (width <= 0f || height <= 0f) return@Canvas
 
     val baselineY = height - 1.5.dp.toPx()
-    val availableLift = (baselineY - 1.dp.toPx()).coerceAtLeast(0f)
+    val availableLift = (baselineY - 1.dp.toPx()).coerceAtLeast(0f) * animatedAmpScale
     val step = 2.dp.toPx().coerceAtLeast(1f)
-    val taperInset = 16.dp.toPx().coerceAtMost(width / 4f)
+    val clampedProgress = progress.coerceIn(0f, 1f)
+    val waveActiveWidth = (width * clampedProgress).coerceIn(0f, width)
+
+    // Unplayed track baseline line
+    drawLine(
+      color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f),
+      start = Offset(0f, baselineY),
+      end = Offset(width, baselineY),
+      strokeWidth = 1.dp.toPx(),
+      cap = StrokeCap.Round,
+    )
+
+    // Played track baseline accent glow
+    if (waveActiveWidth > 0f) {
+      drawLine(
+        brush = Brush.horizontalGradient(
+          colors = listOf(wave1Color.copy(alpha = 0.6f), wave3Color),
+          startX = 0f,
+          endX = waveActiveWidth,
+        ),
+        start = Offset(0f, baselineY),
+        end = Offset(waveActiveWidth, baselineY),
+        strokeWidth = 2.dp.toPx(),
+        cap = StrokeCap.Round,
+      )
+    }
+
+    if (waveActiveWidth <= 2.dp.toPx() || availableLift <= 0.5f) return@Canvas
+
+    val taperInset = 12.dp.toPx().coerceAtMost(waveActiveWidth / 4f)
 
     fun smoothstep(v: Float): Float {
       val c = v.coerceIn(0f, 1f)
@@ -1863,7 +1914,7 @@ fun OneUi9WaveformVisualizer(
 
       fun ribbonY(x: Float): Float {
         val edgeIn = if (taperInset > 0f) smoothstep(x / taperInset) else 1f
-        val edgeOut = if (taperInset > 0f) smoothstep((width - x) / taperInset) else 1f
+        val edgeOut = if (taperInset > 0f) smoothstep((waveActiveWidth - x) / taperInset) else 1f
         val envelope = edgeIn * edgeOut
         val undulation = 0.50f + 0.50f * sin((x / wavelength) * twoPi - phaseOffset)
         return baselineY - lift * undulation * envelope
@@ -1875,13 +1926,13 @@ fun OneUi9WaveformVisualizer(
       contourPath.moveTo(0f, startY)
 
       var x = 0f
-      while (x < width) {
-        x = min(x + step, width)
+      while (x < waveActiveWidth) {
+        x = min(x + step, waveActiveWidth)
         val y = ribbonY(x)
         filledPath.lineTo(x, y)
         contourPath.lineTo(x, y)
       }
-      filledPath.lineTo(width, baselineY)
+      filledPath.lineTo(waveActiveWidth, baselineY)
       filledPath.close()
 
       // 1. One UI 9 Frosted Glass Gradient Body Fill (curtain down to baseline)
