@@ -4,6 +4,25 @@ These notes are written in plain English and focus on what changed for real use.
 
 ## 1.0.0
 
+### 🔮 Fusion Experience, Music Sub-Categories & Performance Architecture
+- **Unified "Fusion" Branding & Clean Interface:**
+  - Transitioned all user-facing BentoFusion terminology cleanly to **Fusion** throughout the app (browser headers, sub-tabs, settings, and cards).
+  - Streamlined horizontal media rail naming: updated `Video/Movie` to **Movies / Videos**.
+  - Completely removed the redundant standalone Music tab from the bottom navigation bar and navigation bar preferences in favor of the rich, unified Fusion hub.
+  - Removed duplicate Clear Thumbnail Cache option in Appearance Settings in favor of Advanced Settings.
+  - Dedicated Liquid Glass preference to the main Settings page, eliminating duplicate navigation entries in Appearance Settings.
+- **Fusion Music Sub-Category System & Custom Ordering:**
+  - Expanded Fusion Music with full sub-category filtering and browsing: **All Music**, **Favorites**, **Playlists**, **Folders**, **Albums**, and **Artists**.
+  - Added dedicated interactive bottom sheets (`AlbumDetailSheet` and `ArtistDetailSheet`) with full tracklists, album art, and direct track playback.
+  - Added full drag-and-drop reordering and on/off toggles for Music Sub-Tabs in **Audio Settings**.
+  - Dynamic default selection: whichever sub-category is placed 1st in the reorder list is automatically selected as the default view upon entering the Music tab.
+- **Glass UI Watch Analytics Separation:**
+  - Separated Profile Watch Analytics into dedicated, elevated glass cards: **Most Watched** for video media and **Most Listened** for audio tracks, each with specialized iconography, custom containers, and stats.
+- **Hardware-Accelerated Panel Performance:**
+  - Optimized real-time panel transitions (`PlayerPanels` and `DraggablePanel`) using hardware-accelerated render layers (`graphicsLayer`) to eliminate animation jitter and dropped frames when opening panels with Liquid Glass enabled.
+- **Curated Theme Presets Renaming:**
+  - Refined flagship themes: `Deep Midnight Cyan` &rarr; **Deep Midnight**, `Nordic Glacial Mint` &rarr; **Nordic Glacial**, and `Velvet Nebula Violet` &rarr; **Velvet Nebula**.
+
 ### 🎵 Live Audio Pulsing Sync, All Media Mini-Player Coordination, Duration Cut-Out Slider & Videos Folder View
 - **Real-Time Audio Pulsing Live Sync:**
   - Resolved track sync delay when changing music in the audio player (next, previous, or auto-advancing queue).

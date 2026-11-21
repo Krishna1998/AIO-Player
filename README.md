@@ -74,10 +74,12 @@ Whether decoding 4K HDR10+ anime with complex ASS karaoke subtitles or driving a
 | :--- | :---: | :--- |
 | **Material 3 Expressive** | 🟢 **ACTIVE** | Full dynamic color integration, OLED pure black theme, and expressive typography |
 | **Curated 10-Icon Elite Suite** | 🟢 **ACTIVE** | **NEW:** In-app icon switcher dedicated to 10 futuristic designs on Stealth Carbon: Aura Aperture (default), Stealth Shutter, Kilo-Hertz Monolith, Quantum Aperture, Liquid Acoustic Droplet, Horizon Aero Blades, Aura Aperture, Eclipse Halo (Cyan & Lime @ 75%), and Supersonic Split Arrow (@ 75%), with Android 12+ animated splash screens and Material You dynamic theming |
-| **6 Flagship App Themes** | 🟢 **ACTIVE** | **NEW:** Stealth Acid Lime, Electric Cyan, Hyper Crimson, Cyber Magenta, Quantum Violet, and Solar Gold theme presets |
+| **Fusion Media Architecture** | 🟢 **ACTIVE** | **NEW:** Unified Fusion media hub replacing legacy Bento navigation; includes configurable Movies / Videos and Music rails with sub-categories (All Music, Favorites, Playlists, Folders, Albums, Artists) and custom order prioritization |
+| **6 Flagship App Themes** | 🟢 **ACTIVE** | **NEW:** Stealth Acid Lime, Deep Midnight, Hyper Crimson, Cyber Magenta, Quantum Violet, and Solar Gold theme presets |
 | **Slimline HUD Sliders** | 🟢 **ACTIVE** | **NEW:** Ultra-sleek 36dp width brightness and volume vertical pills with 18dp iconography and tabular metrics |
 | **Global Scrollbar Hide Toggle** | 🟢 **ACTIVE** | **NEW:** Dedicated toggle in Appearance preferences to completely hide the scrollbar across Home, Music, and all media lists |
-| **5 Glass UI App Themes** | 🟢 **ACTIVE** | CyberPrism, RossoPrism, AuroraMint, HoloOpal, and SolarAmber theme engine additions with specular frosted glass styling |
+| **Glass UI App Themes** | 🟢 **ACTIVE** | Cyber Prism, Rosso Prism, Nordic Glacial, Velvet Nebula, and Solar Amber theme engine with specular frosted glass styling |
+| **Hardware-Accelerated Panels** | 🟢 **ACTIVE** | **NEW:** `graphicsLayer` optimized side and bottom panels for fluid 120Hz jitter-free slide transitions with real-time Liquid Glass |
 | **Audio Player Liquid Glass** | 🟢 **ACTIVE** | **NEW:** Frosted translucent glass pods, specular top-lit gradient rims, and floating depth shadows across all audio controls |
 | **Top Header Track Counter** | 🟢 **ACTIVE** | **NEW:** Track and chapter counter (`Track X / Y`) relocated to upper side inside top header bar beneath NOW PLAYING |
 | **Material You Themed Icons** | 🟢 **ACTIVE** | Full monochrome silhouette vector layer matching Android 13+ dynamic system color palettes |
