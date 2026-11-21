@@ -317,14 +317,14 @@ internal fun WaveVisualizerOverlay(
     val frontLiftScale = ribbonLiftScale(outputVolume, loudness, highLevel)
     val beatImpact = beatPulse * outputVolume
 
-    // One UI 9.5 Aurora Frosted Glass Veil: 3-tier harmonious multi-depth wave curtains
-    // Layer 1: Ambient Deep Bass Veil (1st wave)
+    // One UI 9.5 Aurora Frosted Glass Veil: 3-tier multi-depth wave curtains
+    // Layer 1: Ambient Deep Bass Veil (Back wave - goes highest at the top)
     drawRibbon(
       filledPath = lowFilledPath,
       contourPath = lowContourPath,
       color = wave1Color,
       wavelength = 112.dp.toPx(),
-      baseLift = 26.0.dp.toPx(),
+      baseLift = 28.0.dp.toPx(),
       phase = lowPhase,
       liftScale = rearLiftScale,
       beatLift = 4.8.dp.toPx() * beatImpact,
@@ -335,16 +335,16 @@ internal fun WaveVisualizerOverlay(
       bodyBottomAlpha = 0.08f,
     )
 
-    // Layer 2: Harmonic Mid Veil (mid wave - matched height with first and last)
+    // Layer 2: Harmonic Mid Veil (Mid wave - slightly down from back wave)
     drawRibbon(
       filledPath = midFilledPath,
       contourPath = midContourPath,
       color = wave2Color,
       wavelength = 72.dp.toPx(),
-      baseLift = 26.0.dp.toPx(),
+      baseLift = 23.0.dp.toPx(),
       phase = midPhase,
       liftScale = middleLiftScale,
-      beatLift = 4.8.dp.toPx() * beatImpact,
+      beatLift = 4.0.dp.toPx() * beatImpact,
       contourWidth = 1.6.dp.toPx(),
       glowWidth = 6.0.dp.toPx(),
       glowAlpha = 0.38f,
@@ -352,16 +352,16 @@ internal fun WaveVisualizerOverlay(
       bodyBottomAlpha = 0.10f,
     )
 
-    // Layer 3: Vibrant Lead Luminous Wave with Specular Core (last wave - matched height)
+    // Layer 3: Vibrant Lead Luminous Wave with Specular Core (Front wave - slightly down from mid wave)
     drawRibbon(
       filledPath = highFilledPath,
       contourPath = highContourPath,
       color = wave3Color,
       wavelength = 46.dp.toPx(),
-      baseLift = 26.0.dp.toPx(),
+      baseLift = 18.0.dp.toPx(),
       phase = highPhase,
       liftScale = frontLiftScale,
-      beatLift = 4.8.dp.toPx() * beatImpact,
+      beatLift = 3.2.dp.toPx() * beatImpact,
       contourWidth = 2.0.dp.toPx(),
       glowWidth = 7.5.dp.toPx(),
       glowAlpha = 0.50f,
