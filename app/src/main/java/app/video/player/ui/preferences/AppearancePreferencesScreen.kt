@@ -387,22 +387,6 @@ object AppearancePreferencesScreen : Screen {
                       PreferenceDivider()
                     }
 
-                    ExpressivePreferenceItem {
-                      Preference(
-                        modifier = Modifier.settingsSearchTarget(R.string.pref_appearance_category_liquid_glass),
-                        title = { Text(stringResource(R.string.pref_appearance_category_liquid_glass)) },
-                        summary = {
-                          Text(
-                            stringResource(R.string.pref_appearance_liquid_glass_summary),
-                            color = MaterialTheme.colorScheme.outline,
-                          )
-                        },
-                        onClick = { backstack.navigateTo(LiquidGlassPreferencesScreen) },
-                      )
-                    }
-
-                    PreferenceDivider()
-
                     SwitchPreference(
                     modifier = Modifier.settingsSearchTarget(R.string.pref_appearance_amoled_mode_title),
                     value = amoledMode,
