@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Stealth Carbon adaptive icon background -->
-    <color name="ic_launcher_background">#FF0E1017</color>
+    <!-- Velvet Void flagship launcher backdrop matching Velvet Nebula Violet theme -->
+    <color name="ic_launcher_background">#FF120914</color>
 </resources>

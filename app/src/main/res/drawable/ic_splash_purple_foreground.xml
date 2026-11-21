@@ -7,12 +7,12 @@
 
         <!-- Outer Dim Aura Ring (Animated Main Aura) -->
         <group android:name="logo_main" android:pivotX="256" android:pivotY="256">
-            <path android:strokeColor="#FFD4FF00" android:strokeAlpha="0.35" android:strokeWidth="11" android:pathData="M 256,101 A 155,155 0 1,0 256,411 A 155,155 0 1,0 256,101 Z" />
+            <path android:strokeColor="#FFA855F7" android:strokeAlpha="0.40" android:strokeWidth="11" android:pathData="M 256,101 A 155,155 0 1,0 256,411 A 155,155 0 1,0 256,101 Z" />
         </group>
 
         <!-- Inner Solid Disc with Negative Space Playhead Cutout (Animated Tip Pop) -->
         <group android:name="logo_tip" android:pivotX="256" android:pivotY="256">
-            <path android:fillColor="#FFD4FF00" android:fillType="evenOdd" android:pathData="M 256,144 A 112,112 0 1,0 256,368 A 112,112 0 1,0 256,144 Z M 222,191 L 325,256 L 222,321 Z" />
+            <path android:fillColor="#FFC084FC" android:fillType="evenOdd" android:pathData="M 256,144 A 112,112 0 1,0 256,368 A 112,112 0 1,0 256,144 Z M 222,191 L 325,256 L 222,321 Z" />
         </group>
     </group>
 </vector>
