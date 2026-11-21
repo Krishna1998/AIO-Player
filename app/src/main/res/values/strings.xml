@@ -2159,7 +2159,12 @@
   <string name="music_source_navidrome">Navidrome Music</string>
   <string name="player_lyrics_title">Lyrics</string>
   <string name="instrumental">Instrumental</string>
-  <string name="pref_music_tabs_title">Music Library Tabs</string>
+  <string name="pref_music_tabs_title">Music Sub-Tabs</string>
+  <string name="pref_music_tabs_summary">Drag to reorder and toggle sub-categories in the Fusion Music tab (All Music, Favorites, Playlists, Folders)</string>
+  <string name="pref_music_subtab_all_songs">All Music</string>
+  <string name="pref_music_subtab_favorites">Favorites</string>
+  <string name="pref_music_subtab_playlists">Playlists</string>
+  <string name="pref_music_subtab_folders">Folders</string>
   <string name="pref_paxsenix_api_key">PaxSenix API key</string>
   <string name="pref_paxsenix_api_key_summary">Unlocks the Spotify and Musixmatch routes</string>
   <string name="pref_paxsenix_api_key_dialog_desc">Paste your PaxSenix API key. Leave it empty to use only the routes that need no key.</string>

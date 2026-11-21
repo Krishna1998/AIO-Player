@@ -209,6 +209,57 @@ object AudioPreferencesScreen : Screen {
           }
 
           item {
+            PreferenceSectionHeader(
+              position = PreferenceSectionPosition.Middle,
+              title = stringResource(R.string.pref_music_tabs_title),
+              modifier = Modifier.settingsSearchTarget(R.string.pref_music_tabs_title),
+            )
+          }
+
+          item {
+            val enabledMusicTabs by preferences.enabledMusicTabs.collectAsState()
+            val musicTabOrder by preferences.musicTabOrder.collectAsState()
+            val defaultOrder = listOf("ALL_MUSIC", "FAVORITES", "PLAYLISTS", "FOLDERS")
+            val orderedTabs = (musicTabOrder.filter { it in defaultOrder } + defaultOrder).distinct()
+
+            ExpressivePreferenceGroup {
+              Text(
+                text = stringResource(R.string.pref_music_tabs_summary),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.outline,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+              )
+              ReorderableTabPreferences(
+                tabs = orderedTabs.map { tabId ->
+                  val (titleRes, summaryRes) = when (tabId) {
+                    "ALL_MUSIC" -> Pair(R.string.pref_music_subtab_all_songs, R.string.ui_songs)
+                    "FAVORITES" -> Pair(R.string.pref_music_subtab_favorites, R.string.ui_favorites)
+                    "PLAYLISTS" -> Pair(R.string.pref_music_subtab_playlists, R.string.ui_playlists)
+                    else -> Pair(R.string.pref_music_subtab_folders, R.string.search_category_folders)
+                  }
+                  ReorderableTabItem(
+                    id = tabId,
+                    title = stringResource(titleRes),
+                    summary = stringResource(summaryRes),
+                    enabled = tabId in enabledMusicTabs,
+                    titleRes = titleRes,
+                  )
+                },
+                onEnabledChange = { id, enabled ->
+                  val next = if (enabled) enabledMusicTabs + id else enabledMusicTabs - id
+                  if (next.isNotEmpty()) preferences.enabledMusicTabs.set(next)
+                },
+                onMove = { id, destination ->
+                  val next = orderedTabs.toMutableList()
+                  next.remove(id)
+                  next.add(destination.coerceIn(0, next.size), id)
+                  preferences.musicTabOrder.set(next)
+                },
+              )
+            }
+          }
+
+          item {
             PreferenceSectionHeader(position = PreferenceSectionPosition.Middle, title = stringResource(R.string.pref_section_appearance))
           }
 

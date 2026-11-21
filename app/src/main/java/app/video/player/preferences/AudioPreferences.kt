@@ -68,16 +68,17 @@ class AudioPreferences(
   val wavyVisualizerMode = preferenceStore.getEnum("wavy_visualizer_mode", WavyVisualizerMode.OneSide)
   val enabledMusicTabs = preferenceStore.getStringSet(
     "enabled_music_tabs",
-    setOf("FOLDERS", "SONGS", "FAVORITES", "PLAYLISTS"),
+    setOf("ALL_MUSIC", "FAVORITES", "PLAYLISTS", "FOLDERS"),
   )
   val musicTabOrder = preferenceStore.getObject(
     key = "music_tab_order",
-    defaultValue = listOf("FOLDERS", "SONGS", "FAVORITES", "PLAYLISTS", "ALBUMS", "ARTISTS"),
+    defaultValue = listOf("ALL_MUSIC", "FAVORITES", "PLAYLISTS", "FOLDERS"),
     serializer = { list -> list.joinToString(",") },
     deserializer = { str ->
-      val parsed = str.split(",").map { it.trim() }.filter { it.isNotEmpty() }
-      val missing = listOf("FOLDERS", "SONGS", "FAVORITES", "PLAYLISTS", "ALBUMS", "ARTISTS") - parsed.toSet()
-      parsed + missing
+      val defaults = listOf("ALL_MUSIC", "FAVORITES", "PLAYLISTS", "FOLDERS")
+      val legacyMap = mapOf("SONGS" to "ALL_MUSIC")
+      val parsed = str.split(",").map { it.trim() }.map { legacyMap[it] ?: it }.filter { it in defaults }.distinct()
+      parsed + (defaults - parsed.toSet())
     },
   )
 

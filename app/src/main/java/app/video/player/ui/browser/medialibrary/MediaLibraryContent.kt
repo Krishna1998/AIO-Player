@@ -154,6 +154,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   val browserPreferences = koinInject<BrowserPreferences>()
   val foldersPreferences = koinInject<FoldersPreferences>()
   val appearancePreferences = koinInject<app.video.player.preferences.AppearancePreferences>()
+  val audioPreferences = koinInject<app.video.player.preferences.AudioPreferences>()
   val showQuickPlayFab by appearancePreferences.showQuickPlayFab.collectAsState()
   val playerPreferences = koinInject<PlayerPreferences>()
   val playlistRepository = koinInject<PlaylistRepository>()
@@ -217,8 +218,19 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   val savedMediaType by browserPreferences.mediaLibraryType.collectAsState()
   val mediaType = if (forceAudio) MediaLibraryType.Audio else if (includeAudioBrowser || browserPreferences.folderViewMode.get() == app.video.player.preferences.FolderViewMode.BentoFusion) savedMediaType else MediaLibraryType.Video
   val musicCoverArtSize by browserPreferences.musicCoverArtSize.collectAsState()
+  val enabledMusicTabs by audioPreferences.enabledMusicTabs.collectAsState()
+  val musicTabOrder by audioPreferences.musicTabOrder.collectAsState()
+  val activeMusicSubTabs = remember(enabledMusicTabs, musicTabOrder) {
+    val defaultOrder = listOf("ALL_MUSIC", "FAVORITES", "PLAYLISTS", "FOLDERS")
+    val ordered = (musicTabOrder.filter { it in defaultOrder } + defaultOrder).distinct()
+    val filtered = ordered.filter { it in enabledMusicTabs }
+    if (filtered.isNotEmpty()) filtered else listOf("ALL_MUSIC")
+  }
   var videoSubTab by rememberSaveable { mutableIntStateOf(0) }
-  var audioSubTab by rememberSaveable { mutableIntStateOf(0) }
+  var audioSubTabId by rememberSaveable { mutableStateOf("ALL_MUSIC") }
+  val currentAudioSubTab = remember(activeMusicSubTabs, audioSubTabId) {
+    if (audioSubTabId in activeMusicSubTabs) audioSubTabId else activeMusicSubTabs.first()
+  }
   val sortedVideos =
     remember(videos, videoSortType, videoSortOrder) {
       SortUtils.sortVideos(videos, videoSortType, videoSortOrder)
@@ -751,7 +763,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
             !selectionManager.isInSelectionMode &&
             isFabVisible.value &&
             !MainScreen.getPermissionDeniedState() &&
-            !(currentTab == MediaLibraryType.Audio && audioSubTab == 2 && !isSearching)
+            !(currentTab == MediaLibraryType.Audio && currentAudioSubTab == "PLAYLISTS" && !isSearching)
 
         FloatingActionButtonMenu(
         modifier = Modifier.padding(bottom = FabPlacement.scaffoldBottomPadding()),
@@ -785,7 +797,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                 onCheckedChange = {
                   if (quickPlayFabDirect) {
                     coroutineScope.launch {
-                      val effectiveVideos = if (currentTab == MediaLibraryType.Audio && audioSubTab == 1) {
+                      val effectiveVideos = if (currentTab == MediaLibraryType.Audio && currentAudioSubTab == "FAVORITES") {
                         favoriteAudioVideos
                       } else {
                         currentVideosWithInfo
@@ -802,7 +814,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
 
                       playFromMediaLibrary(
                         video = targetVideo ?: effectiveVideos.first().video,
-                        customPlaylist = if (currentTab == MediaLibraryType.Audio && audioSubTab == 1) favoriteAudioVideos.map { it.video } else null,
+                        customPlaylist = if (currentTab == MediaLibraryType.Audio && currentAudioSubTab == "FAVORITES") favoriteAudioVideos.map { it.video } else null,
                       )
                     }
                   } else {
@@ -849,7 +861,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
               onClick = {
                 isFabExpanded.value = false
                 coroutineScope.launch {
-                  val effectiveVideos = if (currentTab == MediaLibraryType.Audio && audioSubTab == 1) {
+                  val effectiveVideos = if (currentTab == MediaLibraryType.Audio && currentAudioSubTab == "FAVORITES") {
                     favoriteAudioVideos
                   } else {
                     currentVideosWithInfo
@@ -866,7 +878,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
 
                   playFromMediaLibrary(
                     video = targetVideo ?: effectiveVideos.first().video,
-                    customPlaylist = if (currentTab == MediaLibraryType.Audio && audioSubTab == 1) favoriteAudioVideos.map { it.video } else null,
+                    customPlaylist = if (currentTab == MediaLibraryType.Audio && currentAudioSubTab == "FAVORITES") favoriteAudioVideos.map { it.video } else null,
                   )
                 }
               },
@@ -1180,83 +1192,97 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                   pageVideosWithInfo.filter { favoriteAudioPaths.contains(it.video.path) }
                 }
                 Column(modifier = Modifier.fillMaxSize()) {
-                  Row(
-                    modifier = Modifier
-                      .fillMaxWidth()
-                      .horizontalScroll(rememberScrollState())
-                      .padding(horizontal = 16.dp, vertical = 2.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                  ) {
-                    androidx.compose.material3.FilterChip(
-                      selected = audioSubTab == 0,
-                      onClick = { audioSubTab = 0 },
-                      label = { Text("Music Library (${pageVideosWithInfo.size})") },
-                      leadingIcon = {
-                        app.video.player.ui.icons.Icon(
-                          imageVector = app.video.player.ui.icons.Icons.RoundedFilled.Audiotrack,
-                          contentDescription = null,
-                          modifier = Modifier.size(16.dp),
-                        )
-                      },
-                      colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                      ),
-                    )
-                    androidx.compose.material3.FilterChip(
-                      selected = audioSubTab == 1,
-                      onClick = { audioSubTab = 1 },
-                      label = { Text(if (pageFavoriteAudioVideos.isNotEmpty()) "Favorite (${pageFavoriteAudioVideos.size})" else "Favorite") },
-                      leadingIcon = {
-                        app.video.player.ui.icons.Icon(
-                          imageVector = app.video.player.ui.icons.Icons.RoundedFilled.Favorite,
-                          contentDescription = null,
-                          modifier = Modifier.size(16.dp),
-                          tint = if (audioSubTab == 1) Color(0xFFFF4081) else MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                      },
-                      colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                      ),
-                    )
-                    androidx.compose.material3.FilterChip(
-                      selected = audioSubTab == 2,
-                      onClick = { audioSubTab = 2 },
-                      label = { Text(if (audioPlaylists.isNotEmpty()) "Playlist (${audioPlaylists.size})" else "Playlist") },
-                      leadingIcon = {
-                        app.video.player.ui.icons.Icon(
-                          imageVector = app.video.player.ui.icons.Icons.RoundedFilled.QueueMusic,
-                          contentDescription = null,
-                          modifier = Modifier.size(16.dp),
-                        )
-                      },
-                      colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                      ),
-                    )
-                    androidx.compose.material3.FilterChip(
-                      selected = audioSubTab == 3,
-                      onClick = { audioSubTab = 3 },
-                      label = { Text("Folders") },
-                      leadingIcon = {
-                        app.video.player.ui.icons.Icon(
-                          imageVector = app.video.player.ui.icons.Icons.RoundedFilled.Folder,
-                          contentDescription = null,
-                          modifier = Modifier.size(16.dp),
-                        )
-                      },
-                      colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                      ),
-                    )
+                  if (activeMusicSubTabs.size > 1) {
+                    Row(
+                      modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState())
+                        .padding(horizontal = 16.dp, vertical = 2.dp),
+                      horizontalArrangement = Arrangement.spacedBy(8.dp),
+                      verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                      activeMusicSubTabs.forEach { tabId ->
+                        when (tabId) {
+                          "ALL_MUSIC" -> {
+                            androidx.compose.material3.FilterChip(
+                              selected = currentAudioSubTab == "ALL_MUSIC",
+                              onClick = { audioSubTabId = "ALL_MUSIC" },
+                              label = { Text("Music Library (${pageVideosWithInfo.size})") },
+                              leadingIcon = {
+                                app.video.player.ui.icons.Icon(
+                                  imageVector = app.video.player.ui.icons.Icons.RoundedFilled.Audiotrack,
+                                  contentDescription = null,
+                                  modifier = Modifier.size(16.dp),
+                                )
+                              },
+                              colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                              ),
+                            )
+                          }
+                          "FAVORITES" -> {
+                            androidx.compose.material3.FilterChip(
+                              selected = currentAudioSubTab == "FAVORITES",
+                              onClick = { audioSubTabId = "FAVORITES" },
+                              label = { Text(if (pageFavoriteAudioVideos.isNotEmpty()) "Favorite (${pageFavoriteAudioVideos.size})" else "Favorite") },
+                              leadingIcon = {
+                                app.video.player.ui.icons.Icon(
+                                  imageVector = app.video.player.ui.icons.Icons.RoundedFilled.Favorite,
+                                  contentDescription = null,
+                                  modifier = Modifier.size(16.dp),
+                                  tint = if (currentAudioSubTab == "FAVORITES") Color(0xFFFF4081) else MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                              },
+                              colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                              ),
+                            )
+                          }
+                          "PLAYLISTS" -> {
+                            androidx.compose.material3.FilterChip(
+                              selected = currentAudioSubTab == "PLAYLISTS",
+                              onClick = { audioSubTabId = "PLAYLISTS" },
+                              label = { Text(if (audioPlaylists.isNotEmpty()) "Playlist (${audioPlaylists.size})" else "Playlist") },
+                              leadingIcon = {
+                                app.video.player.ui.icons.Icon(
+                                  imageVector = app.video.player.ui.icons.Icons.RoundedFilled.QueueMusic,
+                                  contentDescription = null,
+                                  modifier = Modifier.size(16.dp),
+                                )
+                              },
+                              colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                              ),
+                            )
+                          }
+                          "FOLDERS" -> {
+                            androidx.compose.material3.FilterChip(
+                              selected = currentAudioSubTab == "FOLDERS",
+                              onClick = { audioSubTabId = "FOLDERS" },
+                              label = { Text("Folders") },
+                              leadingIcon = {
+                                app.video.player.ui.icons.Icon(
+                                  imageVector = app.video.player.ui.icons.Icons.RoundedFilled.Folder,
+                                  contentDescription = null,
+                                  modifier = Modifier.size(16.dp),
+                                )
+                              },
+                              colors = androidx.compose.material3.FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                              ),
+                            )
+                          }
+                        }
+                      }
+                    }
                   }
                   Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                    when (audioSubTab) {
-                      0 -> {
+                    when (currentAudioSubTab) {
+                      "ALL_MUSIC" -> {
                         VideoListContent(
                           folderId = "media_library_audio",
                           videosWithInfo = pageVideosWithInfo,
@@ -1286,7 +1312,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                           headerContent = null,
                         )
                       }
-                      1 -> {
+                      "FAVORITES" -> {
                         if (pageFavoriteAudioVideos.isEmpty()) {
                           Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             app.video.player.ui.browser.states.EmptyState(
@@ -1326,14 +1352,14 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                           )
                         }
                       }
-                      2 -> {
+                      "PLAYLISTS" -> {
                         app.video.player.ui.browser.playlist.PlaylistScreen.PlaylistScreenContent(
                           audioOnly = true,
                           embedded = true,
                           searchQuery = searchQuery,
                         )
                       }
-                      3 -> {
+                      "FOLDERS" -> {
                         app.video.player.ui.browser.folderlist.FolderListScreen.MediaStoreFolderListContent(
                           audioOnly = true,
                           videoOnly = false,
@@ -1495,7 +1521,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
 
     if (sortDialogOpen.value) {
       if (((currentTab == MediaLibraryType.Video && videoSubTab == 0) ||
-          (currentTab == MediaLibraryType.Audio && audioSubTab == 3)) && !isSearching) {
+          (currentTab == MediaLibraryType.Audio && currentAudioSubTab == "FOLDERS")) && !isSearching) {
         FolderSortDialog(
           isOpen = sortDialogOpen.value,
           onDismiss = { sortDialogOpen.value = false },
@@ -1506,7 +1532,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
           embeddedAlbumView = true,
           isAudio = currentTab == MediaLibraryType.Audio,
         )
-      } else if (currentTab == MediaLibraryType.Audio && audioSubTab == 2 && !isSearching) {
+      } else if (currentTab == MediaLibraryType.Audio && currentAudioSubTab == "PLAYLISTS" && !isSearching) {
         PlaylistSortDialog(
           isOpen = sortDialogOpen.value,
           onDismiss = { sortDialogOpen.value = false },
