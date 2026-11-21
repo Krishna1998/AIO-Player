@@ -461,7 +461,7 @@ object NetworkStreamingScreen : Screen {
             renamingEntry = null
           },
           currentName = entry.fileName,
-          itemType = stringResource(R.string.stream_link),
+          itemType = "stream",
         )
       }
     }
@@ -837,7 +837,7 @@ private fun StreamLinkSection(
               ) {
                 Icon(
                   imageVector = Icons.RoundedFilled.Edit,
-                  contentDescription = stringResource(R.string.action_rename),
+                  contentDescription = stringResource(R.string.rename),
                   tint = MaterialTheme.colorScheme.secondary,
                   modifier = Modifier.size(18.dp),
                 )
