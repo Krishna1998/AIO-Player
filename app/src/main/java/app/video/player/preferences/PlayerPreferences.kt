@@ -347,13 +347,13 @@ class PlayerPreferences(
   val showZoomLevelOverlay = preferenceStore.getBoolean("show_zoom_level_overlay", false)
 
   /** Show the action pill when toggling repeat mode or shuffle. */
-  val showRepeatShuffleOverlay = preferenceStore.getBoolean("show_repeat_shuffle_overlay", true)
+  val showRepeatShuffleOverlay = preferenceStore.getBoolean("show_repeat_shuffle_overlay", false)
 
   /** Show brief text pills from custom buttons, ambient toggle, subtitle drag, and Lua scripts. */
-  val showActionFeedbackOverlay = preferenceStore.getBoolean("show_action_feedback_overlay", true)
+  val showActionFeedbackOverlay = preferenceStore.getBoolean("show_action_feedback_overlay", false)
 
   /** Show the automatic-resume pill with its Restart action. */
-  val showResumeIndicatorOverlay = preferenceStore.getBoolean("show_resume_indicator_overlay", true)
+  val showResumeIndicatorOverlay = preferenceStore.getBoolean("show_resume_indicator_overlay", false)
 
   /** Show provider/network status feedback such as online subtitle and marker lookup failures. */
   val showProviderStatusOverlay = preferenceStore.getBoolean("show_provider_status_overlay", false)
