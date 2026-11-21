@@ -112,16 +112,16 @@ class BrowserPreferences(
   val navidromeSortOrder = preferenceStore.getEnum("navidrome_sort_order", MusicSortOrder.ASCENDING)
 
   val folderViewMode = preferenceStore.getEnum("folder_view_mode", FolderViewMode.DualHorizon)
-  val dualPaneForTablet = preferenceStore.getBoolean("dual_pane_for_tablet", true)
+  val dualPaneForTablet = preferenceStore.getBoolean("dual_pane_for_tablet", false)
 
   val folderGridColumnsPortrait = preferenceStore.getInt("folder_grid_columns_portrait", 2)
-  val folderGridColumnsLandscape = preferenceStore.getInt("folder_grid_columns_landscape", 0)
+  val folderGridColumnsLandscape = preferenceStore.getInt("folder_grid_columns_landscape", 6)
 
   val videoGridColumnsPortrait = preferenceStore.getInt("video_grid_columns_portrait", 2)
-  val videoGridColumnsLandscape = preferenceStore.getInt("video_grid_columns_landscape", 0)
+  val videoGridColumnsLandscape = preferenceStore.getInt("video_grid_columns_landscape", 6)
 
   val musicGridColumnsPortrait = preferenceStore.getInt("music_grid_columns_portrait", 2)
-  val musicGridColumnsLandscape = preferenceStore.getInt("music_grid_columns_landscape", 0)
+  val musicGridColumnsLandscape = preferenceStore.getInt("music_grid_columns_landscape", 6)
 
   val folderGridColumnsDualPanePortrait = preferenceStore.getInt("folder_grid_columns_dual_pane_portrait", 0)
   val folderGridColumnsDualPaneLandscape = preferenceStore.getInt("folder_grid_columns_dual_pane_landscape", 0)
