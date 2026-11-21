@@ -1487,7 +1487,7 @@
   <string name="network_bookmark_source_format">%1$s  •  %2$s</string>
   <string name="ui_add_smb_ftp_or_webdav_connections_to_browse_network_files">Add SMB, FTP, or WebDAV connections to browse network files</string>
   <string name="ui_enter_stream_url">Enter stream URL...</string>
-  <string name="ui_network_telegram_magic_hint">Generate Telegram stream link and paste it here to check the magic ✨</string>
+  <string name="ui_network_telegram_magic_hint">Paste a Telegram or stream link here to see the magic ✨</string>
   <string name="ui_paste_stream_url">Paste stream URL</string>
   <string name="ui_clear_stream_url">Clear stream URL</string>
   <string name="ui_play_stream">Play stream</string>
