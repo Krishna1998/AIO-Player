@@ -26,8 +26,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import app.video.player.ui.utils.NavigationPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -44,10 +42,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import app.video.player.presentation.components.AppTextField as OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.PrimaryScrollableTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -101,7 +97,6 @@ import app.video.player.ui.preferences.PreferencesScreen
 import app.video.player.ui.utils.LocalBackStack
 import app.video.player.ui.utils.navigateTo
 import app.video.player.ui.utils.popSafely
-import app.video.player.ui.utils.rememberTabNavigation
 import app.video.player.utils.media.SharedUrlExtractor
 import app.video.player.utils.media.MediaUtils
 import app.video.player.utils.media.HttpUtils
@@ -111,12 +106,6 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
 
-
-private enum class NetworkTab(val titleResId: Int) {
-  LOCAL_NETWORK(R.string.ui_local_network),
-  MEDIA(R.string.ui_media),
-  SYNC_PLAY(R.string.syncplay_title),
-}
 
 @Serializable
 object NetworkStreamingScreen : Screen {
@@ -134,9 +123,7 @@ object NetworkStreamingScreen : Screen {
     val folderBookmarks by bookmarkPreferences.bookmarks.collectAsState()
     val connectionStatuses by viewModel.connectionStatuses.collectAsState()
     val recentLinks by viewModel.recentLinks.collectAsState()
-    val allMediaGroups by viewModel.allMediaGroups.collectAsState()
     var showAddSheet by remember { mutableStateOf(false) }
-    var showAddMediaDialog by remember { mutableStateOf(false) }
     var editingConnection by remember { mutableStateOf<NetworkConnection?>(null) }
     val coroutineScope = rememberCoroutineScope()
     val navigationHaptics = app.video.player.ui.utils.rememberAppHaptics()
@@ -234,33 +221,10 @@ object NetworkStreamingScreen : Screen {
         }
       }
 
-    val filteredMediaGroups =
-      remember(allMediaGroups, searchQuery) {
-        val query = searchQuery.trim()
-        if (query.isEmpty()) {
-          allMediaGroups
-        } else {
-          allMediaGroups.filter { group ->
-            group.title.contains(query, ignoreCase = true) ||
-              group.infoHash.orEmpty().contains(query, ignoreCase = true) ||
-              group.canonicalSourceUri.contains(query, ignoreCase = true) ||
-              group.overview.orEmpty().contains(query, ignoreCase = true) ||
-              group.releaseYear.orEmpty().contains(query, ignoreCase = true) ||
-              group.files.any { entry ->
-                entry.fileName.contains(query, ignoreCase = true) ||
-                  entry.filePath.orEmpty().contains(query, ignoreCase = true) ||
-                  entry.fileIndex?.toString() == query
-              }
-          }
-        }
-      }
-
     BackHandler(enabled = isSearching) {
       isSearching = false
       searchQuery = ""
     }
-
-    val pagerState = rememberPagerState { NetworkTab.entries.size }
 
     val headerContainerColor =
       if (app.video.player.ui.theme.LocalAppWallpaperActive.current) {
@@ -322,7 +286,7 @@ object NetworkStreamingScreen : Screen {
                 title = stringResource(R.string.ui_network),
                 isInSelectionMode = false,
                 selectedCount = 0,
-                totalCount = connections.size + recentLinks.size + allMediaGroups.size + resolvedFolderBookmarks.size,
+                totalCount = connections.size + recentLinks.size + resolvedFolderBookmarks.size,
                 onBackClick =
                   if (app.video.player.ui.browser.LocalIsMainTabPage.current) {
                     null
@@ -361,60 +325,19 @@ object NetworkStreamingScreen : Screen {
             }
           }
 
-          PrimaryScrollableTabRow(
-            selectedTabIndex = pagerState.currentPage.coerceIn(0, (NetworkTab.entries.size - 1).coerceAtLeast(0)),
-            edgePadding = 8.dp,
-            containerColor = Color.Transparent,
-            contentColor = MaterialTheme.colorScheme.primary,
-            divider = {},
-          ) {
-            val navigateTab = rememberTabNavigation(pagerState)
-            NetworkTab.entries.forEachIndexed { index, tab ->
-              Tab(
-                selected = pagerState.currentPage == index,
-                onClick = {
-                   if (pagerState.currentPage != index) navigationHaptics.selection(true)
-                   navigateTab(index)
-                 },
-                text = {
-                  Text(
-                    text = stringResource(tab.titleResId),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = if (pagerState.currentPage == index) FontWeight.Bold else FontWeight.Medium,
-                    maxLines = 1,
-                    softWrap = false,
-                    overflow = TextOverflow.Ellipsis,
-                  )
-                },
-              )
-            }
-          }
-          HorizontalDivider()
         }
       },
       floatingActionButton = {
-        when (pagerState.currentPage) {
-          NetworkTab.LOCAL_NETWORK.ordinal -> {
-            ExtendedFloatingActionButton(
-              onClick = { showAddSheet = true },
-              icon = { Icon(Icons.RoundedFilled.Add, contentDescription = null) },
-              text = {
-                Text(
-                  stringResource(R.string.ui_add_connection),
-                )
-              },
-              modifier = Modifier.padding(bottom = app.video.player.ui.browser.fab.FabPlacement.scaffoldBottomPadding()),
+        ExtendedFloatingActionButton(
+          onClick = { showAddSheet = true },
+          icon = { Icon(Icons.RoundedFilled.Add, contentDescription = null) },
+          text = {
+            Text(
+              stringResource(R.string.ui_add_connection),
             )
-          }
-          NetworkTab.MEDIA.ordinal -> {
-            ExtendedFloatingActionButton(
-              onClick = { showAddMediaDialog = true },
-              icon = { Icon(Icons.RoundedFilled.Add, contentDescription = null) },
-              text = { Text("Add Media") },
-              modifier = Modifier.padding(bottom = app.video.player.ui.browser.fab.FabPlacement.scaffoldBottomPadding()),
-            )
-          }
-        }
+          },
+          modifier = Modifier.padding(bottom = app.video.player.ui.browser.fab.FabPlacement.scaffoldBottomPadding()),
+        )
       },
     ) { padding ->
       Box(
@@ -423,105 +346,71 @@ object NetworkStreamingScreen : Screen {
             .fillMaxSize()
             .padding(padding),
       ) {
-        NavigationPager(
-          state = pagerState,
-          modifier =
-            Modifier
-              .fillMaxSize(),
-          userScrollEnabled = true,
-          beyondViewportPageCount = 1,
-          allowNestedSwipes = true,
-        ) { page ->
-          when (NetworkTab.entries[page]) {
-            NetworkTab.LOCAL_NETWORK -> {
-              LocalNetworkContent(
-                connections = filteredConnections,
-                bookmarks = filteredFolderBookmarks,
-                connectionStatuses = connectionStatuses,
-                recentLinks = filteredRecentLinks,
-                isPreparingLink =
-                  showYtdlpInstallPrompt ||
-                    showYtdlpInstallProgress ||
-                    linkPlaybackJob?.isActive == true,
-                onPlayLink = { url ->
-                  val playableSource = url.trim()
-                  playLinkGatingYtdlp(playableSource)
-                },
-                onPlayRecent = { entry ->
-                  viewModel.recordExistingLinkPlayed(entry.stableKey)
-                  MediaUtils.playFile(
-                    source = entry.canonicalSourceUri,
-                    context = context,
-                    launchSource = "network_recent",
-                    title = entry.fileName,
-                  )
-                },
-                onSaveToMedia = { entry ->
-                  val playableSource = entry.canonicalSourceUri.trim()
-                  when (linkDownloadCoordinator.enqueue(playableSource, entry.fileName)) {
-                    app.video.player.domain.download.LinkDownloadCoordinator.Route.UNSUPPORTED ->
-                      app.video.player.ui.components.AppToast
-                        .makeText(context, R.string.downloads_location_invalid, app.video.player.ui.components.AppToast.LENGTH_SHORT)
-                        .show()
-                    else ->
-                      app.video.player.ui.components.AppToast
-                        .makeText(context, R.string.downloads_started, app.video.player.ui.components.AppToast.LENGTH_SHORT)
-                        .show()
-                  }
-                },
-                onDeleteRecent = viewModel::deleteStreamEntry,
-                onConnect = { viewModel.connect(it) },
-                onDisconnect = { viewModel.disconnect(it) },
-                onEdit = { editingConnection = it },
-                onDelete = { viewModel.deleteConnection(it) },
-                onBrowse = { conn, status ->
-                  if (status?.isConnected == true) {
-                    backstack.navigateTo(
-                      NetworkBrowserScreen(
-                        connectionId = conn.id,
-                        connectionName = conn.name,
-                        currentPath = "/",
-                      ),
-                    )
-                  }
-                },
-                onAutoConnectChange = { conn, autoConnect ->
-                  viewModel.updateConnection(conn.copy(autoConnect = autoConnect))
-                },
-                onOpenBookmark = { item ->
-                  backstack.navigateTo(
-                    NetworkBrowserScreen(
-                      connectionId = item.connection.id,
-                      connectionName = item.connection.name,
-                      currentPath = item.bookmark.path,
-                    ),
-                  )
-                },
-                onManageBookmarks = { backstack.navigateTo(NetworkBookmarksScreen) },
+        LocalNetworkContent(
+          connections = filteredConnections,
+          bookmarks = filteredFolderBookmarks,
+          connectionStatuses = connectionStatuses,
+          recentLinks = filteredRecentLinks,
+          isPreparingLink =
+            showYtdlpInstallPrompt ||
+              showYtdlpInstallProgress ||
+              linkPlaybackJob?.isActive == true,
+          onPlayLink = { url ->
+            val playableSource = url.trim()
+            playLinkGatingYtdlp(playableSource)
+          },
+          onPlayRecent = { entry ->
+            viewModel.recordExistingLinkPlayed(entry.stableKey)
+            MediaUtils.playFile(
+              source = entry.canonicalSourceUri,
+              context = context,
+              launchSource = "network_recent",
+              title = entry.fileName,
+            )
+          },
+          onSaveToMedia = { entry ->
+            val playableSource = entry.canonicalSourceUri.trim()
+            when (linkDownloadCoordinator.enqueue(playableSource, entry.fileName)) {
+              app.video.player.domain.download.LinkDownloadCoordinator.Route.UNSUPPORTED ->
+                app.video.player.ui.components.AppToast
+                  .makeText(context, R.string.downloads_location_invalid, app.video.player.ui.components.AppToast.LENGTH_SHORT)
+                  .show()
+              else ->
+                app.video.player.ui.components.AppToast
+                  .makeText(context, R.string.downloads_started, app.video.player.ui.components.AppToast.LENGTH_SHORT)
+                  .show()
+            }
+          },
+          onDeleteRecent = viewModel::deleteStreamEntry,
+          onConnect = { viewModel.connect(it) },
+          onDisconnect = { viewModel.disconnect(it) },
+          onEdit = { editingConnection = it },
+          onDelete = { viewModel.deleteConnection(it) },
+          onBrowse = { conn, status ->
+            if (status?.isConnected == true) {
+              backstack.navigateTo(
+                NetworkBrowserScreen(
+                  connectionId = conn.id,
+                  connectionName = conn.name,
+                  currentPath = "/",
+                ),
               )
             }
-            NetworkTab.MEDIA -> {
-              MediaContent(
-                mediaGroups = filteredMediaGroups,
-                searchQuery = searchQuery,
-                onPlayMedia = { entry ->
-                  viewModel.recordExistingLinkPlayed(entry.stableKey)
-                  MediaUtils.playFile(
-                    source = entry.canonicalSourceUri,
-                    context = context,
-                    launchSource = "network_media",
-                    title = entry.fileName,
-                  )
-                },
-                onDeleteMediaFile = viewModel::deleteStreamEntry,
-                onDeleteMediaGroup = { viewModel.deleteMediaGroup(it) },
-              )
-            }
-            NetworkTab.SYNC_PLAY -> {
-              SyncPlayContent()
-            }
-          }
-        }
+          },
+          onAutoConnectChange = { conn, autoConnect ->
+            viewModel.updateConnection(conn.copy(autoConnect = autoConnect))
+          },
+          onOpenBookmark = { item ->
+            backstack.navigateTo(
+              NetworkBrowserScreen(
+                connectionId = item.connection.id,
+                connectionName = item.connection.name,
+                currentPath = item.bookmark.path,
+              ),
+            )
+          },
+          onManageBookmarks = { backstack.navigateTo(NetworkBookmarksScreen) },
+        )
       }
 
       AddConnectionSheet(
@@ -583,20 +472,6 @@ object NetworkStreamingScreen : Screen {
         },
       )
 
-      AddMediaDialog(
-        isOpen = showAddMediaDialog,
-        onDismiss = { showAddMediaDialog = false },
-        onSubmit = { url ->
-          coroutineScope.launch {
-            val resolved = HttpUtils.resolveDirectStreamUrl(url)
-            val playableSource = resolved.streamUrl
-            val resolvedTitle = resolved.title
-            viewModel.saveLinkToMedia(playableSource, resolvedTitle)
-            MediaUtils.playFile(playableSource, context, "network_stream", title = resolvedTitle)
-          }
-        },
-      )
-
       editingConnection?.let { connection ->
         EditConnectionSheet(
           connection = connection,
@@ -611,80 +486,6 @@ object NetworkStreamingScreen : Screen {
       }
     }
   }
-}
-
-@Composable
-private fun AddMediaDialog(
-  isOpen: Boolean,
-  onDismiss: () -> Unit,
-  onSubmit: (String) -> Unit,
-) {
-  if (!isOpen) return
-  var inputUrl by remember { mutableStateOf("") }
-  val context = LocalContext.current
-  val clipboard = androidx.compose.ui.platform.LocalClipboard.current
-  val coroutineScope = rememberCoroutineScope()
-
-  app.video.player.presentation.components.AppAlertDialog(
-    onDismissRequest = onDismiss,
-    title = { Text(stringResource(R.string.ui_saved_media)) },
-    text = {
-      Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(
-          text = "Paste a direct video stream (HLS, MP4, MKV) to save and play.",
-          style = MaterialTheme.typography.bodyMedium,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        OutlinedTextField(
-          value = inputUrl,
-          onValueChange = { inputUrl = it },
-          label = { Text(stringResource(R.string.ui_stream_url)) },
-          placeholder = { Text("https://...") },
-          modifier = Modifier.fillMaxWidth(),
-          singleLine = true,
-          trailingIcon = {
-            if (inputUrl.isBlank()) {
-              IconButton(
-                onClick = {
-                  coroutineScope.launch {
-                    val clipData = clipboard.getClipEntry()?.clipData
-                    if (clipData != null && clipData.itemCount > 0) {
-                      val clip = clipData.getItemAt(0).coerceToText(context)?.toString()?.trim()
-                      if (!clip.isNullOrBlank()) inputUrl = clip
-                    }
-                  }
-                },
-              ) {
-                Icon(Icons.RoundedFilled.ContentPaste, contentDescription = "Paste")
-              }
-            } else {
-              IconButton(onClick = { inputUrl = "" }) {
-                Icon(Icons.RoundedFilled.Close, contentDescription = "Clear")
-              }
-            }
-          },
-        )
-      }
-    },
-    confirmButton = {
-      Button(
-        onClick = {
-          if (inputUrl.isNotBlank()) {
-            onSubmit(inputUrl.trim())
-            onDismiss()
-          }
-        },
-        enabled = inputUrl.isNotBlank(),
-      ) {
-        Text(stringResource(R.string.ui_play_now))
-      }
-    },
-    dismissButton = {
-      app.video.player.presentation.components.AppDialogTextButton(onClick = onDismiss) {
-        Text(stringResource(R.string.generic_cancel))
-      }
-    },
-  )
 }
 
 @Composable
@@ -762,155 +563,6 @@ private fun LocalNetworkContent(
           modifier = Modifier.padding(bottom = 0.dp),
         )
       }
-    }
-  }
-}
-
-@Composable
-private fun SyncPlayContent() {
-  SyncplayPanel()
-}
-
-@Composable
-private fun MediaContent(
-  mediaGroups: List<MediaStreamGroup>,
-  searchQuery: String,
-  onPlayMedia: (NetworkStreamEntryEntity) -> Unit,
-  onDeleteMediaFile: (String) -> Unit,
-  onDeleteMediaGroup: (MediaStreamGroup) -> Unit,
-) {
-  val context = LocalContext.current
-  var selectedDetailGroup by remember { mutableStateOf<MediaStreamGroup?>(null) }
-  val navBarHeight = app.video.player.ui.browser.LocalNavigationBarHeight.current
-  val bottomOverlayClearance = maxOf(navBarHeight, app.video.player.ui.browser.NavigationBarState.miniPlayerClearance)
-
-  val heroGroups =
-    remember(mediaGroups) {
-      mediaGroups.filter { !it.backdropUrl.isNullOrBlank() || !it.posterUrl.isNullOrBlank() }
-        .ifEmpty { mediaGroups }
-    }
-
-  val recentViewedFiles =
-    remember(mediaGroups) {
-      mediaGroups.flatMap { group ->
-        group.files
-      }.sortedByDescending { it.updatedAt }
-        .distinctBy { it.stableKey }
-    }
-
-  val onPlayWithHistory: (NetworkStreamEntryEntity, String?) -> Unit = { file, _ ->
-    onPlayMedia(file)
-  }
-
-  Box(modifier = Modifier.fillMaxSize()) {
-    if (mediaGroups.isEmpty()) {
-      LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = bottomOverlayClearance + 16.dp),
-      ) {
-        item {
-          EmptyStateCard(
-            icon = Icons.RoundedFilled.Movie,
-            title = stringResource(R.string.ui_no_saved_media_title),
-            subtitle = stringResource(R.string.ui_no_saved_media_description),
-          )
-        }
-      }
-    } else {
-      LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(bottom = bottomOverlayClearance + 24.dp),
-        verticalArrangement = Arrangement.spacedBy(18.dp),
-      ) {
-        // 1. Featured Hero Carousel Banner
-        if (heroGroups.isNotEmpty() && searchQuery.isBlank()) {
-          item {
-            TorrentHeroBanner(
-              groups = heroGroups,
-              onPlay = { group ->
-                val targetFile = group.files.firstOrNull()
-                if (targetFile != null) {
-                  onPlayWithHistory(targetFile, group.infoHash)
-                }
-              },
-              onDetails = { group -> selectedDetailGroup = group },
-            )
-          }
-        }
-
-        // 2. Continue Watching (Recently Played Saved Links)
-        if (recentViewedFiles.isNotEmpty() && searchQuery.isBlank()) {
-          item {
-            Column(
-              modifier = Modifier.fillMaxWidth(),
-              verticalArrangement = Arrangement.spacedBy(10.dp),
-            ) {
-              TorrentSectionHeader(
-                title = "Continue Watching",
-                subtitle = stringResource(R.string.ui_recent_streams),
-              )
-              androidx.compose.foundation.lazy.LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp),
-              ) {
-                items(recentViewedFiles, key = { it.stableKey }) { entry ->
-                  TorrentResumeCard(
-                    entry = entry,
-                    onClick = { onPlayWithHistory(entry, entry.infoHash) },
-                    onLongClick = {
-                      val group = mediaGroups.find { it.infoHash == entry.infoHash || it.canonicalSourceUri == entry.canonicalSourceUri }
-                      if (group != null) selectedDetailGroup = group
-                    },
-                  )
-                }
-              }
-            }
-          }
-        }
-
-        // 3. Saved Links Section Header
-        item {
-          TorrentSectionHeader(
-            title = if (searchQuery.isNotBlank()) "Search Results (${mediaGroups.size})" else "Saved Links (${mediaGroups.size})",
-            subtitle = if (searchQuery.isNotBlank()) null else "Stream instantly with high-speed hardware acceleration",
-          )
-        }
-
-        // 4. Saved Links Posters
-        if (mediaGroups.isNotEmpty()) {
-          item {
-            androidx.compose.foundation.lazy.LazyRow(
-              horizontalArrangement = Arrangement.spacedBy(12.dp),
-              contentPadding = PaddingValues(horizontal = 16.dp),
-            ) {
-              items(mediaGroups, key = { it.id }) { group ->
-                TorrentPosterCard(
-                  group = group,
-                  onClick = { selectedDetailGroup = group },
-                  onLongClick = { selectedDetailGroup = group },
-                )
-              }
-            }
-          }
-        }
-      }
-    }
-
-    // 5. Cinematic Media Detail Sheet
-    selectedDetailGroup?.let { group ->
-      TorrentDetailSheet(
-        group = group,
-        viewedFileIndices = emptySet(),
-        onDismiss = { selectedDetailGroup = null },
-        onPlayFile = { file ->
-          onPlayWithHistory(file, group.infoHash)
-        },
-        onDeleteGroup = { grp ->
-          onDeleteMediaGroup(grp)
-          selectedDetailGroup = null
-        },
-        onDeleteFile = onDeleteMediaFile,
-      )
     }
   }
 }
