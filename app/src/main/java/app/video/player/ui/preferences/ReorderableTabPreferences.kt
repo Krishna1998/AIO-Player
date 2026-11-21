@@ -3,7 +3,7 @@ package app.video.player.ui.preferences
 
 import androidx.annotation.StringRes
 
-import androidx.compose.runtime.key
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
@@ -11,9 +11,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
@@ -21,6 +24,9 @@ import androidx.compose.ui.unit.dp
 import app.video.player.ui.components.IconSwitch
 import app.video.player.ui.icons.Icon
 import app.video.player.ui.icons.Icons
+import app.video.player.ui.theme.AppConnectedShapeTokens
+import app.video.player.ui.theme.ConnectedLayout
+import app.video.player.ui.theme.rememberConnectedShape
 import app.video.player.ui.tv.TvReorderButtons
 import app.video.player.ui.tv.isTelevision
 import sh.calvin.reorderable.ReorderableColumn
@@ -53,14 +59,35 @@ internal fun ReorderableTabPreferences(
     modifier = Modifier.fillMaxWidth(),
     verticalArrangement = Arrangement.spacedBy(4.dp),
   ) { index, tab, isDragging ->
+    val elevation by animateDpAsState(
+      targetValue = if (isDragging) 8.dp else 0.dp,
+      label = "reorderElevation",
+    )
+    val tileShape = if (isDragging) {
+      RoundedCornerShape(AppConnectedShapeTokens.outerCorner)
+    } else {
+      rememberConnectedShape(
+        index = index,
+        itemCount = tabs.size,
+        layout = ConnectedLayout.Vertical,
+      )
+    }
     key(tab.id) {
       ReorderableItem {
         ExpressivePreferenceTile(
           index = index,
           itemCount = tabs.size,
+          shape = tileShape,
           modifier = Modifier
             .then(tab.titleRes?.let { Modifier.settingsSearchTarget(it) } ?: Modifier)
-            .graphicsLayer { alpha = if (isDragging) 0.95f else 1f },
+            .graphicsLayer {
+              shadowElevation = elevation.toPx()
+              shape = tileShape
+              clip = isDragging
+              alpha = if (isDragging) 0.95f else 1f
+              scaleX = if (isDragging) 1.02f else 1f
+              scaleY = if (isDragging) 1.02f else 1f
+            },
         ) {
           Row(
             modifier = Modifier.fillMaxWidth().heightIn(min = 72.dp)

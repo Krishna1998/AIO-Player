@@ -198,6 +198,7 @@ fun ExpressivePreferenceTile(
   itemCount: Int,
   modifier: Modifier = Modifier,
   selected: Boolean = false,
+  shape: Shape? = null,
   content: @Composable () -> Unit,
 ) {
   val colors = MaterialTheme.colorScheme
@@ -206,15 +207,15 @@ fun ExpressivePreferenceTile(
     animationSpec = AppMotion.spatial(AppMotion.Effect.Color, snap()),
     label = "expressivePreferenceTileColor",
   )
-  val shape =
-    rememberConnectedShape(
+  val tileShape =
+    shape ?: rememberConnectedShape(
       index = index,
       itemCount = itemCount,
       layout = ConnectedLayout.Vertical,
     )
   Surface(
     modifier = modifier.fillMaxWidth(),
-    shape = shape,
+    shape = tileShape,
     color = containerColor,
   ) {
     // The tile already owns the row surface and the 16dp group inset. Nested
