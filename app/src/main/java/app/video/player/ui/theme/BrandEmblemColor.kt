@@ -37,7 +37,7 @@ enum class BrandEmblemColor(
   ElectricViolet(
     labelRes = R.string.pref_emblem_color_violet,
     color = Color(0xFFA855F7),
-    matchingLauncherAlias = "IconBlackGradient",
+    matchingLauncherAlias = "IconVelvetVoidQuantumApertureViolet",
   ),
   CyberMagenta(
     labelRes = R.string.pref_emblem_color_magenta,

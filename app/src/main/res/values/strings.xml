@@ -2684,6 +2684,7 @@
   <string name="app_icon_logo_continuous_ligature_vm_lime">Continuous Ligature VM (Acid Lime)</string>
   <string name="app_icon_logo_quantum_aperture_lime">Quantum Aperture (Acid Lime)</string>
   <string name="app_icon_logo_quantum_aperture_white">Quantum Aperture (Diamond White)</string>
+  <string name="app_icon_logo_quantum_aperture_violet">Quantum Aperture (Nebula Violet)</string>
   <string name="downloads_all">All downloads</string>
   <string name="downloads_attention_section">Needs attention</string>
   <string name="downloads_search_hint">Search downloads</string>

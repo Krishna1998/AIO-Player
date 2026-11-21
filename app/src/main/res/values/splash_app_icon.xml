@@ -74,6 +74,10 @@
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_quantum_aperture_white_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_velvet_void</item>
     </style>
+    <style name="Theme.videoplayer.Splash.VelvetVoidQuantumApertureViolet">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_quantum_aperture_violet_animated</item>
+        <item name="windowSplashScreenBackground">@color/icon_bg_velvet_void</item>
+    </style>
     <style name="Theme.videoplayer.Splash.WhiteSolid">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_solid_purple_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_white</item>
