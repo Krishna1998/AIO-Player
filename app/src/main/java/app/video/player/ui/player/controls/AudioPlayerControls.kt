@@ -52,8 +52,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
+import app.video.player.ui.player.controls.components.VolumeSlider
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -949,6 +951,24 @@ fun AudioPlayerControls(
   val coroutineScope = rememberCoroutineScope()
   val activeTrackPath = mediaPath?.takeIf { it.isNotBlank() } ?: currentMediaSource
 
+  val audioVolumeGesture by audioPreferences.audioVolumeGesture.collectAsState()
+  val isVolumeSliderShown by viewModel.isVolumeSliderShown.collectAsState()
+  val volumeSliderTimestamp by viewModel.volumeSliderTimestamp.collectAsState()
+  val currentMPVVolume by PlaybackSession.propInt["volume"].collectAsState()
+  val boostCap by audioPreferences.volumeBoostCap.collectAsState()
+  val displayVolumeAsPercentage by playerPreferences.displayVolumeAsPercentage.collectAsState()
+  val volumeBoostingCap = audioPreferences.volumeBoostCap.get()
+  val volumeHaptics = app.video.player.ui.utils.rememberAdjustmentHaptics(
+    0f, 100f + volumeBoostingCap, landmarks = listOf(100f),
+  )
+
+  LaunchedEffect(volumeSliderTimestamp) {
+    if (isVolumeSliderShown && volumeSliderTimestamp > 0) {
+      kotlinx.coroutines.delay(1200L)
+      viewModel.isVolumeSliderShown.value = false
+    }
+  }
+
   val jellyfinInfo = remember(activeTrackPath, mediaPath) {
     val path = mediaPath?.takeIf { it.isNotBlank() } ?: activeTrackPath
     if (path.isNullOrBlank()) null
@@ -1501,13 +1521,110 @@ fun AudioPlayerControls(
             modifier = Modifier
               .fillMaxHeight()
               .fillMaxWidth(if (isTabletPortrait) 0.56f else if (isPortrait) 0.92f else 1f)
-              .pointerInput(viewModel, mediaPath, containerWidthPx, isAudiobook) {
-                if (isAudiobook || containerWidthPx <= 0f) return@pointerInput
-                detectHorizontalDragGestures(
-                  onDragStart = {
-                    coroutineScope.launch { animatableOffsetX.snapTo(0f) }
-                  },
-                  onDragEnd = {
+              .pointerInput(viewModel, mediaPath, containerWidthPx, isAudiobook, audioVolumeGesture) {
+                if (containerWidthPx <= 0f) return@pointerInput
+                awaitEachGesture {
+                  val down = awaitFirstDown(requireUnconsumed = false)
+                  val startPosition = down.position
+
+                  var gestureType: String? = null // "horizontal" or "vertical"
+                  var startingY = 0f
+                  var mpvVolumeStartingY = 0f
+                  var originalVolumePercent = viewModel.currentVolumePercent.value
+                  var originalMPVVolume = PlaybackSession.propInt["volume"].value ?: 100
+                  var lastVolumePercentValue = originalVolumePercent
+                  var lastMPVVolumeValue = originalMPVVolume
+                  val volumeGestureSens = 0.22f
+                  val mpvVolumeGestureSens = 0.15f
+
+                  coroutineScope.launch { animatableOffsetX.snapTo(0f) }
+
+                  while (true) {
+                    val event = awaitPointerEvent()
+                    val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                    if (!change.pressed) break
+
+                    val currentPosition = change.position
+                    val deltaX = currentPosition.x - startPosition.x
+                    val deltaY = currentPosition.y - startPosition.y
+
+                    if (gestureType == null) {
+                      val slop = viewConfiguration.touchSlop
+                      if (kotlin.math.abs(deltaX) > slop || kotlin.math.abs(deltaY) > slop) {
+                        if (kotlin.math.abs(deltaX) >= kotlin.math.abs(deltaY) * 1.2f) {
+                          if (!isAudiobook) {
+                            gestureType = "horizontal"
+                          }
+                        } else if (kotlin.math.abs(deltaY) >= kotlin.math.abs(deltaX) * 1.2f) {
+                          if (audioVolumeGesture) {
+                            gestureType = "vertical"
+                            startingY = currentPosition.y
+                            mpvVolumeStartingY = 0f
+                            originalVolumePercent = viewModel.currentVolumePercent.value
+                            originalMPVVolume = PlaybackSession.propInt["volume"].value ?: 100
+                            lastVolumePercentValue = originalVolumePercent
+                            lastMPVVolumeValue = originalMPVVolume
+                          }
+                        }
+                      }
+                    }
+
+                    if (gestureType == "horizontal") {
+                      change.consume()
+                      coroutineScope.launch {
+                        animatableOffsetX.snapTo(deltaX)
+                      }
+                    } else if (gestureType == "vertical") {
+                      change.consume()
+                      val amount = currentPosition.y - startPosition.y
+                      val currentVP = viewModel.currentVolumePercent.value
+                      val currentMPV = PlaybackSession.propInt["volume"].value ?: 100
+                      val isIncreasingBoost = volumeBoostingCap > 0 && currentVP == 100 && (currentMPV - 100) < volumeBoostingCap && amount < 0
+                      val isDecreasingBoost = volumeBoostingCap > 0 && currentVP == 100 && (currentMPV - 100) in 1..volumeBoostingCap && amount > 0
+
+                      if (isIncreasingBoost || isDecreasingBoost) {
+                        if (mpvVolumeStartingY == 0f) {
+                          startingY = 0f
+                          originalVolumePercent = currentVP
+                          mpvVolumeStartingY = currentPosition.y
+                        }
+                        val newMPVVolume = calculateNewVerticalGestureValue(
+                          originalMPVVolume,
+                          mpvVolumeStartingY,
+                          currentPosition.y,
+                          mpvVolumeGestureSens,
+                        ).coerceIn(100..volumeBoostingCap + 100)
+
+                        if (newMPVVolume != lastMPVVolumeValue) {
+                          viewModel.changeMPVVolumeTo(newMPVVolume)
+                          volumeHaptics.move(lastMPVVolumeValue.toFloat(), newMPVVolume.toFloat())
+                          lastMPVVolumeValue = newMPVVolume
+                        }
+                      } else {
+                        if (startingY == 0f) {
+                          mpvVolumeStartingY = 0f
+                          originalMPVVolume = currentMPV
+                          startingY = currentPosition.y
+                        }
+                        val newVolumePercent = calculateNewVerticalGestureValue(
+                          originalVolumePercent,
+                          startingY,
+                          currentPosition.y,
+                          volumeGestureSens,
+                        ).coerceIn(0, 100)
+
+                        if (newVolumePercent != lastVolumePercentValue) {
+                          viewModel.changeVolumePercentTo(newVolumePercent, showSystemUi = false)
+                          volumeHaptics.move(lastVolumePercentValue.toFloat(), newVolumePercent.toFloat())
+                          lastVolumePercentValue = newVolumePercent
+                        }
+                      }
+
+                      viewModel.displayVolumeSlider()
+                    }
+                  }
+
+                  if (gestureType == "horizontal") {
                     val threshold = containerWidthPx * 0.25f
                     val dragVal = animatableOffsetX.value
                     coroutineScope.launch {
@@ -1544,19 +1661,12 @@ fun AudioPlayerControls(
                         )
                       }
                     }
-                  },
-                  onDragCancel = {
+                  } else {
                     coroutineScope.launch {
                       animatableOffsetX.animateTo(0f, spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = 0.85f))
                     }
-                  },
-                  onHorizontalDrag = { change, dragAmount ->
-                    change.consume()
-                    coroutineScope.launch {
-                      animatableOffsetX.snapTo(animatableOffsetX.value + dragAmount)
-                    }
                   }
-                )
+                }
               },
             contentAlignment = Alignment.Center,
           ) {
@@ -1669,6 +1779,29 @@ fun AudioPlayerControls(
                   isPlaying = isPlaying,
                 )
               }
+            }
+
+            // 4. Floating Vertical Volume HUD Pill
+            androidx.compose.animation.AnimatedVisibility(
+              visible = isVolumeSliderShown,
+              enter = fadeIn(animationSpec = tween(150)) + scaleIn(initialScale = 0.85f, animationSpec = tween(180)),
+              exit = fadeOut(animationSpec = tween(200)) + scaleOut(targetScale = 0.85f, animationSpec = tween(180)),
+              modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(end = 16.dp),
+            ) {
+              val currentBoost = (currentMPVVolume ?: 100) - 100
+              val showBoost = boostCap > 0 || currentBoost > 0
+              val effBoostCap = maxOf(boostCap, currentBoost)
+
+              VolumeSlider(
+                volume = (currentVolumePercent * viewModel.maxVolume / 100f).roundToInt(),
+                volumePercentage = currentVolumePercent,
+                mpvVolume = currentMPVVolume ?: 100,
+                range = 0..viewModel.maxVolume,
+                boostRange = if (showBoost) 0..effBoostCap else null,
+                displayAsPercentage = displayVolumeAsPercentage,
+              )
             }
           }
         }
