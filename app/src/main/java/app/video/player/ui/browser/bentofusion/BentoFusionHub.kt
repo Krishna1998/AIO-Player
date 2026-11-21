@@ -18,6 +18,7 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
@@ -69,6 +70,7 @@ import app.video.player.ui.browser.dialogs.DeleteConfirmationDialog
 import app.video.player.ui.components.AppToast as Toast
 import app.video.player.utils.permission.PermissionUtils
 import app.video.player.ui.icons.AppIcon
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.compositeOver
 import app.video.player.preferences.AppearancePreferences
 import app.video.player.ui.player.visualizer.resolveWaveformColors
@@ -1846,6 +1848,8 @@ fun OneUi9WaveformVisualizer(
     label = "waveAmpScale",
   )
 
+  val outlineVariantColor = MaterialTheme.colorScheme.outlineVariant
+  val minWaveActiveWidth = with(LocalDensity.current) { 2.dp.toPx() }
   val filledPath = remember { Path() }
   val contourPath = remember { Path() }
 
@@ -1864,7 +1868,7 @@ fun OneUi9WaveformVisualizer(
 
     // Unplayed track baseline line
     drawLine(
-      color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f),
+      color = outlineVariantColor.copy(alpha = 0.25f),
       start = Offset(0f, baselineY),
       end = Offset(width, baselineY),
       strokeWidth = 1.dp.toPx(),
@@ -1886,7 +1890,7 @@ fun OneUi9WaveformVisualizer(
       )
     }
 
-    if (waveActiveWidth <= 2.dp.toPx() || availableLift <= 0.5f) return@Canvas
+    if (waveActiveWidth <= minWaveActiveWidth || availableLift <= 0.5f) return@Canvas
 
     val taperInset = 12.dp.toPx().coerceAtMost(waveActiveWidth / 4f)
 
