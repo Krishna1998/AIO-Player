@@ -265,9 +265,9 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
     if (filtered.isNotEmpty()) filtered else listOf("ALL_MUSIC")
   }
   var videoSubTab by rememberSaveable { mutableIntStateOf(0) }
-  var audioSubTabId by rememberSaveable { mutableStateOf("ALL_MUSIC") }
+  var audioSubTabId by rememberSaveable { mutableStateOf<String?>(null) }
   val currentAudioSubTab = remember(activeMusicSubTabs, audioSubTabId) {
-    if (audioSubTabId in activeMusicSubTabs) audioSubTabId else activeMusicSubTabs.first()
+    if (audioSubTabId != null && audioSubTabId in activeMusicSubTabs) audioSubTabId!! else activeMusicSubTabs.first()
   }
   val sortedVideos =
     remember(videos, videoSortType, videoSortOrder) {
