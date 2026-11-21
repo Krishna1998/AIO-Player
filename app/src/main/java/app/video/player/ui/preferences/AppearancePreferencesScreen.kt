@@ -427,6 +427,22 @@ object AppearancePreferencesScreen : Screen {
                       PreferenceDivider()
                     }
 
+                    ExpressivePreferenceItem {
+                      Preference(
+                        modifier = Modifier.settingsSearchTarget(R.string.pref_appearance_category_liquid_glass),
+                        title = { Text(stringResource(R.string.pref_appearance_category_liquid_glass)) },
+                        summary = {
+                          Text(
+                            stringResource(R.string.pref_appearance_liquid_glass_summary),
+                            color = MaterialTheme.colorScheme.outline,
+                          )
+                        },
+                        onClick = { backstack.navigateTo(LiquidGlassPreferencesScreen) },
+                      )
+                    }
+
+                    PreferenceDivider()
+
                     SwitchPreference(
                     modifier = Modifier.settingsSearchTarget(R.string.pref_appearance_amoled_mode_title),
                     value = amoledMode,
@@ -1281,13 +1297,6 @@ object AppearancePreferencesScreen : Screen {
           }
 
           item {
-            PreferenceSectionHeader(
-              position = PreferenceSectionPosition.Middle,
-              title = stringResource(R.string.pref_bentofusion_section_order_title),
-            )
-          }
-
-          item {
             val bentoSectionOrder by browserPreferences.bentoFusionSectionOrder.collectAsState()
             val bentoShowVideo by browserPreferences.bentoFusionShowVideoRail.collectAsState()
             val bentoShowPulsing by browserPreferences.bentoFusionShowAudioPulsing.collectAsState()
@@ -1320,6 +1329,12 @@ object AppearancePreferencesScreen : Screen {
               }
             }
             ExpressivePreferenceGroup {
+              Text(
+                text = stringResource(R.string.pref_bentofusion_section_order_title),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+              )
               ReorderableTabPreferences(
                 tabs = bentoOrderItems,
                 onEnabledChange = { id, enabled ->
@@ -1337,13 +1352,6 @@ object AppearancePreferencesScreen : Screen {
                 },
               )
             }
-          }
-
-          item {
-            PreferenceSectionHeader(
-              position = PreferenceSectionPosition.Middle,
-              title = stringResource(R.string.pref_library_sub_tabs_order_title),
-            )
           }
 
           item {
@@ -1383,6 +1391,12 @@ object AppearancePreferencesScreen : Screen {
               }
             }
             ExpressivePreferenceGroup {
+              Text(
+                text = stringResource(R.string.pref_library_sub_tabs_order_title),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+              )
               ReorderableTabPreferences(
                 tabs = subTabItems,
                 onEnabledChange = { id, enabled ->
