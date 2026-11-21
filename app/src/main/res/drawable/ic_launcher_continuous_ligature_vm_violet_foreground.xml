@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- V&M Player Icon: Continuous Ligature VM (Electric Violet) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+
+    <group
+        android:name="continuous_ligature_vm"
+        android:pivotX="256"
+        android:pivotY="256"
+        android:scaleX="0.82"
+        android:scaleY="0.82">
+
+        <!-- Continuous Monoline Ribbon (V into M) in Electric Violet -->
+        <path
+            android:strokeColor="#FFC084FC"
+            android:strokeWidth="28"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M 105,172 L 172,365 L 231,214 L 290,365 L 348,214 L 407,365" />
+
+        <!-- Forward Playhead Nestled at M Apex in Neon Fuchsia -->
+        <path
+            android:fillColor="#FFE879F9"
+            android:pathData="M 268,145 L 322,180 L 268,215 Z" />
+    </group>
+</vector>

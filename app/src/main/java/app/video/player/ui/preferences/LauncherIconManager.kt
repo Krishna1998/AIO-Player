@@ -74,6 +74,9 @@ internal enum class IconMark(
   QuantumApertureLime("QuantumApertureLime", R.drawable.ic_launcher_quantum_aperture_lime_foreground, R.string.app_icon_logo_quantum_aperture_lime),
   QuantumApertureWhite("QuantumApertureWhite", R.drawable.ic_launcher_quantum_aperture_white_foreground, R.string.app_icon_logo_quantum_aperture_white),
   QuantumApertureViolet("QuantumApertureViolet", R.drawable.ic_launcher_quantum_aperture_violet_foreground, R.string.app_icon_logo_quantum_aperture_violet),
+  ContinuousLigatureVMViolet("ContinuousLigatureVMViolet", R.drawable.ic_launcher_continuous_ligature_vm_violet_foreground, R.string.app_icon_logo_continuous_ligature_vm_violet),
+  AuraApertureViolet("AuraApertureViolet", R.drawable.ic_launcher_aura_aperture_violet_foreground, R.string.app_icon_logo_aura_aperture_violet),
+  SupersonicSplitArrowViolet("SupersonicSplitArrowViolet", R.drawable.ic_launcher_supersonic_split_arrow_violet_foreground, R.string.app_icon_logo_supersonic_split_arrow_violet),
 }
 
 /**
@@ -110,6 +113,9 @@ internal class LauncherIcon(
       LauncherIcon(IconBackground.Black, IconMark.ContinuousLigatureVMLime, R.mipmap.ic_launcher_black_continuous_ligature_vm_lime, R.style.Theme_videoplayer_Splash_BlackContinuousLigatureVMLime),
       LauncherIcon(IconBackground.Black, IconMark.QuantumApertureLime, R.mipmap.ic_launcher_black_quantum_aperture_lime, R.style.Theme_videoplayer_Splash_BlackQuantumApertureLime),
       LauncherIcon(IconBackground.VelvetVoid, IconMark.QuantumApertureViolet, R.mipmap.ic_launcher_velvet_void_quantum_aperture_violet, R.style.Theme_videoplayer_Splash_VelvetVoidQuantumApertureViolet),
+      LauncherIcon(IconBackground.Black, IconMark.ContinuousLigatureVMViolet, R.mipmap.ic_launcher_black_continuous_ligature_vm_violet, R.style.Theme_videoplayer_Splash_BlackContinuousLigatureVMViolet),
+      LauncherIcon(IconBackground.VelvetVoid, IconMark.AuraApertureViolet, R.mipmap.ic_launcher_velvet_void_aura_aperture_violet, R.style.Theme_videoplayer_Splash_VelvetVoidAuraApertureViolet),
+      LauncherIcon(IconBackground.VelvetVoid, IconMark.SupersonicSplitArrowViolet, R.mipmap.ic_launcher_velvet_void_supersonic_split_arrow_violet, R.style.Theme_videoplayer_Splash_VelvetVoidSupersonicSplitArrowViolet),
       LauncherIcon(IconBackground.VelvetVoid, IconMark.QuantumApertureWhite, R.mipmap.ic_launcher_velvet_void_quantum_aperture_white, R.style.Theme_videoplayer_Splash_VelvetVoidQuantumApertureWhite),
     )
 
@@ -129,8 +135,11 @@ internal class LauncherIcon(
       "app.video.player.IconBlackPulseRotaryDialLime",
       "app.video.player.IconBlackPulseRotaryDialCrimson",
       "app.video.player.IconBlackContinuousLigatureVMLime",
+      "app.video.player.IconBlackContinuousLigatureVMViolet",
       "app.video.player.IconBlackQuantumApertureLime",
       "app.video.player.IconVelvetVoidQuantumApertureViolet",
+      "app.video.player.IconVelvetVoidAuraApertureViolet",
+      "app.video.player.IconVelvetVoidSupersonicSplitArrowViolet",
       "app.video.player.IconVelvetVoidQuantumApertureWhite",
       "app.video.player.IconBlackWhite",
       "app.video.player.IconWhiteSolid",
