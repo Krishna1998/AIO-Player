@@ -53,3 +53,4 @@ enum class BrandEmblemColor(
   fun resolveColor(themePrimary: Color): Color =
     if (this == SyncTheme) themePrimary else color
 }
+
