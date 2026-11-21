@@ -1342,7 +1342,7 @@
   <string name="ui_artists">Artists</string>
   <string name="ui_favorites">Favorites</string>
   <string name="ui_network">Streaming</string>
-  <string name="ui_online_streaming">Streaming</string>
+  <string name="ui_online_streaming">Online Streaming</string>
   <string name="ui_pinned_folder">Pinned folder</string>
   <string name="ui_pin_videos">Pin videos</string>
   <string name="ui_unpin_videos">Unpin videos</string>
