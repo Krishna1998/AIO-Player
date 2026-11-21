@@ -440,7 +440,7 @@ class OnlineMoviePosterRepository(
   }.getOrNull()
 
   /**
-   * When a video/movie file is renamed, migrate its path-based cached poster
+   * When a video / movie file is renamed, migrate its path-based cached poster
    * from the old path hash to the new path hash so the thumbnail doesn't vanish.
    */
   fun onMediaRenamed(oldPath: String, newPath: String) {

@@ -526,7 +526,7 @@ class ThumbnailRepository(
   fun onMediaRenamed(oldPath: String, newPath: String) {
     if (oldPath.isBlank() || newPath.isBlank() || oldPath == newPath) return
     renamedPathAliases[newPath] = oldPath
-    // Forward to online-poster repository (video/movie thumbnails)
+    // Forward to online-poster repository (video / movie thumbnails)
     runCatching { onlinePosterRepository.onMediaRenamed(oldPath, newPath) }
     // Forward to online-music-artwork repository (audio thumbnails)
     runCatching { onlineMusicArtworkRepository.onMediaRenamed(oldPath, newPath) }
