@@ -248,6 +248,9 @@ fun BentoFusionHeader(
   val recentEntities by recentlyPlayedRepo.observeRecentlyPlayed(limit = 50).collectAsState(initial = emptyList())
   val browserPreferences = koinInject<BrowserPreferences>()
   val bentoFusionHintDismissed by browserPreferences.bentoFusionHintDismissed.collectAsState()
+  val showVideoRail by browserPreferences.bentoFusionShowVideoRail.collectAsState()
+  val showAudioPulsing by browserPreferences.bentoFusionShowAudioPulsing.collectAsState()
+  val showMusicRail by browserPreferences.bentoFusionShowMusicRail.collectAsState()
   val onlineMusicArtworkRepository = koinInject<OnlineMusicArtworkRepository>()
   val minVideoMinutes by browserPreferences.minimumVideoHorizonDurationMinutes.collectAsState()
   val minVideoDurationMs = remember(minVideoMinutes) { (minVideoMinutes * 60 * 1000L).coerceAtLeast(0L) }
@@ -488,7 +491,7 @@ fun BentoFusionHeader(
     }
 
     // 1. Video/Movie Rail
-    if (videoItems.isNotEmpty()) {
+    if (showVideoRail && videoItems.isNotEmpty()) {
       HorizonRailSection(
         title = "Video/Movie",
         icon = "🎬",
@@ -515,7 +518,7 @@ fun BentoFusionHeader(
 
     // 2. Audio Pulsing Hero Spotlight Card
     val heroToDisplay = heroAudio ?: (if (videoItems.isEmpty()) heroVideo else null)
-    if (heroToDisplay != null) {
+    if (showAudioPulsing && heroToDisplay != null) {
       val isCurrentlyInSession = remember(currentSessionItem, heroToDisplay.video) {
         matchesPlaybackItem(heroToDisplay.video, currentSessionItem)
       }
@@ -609,7 +612,7 @@ fun BentoFusionHeader(
     }
 
     // 3. Music Rail (ALL songs sorted by title)
-    if (sortedAudioByTitle.isNotEmpty()) {
+    if (showMusicRail && sortedAudioByTitle.isNotEmpty()) {
       HorizonRailSection(
         title = "Music",
         icon = "🎵",
@@ -911,6 +914,8 @@ fun DualHorizonRails(
   modifier: Modifier = Modifier,
 ) {
   val browserPreferences = koinInject<BrowserPreferences>()
+  val showVideoRail by browserPreferences.bentoFusionShowVideoRail.collectAsState()
+  val showMusicRail by browserPreferences.bentoFusionShowMusicRail.collectAsState()
   val minVideoMinutes by browserPreferences.minimumVideoHorizonDurationMinutes.collectAsState()
   val minVideoDurationMs = remember(minVideoMinutes) { (minVideoMinutes * 60 * 1000L).coerceAtLeast(0L) }
 
@@ -935,7 +940,7 @@ fun DualHorizonRails(
     verticalArrangement = Arrangement.spacedBy(14.dp),
   ) {
     // 1. Video/Movie
-    if (videoItems.isNotEmpty()) {
+    if (showVideoRail && videoItems.isNotEmpty()) {
       HorizonRailSection(
         title = "Video/Movie",
         icon = "🎬",
@@ -961,7 +966,7 @@ fun DualHorizonRails(
     }
 
     // 2. Music (ALL songs sorted by title)
-    if (sortedAudioByTitle.isNotEmpty()) {
+    if (showMusicRail && sortedAudioByTitle.isNotEmpty()) {
       HorizonRailSection(
         title = "Music",
         icon = "🎵",

@@ -209,6 +209,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   val folderSortOrder by browserPreferences.folderSortOrder.collectAsState()
   val mediaLayoutMode by browserPreferences.mediaLayoutMode.collectAsState()
   val includeAudioBrowser by browserPreferences.includeAudioBrowser.collectAsState()
+  val libraryShowMusicTab by browserPreferences.libraryShowMusicTab.collectAsState()
   val savedMediaType by browserPreferences.mediaLibraryType.collectAsState()
   val mediaType = if (forceAudio) MediaLibraryType.Audio else if (includeAudioBrowser || browserPreferences.folderViewMode.get() == app.video.player.preferences.FolderViewMode.BentoFusion) savedMediaType else MediaLibraryType.Video
   val musicCoverArtSize by browserPreferences.musicCoverArtSize.collectAsState()
@@ -231,8 +232,14 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   val favoriteAudioVideos = remember(audioVideosWithInfo, favoriteAudioPaths) {
     audioVideosWithInfo.filter { favoriteAudioPaths.contains(it.video.path) }
   }
-  val mediaLibraryTabs = remember(forceAudio) {
-    if (forceAudio) listOf(MediaLibraryType.Audio) else MediaLibraryType.entries.toList()
+  val mediaLibraryTabs = remember(forceAudio, libraryShowMusicTab) {
+    if (forceAudio) {
+      listOf(MediaLibraryType.Audio)
+    } else if (!libraryShowMusicTab) {
+      listOf(MediaLibraryType.All, MediaLibraryType.Video)
+    } else {
+      MediaLibraryType.entries.toList()
+    }
   }
   val initialPageIndex = remember(mediaLibraryTabs) {
     mediaLibraryTabs.indexOf(mediaType).coerceAtLeast(0)
@@ -879,7 +886,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
               horizontalArrangement = Arrangement.spacedBy(8.dp),
               verticalAlignment = Alignment.CenterVertically,
             ) {
-              MediaLibraryType.entries.forEachIndexed { index, type ->
+              mediaLibraryTabs.forEachIndexed { index, type ->
                 val isSelected = currentTab == type
                 val count = when (type) {
                   MediaLibraryType.All -> sortedVideosWithInfo.size

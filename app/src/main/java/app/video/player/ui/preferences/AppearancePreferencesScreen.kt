@@ -1101,6 +1101,82 @@ object AppearancePreferencesScreen : Screen {
 
           item {
             PreferenceSectionHeader(
+              position = PreferenceSectionPosition.Middle,
+              title = stringResource(R.string.pref_appearance_category_bentofusion),
+            )
+          }
+
+          item {
+            ExpressivePreferenceGroup {
+              val bentoItemCount = 4
+              val bentoFusionShowVideoRail by browserPreferences.bentoFusionShowVideoRail.collectAsState()
+              SwitchPreference(
+                modifier = Modifier.settingsSearchTarget(R.string.pref_bentofusion_show_video_card_title),
+                value = bentoFusionShowVideoRail,
+                onValueChange = { browserPreferences.bentoFusionShowVideoRail.set(it) },
+                title = { Text(stringResource(R.string.pref_bentofusion_show_video_card_title)) },
+                summary = {
+                  Text(
+                    text = stringResource(R.string.pref_bentofusion_show_video_card_summary),
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+                groupIndex = 0,
+                groupSize = bentoItemCount,
+              )
+
+              val bentoFusionShowAudioPulsing by browserPreferences.bentoFusionShowAudioPulsing.collectAsState()
+              SwitchPreference(
+                modifier = Modifier.settingsSearchTarget(R.string.pref_bentofusion_show_audio_pulsing_title),
+                value = bentoFusionShowAudioPulsing,
+                onValueChange = { browserPreferences.bentoFusionShowAudioPulsing.set(it) },
+                title = { Text(stringResource(R.string.pref_bentofusion_show_audio_pulsing_title)) },
+                summary = {
+                  Text(
+                    text = stringResource(R.string.pref_bentofusion_show_audio_pulsing_summary),
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+                groupIndex = 1,
+                groupSize = bentoItemCount,
+              )
+
+              val bentoFusionShowMusicRail by browserPreferences.bentoFusionShowMusicRail.collectAsState()
+              SwitchPreference(
+                modifier = Modifier.settingsSearchTarget(R.string.pref_bentofusion_show_music_card_title),
+                value = bentoFusionShowMusicRail,
+                onValueChange = { browserPreferences.bentoFusionShowMusicRail.set(it) },
+                title = { Text(stringResource(R.string.pref_bentofusion_show_music_card_title)) },
+                summary = {
+                  Text(
+                    text = stringResource(R.string.pref_bentofusion_show_music_card_summary),
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+                groupIndex = 2,
+                groupSize = bentoItemCount,
+              )
+
+              val libraryShowMusicTab by browserPreferences.libraryShowMusicTab.collectAsState()
+              SwitchPreference(
+                modifier = Modifier.settingsSearchTarget(R.string.pref_library_show_music_tab_title),
+                value = libraryShowMusicTab,
+                onValueChange = { browserPreferences.libraryShowMusicTab.set(it) },
+                title = { Text(stringResource(R.string.pref_library_show_music_tab_title)) },
+                summary = {
+                  Text(
+                    text = stringResource(R.string.pref_library_show_music_tab_summary),
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+                groupIndex = 3,
+                groupSize = bentoItemCount,
+              )
+            }
+          }
+
+          item {
+            PreferenceSectionHeader(
               position = if (television) PreferenceSectionPosition.Last else PreferenceSectionPosition.Middle,
               title = stringResource(R.string.pref_appearance_category_navigation),
             )
@@ -1108,8 +1184,9 @@ object AppearancePreferencesScreen : Screen {
 
           item {
             val showNetworkTab by preferences.showNetworkTab.collectAsState()
+            val showMusicTab by preferences.showMusicTab.collectAsState()
             val savedOrder by preferences.bottomNavigationOrder.collectAsState()
-            val names = listOf("HOME", "NETWORK")
+            val names = listOf("HOME", "NETWORK", "MUSIC")
             val ordered =
               listOf("HOME") +
                 (savedOrder.filter { it in names } + names)
@@ -1118,7 +1195,8 @@ object AppearancePreferencesScreen : Screen {
             val tabItems = ordered.map { id ->
               when (id) {
                 "HOME" -> ReorderableTabItem(id, stringResource(R.string.pref_nav_home_title), stringResource(R.string.pref_nav_home_summary), true, required = true)
-                else -> ReorderableTabItem(id, stringResource(R.string.pref_nav_network_title), stringResource(R.string.pref_nav_network_summary), showNetworkTab, titleRes = R.string.pref_nav_network_title)
+                "NETWORK" -> ReorderableTabItem(id, stringResource(R.string.pref_nav_network_title), stringResource(R.string.pref_nav_network_summary), showNetworkTab, titleRes = R.string.pref_nav_network_title)
+                else -> ReorderableTabItem(id, stringResource(R.string.pref_nav_music_title), stringResource(R.string.pref_nav_music_summary), showMusicTab, titleRes = R.string.pref_nav_music_title)
               }
             }
             ExpressivePreferenceGroup {
@@ -1127,6 +1205,7 @@ object AppearancePreferencesScreen : Screen {
                 onEnabledChange = { id, enabled ->
                   when (id) {
                     "NETWORK" -> preferences.showNetworkTab.set(enabled)
+                    "MUSIC" -> preferences.showMusicTab.set(enabled)
                   }
                 },
                 onMove = { id, destination ->

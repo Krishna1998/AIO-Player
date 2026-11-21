@@ -190,6 +190,12 @@ class BrowserPreferences(
   // True once the user finished (or skipped through) the first-run permission flow.
   val onboardingCompleted = preferenceStore.getBoolean(ONBOARDING_COMPLETED_KEY, false)
 
+  // BentoFusion & Media Library section visibility toggles
+  val bentoFusionShowVideoRail = preferenceStore.getBoolean("bentofusion_show_video_rail", true)
+  val bentoFusionShowAudioPulsing = preferenceStore.getBoolean("bentofusion_show_audio_pulsing", true)
+  val bentoFusionShowMusicRail = preferenceStore.getBoolean("bentofusion_show_music_rail", true)
+  val libraryShowMusicTab = preferenceStore.getBoolean("library_show_music_tab", true)
+
   // Feature discovery hint for BentoFusion (Audio Pulsing gestures & interactive highlights)
   val bentoFusionHintDismissed = preferenceStore.getBoolean("bentofusion_hint_dismissed", false)
 
