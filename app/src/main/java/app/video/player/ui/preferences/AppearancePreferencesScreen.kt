@@ -50,6 +50,7 @@ import app.video.player.preferences.AppearancePreferences
 import app.video.player.preferences.AudioPulsingProgressStyle
 import app.video.player.preferences.BentoFusionHeaderStyle
 import app.video.player.preferences.BrowserPreferences
+import app.video.player.preferences.HomeScreenLayout
 import app.video.player.preferences.GesturePreferences
 import app.video.player.preferences.MultiChoiceSegmentedButton
 import app.video.player.preferences.PlayerPreferences
@@ -1147,7 +1148,30 @@ object AppearancePreferencesScreen : Screen {
 
           item {
             ExpressivePreferenceGroup {
-              val bentoItemCount = 6
+              val bentoItemCount = 7
+              val homeScreenLayout by browserPreferences.homeScreenLayout.collectAsState()
+              ExpressivePreferenceTile(index = 0, itemCount = bentoItemCount) {
+                ListPreference(
+                  modifier = Modifier.settingsSearchTarget(R.string.pref_home_screen_layout_title),
+                  value = homeScreenLayout,
+                  onValueChange = {
+                    if (it != homeScreenLayout) {
+                      browserPreferences.homeScreenLayout.set(it)
+                      showInterfaceRestartDialog = true
+                    }
+                  },
+                  values = HomeScreenLayout.entries,
+                  valueToText = { AnnotatedString(stringResource(it.titleRes)) },
+                  title = { Text(stringResource(R.string.pref_home_screen_layout_title)) },
+                  summary = {
+                    Text(
+                      stringResource(homeScreenLayout.titleRes),
+                      color = MaterialTheme.colorScheme.outline,
+                    )
+                  },
+                )
+              }
+
               val bentoFusionShowVideoRail by browserPreferences.bentoFusionShowVideoRail.collectAsState()
               SwitchPreference(
                 modifier = Modifier.settingsSearchTarget(R.string.pref_bentofusion_show_video_card_title),
@@ -1160,7 +1184,7 @@ object AppearancePreferencesScreen : Screen {
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
-                groupIndex = 0,
+                groupIndex = 1,
                 groupSize = bentoItemCount,
               )
 
@@ -1176,12 +1200,12 @@ object AppearancePreferencesScreen : Screen {
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
-                groupIndex = 1,
+                groupIndex = 2,
                 groupSize = bentoItemCount,
               )
 
               val audioPulsingProgressStyle by browserPreferences.audioPulsingProgressStyle.collectAsState()
-              ExpressivePreferenceTile(index = 2, itemCount = bentoItemCount) {
+              ExpressivePreferenceTile(index = 3, itemCount = bentoItemCount) {
                 ListPreference(
                   modifier = Modifier.settingsSearchTarget(R.string.pref_audio_pulsing_progress_style_title),
                   value = audioPulsingProgressStyle,
@@ -1205,7 +1229,7 @@ object AppearancePreferencesScreen : Screen {
               }
 
               val bentoFusionHeaderStyle by browserPreferences.bentoFusionHeaderStyle.collectAsState()
-              ExpressivePreferenceTile(index = 3, itemCount = bentoItemCount) {
+              ExpressivePreferenceTile(index = 4, itemCount = bentoItemCount) {
                 ListPreference(
                   modifier = Modifier.settingsSearchTarget(R.string.pref_bentofusion_header_style_title),
                   value = bentoFusionHeaderStyle,
@@ -1239,7 +1263,7 @@ object AppearancePreferencesScreen : Screen {
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
-                groupIndex = 4,
+                groupIndex = 5,
                 groupSize = bentoItemCount,
               )
 
@@ -1254,6 +1278,10 @@ object AppearancePreferencesScreen : Screen {
                     text = stringResource(R.string.pref_library_show_music_tab_summary),
                     color = MaterialTheme.colorScheme.outline,
                   )
+                },
+                groupIndex = 6,
+                groupSize = bentoItemCount,
+              )
                 },
                 groupIndex = 5,
                 groupSize = bentoItemCount,

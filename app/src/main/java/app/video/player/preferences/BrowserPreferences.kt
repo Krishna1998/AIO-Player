@@ -191,6 +191,7 @@ class BrowserPreferences(
   val onboardingCompleted = preferenceStore.getBoolean(ONBOARDING_COMPLETED_KEY, false)
 
   // BentoFusion & Media Library section visibility toggles
+  val homeScreenLayout = preferenceStore.getEnum("home_screen_layout", HomeScreenLayout.BentoFusion)
   val bentoFusionShowVideoRail = preferenceStore.getBoolean("bentofusion_show_video_rail", true)
   val bentoFusionShowAudioPulsing = preferenceStore.getBoolean("bentofusion_show_audio_pulsing", true)
   val audioPulsingProgressStyle = preferenceStore.getEnum("audio_pulsing_progress_style", AudioPulsingProgressStyle.WavyVisualizer)
@@ -493,6 +494,14 @@ enum class AudioPulsingProgressStyle(
 ) {
   WavyVisualizer(app.video.player.R.string.pref_audio_pulsing_style_wavy),
   Seekbar(app.video.player.R.string.pref_audio_pulsing_style_seekbar),
+}
+
+enum class HomeScreenLayout(
+  val titleRes: Int,
+) {
+  BentoFusion(app.video.player.R.string.pref_home_screen_layout_bentofusion),
+  CinematicHorizon(app.video.player.R.string.pref_home_screen_layout_cinematic),
+  FluidFlowStream(app.video.player.R.string.pref_home_screen_layout_fluid_flow),
 }
 
 enum class BentoFusionHeaderStyle(

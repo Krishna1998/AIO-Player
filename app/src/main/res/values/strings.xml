@@ -133,7 +133,12 @@
   <string name="pref_appearance_replace_embedded_music_artwork_summary">Prefer official high-resolution online artwork over existing local embedded ID3 tags</string>
   <string name="pref_nav_network_title">Show Streaming tab</string>
   <string name="pref_nav_network_summary">Show or hide Streaming in the bottom navigation bar</string>
-  <string name="pref_appearance_category_bentofusion">Fusion &amp; Media Library</string>
+  <string name="pref_home_screen_layout_title">Home screen layout</string>
+  <string name="pref_home_screen_layout_summary">Choose your preferred home experience: BentoFusion, Cinematic Horizon, or Fluid Flow Stream</string>
+  <string name="pref_home_screen_layout_bentofusion">BentoFusion (Default)</string>
+  <string name="pref_home_screen_layout_cinematic">Cinematic Horizon</string>
+  <string name="pref_home_screen_layout_fluid_flow">Fluid Flow Stream</string>
+  <string name="pref_appearance_category_bentofusion">Home &amp; Media Library</string>
   <string name="pref_bentofusion_show_video_card_title">Show Movies / Videos</string>
   <string name="pref_bentofusion_show_video_card_summary">Display the horizontal Movies / Videos in Fusion / All Media</string>
   <string name="pref_bentofusion_show_audio_pulsing_title">Show Audio Pulsing</string>
