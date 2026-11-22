@@ -1178,43 +1178,12 @@ object AppearancePreferencesScreen : Screen {
           }
 
           item {
-            val bentoItemCount = 6
+            val bentoItemCount = 3
 
             ExpressivePreferenceGroup {
-              val bentoFusionShowVideoRail by browserPreferences.bentoFusionShowVideoRail.collectAsState()
-              SwitchPreference(
-                modifier = Modifier.settingsSearchTarget(R.string.pref_bentofusion_show_video_card_title),
-                value = bentoFusionShowVideoRail,
-                onValueChange = { browserPreferences.bentoFusionShowVideoRail.set(it) },
-                title = { Text(stringResource(R.string.pref_bentofusion_show_video_card_title)) },
-                summary = {
-                  Text(
-                    text = stringResource(R.string.pref_bentofusion_show_video_card_summary),
-                    color = MaterialTheme.colorScheme.outline,
-                  )
-                },
-                groupIndex = 0,
-                groupSize = bentoItemCount,
-              )
-
-              val bentoFusionShowAudioPulsing by browserPreferences.bentoFusionShowAudioPulsing.collectAsState()
-              SwitchPreference(
-                modifier = Modifier.settingsSearchTarget(R.string.pref_bentofusion_show_audio_pulsing_title),
-                value = bentoFusionShowAudioPulsing,
-                onValueChange = { browserPreferences.bentoFusionShowAudioPulsing.set(it) },
-                title = { Text(stringResource(R.string.pref_bentofusion_show_audio_pulsing_title)) },
-                summary = {
-                  Text(
-                    text = stringResource(R.string.pref_bentofusion_show_audio_pulsing_summary),
-                    color = MaterialTheme.colorScheme.outline,
-                  )
-                },
-                groupIndex = 1,
-                groupSize = bentoItemCount,
-              )
-
               val audioPulsingProgressStyle by browserPreferences.audioPulsingProgressStyle.collectAsState()
-              ExpressivePreferenceTile(index = 2, itemCount = bentoItemCount) {
+              val bentoFusionShowAudioPulsing by browserPreferences.bentoFusionShowAudioPulsing.collectAsState()
+              ExpressivePreferenceTile(index = 0, itemCount = bentoItemCount) {
                 ListPreference(
                   modifier = Modifier.settingsSearchTarget(R.string.pref_audio_pulsing_progress_style_title),
                   value = audioPulsingProgressStyle,
@@ -1238,7 +1207,7 @@ object AppearancePreferencesScreen : Screen {
               }
 
               val bentoFusionHeaderStyle by browserPreferences.bentoFusionHeaderStyle.collectAsState()
-              ExpressivePreferenceTile(index = 3, itemCount = bentoItemCount) {
+              ExpressivePreferenceTile(index = 1, itemCount = bentoItemCount) {
                 ListPreference(
                   modifier = Modifier.settingsSearchTarget(R.string.pref_bentofusion_header_style_title),
                   value = bentoFusionHeaderStyle,
@@ -1260,22 +1229,6 @@ object AppearancePreferencesScreen : Screen {
                 )
               }
 
-              val bentoFusionShowMusicRail by browserPreferences.bentoFusionShowMusicRail.collectAsState()
-              SwitchPreference(
-                modifier = Modifier.settingsSearchTarget(R.string.pref_bentofusion_show_music_card_title),
-                value = bentoFusionShowMusicRail,
-                onValueChange = { browserPreferences.bentoFusionShowMusicRail.set(it) },
-                title = { Text(stringResource(R.string.pref_bentofusion_show_music_card_title)) },
-                summary = {
-                  Text(
-                    text = stringResource(R.string.pref_bentofusion_show_music_card_summary),
-                    color = MaterialTheme.colorScheme.outline,
-                  )
-                },
-                groupIndex = 4,
-                groupSize = bentoItemCount,
-              )
-
               val libraryShowMusicTab by browserPreferences.libraryShowMusicTab.collectAsState()
               SwitchPreference(
                 modifier = Modifier.settingsSearchTarget(R.string.pref_library_show_music_tab_title),
@@ -1288,7 +1241,7 @@ object AppearancePreferencesScreen : Screen {
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
-                groupIndex = 5,
+                groupIndex = 2,
                 groupSize = bentoItemCount,
               )
             }
