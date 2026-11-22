@@ -134,10 +134,9 @@
   <string name="pref_nav_network_title">Show Streaming tab</string>
   <string name="pref_nav_network_summary">Show or hide Streaming in the bottom navigation bar</string>
   <string name="pref_home_screen_layout_title">Home screen layout</string>
-  <string name="pref_home_screen_layout_summary">Choose your preferred home experience: Fusion, Cinematic Horizon, or Fluid Flow Stream</string>
+  <string name="pref_home_screen_layout_summary">Choose your preferred home experience: Fusion or Cinematic Horizon</string>
   <string name="pref_home_screen_layout_bentofusion">Fusion (Default)</string>
   <string name="pref_home_screen_layout_cinematic">Cinematic Horizon</string>
-  <string name="pref_home_screen_layout_fluid_flow">Fluid Flow Stream</string>
   <string name="pref_appearance_category_bentofusion">Home &amp; Media Library</string>
   <string name="pref_bentofusion_show_video_card_title">Show Movies / Videos</string>
   <string name="pref_bentofusion_show_video_card_summary">Display the horizontal Movies / Videos in Fusion / All Media</string>

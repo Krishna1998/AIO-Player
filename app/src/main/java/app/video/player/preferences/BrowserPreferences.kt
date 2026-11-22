@@ -502,7 +502,6 @@ enum class HomeScreenLayout(
 ) {
   BentoFusion(app.video.player.R.string.pref_home_screen_layout_bentofusion),
   CinematicHorizon(app.video.player.R.string.pref_home_screen_layout_cinematic),
-  FluidFlowStream(app.video.player.R.string.pref_home_screen_layout_fluid_flow),
 }
 
 enum class BentoFusionHeaderStyle(
