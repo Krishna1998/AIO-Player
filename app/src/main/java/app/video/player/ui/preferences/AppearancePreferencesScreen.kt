@@ -1310,10 +1310,6 @@ object AppearancePreferencesScreen : Screen {
                 groupIndex = 6,
                 groupSize = bentoItemCount,
               )
-                },
-                groupIndex = 5,
-                groupSize = bentoItemCount,
-              )
             }
           }
 

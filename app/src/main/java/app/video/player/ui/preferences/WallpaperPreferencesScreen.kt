@@ -9,6 +9,7 @@
 
 package app.video.player.ui.preferences
 
+import android.app.Activity
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -38,7 +39,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,17 +56,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.video.player.R
 import app.video.player.preferences.AppearancePreferences
+import app.video.player.preferences.preference.collectAsState
 import app.video.player.presentation.Screen
 import app.video.player.ui.components.AppSlider
 import app.video.player.ui.icons.Icon
 import app.video.player.ui.icons.Icons
-import app.video.player.ui.preferences.components.ExpressivePreferenceGroup
-import app.video.player.ui.preferences.components.ExpressivePreferenceItem
-import app.video.player.ui.preferences.components.PreferenceAction
-import app.video.player.ui.preferences.components.PreferenceCard
-import app.video.player.ui.preferences.components.PreferenceDivider
-import app.video.player.ui.preferences.components.PreferenceSectionHeader
-import app.video.player.ui.preferences.components.PreferenceSectionPosition
+import app.video.player.ui.preferences.ExpressivePreferenceGroup
+import app.video.player.ui.preferences.ExpressivePreferenceItem
+import app.video.player.ui.preferences.PreferenceCard
+import app.video.player.ui.preferences.PreferenceDivider
+import app.video.player.ui.preferences.PreferenceSectionHeader
+import app.video.player.ui.preferences.PreferenceSectionPosition
+import app.video.player.ui.preferences.SettingsTopAppBar
 import app.video.player.ui.preferences.components.RestartRequiredDialog
 import app.video.player.ui.theme.WallpaperPreset
 import app.video.player.ui.theme.WallpaperScaleMode
@@ -106,18 +107,23 @@ object WallpaperPreferencesScreen : Screen {
     }
 
     if (showRestartDialog) {
-      RestartRequiredDialog(onDismiss = { showRestartDialog = false })
+      RestartRequiredDialog(
+        title = stringResource(R.string.pref_appearance_interface_restart_title),
+        message = stringResource(R.string.pref_appearance_interface_restart_message),
+        confirmLabel = stringResource(R.string.pref_appearance_ui_scale_restart_now),
+        onDismiss = { showRestartDialog = false },
+        onConfirm = {
+          showRestartDialog = false
+          (context as? Activity)?.recreate()
+        },
+      )
     }
 
     Scaffold(
       topBar = {
-        app.video.player.ui.browser.components.BrowserTopBar(
+        SettingsTopAppBar(
           title = stringResource(R.string.pref_appearance_custom_wallpaper_title),
-          navigationIcon = {
-            IconButton(onClick = { backstack.popSafely() }) {
-              Icon(Icons.ArrowBack, contentDescription = stringResource(R.string.generic_back))
-            }
-          },
+          onBack = { backstack.popSafely() },
         )
       },
     ) { innerPadding ->
@@ -131,7 +137,7 @@ object WallpaperPreferencesScreen : Screen {
         // 1. Presets Selector Section
         item {
           PreferenceSectionHeader(
-            position = PreferenceSectionPosition.Top,
+            position = PreferenceSectionPosition.First,
             title = stringResource(R.string.wallpaper_presets_label),
           )
         }
@@ -267,7 +273,7 @@ object WallpaperPreferencesScreen : Screen {
               val itemCount = 3
 
               // Blur Slider
-              ExpressivePreferenceItem(index = 0, itemCount = itemCount) {
+              ExpressivePreferenceItem {
                 Column(modifier = Modifier.padding(16.dp)) {
                   Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -294,7 +300,7 @@ object WallpaperPreferencesScreen : Screen {
               }
 
               // Dimming / Darkness (Transparency)
-              ExpressivePreferenceItem(index = 1, itemCount = itemCount) {
+              ExpressivePreferenceItem {
                 Column(modifier = Modifier.padding(16.dp)) {
                   Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -321,7 +327,7 @@ object WallpaperPreferencesScreen : Screen {
               }
 
               // Scale Mode (Fit / Fill)
-              ExpressivePreferenceItem(index = 2, itemCount = itemCount) {
+              ExpressivePreferenceItem {
                 Row(
                   modifier = Modifier
                     .fillMaxWidth()
