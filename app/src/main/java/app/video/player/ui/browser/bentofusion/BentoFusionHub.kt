@@ -2290,8 +2290,11 @@ private fun BentoHeroSpotlightCard(
         Column(
           modifier = Modifier
             .fillMaxWidth()
-            .padding((14f * scale.coerceIn(0.7f, 1.3f)).dp),
-          verticalArrangement = Arrangement.spacedBy((8f * scale.coerceIn(0.7f, 1.3f)).dp),
+            .padding(
+              horizontal = 14.dp,
+              vertical = (12f * scale.coerceIn(0.7f, 1.3f)).dp,
+            ),
+          verticalArrangement = Arrangement.spacedBy((7f * scale.coerceIn(0.7f, 1.3f)).dp),
         ) {
           // Top Header Row: Status Badge & Format Chip
           Row(
