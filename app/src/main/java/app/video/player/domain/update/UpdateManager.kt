@@ -53,38 +53,45 @@ class UpdateManager(
       return null
     }
 
+    // Enforce channel according to package identity to prevent cross-package install failures
+    val effectiveChannel = if (context.packageName.endsWith(".beta") || BuildConfig.IS_EXPERIMENTAL_BUILD) {
+      AppUpdateChannel.EXPERIMENTAL
+    } else {
+      channel
+    }
+
     val release =
       getLatestRelease(
-        when (channel) {
+        when (effectiveChannel) {
           AppUpdateChannel.STABLE -> STABLE_RELEASE_URL
           AppUpdateChannel.PREVIEW -> PREVIEW_RELEASE_URL
           AppUpdateChannel.EXPERIMENTAL -> EXPERIMENTAL_RELEASE_URL
         },
-        allowMissing = channel == AppUpdateChannel.EXPERIMENTAL,
+        allowMissing = effectiveChannel == AppUpdateChannel.EXPERIMENTAL,
       ) ?: return null
     if (selectUpdateAsset(release) == null) {
       return null
     }
     val prefs = context.getSharedPreferences("videoplayer_prefs", Context.MODE_PRIVATE)
     val ignoredVersion =
-      prefs.getString(ignoredVersionKey(channel), null)
-        ?: if (channel == AppUpdateChannel.STABLE) prefs.getString(LEGACY_IGNORED_VERSION_KEY, null) else null
+      prefs.getString(ignoredVersionKey(effectiveChannel), null)
+        ?: if (effectiveChannel == AppUpdateChannel.STABLE) prefs.getString(LEGACY_IGNORED_VERSION_KEY, null) else null
 
     // If this version was ignored, don't show it unless forced (manual check)
     val isIgnored =
       ignoredVersion == release.updateKey ||
-        (channel == AppUpdateChannel.STABLE && ignoredVersion == release.tagName.removePrefix("v"))
+        (effectiveChannel == AppUpdateChannel.STABLE && ignoredVersion == release.tagName.removePrefix("v"))
     if (!forceShow && isIgnored) {
       return null
     }
 
     val isNewer =
-      when (channel) {
+      when (effectiveChannel) {
         AppUpdateChannel.STABLE -> {
           val currentVersion = BuildConfig.VERSION_NAME.substringBefore('-')
           isNewerVersion(release.tagName.removePrefix("v"), currentVersion)
         }
-        AppUpdateChannel.PREVIEW, AppUpdateChannel.EXPERIMENTAL -> isNewerCiBuild(release, channel)
+        AppUpdateChannel.PREVIEW, AppUpdateChannel.EXPERIMENTAL -> isNewerCiBuild(release, effectiveChannel)
       }
 
     return if (isNewer) {

@@ -48,12 +48,14 @@ data class Release(
       }
 
   val isExperimental: Boolean
-    get() = channel.equals("experimental", ignoreCase = true) || tagName.equals("experimental", ignoreCase = true)
+    get() = channel.equals("experimental", ignoreCase = true) || tagName.equals("experimental", ignoreCase = true) || tagName.startsWith("experimental-r")
 
   val experimentalBuildNumber: Int?
     get() =
       if (isExperimental) {
-        commitCount ?: BUILD_NUMBER_REGEX.find(name)?.groupValues?.getOrNull(1)?.toIntOrNull()
+        commitCount
+          ?: BUILD_NUMBER_REGEX.find(name)?.groupValues?.getOrNull(1)?.toIntOrNull()
+          ?: BUILD_NUMBER_REGEX.find(tagName)?.groupValues?.getOrNull(1)?.toIntOrNull()
       } else {
         null
       }
@@ -84,8 +86,10 @@ data class Release(
   val updateAssets: List<Asset>
     get() {
       val channelName = ciChannelName ?: return assets
-      val buildNumber = ciBuildNumber ?: return emptyList()
-      return assets.filter { it.name.startsWith("VideoPlayer-$channelName-r$buildNumber-", ignoreCase = true) }
+      val buildNumber = ciBuildNumber ?: return assets
+      val specific = assets.filter { it.name.startsWith("VideoPlayer-$channelName-r$buildNumber-", ignoreCase = true) }
+      if (specific.isNotEmpty()) return specific
+      return assets.filter { it.name.startsWith("VideoPlayer-", ignoreCase = true) }
     }
 
   companion object {

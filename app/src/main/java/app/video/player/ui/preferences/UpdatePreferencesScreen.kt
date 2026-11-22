@@ -173,18 +173,8 @@ object UpdatePreferencesScreen : Screen {
             }
 
             item {
+              val isBetaPackage = updateChannel == AppUpdateChannel.EXPERIMENTAL || BuildConfig.IS_EXPERIMENTAL_BUILD
               PreferenceCard {
-                val channelNames = listOf(
-                  stringResource(R.string.ui_update_channel_stable_short),
-                  stringResource(R.string.ui_update_channel_preview_short),
-                  stringResource(R.string.ui_update_channel_experimental_short),
-                )
-                val channelValues = listOf(
-                  AppUpdateChannel.STABLE.name,
-                  AppUpdateChannel.PREVIEW.name,
-                  AppUpdateChannel.EXPERIMENTAL.name,
-                )
-
                 AppPreference(
                   title = { Text(stringResource(R.string.ui_update_channel)) },
                   summary = {
@@ -193,7 +183,7 @@ object UpdatePreferencesScreen : Screen {
                         AppUpdateChannel.STABLE -> stringResource(R.string.ui_update_channel_stable_short)
                         AppUpdateChannel.PREVIEW -> stringResource(R.string.ui_update_channel_preview_short)
                         AppUpdateChannel.EXPERIMENTAL -> stringResource(R.string.ui_update_channel_experimental_short)
-                      } + " — " + stringResource(R.string.ui_update_channels_summary),
+                      } + if (isBetaPackage) " (CI Beta Package: video.music.player.beta)" else " — " + stringResource(R.string.ui_update_channels_summary),
                       color = MaterialTheme.colorScheme.outline,
                     )
                   },
@@ -203,7 +193,7 @@ object UpdatePreferencesScreen : Screen {
                       contentDescription = null,
                     )
                   },
-                  action = PreferenceAction.Dialog,
+                  action = if (!isBetaPackage) PreferenceAction.Dialog else PreferenceAction.None,
                   onClick = {
                     // Open update sheet dialog to select channel or view updates
                     updateViewModel.showPendingUpdate()

@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -181,4 +181,35 @@ jobs:
           if-no-files-found: error
           retention-days: 14
           compression-level: 0
+
+      - name: Prepare CI Release Assets
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ci-release-assets
+          release_apk=$(find app/build/outputs/apk/standard/release -name "app-standard-arm64-v8a-release*.apk" | head -n 1)
+          if [[ -f "$release_apk" ]]; then
+            cp "$release_apk" "ci-release-assets/VideoPlayer-experimental-r${COMMIT_COUNT}-arm64-v8a.apk"
+            cp "$release_apk" "ci-release-assets/VideoPlayer-arm64-v8a-experimental.apk"
+            echo "CI Release APK staged: VideoPlayer-experimental-r${COMMIT_COUNT}-arm64-v8a.apk"
+          else
+            echo "No signed release APK found to publish"
+            exit 1
+          fi
+
+      - name: Publish CI Rolling Release
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') && env.SIGNING_KEYSTORE != ''
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: experimental
+          name: "Experimental CI Build r${{ env.COMMIT_COUNT }}"
+          body: |
+            Continuous Integration (CI) experimental build from commit ${{ env.SHORT_SHA }} (r${{ env.COMMIT_COUNT }}).
+            - Package: `video.music.player.beta`
+            - Architecture: `arm64-v8a`
+            - Auto-published upon successful CI build.
+          prerelease: true
+          make_latest: false
+          files: ci-release-assets/*.apk
 
