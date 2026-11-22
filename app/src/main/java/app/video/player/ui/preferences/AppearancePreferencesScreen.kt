@@ -1178,33 +1178,10 @@ object AppearancePreferencesScreen : Screen {
           }
 
           item {
-            val homeScreenLayout by browserPreferences.homeScreenLayout.collectAsState()
-            val bentoItemCount = 7
+            val bentoItemCount = 6
             var tileIndex = 0
 
             ExpressivePreferenceGroup {
-              ExpressivePreferenceTile(index = tileIndex++, itemCount = bentoItemCount) {
-                ListPreference(
-                  modifier = Modifier.settingsSearchTarget(R.string.pref_home_screen_layout_title),
-                  value = homeScreenLayout,
-                  onValueChange = {
-                    if (it != homeScreenLayout) {
-                      browserPreferences.homeScreenLayout.set(it)
-                      showInterfaceRestartDialog = true
-                    }
-                  },
-                  values = HomeScreenLayout.entries,
-                  valueToText = { AnnotatedString(stringResource(it.titleRes)) },
-                  title = { Text(stringResource(R.string.pref_home_screen_layout_title)) },
-                  summary = {
-                    Text(
-                      stringResource(homeScreenLayout.titleRes),
-                      color = MaterialTheme.colorScheme.outline,
-                    )
-                  },
-                )
-              }
-
               val bentoFusionShowVideoRail by browserPreferences.bentoFusionShowVideoRail.collectAsState()
               SwitchPreference(
                 modifier = Modifier.settingsSearchTarget(R.string.pref_bentofusion_show_video_card_title),
@@ -1319,37 +1296,32 @@ object AppearancePreferencesScreen : Screen {
           }
 
           item {
-            val homeScreenLayout by browserPreferences.homeScreenLayout.collectAsState()
-            val isCinematic = homeScreenLayout == HomeScreenLayout.CinematicHorizon
             val bentoShowVideo by browserPreferences.bentoFusionShowVideoRail.collectAsState()
             val bentoShowPulsing by browserPreferences.bentoFusionShowAudioPulsing.collectAsState()
             val bentoShowMusic by browserPreferences.bentoFusionShowMusicRail.collectAsState()
-            val showSpotlight by browserPreferences.cinematicShowHeroSpotlight.collectAsState()
 
             PreferenceCard {
-              if (isCinematic && showSpotlight) {
-                val spotlightScale by browserPreferences.cinematicSpotlightScale.collectAsState()
-                ExpressivePreferenceItem(standalone = true) {
-                  SliderPreference(
-                    modifier = Modifier.settingsSearchTarget(R.string.pref_cinematic_spotlight_scale_title),
-                    value = spotlightScale,
-                    onValueChange = { browserPreferences.cinematicSpotlightScale.set(it) },
-                    sliderValue = spotlightScale,
-                    onSliderValueChange = { browserPreferences.cinematicSpotlightScale.set(it) },
-                    valueRange = 0.70f..1.30f,
-                    valueSteps = 12,
-                    title = { Text(stringResource(R.string.pref_cinematic_spotlight_scale_title)) },
-                    summary = {
-                      val pct = (spotlightScale * 100).roundToInt()
-                      Text(
-                        text = if (pct == 100) "100% (Default)" else "$pct%",
-                        color = MaterialTheme.colorScheme.outline,
-                      )
-                    },
-                  )
-                }
-                PreferenceDivider()
+              val spotlightScale by browserPreferences.cinematicSpotlightScale.collectAsState()
+              ExpressivePreferenceItem(standalone = true) {
+                SliderPreference(
+                  modifier = Modifier.settingsSearchTarget(R.string.pref_cinematic_spotlight_scale_title),
+                  value = spotlightScale,
+                  onValueChange = { browserPreferences.cinematicSpotlightScale.set(it) },
+                  sliderValue = spotlightScale,
+                  onSliderValueChange = { browserPreferences.cinematicSpotlightScale.set(it) },
+                  valueRange = 0.70f..1.30f,
+                  valueSteps = 12,
+                  title = { Text(stringResource(R.string.pref_cinematic_spotlight_scale_title)) },
+                  summary = {
+                    val pct = (spotlightScale * 100).roundToInt()
+                    Text(
+                      text = if (pct == 100) "100% (Default)" else "$pct%",
+                      color = MaterialTheme.colorScheme.outline,
+                    )
+                  },
+                )
               }
+              PreferenceDivider()
 
               if (bentoShowPulsing) {
                 val pulsingScale by browserPreferences.bentoFusionAudioPulsingScale.collectAsState()

@@ -191,7 +191,7 @@ class BrowserPreferences(
   val onboardingCompleted = preferenceStore.getBoolean(ONBOARDING_COMPLETED_KEY, false)
 
   // BentoFusion & Media Library section visibility toggles
-  val homeScreenLayout = preferenceStore.getEnum("home_screen_layout", HomeScreenLayout.BentoFusion)
+  val homeScreenLayout = preferenceStore.getEnum("home_screen_layout", HomeScreenLayout.CinematicHorizon)
   val bentoFusionShowVideoRail = preferenceStore.getBoolean("bentofusion_show_video_rail", true)
   val bentoFusionShowAudioPulsing = preferenceStore.getBoolean("bentofusion_show_audio_pulsing", true)
   val cinematicShowHeroSpotlight = preferenceStore.getBoolean("cinematic_show_hero_spotlight", true)

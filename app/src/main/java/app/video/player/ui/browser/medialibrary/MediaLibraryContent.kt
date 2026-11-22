@@ -363,12 +363,11 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
     mediaLibraryTabs.getOrNull(pagerState.currentPage) ?: mediaType
   }
 
-  DisposableEffect(currentTab, bentoFusionShowAudioPulsing, homeScreenLayout) {
-    // When Audio Pulsing is enabled in BentoFusion or CinematicHorizon, suppress the mini-player
+  DisposableEffect(currentTab, bentoFusionShowAudioPulsing) {
+    // When Audio Pulsing is enabled in Cinematic Horizon, suppress the mini-player
     // on All Media to avoid redundant controls and UI clutter with the Audio Pulsing spotlight card.
     // When Audio Pulsing is turned off, allow the mini-player to show in all media.
-    val hasAudioPulsingSpotlight = (homeScreenLayout == app.video.player.preferences.HomeScreenLayout.BentoFusion ||
-      homeScreenLayout == app.video.player.preferences.HomeScreenLayout.CinematicHorizon) && bentoFusionShowAudioPulsing
+    val hasAudioPulsingSpotlight = bentoFusionShowAudioPulsing
 
     NavigationBarState.isAllMediaTabActive = (currentTab == MediaLibraryType.All && hasAudioPulsingSpotlight)
     onDispose {
