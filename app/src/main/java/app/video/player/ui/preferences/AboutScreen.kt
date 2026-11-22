@@ -16,6 +16,8 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.widget.ImageView
 import androidx.annotation.StringRes
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -41,13 +43,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -58,18 +57,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -94,6 +93,9 @@ import app.video.player.ui.utils.navigateTo
 import app.video.player.ui.utils.popSafely
 import app.video.player.utils.clipboard.SafeClipboard
 import kotlinx.serialization.Serializable
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
 @Serializable
 object AboutScreen : Screen {
@@ -114,7 +116,6 @@ object AboutScreen : Screen {
     val buildType = BuildConfig.BUILD_TYPE
     val githubRepoUrl = stringResource(R.string.github_repo_url)
     val isGlassActive = liquidGlassActive()
-    val isWallpaperActive = LocalAppWallpaperActive.current
     val systemStats = remember { collectSystemStats(context) }
     val deviceInfo = remember { collectDeviceInfo() }
 
@@ -130,16 +131,37 @@ object AboutScreen : Screen {
     ) { paddingValues ->
       ProvideExpressivePreferenceLocals {
         val cs = MaterialTheme.colorScheme
-        val transition = rememberInfiniteTransition(label = "aboutAura")
-        val auraPhase by transition.animateFloat(
+        val transition = rememberInfiniteTransition(label = "quantumNebula")
+
+        // Celestial orbital kinetic spins
+        val orbitRotationOuter by transition.animateFloat(
+          initialValue = 0f,
+          targetValue = 360f,
+          animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 18000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart,
+          ),
+          label = "orbitOuter",
+        )
+        val orbitRotationInner by transition.animateFloat(
+          initialValue = 360f,
+          targetValue = 0f,
+          animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 11000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart,
+          ),
+          label = "orbitInner",
+        )
+
+        // Cosmic nebula breathing pulse
+        val nebulaBreathing by transition.animateFloat(
           initialValue = 0f,
           targetValue = 1f,
-          animationSpec =
-            infiniteRepeatable(
-              animation = tween(durationMillis = 6500),
-              repeatMode = RepeatMode.Reverse,
-            ),
-          label = "auraPhase",
+          animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 7000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse,
+          ),
+          label = "nebulaBreathing",
         )
 
         LazyColumn(
@@ -150,7 +172,9 @@ object AboutScreen : Screen {
           contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
           verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-          // 1. Futuristic Hero Glass Banner
+          // =========================================================================
+          // 1. CONCEPT 2: QUANTUM NEBULA SPATIAL HERO CORE
+          // =========================================================================
           item {
             Box(
               modifier =
@@ -165,21 +189,45 @@ object AboutScreen : Screen {
                     },
                   )
                   .drawWithCache {
-                    val cx = size.width * (0.2f + 0.6f * auraPhase)
-                    val cy = size.height * (0.3f + 0.4f * (1f - auraPhase))
-                    val auraGradient =
+                    val cx = size.width * (0.25f + 0.50f * nebulaBreathing)
+                    val cy = size.height * (0.28f + 0.35f * (1f - nebulaBreathing))
+                    val deepViolet = Color(0xFF7C3AED)
+                    val cosmicCyan = Color(0xFF06B6D4)
+                    val cosmicMagenta = Color(0xFFD946EF)
+
+                    val cosmicAura =
                       Brush.radialGradient(
                         colors =
                           listOf(
-                            cs.primary.copy(alpha = if (isGlassActive) 0.32f else 0.22f),
-                            cs.tertiary.copy(alpha = if (isGlassActive) 0.18f else 0.12f),
+                            deepViolet.copy(alpha = if (isGlassActive) 0.38f else 0.28f),
+                            cosmicMagenta.copy(alpha = if (isGlassActive) 0.22f else 0.16f),
+                            cosmicCyan.copy(alpha = if (isGlassActive) 0.12f else 0.08f),
                             Color.Transparent,
                           ),
                         center = Offset(cx, cy),
-                        radius = size.width * 0.85f,
+                        radius = size.width * 0.95f,
                       )
+
+                    // Stardust optical particle field
+                    val stars = listOf(
+                      Offset(size.width * 0.15f, size.height * 0.20f) to 1.8f,
+                      Offset(size.width * 0.82f, size.height * 0.18f) to 2.2f,
+                      Offset(size.width * 0.70f, size.height * 0.65f) to 1.5f,
+                      Offset(size.width * 0.22f, size.height * 0.75f) to 2.0f,
+                      Offset(size.width * 0.88f, size.height * 0.82f) to 1.6f,
+                      Offset(size.width * 0.45f, size.height * 0.10f) to 1.4f,
+                    )
+
                     onDrawBehind {
-                      drawRect(brush = auraGradient)
+                      drawRect(brush = cosmicAura)
+                      stars.forEach { (pos, radius) ->
+                        val twinkle = (0.35f + 0.65f * sin((nebulaBreathing * 2 * PI + pos.x).toDouble()).toFloat()).coerceIn(0.2f, 1f)
+                        drawCircle(
+                          color = Color.White.copy(alpha = twinkle * 0.75f),
+                          radius = radius,
+                          center = pos,
+                        )
+                      }
                     }
                   }
                   .padding(24.dp),
@@ -188,58 +236,127 @@ object AboutScreen : Screen {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
               ) {
-                // App Icon with breathing glowing ring
+                // Dual Kinetic Quantum Orbital Rings surrounding the App Icon
                 Box(
-                  modifier =
-                    Modifier
-                      .size(86.dp)
-                      .clip(CircleShape)
-                      .background(cs.surfaceContainerHighest.copy(alpha = 0.6f))
-                      .border(
-                        width = 2.dp,
-                        brush =
-                          Brush.sweepGradient(
-                            listOf(
-                              cs.primary,
-                              cs.tertiary,
-                              cs.secondary,
-                              cs.primary,
-                            ),
-                          ),
-                        shape = CircleShape,
-                      )
-                      .padding(14.dp),
+                  modifier = Modifier.size(116.dp),
                   contentAlignment = Alignment.Center,
                 ) {
-                  AndroidView(
-                    modifier = Modifier.fillMaxSize(),
-                    factory = { ctx ->
-                      ImageView(ctx).apply {
-                        scaleType = ImageView.ScaleType.FIT_CENTER
-                        setImageResource(LauncherIconManager.current(ctx).preview)
-                      }
-                    },
-                    update = { view ->
-                      val selectedPreview = LauncherIconManager.current(view.context).preview
-                      view.setImageResource(selectedPreview)
-                    },
+                  // Outer dashed orbital ring
+                  Box(
+                    modifier =
+                      Modifier
+                        .fillMaxSize()
+                        .rotate(orbitRotationOuter)
+                        .drawWithCache {
+                          val stroke = Stroke(
+                            width = 2.dp.toPx(),
+                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(18f, 12f), 0f),
+                          )
+                          val ringGradient = Brush.sweepGradient(
+                            listOf(
+                              Color(0xFF8B5CF6).copy(alpha = 0.8f),
+                              Color(0xFF06B6D4).copy(alpha = 0.4f),
+                              Color(0xFFD946EF).copy(alpha = 0.9f),
+                              Color(0xFF8B5CF6).copy(alpha = 0.8f),
+                            ),
+                          )
+                          onDrawBehind {
+                            drawCircle(brush = ringGradient, style = stroke)
+                          }
+                        },
                   )
+
+                  // Inner counter-rotating photon ring
+                  Box(
+                    modifier =
+                      Modifier
+                        .size(94.dp)
+                        .rotate(orbitRotationInner)
+                        .drawWithCache {
+                          val stroke = Stroke(width = 1.5.dp.toPx())
+                          val ringGradient = Brush.sweepGradient(
+                            listOf(
+                              Color(0xFFC084FC).copy(alpha = 0.9f),
+                              Color.Transparent,
+                              Color(0xFF38BDF8).copy(alpha = 0.7f),
+                              Color.Transparent,
+                            ),
+                          )
+                          onDrawBehind {
+                            drawCircle(brush = ringGradient, style = stroke)
+                          }
+                        },
+                  )
+
+                  // Core Floating Icon with Obsidian Shield
+                  Box(
+                    modifier =
+                      Modifier
+                        .size(72.dp)
+                        .clip(CircleShape)
+                        .background(cs.surfaceContainerHighest.copy(alpha = 0.85f))
+                        .border(
+                          width = 1.8.dp,
+                          brush = Brush.linearGradient(
+                            listOf(
+                              Color(0xFFC084FC).copy(alpha = 0.9f),
+                              Color(0xFF38BDF8).copy(alpha = 0.6f),
+                            ),
+                          ),
+                          shape = CircleShape,
+                        )
+                        .padding(14.dp),
+                    contentAlignment = Alignment.Center,
+                  ) {
+                    AndroidView(
+                      modifier = Modifier.fillMaxSize(),
+                      factory = { ctx ->
+                        ImageView(ctx).apply {
+                          scaleType = ImageView.ScaleType.FIT_CENTER
+                          setImageResource(LauncherIconManager.current(ctx).preview)
+                        }
+                      },
+                      update = { view ->
+                        val selectedPreview = LauncherIconManager.current(view.context).preview
+                        view.setImageResource(selectedPreview)
+                      },
+                    )
+                  }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // App Title
-                Text(
-                  text = stringResource(R.string.app_name),
-                  style = MaterialTheme.typography.headlineMedium,
-                  fontWeight = FontWeight.ExtraBold,
-                  letterSpacing = (-0.5).sp,
-                  color = cs.onSurface,
-                )
+                // App Title & Futuristic Monospace Edition Tag
+                Row(
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                  Text(
+                    text = stringResource(R.string.app_name),
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = (-0.5).sp,
+                    color = cs.onSurface,
+                  )
+                  Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = Color(0xFF8B5CF6).copy(alpha = 0.18f),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF8B5CF6).copy(alpha = 0.45f)),
+                  ) {
+                    Text(
+                      text = "QUANTUM",
+                      modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp),
+                      style = MaterialTheme.typography.labelSmall,
+                      fontWeight = FontWeight.ExtraBold,
+                      fontFamily = FontFamily.Monospace,
+                      color = Color(0xFFC084FC),
+                    )
+                  }
+                }
 
                 Spacer(modifier = Modifier.height(6.dp))
 
-                // Version & Channel Tag
+                // Version & Build Spec Pills
                 Row(
                   verticalAlignment = Alignment.CenterVertically,
                   horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -247,11 +364,11 @@ object AboutScreen : Screen {
                   Surface(
                     shape = RoundedCornerShape(999.dp),
                     color = cs.primary.copy(alpha = 0.14f),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, cs.primary.copy(alpha = 0.3f)),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, cs.primary.copy(alpha = 0.35f)),
                   ) {
                     Text(
                       text = "v$versionName",
-                      modifier = Modifier.padding(horizontal = 10.dp, vertical = 3.dp),
+                      modifier = Modifier.padding(horizontal = 11.dp, vertical = 3.dp),
                       style = MaterialTheme.typography.labelMedium,
                       fontWeight = FontWeight.Bold,
                       color = cs.primary,
@@ -261,11 +378,11 @@ object AboutScreen : Screen {
 
                   Surface(
                     shape = RoundedCornerShape(999.dp),
-                    color = cs.secondaryContainer.copy(alpha = 0.7f),
+                    color = cs.secondaryContainer.copy(alpha = 0.75f),
                   ) {
                     Text(
                       text = buildType.uppercase(),
-                      modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                      modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.dp),
                       style = MaterialTheme.typography.labelSmall,
                       fontWeight = FontWeight.SemiBold,
                       color = cs.onSecondaryContainer,
@@ -275,11 +392,11 @@ object AboutScreen : Screen {
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Developer Badge
+                // Developer Badge with Subtle Cosmic Glow
                 Surface(
                   shape = RoundedCornerShape(16.dp),
-                  color = cs.surfaceContainerHighest.copy(alpha = 0.5f),
-                  border = androidx.compose.foundation.BorderStroke(0.8.dp, cs.outlineVariant.copy(alpha = 0.3f)),
+                  color = cs.surfaceContainerHighest.copy(alpha = 0.55f),
+                  border = androidx.compose.foundation.BorderStroke(0.8.dp, Color(0xFF8B5CF6).copy(alpha = 0.3f)),
                 ) {
                   Row(
                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
@@ -290,7 +407,7 @@ object AboutScreen : Screen {
                       imageVector = Icons.RoundedFilled.Favorite,
                       contentDescription = null,
                       modifier = Modifier.size(14.dp),
-                      tint = cs.error.copy(alpha = 0.85f),
+                      tint = Color(0xFFEC4899),
                     )
                     Text(
                       text = stringResource(R.string.ui_by_ritesh_pandit),
@@ -303,7 +420,7 @@ object AboutScreen : Screen {
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Quick Action Bar: Open-Source Libraries & GitHub Repository
+                // Quick Action Buttons: OSS Matrix & GitHub
                 Row(
                   modifier = Modifier.fillMaxWidth(),
                   horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -365,10 +482,66 @@ object AboutScreen : Screen {
             }
           }
 
-          // 2. Hardware Architecture & Diagnostics Card
+          // =========================================================================
+          // 2. CORE TELEMETRY MATRIX TILES (Realtime Engine Specs)
+          // =========================================================================
           item {
             PreferenceSectionHeader(
               position = PreferenceSectionPosition.First,
+              title = "Core Engine Telemetry",
+            )
+          }
+
+          item {
+            PreferenceCard {
+              Column(
+                modifier = Modifier.fillMaxWidth().padding(14.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+              ) {
+                Row(
+                  modifier = Modifier.fillMaxWidth(),
+                  horizontalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                  QuantumTelemetryTile(
+                    modifier = Modifier.weight(1f),
+                    title = "GPU PIPELINE",
+                    value = if (BuildConfig.MPV_SUPPORTS_VULKAN) "Vulkan + GLES" else "OpenGL ES",
+                    accentColor = Color(0xFF38BDF8),
+                  )
+                  QuantumTelemetryTile(
+                    modifier = Modifier.weight(1f),
+                    title = "AUDIO ENGINE",
+                    value = "384kHz / 32-bit",
+                    accentColor = Color(0xFFC084FC),
+                  )
+                }
+                Row(
+                  modifier = Modifier.fillMaxWidth(),
+                  horizontalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                  QuantumTelemetryTile(
+                    modifier = Modifier.weight(1f),
+                    title = "CODEC ENGINE",
+                    value = "MediaCodec Ultra",
+                    accentColor = Color(0xFF34D399),
+                  )
+                  QuantumTelemetryTile(
+                    modifier = Modifier.weight(1f),
+                    title = "GLASS SHADER",
+                    value = if (isGlassActive) "AGSL Active" else "Standard Blit",
+                    accentColor = Color(0xFFF472B6),
+                  )
+                }
+              }
+            }
+          }
+
+          // =========================================================================
+          // 3. HARDWARE ARCHITECTURE & DIAGNOSTICS CARD
+          // =========================================================================
+          item {
+            PreferenceSectionHeader(
+              position = PreferenceSectionPosition.Middle,
               title = stringResource(R.string.ui_device_info),
             )
           }
@@ -381,6 +554,7 @@ object AboutScreen : Screen {
                     .fillMaxWidth()
                     .clickable {
                       SafeClipboard.copyPlainText(context, "videoplayer_device_info", deviceInfo)
+                      Toast.show(context, "Diagnostic Specifications Copied to Clipboard")
                     }
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -388,14 +562,14 @@ object AboutScreen : Screen {
               ) {
                 Surface(
                   shape = RoundedCornerShape(14.dp),
-                  color = cs.primary.copy(alpha = 0.12f),
+                  color = Color(0xFF8B5CF6).copy(alpha = 0.16f),
                   modifier = Modifier.size(44.dp),
                 ) {
                   Box(contentAlignment = Alignment.Center) {
                     Icon(
                       imageVector = Icons.RoundedFilled.Info,
                       contentDescription = null,
-                      tint = cs.primary,
+                      tint = Color(0xFFC084FC),
                       modifier = Modifier.size(24.dp),
                     )
                   }
@@ -426,7 +600,9 @@ object AboutScreen : Screen {
             }
           }
 
-          // 3. Detailed Real-time System Specs
+          // =========================================================================
+          // 4. DETAILED REAL-TIME SYSTEM SPECS
+          // =========================================================================
           item {
             PreferenceSectionHeader(
               position = PreferenceSectionPosition.Middle,
@@ -445,7 +621,9 @@ object AboutScreen : Screen {
             }
           }
 
-          // 4. Footer Branding & Copyright
+          // =========================================================================
+          // 5. FOOTER BRANDING & LICENSE
+          // =========================================================================
           item {
             Column(
               modifier =
@@ -455,7 +633,7 @@ object AboutScreen : Screen {
               horizontalAlignment = Alignment.CenterHorizontally,
             ) {
               Text(
-                text = "Crafted for high performance playback and luxury UI",
+                text = "Quantum acoustic dynamics and visual perfection",
                 style = MaterialTheme.typography.labelMedium,
                 color = cs.outline.copy(alpha = 0.75f),
                 textAlign = TextAlign.Center,
@@ -471,6 +649,41 @@ object AboutScreen : Screen {
           }
         }
       }
+    }
+  }
+}
+
+@Composable
+private fun QuantumTelemetryTile(
+  modifier: Modifier = Modifier,
+  title: String,
+  value: String,
+  accentColor: Color,
+) {
+  Surface(
+    modifier = modifier,
+    shape = RoundedCornerShape(16.dp),
+    color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.5f),
+    border = androidx.compose.foundation.BorderStroke(1.dp, accentColor.copy(alpha = 0.25f)),
+  ) {
+    Column(
+      modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+    ) {
+      Text(
+        text = title,
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.Bold,
+        letterSpacing = 0.6.sp,
+        color = MaterialTheme.colorScheme.outline,
+      )
+      Spacer(Modifier.height(4.dp))
+      Text(
+        text = value,
+        style = MaterialTheme.typography.bodyMedium,
+        fontWeight = FontWeight.Bold,
+        fontFamily = FontFamily.Monospace,
+        color = accentColor,
+      )
     }
   }
 }
@@ -499,6 +712,7 @@ private fun SystemStatRow(
       text = value,
       style = MaterialTheme.typography.bodyMedium,
       fontWeight = FontWeight.Medium,
+      fontFamily = FontFamily.Monospace,
       color = MaterialTheme.colorScheme.onSurface,
       modifier = Modifier.weight(1.4f),
     )

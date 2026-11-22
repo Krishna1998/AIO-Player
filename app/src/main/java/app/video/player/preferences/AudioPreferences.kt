@@ -66,7 +66,7 @@ class AudioPreferences(
   val audioAmbientMode = preferenceStore.getBoolean("audio_ambient_mode", true)
   val immersiveArtwork = preferenceStore.getBoolean("audio_immersive_artwork", true)
   val audioWavySeekbar = preferenceStore.getBoolean("audio_wavy_seekbar", true)
-  val wavyVisualizerMode = preferenceStore.getEnum("wavy_visualizer_mode", WavyVisualizerMode.BothSides)
+  val wavyVisualizerMode = preferenceStore.getEnum("wavy_visualizer_mode", WavyVisualizerMode.OneSide)
   val enabledMusicTabs = preferenceStore.getStringSet(
     "enabled_music_tabs",
     setOf("ALL_MUSIC", "FAVORITES", "PLAYLISTS", "FOLDERS", "ALBUMS", "ARTISTS"),
@@ -170,7 +170,6 @@ enum class AudioPlayerOrientation(
 enum class WavyVisualizerMode(
   @StringRes val titleRes: Int,
 ) {
-  BothSides(R.string.pref_wavy_visualizer_both_sides),
   OneSide(R.string.pref_wavy_visualizer_one_side),
   Disabled(R.string.pref_wavy_visualizer_disabled),
 }
