@@ -80,7 +80,7 @@ class AppearancePreferences(
   val amoledMode = preferenceStore.getBoolean("amoled_mode", true)
   // Opt-in: glass records the screen behind it every frame and moves player video to a TextureView.
   val liquidGlassEnabled =
-    preferenceStore.getBoolean("liquid_glass_enabled", Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+    preferenceStore.getBoolean("liquid_glass_enabled", false)
   val liquidGlassInHdr = preferenceStore.getBoolean("liquid_glass_in_hdr", false)
   val liquidGlassOpacity = preferenceStore.getFloat("liquid_glass_opacity", 1f)
   val liquidGlassBlur = preferenceStore.getFloat("liquid_glass_blur", 1f)
