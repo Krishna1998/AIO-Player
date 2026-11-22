@@ -1992,6 +1992,16 @@
   <string name="secure_folder_pin_length">PIN length</string>
   <string name="secure_folder_pin_length_option">%1$d digits</string>
   <string name="secure_folder_proceed">Proceed</string>
+  <string name="secure_folder_restore_all_title">Restore all files to storage</string>
+  <string name="secure_folder_restore_all_summary">Move all secured files back to their original storage folders before uninstalling the app</string>
+  <string name="secure_folder_restore_all_confirm_title">Restore all secured files?</string>
+  <string name="secure_folder_restore_all_confirm_subtitle">All hidden videos will be moved back to their original folders or Movies/Restored so they won\'t be lost if you uninstall the app.</string>
+  <string name="secure_folder_restore_all_empty">No files in Secure Folder to restore.</string>
+  <string name="secure_folder_uninstall_warning_title">Uninstall Data Loss Warning (HyperOS / Android)</string>
+  <string name="secure_folder_uninstall_warning_body">HyperOS and newer Android versions automatically erase all private app data upon uninstallation without asking to keep data. If you plan to uninstall or reinstall the app, always tap \"Restore all files to storage\" or export a backup first so your locked videos are not permanently lost.</string>
+  <string name="secure_folder_export_vault_title">Export Encrypted Vault Backup</string>
+  <string name="secure_folder_export_vault_summary">Create an encrypted archive backup of your secured files in your device Downloads or external drive</string>
+  <string name="secure_folder_export_vault_success">Successfully exported %1$d file(s) to backup</string>
   <string name="secure_folder_restore_on_destroy_title">Restore files on destroy</string>
   <string name="secure_folder_restore_on_destroy_summary">Restore secured files to their original locations in File Manager when destroying Secure Folder instead of deleting them</string>
   <string name="secure_folder_destroy_title">Destroy Secure Folder</string>

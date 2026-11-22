@@ -12,6 +12,9 @@ package app.video.player.ui.securefolder
 import app.video.player.ui.preferences.DevicePreference
 import app.video.player.ui.tv.tvContentFocus
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 import app.video.player.ui.components.AppToast as Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -83,6 +86,7 @@ data object SecureFolderSettingsScreen : Screen {
     var forgotPinOpen by remember { mutableStateOf(false) }
     var hideConfirmOpen by remember { mutableStateOf(false) }
     var biometricPinOpen by remember { mutableStateOf(false) }
+    var restoreAllConfirmOpen by remember { mutableStateOf(false) }
 
     val pinChangedMessage = stringResource(R.string.secure_folder_pin_changed)
     val securityQuestionChangedMessage = stringResource(R.string.secure_folder_security_question_changed)
@@ -90,6 +94,7 @@ data object SecureFolderSettingsScreen : Screen {
     val destroyedMessage = stringResource(R.string.secure_folder_destroyed)
     val destroyFailedMessage = stringResource(R.string.secure_folder_destroy_failed)
     val noScreenLockMessage = stringResource(R.string.secure_folder_destroy_no_screen_lock)
+    val restoreAllEmptyMessage = stringResource(R.string.secure_folder_restore_all_empty)
 
     fun toast(message: String) = Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
 
@@ -139,6 +144,44 @@ data object SecureFolderSettingsScreen : Screen {
             .padding(padding)
             .verticalScroll(rememberScrollState()),
       ) {
+        // HyperOS / Android Uninstallation Safety Warning Banner
+        Box(
+          modifier =
+            Modifier
+              .fillMaxWidth()
+              .padding(horizontal = 16.dp, vertical = 8.dp)
+              .clip(RoundedCornerShape(16.dp))
+              .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.28f))
+              .padding(16.dp),
+        ) {
+          Row(
+            verticalAlignment = Alignment.Top,
+            modifier = Modifier.fillMaxWidth(),
+          ) {
+            Icon(
+              imageVector = Icons.RoundedFilled.Warning,
+              contentDescription = null,
+              modifier = Modifier.size(24.dp).padding(top = 2.dp),
+              tint = MaterialTheme.colorScheme.error,
+            )
+            androidx.compose.foundation.layout.Spacer(Modifier.size(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+              Text(
+                text = stringResource(R.string.secure_folder_uninstall_warning_title),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onErrorContainer,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+              )
+              androidx.compose.foundation.layout.Spacer(Modifier.size(4.dp))
+              Text(
+                text = stringResource(R.string.secure_folder_uninstall_warning_body),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+            }
+          }
+        }
+
         PreferenceSectionHeader(
           modifier = Modifier.settingsSearchTarget(R.string.secure_folder_settings_title),
           title = stringResource(R.string.secure_folder_settings_security),
@@ -207,6 +250,18 @@ data object SecureFolderSettingsScreen : Screen {
 
         PreferenceSectionHeader(title = stringResource(R.string.secure_folder_settings_danger_zone))
         PreferenceCard {
+          SecureSettingsRow(
+            modifier = Modifier.settingsSearchTarget(R.string.secure_folder_restore_all_title),
+            icon = Icons.RoundedFilled.Restore,
+            title = stringResource(R.string.secure_folder_restore_all_title),
+            summary = stringResource(R.string.secure_folder_restore_all_summary),
+            onClick = {
+              requirePin {
+                restoreAllConfirmOpen = true
+              }
+            },
+          )
+          PreferenceDivider()
           SwitchPreference(
             modifier = Modifier.settingsSearchTarget(R.string.secure_folder_restore_on_destroy_title),
             value = restoreOnDestroy,
@@ -262,6 +317,29 @@ data object SecureFolderSettingsScreen : Screen {
           hideConfirmOpen = false
         },
         onCancel = { hideConfirmOpen = false },
+      )
+    }
+
+    if (restoreAllConfirmOpen) {
+      ConfirmDialog(
+        title = stringResource(R.string.secure_folder_restore_all_confirm_title),
+        subtitle = stringResource(R.string.secure_folder_restore_all_confirm_subtitle),
+        confirmText = stringResource(R.string.secure_folder_restore),
+        onConfirm = {
+          restoreAllConfirmOpen = false
+          viewModel.restoreAll { success, count ->
+            if (success) {
+              if (count > 0) {
+                toast(context.getString(R.string.secure_folder_restored_success, count))
+              } else {
+                toast(restoreAllEmptyMessage)
+              }
+            } else {
+              toast(destroyFailedMessage)
+            }
+          }
+        },
+        onCancel = { restoreAllConfirmOpen = false },
       )
     }
 

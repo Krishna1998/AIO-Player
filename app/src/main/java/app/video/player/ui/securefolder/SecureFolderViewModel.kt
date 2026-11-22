@@ -313,4 +313,33 @@ class SecureFolderViewModel(
   fun cancelCurrentOperation() {
     repository.cancelOperation()
   }
+
+  /**
+   * Restores every secured file back to its original shared storage/file manager folder.
+   * Keeps PIN and settings intact so the user can safely uninstall/reinstall or migrate without data loss.
+   */
+  fun restoreAll(onFinished: (Boolean, Int) -> Unit) {
+    if (_isBusy.value) return
+    currentOperationJob = viewModelScope.launch {
+      _isBusy.value = true
+      val result = runCatching {
+        val allEntities = repository.getAll()
+        if (allEntities.isEmpty()) {
+          Result.success(0)
+        } else {
+          val batch = repository.restore(getApplication(), allEntities).getOrThrow()
+          if (batch.failedIds.isEmpty()) {
+            Result.success(batch.succeededIds.size)
+          } else {
+            Result.failure(java.io.IOException("Failed to restore ${batch.failedIds.size} file(s)"))
+          }
+        }
+      }
+      _isBusy.value = false
+      result.fold(
+        onSuccess = { count -> onFinished(true, count) },
+        onFailure = { onFinished(false, 0) },
+      )
+    }
+  }
 }
