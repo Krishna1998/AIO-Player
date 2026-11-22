@@ -1139,9 +1139,32 @@ internal fun ExpressivePillNavigationBar(
   val surfaceColor = MaterialTheme.colorScheme.surfaceContainerHigh
   val accentColor = MaterialTheme.colorScheme.primary
 
-  val mutedColor = if (isDarkTheme) Color.White.copy(alpha = 0.88f) else MaterialTheme.colorScheme.onSurfaceVariant
+  // Dynamic theme colors for each navigation tab, synced with the selected app theme
+  val primaryColor = MaterialTheme.colorScheme.primary
+  val secondaryColor = MaterialTheme.colorScheme.secondary
+  val tertiaryColor = MaterialTheme.colorScheme.tertiary
+
+  fun mainTabColor(tab: MainScreen.MainTab, active: Boolean): Color {
+    val base = when (tab) {
+      MainScreen.MainTab.HOME -> primaryColor
+      MainScreen.MainTab.NETWORK -> secondaryColor
+      MainScreen.MainTab.MUSIC -> tertiaryColor
+      MainScreen.MainTab.PROFILE -> primaryColor
+    }
+    return if (active) {
+      // In dark mode, active tab is full-brightness theme color; in light mode, solid theme tone
+      base
+    } else {
+      // Inactive tab: subtly tinted with its respective theme color (harmonized with surface)
+      if (isDarkTheme) {
+        androidx.compose.ui.graphics.lerp(Color.White.copy(alpha = 0.55f), base, 0.40f)
+      } else {
+        androidx.compose.ui.graphics.lerp(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.70f), base, 0.45f)
+      }
+    }
+  }
+
   val selectedSurface = if (isDarkTheme) Color.White.copy(alpha = 0.22f) else accentColor.copy(alpha = 0.16f)
-  val selectedContent = if (isDarkTheme) Color.White else accentColor
 
   val tabRow: @Composable (Boolean) -> Unit = { active ->
       Row(
@@ -1151,7 +1174,7 @@ internal fun ExpressivePillNavigationBar(
         visibleTabs.forEachIndexed { index, tab ->
           key(tab) {
             val label = labels[index]
-            val contentColor = if (active) selectedContent else mutedColor
+            val contentColor = mainTabColor(tab, active)
 
             Box(
               modifier =
@@ -1382,6 +1405,10 @@ private fun LegacyMaterialNavigationBar(
   val appearancePreferences = koinInject<AppearancePreferences>()
   val hideNavBarLabels by appearancePreferences.hideNavigationBarLabels.collectAsState()
   val density = LocalDensity.current
+  val primaryColor = MaterialTheme.colorScheme.primary
+  val secondaryColor = MaterialTheme.colorScheme.secondary
+  val tertiaryColor = MaterialTheme.colorScheme.tertiary
+
   NavigationBar(
     windowInsets = WindowInsets(0),
     modifier =
@@ -1392,6 +1419,12 @@ private fun LegacyMaterialNavigationBar(
       },
   ) {
     visibleTabs.forEach { tab ->
+      val tabColor = when (tab) {
+        MainScreen.MainTab.HOME -> primaryColor
+        MainScreen.MainTab.NETWORK -> secondaryColor
+        MainScreen.MainTab.MUSIC -> tertiaryColor
+        MainScreen.MainTab.PROFILE -> primaryColor
+      }
       NavigationBarItem(
         selected = tab == selectedTab,
         onClick = { onTabSelected(tab) },
@@ -1399,7 +1432,7 @@ private fun LegacyMaterialNavigationBar(
         icon = {
           MainTabIcon(
             tab = tab,
-            tint = LocalContentColor.current,
+            tint = if (tab == selectedTab) tabColor else tabColor.copy(alpha = 0.65f),
             contentDescription = null,
           )
         },
