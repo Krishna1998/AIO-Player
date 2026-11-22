@@ -146,13 +146,33 @@ class UpdateManager(
 
   private suspend fun getLatestRelease(url: String, allowMissing: Boolean = false): Release? =
     withContext(Dispatchers.IO) {
-      val request = Request.Builder().url(url).header("Cache-Control", "no-cache").build()
-      client.newCall(request).awaitResponse().use { response ->
-        // The channel becomes available after the first successful signed CI publication.
-        if (allowMissing && response.code == 404) return@withContext null
-        if (!response.isSuccessful) throw IOException("Unexpected code $response")
-        val responseBody = response.body.string()
-        json.decodeFromString<Release>(responseBody)
+      try {
+        val request =
+          Request.Builder()
+            .url(url)
+            .header("User-Agent", "AIO-Player/${BuildConfig.VERSION_NAME} (Android; ${Build.VERSION.RELEASE})")
+            .header("Accept", "application/vnd.github.v3+json")
+            .header("Cache-Control", "no-cache")
+            .build()
+        client.newCall(request).awaitResponse().use { response ->
+          // The channel becomes available after the first successful signed CI publication.
+          if (allowMissing && response.code == 404) return@withContext null
+          if (!response.isSuccessful) {
+            android.util.Log.e("UpdateManager", "GitHub release check failed: HTTP ${response.code} for $url")
+            throw IOException("Unexpected code $response")
+          }
+          val responseBody = response.body.string()
+          val trimmed = responseBody.trimStart()
+          if (trimmed.startsWith("[")) {
+            val list = json.decodeFromString<List<Release>>(responseBody)
+            list.firstOrNull()
+          } else {
+            json.decodeFromString<Release>(responseBody)
+          }
+        }
+      } catch (e: Exception) {
+        android.util.Log.e("UpdateManager", "Failed to fetch release from $url", e)
+        throw e
       }
     }
 
@@ -305,6 +325,8 @@ class UpdateManager(
       val request =
         Request.Builder()
           .url(asset.downloadUrl)
+          .header("User-Agent", "AIO-Player/${BuildConfig.VERSION_NAME} (Android; ${Build.VERSION.RELEASE})")
+          .header("Accept", "application/octet-stream")
           .apply { if (alreadyDownloaded > 0L) header("Range", "bytes=$alreadyDownloaded-") }
           .build()
 
