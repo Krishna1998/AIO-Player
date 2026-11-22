@@ -1179,8 +1179,7 @@ object AppearancePreferencesScreen : Screen {
 
           item {
             val homeScreenLayout by browserPreferences.homeScreenLayout.collectAsState()
-            val isCinematic = homeScreenLayout == HomeScreenLayout.CinematicHorizon
-            val bentoItemCount = if (isCinematic) 8 else 7
+            val bentoItemCount = 7
             var tileIndex = 0
 
             ExpressivePreferenceGroup {
@@ -1203,24 +1202,6 @@ object AppearancePreferencesScreen : Screen {
                       color = MaterialTheme.colorScheme.outline,
                     )
                   },
-                )
-              }
-
-              if (isCinematic) {
-                val cinematicShowHeroSpotlight by browserPreferences.cinematicShowHeroSpotlight.collectAsState()
-                SwitchPreference(
-                  modifier = Modifier.settingsSearchTarget(R.string.pref_cinematic_show_hero_spotlight_title),
-                  value = cinematicShowHeroSpotlight,
-                  onValueChange = { browserPreferences.cinematicShowHeroSpotlight.set(it) },
-                  title = { Text(stringResource(R.string.pref_cinematic_show_hero_spotlight_title)) },
-                  summary = {
-                    Text(
-                      text = stringResource(R.string.pref_cinematic_show_hero_spotlight_summary),
-                      color = MaterialTheme.colorScheme.outline,
-                    )
-                  },
-                  groupIndex = tileIndex++,
-                  groupSize = bentoItemCount,
                 )
               }
 
