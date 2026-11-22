@@ -19,3 +19,6 @@ val LocalBackStack: ProvidableCompositionLocal<NavBackStack<Screen>> =
 
 val LocalShowSettingsBackArrow: ProvidableCompositionLocal<Boolean> =
   compositionLocalOf { true }
+
+val LocalUpdateViewModel: ProvidableCompositionLocal<app.video.player.ui.update.UpdateViewModel?> =
+  compositionLocalOf { null }

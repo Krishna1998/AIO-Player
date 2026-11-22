@@ -683,9 +683,10 @@ open class MainActivity : AppCompatActivity() {
     val legacyNavigationBar by appearancePreferences.legacyNavigationBar.collectAsState()
     val musicSheet = LocalInAppMusicSheet.current
 
-    // Provide both LocalBackStack and the LazyList/Grid states to all screens
+    // Provide both LocalBackStack, LocalUpdateViewModel and the LazyList/Grid states to all screens
     CompositionLocalProvider(
       LocalBackStack provides typedBackstack,
+      app.video.player.ui.utils.LocalUpdateViewModel provides updateViewModel,
     ) {
       val hasNavEntries = typedBackstack.isNotEmpty()
 

@@ -443,9 +443,9 @@ class UpdateManager(
   }
 
   private companion object {
-    const val STABLE_RELEASE_URL = "https://api.github.com/repos/DARKNIGHT7473/VideoPlayer/releases/latest"
-    const val PREVIEW_RELEASE_URL = "https://api.github.com/repos/DARKNIGHT7473/VideoPlayer/releases"
-    const val EXPERIMENTAL_RELEASE_URL = "https://api.github.com/repos/DARKNIGHT7473/VideoPlayer/releases"
+    const val STABLE_RELEASE_URL = "https://api.github.com/repos/Krishna1998/AIO-Player/releases/latest"
+    const val PREVIEW_RELEASE_URL = "https://api.github.com/repos/Krishna1998/AIO-Player/releases"
+    const val EXPERIMENTAL_RELEASE_URL = "https://api.github.com/repos/Krishna1998/AIO-Player/releases"
     const val LEGACY_IGNORED_VERSION_KEY = "ignored_version"
     const val PART_SUFFIX = ".part"
     const val LOCAL_HASH_LENGTH = 12

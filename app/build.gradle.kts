@@ -85,7 +85,7 @@ android {
     create("standard") {
       dimension = "distribution"
       buildConfigField("boolean", "IS_PLAY_STORE_BUILD", "false")
-      buildConfigField("boolean", "ENABLE_UPDATE_FEATURE", "false")
+      buildConfigField("boolean", "ENABLE_UPDATE_FEATURE", "true")
       buildConfigField("String", "UPDATE_APK_VARIANT", "\"standard\"")
       buildConfigField("boolean", "SCOPED_STORAGE_ONLY", "false")
       buildConfigField("boolean", "MPV_SUPPORTS_VULKAN", "true")
