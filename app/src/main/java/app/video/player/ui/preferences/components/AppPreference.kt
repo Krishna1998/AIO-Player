@@ -54,6 +54,7 @@ fun AppPreference(
     summary = playerSettingSummary(availability, enabled, summary),
     widgetContainer = if (onClick != null && action != PreferenceAction.None) {
       {
+        val horizontalSpacing = runCatching { LocalPreferenceTheme.current.horizontalSpacing }.getOrDefault(16.dp)
         Icon(
           imageVector = when {
             action == PreferenceAction.Dialog -> Icons.RoundedFilled.ArrowDropDown
@@ -62,7 +63,7 @@ fun AppPreference(
           },
           contentDescription = null,
           tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (canClick) 1f else 0.38f),
-          modifier = Modifier.padding(horizontal = LocalPreferenceTheme.current.horizontalSpacing).size(20.dp),
+          modifier = Modifier.padding(horizontal = horizontalSpacing).size(20.dp),
         )
       }
     } else null,

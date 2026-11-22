@@ -114,27 +114,28 @@ object AboutScreen : Screen {
         )
       },
     ) { paddingValues ->
-      val cs = MaterialTheme.colorScheme
-      val colorPrimary = cs.primaryContainer
-      val colorTertiary = cs.tertiaryContainer
-      val transition = rememberInfiniteTransition()
-      val fraction by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec =
-          infiniteRepeatable(
-            animation = tween(durationMillis = 5000),
-            repeatMode = RepeatMode.Reverse,
-          ),
-      )
-      val cornerRadius = 28.dp
+      ProvideExpressivePreferenceLocals {
+        val cs = MaterialTheme.colorScheme
+        val colorPrimary = cs.primaryContainer
+        val colorTertiary = cs.tertiaryContainer
+        val transition = rememberInfiniteTransition()
+        val fraction by transition.animateFloat(
+          initialValue = 0f,
+          targetValue = 1f,
+          animationSpec =
+            infiniteRepeatable(
+              animation = tween(durationMillis = 5000),
+              repeatMode = RepeatMode.Reverse,
+            ),
+        )
+        val cornerRadius = 28.dp
 
-      Column(
-        modifier =
-          Modifier
-            .padding(paddingValues)
-            .verticalScroll(settingsScrollState),
-      ) {
+        Column(
+          modifier =
+            Modifier
+              .padding(paddingValues)
+              .verticalScroll(settingsScrollState),
+        ) {
         PreferenceCard {
           Box(
             modifier =
@@ -397,6 +398,8 @@ object AboutScreen : Screen {
 
         Spacer(Modifier.height(12.dp))
       }
+    }
+  }
     }
   }
 }

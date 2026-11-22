@@ -129,13 +129,14 @@ object WallpaperPreferencesScreen : Screen {
         )
       },
     ) { innerPadding ->
-      LazyColumn(
-        modifier = Modifier
-          .fillMaxSize()
-          .padding(innerPadding),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-      ) {
+      ProvideExpressivePreferenceLocals {
+        LazyColumn(
+          modifier = Modifier
+            .fillMaxSize()
+            .padding(innerPadding),
+          contentPadding = PaddingValues(16.dp),
+          verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
         // 1. Presets Selector Section
         item {
           PreferenceSectionHeader(
@@ -376,6 +377,7 @@ object WallpaperPreferencesScreen : Screen {
         }
       }
     }
+  }
   }
 }
 

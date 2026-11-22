@@ -94,7 +94,8 @@ fun AppSliderPreference(
             onInteractionChange = { isUserInteracting = it },
           )
           if (valueText != null) {
-            Box(Modifier.padding(start = LocalPreferenceTheme.current.horizontalSpacing)) {
+            val horizontalSpacing = runCatching { LocalPreferenceTheme.current.horizontalSpacing }.getOrDefault(16.dp)
+            Box(Modifier.padding(start = horizontalSpacing)) {
               valueText()
             }
           }
