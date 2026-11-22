@@ -156,7 +156,7 @@
   <string name="pref_bentofusion_header_style_luxury">Studio Luxury Aperture</string>
   <string name="pref_bentofusion_show_music_card_title">Show Music</string>
   <string name="pref_bentofusion_show_music_card_summary">Display the horizontal Music in Fusion / All Media</string>
-  <string name="pref_bentofusion_section_order_title">Fusion Section Order</string>
+  <string name="pref_bentofusion_section_order_title">Home Section Order</string>
   <string name="pref_bentofusion_section_video">Movies / Videos</string>
   <string name="pref_bentofusion_section_audio_pulsing">Audio Pulsing</string>
   <string name="pref_bentofusion_section_music">Music</string>
