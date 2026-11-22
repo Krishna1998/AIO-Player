@@ -303,12 +303,11 @@ private fun NormalTopBar(
   val showProfileTab by preferences.showProfileTab.collectAsState()
   val showNetworkTab by preferences.showNetworkTab.collectAsState()
   val isOnlyHomeFilesTab = !showProfileTab && !showNetworkTab
-  val isNavBarVisible = NavigationBarState.isNavBarVisible
-  val showTopBarSearch = legacyNavigationBar || !isMainTabPage || isOnlyHomeFilesTab || !isNavBarVisible
+  val showTopBarSearch = legacyNavigationBar || !isMainTabPage || isOnlyHomeFilesTab
   val profileName by preferences.profileName.collectAsState()
   val profileImagePath by preferences.profileImagePath.collectAsState()
   val profileAvatar = rememberProfileAvatar(profileImagePath)
-  val isProfileActiveInNavBar = isNavBarVisible && showProfileTab
+  val isProfileActiveInNavBar = !legacyNavigationBar && showProfileTab
   val showProfilePictureInSettings = profileAvatar != null && !isProfileActiveInNavBar
   val appName = stringResource(R.string.app_name)
   val effectiveTitle = if (title == appName && profileName.isNotBlank()) profileName else title
