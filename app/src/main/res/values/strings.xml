@@ -2957,7 +2957,7 @@
   <string name="pref_audio_ambient_mode_disabled_by_immersive">Disabled while Immersive artwork is enabled</string>
   <string name="pref_audio_wavy_seekbar_title">One UI 9 Wavy visualizer</string>
   <string name="pref_audio_wavy_seekbar_summary">Fluid multi-layer wavy visualizer animation on the audio seekbar</string>
-  <string name="pref_wavy_visualizer_both_sides">Both sides (Symmetrical)</string>
+  <string name="pref_wavy_visualizer_both_sides">Galaxy Singularity (Dual Event Horizon)</string>
   <string name="pref_wavy_visualizer_one_side">One side (Above seekbar)</string>
   <string name="pref_wavy_visualizer_disabled">Disabled (No visualizer on seekbar)</string>
   <string name="pref_audio_language_title">Audio Language</string>

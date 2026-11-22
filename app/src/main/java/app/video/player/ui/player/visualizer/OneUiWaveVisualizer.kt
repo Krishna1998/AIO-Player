@@ -239,6 +239,7 @@ internal fun WaveVisualizerOverlay(
       bodyTopAlpha: Float,
       bodyBottomAlpha: Float,
       hasWhiteHighlight: Boolean = false,
+      warpRingMultiplier: Float = 1.0f,
     ) {
       val availableLift = (trackTop - 1.dp.toPx()).coerceAtLeast(0f)
       val lift = min((baseLift * liftScale + beatLift) * amplitudeFraction, availableLift)
@@ -247,12 +248,26 @@ internal fun WaveVisualizerOverlay(
       val ribbonEnd = (waveEnd - joinInset).coerceAtLeast(ribbonStart)
       if (ribbonEnd - ribbonStart <= 1f || lift <= 0.25f) return
 
-      fun waveDisplacement(x: Float): Float {
+      fun waveDisplacement(x: Float, isBottom: Boolean): Float {
         val edgeIn = smoothstep((x - ribbonStart) / (wavelength * 0.5f))
         val edgeOut = smoothstep((ribbonEnd - x) / (wavelength * 0.55f))
         val envelope = edgeIn * edgeOut
-        val undulation = 0.60f + 0.40f * sin((x / wavelength) * twoPi - phase)
-        return lift * undulation * envelope
+
+        if (renderBottom) {
+          // Design 2: Galaxy Singularity (Dual Event Horizon Ribbons)
+          // Gravitational pull distortion as x approaches the playhead event horizon
+          val distToThumb = maxOf(18f, ribbonEnd - x)
+          val warpLift = (320f / distToThumb) * envelope * warpRingMultiplier
+          val wave = lift * (0.50f + 0.50f * sin((x / wavelength) * twoPi - phase)) * envelope
+          return if (!isBottom) {
+            wave + warpLift * 0.80f
+          } else {
+            wave * 0.85f + warpLift * 0.80f
+          }
+        } else {
+          val undulation = 0.60f + 0.40f * sin((x / wavelength) * twoPi - phase)
+          return lift * undulation * envelope
+        }
       }
 
       val step = 1.5.dp.toPx().coerceAtLeast(1f)
@@ -264,21 +279,23 @@ internal fun WaveVisualizerOverlay(
       bottomFilledPath.reset()
       bottomContourPath.reset()
 
-      val startDisp = waveDisplacement(ribbonStart)
+      val startDispTop = waveDisplacement(ribbonStart, false)
+      val startDispBot = waveDisplacement(ribbonStart, true)
       filledPath.moveTo(ribbonStart, topBaseline)
-      filledPath.lineTo(ribbonStart, trackTop - startDisp)
-      contourPath.moveTo(ribbonStart, trackTop - startDisp)
+      filledPath.lineTo(ribbonStart, trackTop - startDispTop)
+      contourPath.moveTo(ribbonStart, trackTop - startDispTop)
 
       bottomFilledPath.moveTo(ribbonStart, bottomBaseline)
-      bottomFilledPath.lineTo(ribbonStart, trackBottom + startDisp)
-      bottomContourPath.moveTo(ribbonStart, trackBottom + startDisp)
+      bottomFilledPath.lineTo(ribbonStart, trackBottom + startDispBot)
+      bottomContourPath.moveTo(ribbonStart, trackBottom + startDispBot)
 
       var x = ribbonStart
       while (x < ribbonEnd) {
         x = min(x + step, ribbonEnd)
-        val disp = waveDisplacement(x)
-        val yTop = trackTop - disp
-        val yBottom = trackBottom + disp
+        val dispTop = waveDisplacement(x, false)
+        val dispBot = waveDisplacement(x, true)
+        val yTop = trackTop - dispTop
+        val yBottom = trackBottom + dispBot
 
         filledPath.lineTo(x, yTop)
         contourPath.lineTo(x, yTop)
@@ -373,6 +390,7 @@ internal fun WaveVisualizerOverlay(
       glowAlpha = 0.40f,
       bodyTopAlpha = 0.38f,
       bodyBottomAlpha = 0.08f,
+      warpRingMultiplier = 0.40f,
     )
 
     // Layer 2: Harmonic Mid Veil (Mid wave - slightly down from back wave)
@@ -392,6 +410,7 @@ internal fun WaveVisualizerOverlay(
       glowAlpha = 0.38f,
       bodyTopAlpha = 0.42f,
       bodyBottomAlpha = 0.10f,
+      warpRingMultiplier = 0.70f,
     )
 
     // Layer 3: Vibrant Lead Luminous Wave with Specular Core (Front wave - slightly down from mid wave)
@@ -412,6 +431,7 @@ internal fun WaveVisualizerOverlay(
       bodyTopAlpha = 0.62f,
       bodyBottomAlpha = 0.12f,
       hasWhiteHighlight = true,
+      warpRingMultiplier = 1.0f,
     )
   }
 }
