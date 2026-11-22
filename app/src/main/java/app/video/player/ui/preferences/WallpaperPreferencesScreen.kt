@@ -75,9 +75,11 @@ import app.video.player.ui.theme.saveWallpaperCopy
 import app.video.player.ui.utils.LocalBackStack
 import app.video.player.ui.utils.popSafely
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.koin.compose.koinInject
 import kotlin.math.roundToInt
 
+@Serializable
 object WallpaperPreferencesScreen : Screen {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
