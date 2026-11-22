@@ -360,6 +360,7 @@ enum class FolderSortType {
   VideoCount,
   ;
 
+  @Suppress("DEPRECATION")
   val displayName: String
     get() =
       when (this) {
@@ -380,6 +381,7 @@ enum class VideoSortType {
   Size,
   ;
 
+  @Suppress("DEPRECATION")
   val displayName: String
     get() =
       when (this) {
@@ -399,6 +401,7 @@ enum class NetworkSortType {
   Size,
   ;
 
+  @Suppress("DEPRECATION")
   val displayName: String
     get() =
       when (this) {
@@ -420,6 +423,7 @@ enum class AudiobookSortType {
   DateAdded,
   ;
 
+  @Suppress("DEPRECATION")
   val displayName: String
     get() =
       when (this) {
@@ -444,6 +448,7 @@ enum class FolderViewMode {
   BentoFusion,
   ;
 
+  @Suppress("DEPRECATION")
   val displayName: String
     get() =
       when (this) {
@@ -457,6 +462,7 @@ enum class FolderViewMode {
 
 enum class TreeFlattenDepth(
   val maxLevels: Int,
+  @Suppress("DEPRECATION")
   val displayName: String,
 ) {
   Off(0, "Off (show every folder)"),
@@ -479,6 +485,7 @@ enum class MediaLayoutMode {
   MOSAIC,
   ;
 
+  @Suppress("DEPRECATION")
   val displayName: String
     get() =
       when (this) {
@@ -531,6 +538,7 @@ enum class ThumbnailMode {
   EmbeddedThumbnail,
   ;
 
+  @Suppress("DEPRECATION")
   val displayName: String
     get() =
       when (this) {
@@ -543,6 +551,7 @@ enum class ThumbnailMode {
 
 enum class ThumbnailQuality(
   val maxSizePx: Int,
+  @Suppress("DEPRECATION")
   val displayName: String,
 ) {
   Balanced(720, "Balanced (720p)"),
