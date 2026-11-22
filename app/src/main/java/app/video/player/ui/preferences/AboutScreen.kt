@@ -115,6 +115,8 @@ object AboutScreen : Screen {
     val githubRepoUrl = stringResource(R.string.github_repo_url)
     val isGlassActive = liquidGlassActive()
     val isWallpaperActive = LocalAppWallpaperActive.current
+    val systemStats = remember { collectSystemStats(context) }
+    val deviceInfo = remember { collectDeviceInfo() }
 
     Scaffold(
       containerColor = wallpaperAwareBackgroundColor(),
@@ -373,7 +375,6 @@ object AboutScreen : Screen {
 
           item {
             PreferenceCard {
-              val deviceInfo = remember { collectDeviceInfo() }
               Row(
                 modifier =
                   Modifier
@@ -427,7 +428,6 @@ object AboutScreen : Screen {
           }
 
           // 3. Detailed Real-time System Specs
-          val systemStats = remember { collectSystemStats(context) }
           item {
             PreferenceSectionHeader(
               position = PreferenceSectionPosition.Middle,
