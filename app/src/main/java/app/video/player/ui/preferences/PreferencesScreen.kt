@@ -10,6 +10,7 @@
 package app.video.player.ui.preferences
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Arrangement
@@ -235,11 +236,16 @@ object PreferencesScreen : Screen {
       },
       bottomBar = {
         // Samsung One UI style floating bottom search bar for effortless one-handed reach
+        val miniPlayerClearance = LocalNavigationBarHeight.current
+        val animatedBottomPadding by animateDpAsState(
+          targetValue = 12.dp + miniPlayerClearance,
+          label = "settings_search_bar_mini_player_clearance",
+        )
         Box(
           modifier =
             Modifier
               .fillMaxWidth()
-              .padding(horizontal = 20.dp, vertical = 12.dp)
+              .padding(start = 20.dp, end = 20.dp, top = 12.dp, bottom = animatedBottomPadding)
               .navigationBarsPadding(),
           contentAlignment = Alignment.Center,
         ) {
