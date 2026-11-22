@@ -7,7 +7,7 @@
  * (at your option) any later version.
  */
 
-package app.video.player.ui.browser.bentofusion
+package app.video.player.ui.browser.cinematichorizon
 
 import android.content.Intent
 import android.graphics.Bitmap

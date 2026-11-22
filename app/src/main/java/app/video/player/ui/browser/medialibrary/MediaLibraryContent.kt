@@ -1521,7 +1521,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                   onFabExpandedChange = { isFabExpanded.value = it },
                   headerContent = if (!isSearching && pageType == MediaLibraryType.All && pageVideosWithInfo.isNotEmpty()) {
                     {
-                      app.video.player.ui.browser.bentofusion.BentoFusionHeader(
+                      app.video.player.ui.browser.cinematichorizon.BentoFusionHeader(
                         videosWithInfo = pageVideosWithInfo,
                         recentlyPlayedFilePath = recentlyPlayedFilePath,
                         onPlayMedia = { video, startPos, customQueue ->
