@@ -381,7 +381,6 @@ object AboutScreen : Screen {
                     .fillMaxWidth()
                     .clickable {
                       SafeClipboard.copyPlainText(context, "videoplayer_device_info", deviceInfo)
-                      Toast.makeText(context, "Device info copied to clipboard", Toast.LENGTH_SHORT).show()
                     }
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
