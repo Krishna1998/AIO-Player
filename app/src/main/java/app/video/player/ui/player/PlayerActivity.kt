@@ -2338,7 +2338,7 @@ class PlayerActivity :
         return@runCatching
       }
 
-      if (isDeviceScreenOffOrLocked() && !isBackgroundPlaybackEnabled()) {
+      if (!isInPictureInPictureMode && isDeviceScreenOffOrLocked() && !isBackgroundPlaybackEnabled()) {
         rememberResumeAfterUnlockBeforeForcedPause()
         viewModel.pause()
       } else if (!isBackgroundPlaybackSessionActive && (isUserFinishing || isFinishing)) {
@@ -2353,12 +2353,14 @@ class PlayerActivity :
     // SurfaceView receives surfaceDestroyed when Android reclaims its renderer. Keep a valid
     // paused native Surface across Recents instead of gratuitously resetting the decoder.
     // TextureView, screen-off, Activity finish, and active background audio still detach.
+    // If we are in Picture-in-Picture mode, do NOT release the surface on screen-off / lock,
+    // otherwise the PiP window's video output detaches and fails to play or render on lockscreen.
     val screenLocked = isDeviceScreenOffOrLocked()
-    val releaseStoppedRenderer = player.isTextureSurface || screenLocked ||
+    val releaseStoppedRenderer = player.isTextureSurface || (!isInPictureInPictureMode && screenLocked) ||
       isFinishing || isUserFinishing ||
       (isBackgroundPlaybackSessionActive && viewModel.paused != true)
     if (mpvInitialized && ownsPlaybackSession() &&
-      (!isInPictureInPictureMode || screenLocked) && releaseStoppedRenderer
+      !isInPictureInPictureMode && releaseStoppedRenderer
     ) {
       runCatching { player.releaseSurface() }
         .onFailure { Log.e(TAG, "Could not release stopped playback surface", it) }
@@ -6505,6 +6507,9 @@ private suspend fun restorePlaybackPosition(state: PlaybackStateEntity?, loadGen
     viewModel.setAmbientPipActive(isInPictureInPictureMode)
     if (isInPictureInPictureMode) setVideoAmbientPresentationActive(false)
     pipHelper.onPictureInPictureModeChanged(isInPictureInPictureMode)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+      setShowWhenLocked(isInPictureInPictureMode)
+    }
     if (isInPictureInPictureMode) {
       pendingPipExitResolution = false
       wasInPipMode = true
@@ -6512,11 +6517,12 @@ private suspend fun restorePlaybackPosition(state: PlaybackStateEntity?, loadGen
       if (isCurrentOrientationLandscape() || (player.getVideoOutAspect() ?: 0.0) > 1.0) {
         pipPreservedLandscape = true
       }
-      // Android expands PiP into the requested orientation, so settle on the video's way round now.
-      setOrientation()
+      // Keep activity's existing screen orientation intact while in PiP so aspect ratio doesn't distort
       ensurePipPlaybackNotification()
     } else if (wasInPipMode) {
       pipPreservedLandscape = false
+      // Android expands PiP into the requested orientation, so settle on the video's way round when exiting PiP
+      setOrientation()
       // PiP showed the system bars; hide them before the expand animation draws the player.
       if (!isFinishing) setupSystemUI()
       // Android reports the same PiP exit callback for expansion and close. Resolve it after

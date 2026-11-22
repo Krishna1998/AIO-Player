@@ -76,7 +76,10 @@ class MPVPipHelper(
           intent: Intent?,
         ) {
           when (intent?.getIntExtra(PIP_INTENT_ACTION, 0)) {
-            PIP_PLAY -> PlaybackSession.setPropertyBoolean("pause", false)
+            PIP_PLAY -> {
+              (activity as? PlayerHost)?.requestAudioFocus()
+              PlaybackSession.setPropertyBoolean("pause", false)
+            }
             PIP_PAUSE -> PlaybackSession.setPropertyBoolean("pause", true)
             PIP_REWIND -> PlaybackSession.command("seek", "-10", "relative")
             PIP_FORWARD -> PlaybackSession.command("seek", "10", "relative")
