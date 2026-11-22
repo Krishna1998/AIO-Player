@@ -1331,6 +1331,8 @@ internal fun ExpressivePillNavigationBar(
           },
         )
         drawPath(pillPath, brush = pillBorderBrush, style = Stroke(width = pillOutlineStroke))
+        // Liquid bubble highlight with convex upper-left reflection and soft inset shade
+        drawLiquidBubbleHighlight(pillPath, isDarkTheme, accentColor, intensity = 1f)
         clipPath(pillPath) {
           drawNavigationJellyGlow(motion.frame, accentColor.copy(alpha = glowStrength))
           this@drawWithContent.drawContent()
