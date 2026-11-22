@@ -98,7 +98,7 @@ class SecureFolderPreferences(
    * When true, destroying the Secure Folder restores all files back to their original locations
    * instead of permanently deleting them.
    */
-  val restoreOnDestroy = preferenceStore.getBoolean("secure_folder_restore_on_destroy", true)
+  val restoreOnDestroy = preferenceStore.getBoolean("secure_folder_restore_on_destroy", false)
 
   /** Wipes the PIN, security question and every Secure Folder flag back to first-run defaults. */
   fun resetAll() {
