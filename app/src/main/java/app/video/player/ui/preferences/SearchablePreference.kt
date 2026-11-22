@@ -1358,6 +1358,7 @@ object SearchablePreferences {
         screen = AppearancePreferencesScreen,
         anchorItemIndex = 7,
         SearchEntrySpec(R.string.pref_bentofusion_show_video_card_title, listOf("bentofusion", "video", "movie", "rail", "card", "hide", "show")),
+        SearchEntrySpec(R.string.pref_cinematic_show_hero_spotlight_title, listOf("cinematic", "horizon", "continue watching", "hero", "spotlight", "hide", "show")),
         SearchEntrySpec(R.string.pref_bentofusion_show_audio_pulsing_title, listOf("bentofusion", "audio", "pulsing", "hero", "card", "hide", "show")),
         SearchEntrySpec(R.string.pref_audio_pulsing_progress_style_title, listOf("bentofusion", "audio", "pulsing", "progress", "seekbar", "wavy", "visualizer")),
         SearchEntrySpec(R.string.pref_bentofusion_header_style_title, listOf("bentofusion", "header", "title", "style", "capsule", "pillar", "bento", "pulse", "luxury")),

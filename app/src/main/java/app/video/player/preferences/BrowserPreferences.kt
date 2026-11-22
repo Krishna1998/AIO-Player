@@ -194,6 +194,7 @@ class BrowserPreferences(
   val homeScreenLayout = preferenceStore.getEnum("home_screen_layout", HomeScreenLayout.BentoFusion)
   val bentoFusionShowVideoRail = preferenceStore.getBoolean("bentofusion_show_video_rail", true)
   val bentoFusionShowAudioPulsing = preferenceStore.getBoolean("bentofusion_show_audio_pulsing", true)
+  val cinematicShowHeroSpotlight = preferenceStore.getBoolean("cinematic_show_hero_spotlight", true)
   val audioPulsingProgressStyle = preferenceStore.getEnum("audio_pulsing_progress_style", AudioPulsingProgressStyle.WavyVisualizer)
   val bentoFusionHeaderStyle = preferenceStore.getEnum("bentofusion_header_style", BentoFusionHeaderStyle.LiquidCapsule)
   val bentoFusionShowMusicRail = preferenceStore.getBoolean("bentofusion_show_music_rail", true)

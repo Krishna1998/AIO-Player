@@ -1176,9 +1176,12 @@ object AppearancePreferencesScreen : Screen {
 
           item {
             ExpressivePreferenceGroup {
-              val bentoItemCount = 7
               val homeScreenLayout by browserPreferences.homeScreenLayout.collectAsState()
-              ExpressivePreferenceTile(index = 0, itemCount = bentoItemCount) {
+              val isCinematic = homeScreenLayout == HomeScreenLayout.CinematicHorizon
+              val bentoItemCount = if (isCinematic) 8 else 7
+              var tileIndex = 0
+
+              ExpressivePreferenceTile(index = tileIndex++, itemCount = bentoItemCount) {
                 ListPreference(
                   modifier = Modifier.settingsSearchTarget(R.string.pref_home_screen_layout_title),
                   value = homeScreenLayout,
@@ -1200,6 +1203,24 @@ object AppearancePreferencesScreen : Screen {
                 )
               }
 
+              if (isCinematic) {
+                val cinematicShowHeroSpotlight by browserPreferences.cinematicShowHeroSpotlight.collectAsState()
+                SwitchPreference(
+                  modifier = Modifier.settingsSearchTarget(R.string.pref_cinematic_show_hero_spotlight_title),
+                  value = cinematicShowHeroSpotlight,
+                  onValueChange = { browserPreferences.cinematicShowHeroSpotlight.set(it) },
+                  title = { Text(stringResource(R.string.pref_cinematic_show_hero_spotlight_title)) },
+                  summary = {
+                    Text(
+                      text = stringResource(R.string.pref_cinematic_show_hero_spotlight_summary),
+                      color = MaterialTheme.colorScheme.outline,
+                    )
+                  },
+                  groupIndex = tileIndex++,
+                  groupSize = bentoItemCount,
+                )
+              }
+
               val bentoFusionShowVideoRail by browserPreferences.bentoFusionShowVideoRail.collectAsState()
               SwitchPreference(
                 modifier = Modifier.settingsSearchTarget(R.string.pref_bentofusion_show_video_card_title),
@@ -1212,7 +1233,7 @@ object AppearancePreferencesScreen : Screen {
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
-                groupIndex = 1,
+                groupIndex = tileIndex++,
                 groupSize = bentoItemCount,
               )
 
@@ -1228,12 +1249,12 @@ object AppearancePreferencesScreen : Screen {
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
-                groupIndex = 2,
+                groupIndex = tileIndex++,
                 groupSize = bentoItemCount,
               )
 
               val audioPulsingProgressStyle by browserPreferences.audioPulsingProgressStyle.collectAsState()
-              ExpressivePreferenceTile(index = 3, itemCount = bentoItemCount) {
+              ExpressivePreferenceTile(index = tileIndex++, itemCount = bentoItemCount) {
                 ListPreference(
                   modifier = Modifier.settingsSearchTarget(R.string.pref_audio_pulsing_progress_style_title),
                   value = audioPulsingProgressStyle,
@@ -1257,7 +1278,7 @@ object AppearancePreferencesScreen : Screen {
               }
 
               val bentoFusionHeaderStyle by browserPreferences.bentoFusionHeaderStyle.collectAsState()
-              ExpressivePreferenceTile(index = 4, itemCount = bentoItemCount) {
+              ExpressivePreferenceTile(index = tileIndex++, itemCount = bentoItemCount) {
                 ListPreference(
                   modifier = Modifier.settingsSearchTarget(R.string.pref_bentofusion_header_style_title),
                   value = bentoFusionHeaderStyle,
@@ -1291,7 +1312,7 @@ object AppearancePreferencesScreen : Screen {
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
-                groupIndex = 5,
+                groupIndex = tileIndex++,
                 groupSize = bentoItemCount,
               )
 
@@ -1307,7 +1328,7 @@ object AppearancePreferencesScreen : Screen {
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
-                groupIndex = 6,
+                groupIndex = tileIndex++,
                 groupSize = bentoItemCount,
               )
             }

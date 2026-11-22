@@ -258,6 +258,7 @@ fun BentoFusionHeader(
   val bentoFusionHintDismissed by browserPreferences.bentoFusionHintDismissed.collectAsState()
   val showVideoRail by browserPreferences.bentoFusionShowVideoRail.collectAsState()
   val showAudioPulsing by browserPreferences.bentoFusionShowAudioPulsing.collectAsState()
+  val showCinematicSpotlight by browserPreferences.cinematicShowHeroSpotlight.collectAsState()
   val bentoFusionHeaderStyle by browserPreferences.bentoFusionHeaderStyle.collectAsState()
   val showMusicRail by browserPreferences.bentoFusionShowMusicRail.collectAsState()
   val sectionOrder by browserPreferences.bentoFusionSectionOrder.collectAsState()
@@ -495,6 +496,7 @@ fun BentoFusionHeader(
         showVideoRail = showVideoRail,
         showAudioPulsing = showAudioPulsing,
         showMusicRail = showMusicRail,
+        showSpotlight = showCinematicSpotlight,
         bentoFusionHeaderStyle = bentoFusionHeaderStyle,
         onPlayMedia = onPlayMedia,
         playAudioInBackground = { targetVideo, pos -> playAudioInBackground(targetVideo, pos) },
@@ -802,6 +804,7 @@ private fun CinematicHorizonContent(
   showVideoRail: Boolean = true,
   showAudioPulsing: Boolean = true,
   showMusicRail: Boolean = true,
+  showSpotlight: Boolean = true,
   bentoFusionHeaderStyle: BentoFusionHeaderStyle = BentoFusionHeaderStyle.LiquidCapsule,
   onPlayMedia: (Video, Double?, List<Video>) -> Unit,
   playAudioInBackground: (Video, Double?) -> Unit,
@@ -820,7 +823,7 @@ private fun CinematicHorizonContent(
     verticalArrangement = Arrangement.spacedBy(16.dp),
   ) {
     // 0. Panoramic Spotlight Hero Box
-    if (spotlightItem != null) {
+    if (showSpotlight && spotlightItem != null) {
       val video = spotlightItem.video
       val isSessionPlaying = remember(currentSessionItem, video) {
         matchesPlaybackItem(video, currentSessionItem)
