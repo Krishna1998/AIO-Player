@@ -1050,11 +1050,10 @@ private fun CinematicHorizonContent(
               savedPos
             }
 
-            Box(modifier = Modifier.padding(horizontal = 16.dp)) {
-              BentoHeroSpotlightCard(
-                item = heroToDisplay,
-                scale = audioPulsingScale,
-                onClick = {
+            BentoHeroSpotlightCard(
+              item = heroToDisplay,
+              scale = audioPulsingScale,
+              onClick = {
                   if (heroToDisplay.video.isAudio) {
                     if (isCurrentlyInSession) {
                       val currentPaused = isPaused ?: false
@@ -1127,7 +1126,6 @@ private fun CinematicHorizonContent(
                   }
                 },
               )
-            }
           }
         }
         "MUSIC" -> {
