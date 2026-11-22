@@ -290,8 +290,6 @@ object PlayerControlsPreferencesScreen : Screen {
                           SeekbarStyle.Liquid -> stringResource(R.string.pref_seekbar_style_liquid)
                           SeekbarStyle.CyberLaser -> stringResource(R.string.pref_seekbar_style_cyber_laser)
                           SeekbarStyle.FrostedCapsule -> stringResource(R.string.pref_seekbar_style_frosted_capsule)
-                          SeekbarStyle.SonicWaveform -> stringResource(R.string.pref_seekbar_style_sonic_waveform)
-                          SeekbarStyle.LiquidMercury -> stringResource(R.string.pref_seekbar_style_liquid_mercury)
                         }
                         Text(styleLabel)
                       }

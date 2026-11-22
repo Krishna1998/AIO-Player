@@ -18,6 +18,4 @@ enum class SeekbarStyle {
   Liquid,
   CyberLaser,
   FrostedCapsule,
-  SonicWaveform,
-  LiquidMercury,
 }

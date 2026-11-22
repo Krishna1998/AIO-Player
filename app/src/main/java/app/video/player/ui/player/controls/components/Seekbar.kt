@@ -617,8 +617,6 @@ private fun SeekbarContent(
       SeekbarStyle.Liquid -> liquidSeekbarTrackHeight(paused)
       SeekbarStyle.CyberLaser -> 6.dp
       SeekbarStyle.FrostedCapsule -> if (isVisuallyInteracting) 14.dp else 8.dp
-      SeekbarStyle.SonicWaveform -> 32.dp
-      SeekbarStyle.LiquidMercury -> 6.dp
     },
     animationSpec = spring(
       dampingRatio = AppMotion.Spatial.Expressive.dampingRatio,
@@ -835,30 +833,6 @@ private fun SeekbarContent(
         }
         SeekbarStyle.FrostedCapsule -> {
           FrostedCapsuleSeekbar(
-            positionProvider = positionProvider,
-            duration = duration,
-            chapters = chapters,
-            isPaused = paused,
-            isScrubbing = isVisuallyInteracting,
-            loopStart = loopStart,
-            loopEnd = loopEnd,
-            bufferDuration = bufferDuration,
-          )
-        }
-        SeekbarStyle.SonicWaveform -> {
-          SonicWaveformSeekbar(
-            positionProvider = positionProvider,
-            duration = duration,
-            chapters = chapters,
-            isPaused = paused,
-            isScrubbing = isVisuallyInteracting,
-            loopStart = loopStart,
-            loopEnd = loopEnd,
-            bufferDuration = bufferDuration,
-          )
-        }
-        SeekbarStyle.LiquidMercury -> {
-          LiquidMercurySeekbar(
             positionProvider = positionProvider,
             duration = duration,
             chapters = chapters,
@@ -2091,173 +2065,6 @@ private fun FrostedCapsuleSeekbar(
 }
 
 @Composable
-private fun SonicWaveformSeekbar(
-  positionProvider: () -> Float,
-  duration: Float,
-  chapters: ImmutableList<Segment>,
-  isPaused: Boolean,
-  isScrubbing: Boolean,
-  loopStart: Float? = null,
-  loopEnd: Float? = null,
-  bufferDuration: Float? = null,
-  modifier: Modifier = Modifier,
-) {
-  val primaryColor = MaterialTheme.colorScheme.primary
-  val secondaryColor = MaterialTheme.colorScheme.secondary
-  val (readAheadAlpha, emptyAlpha) = rememberSeekbarTrackAlphas()
-  val maxBarHeight = 32.dp
-
-  Canvas(modifier = modifier.fillMaxWidth().height(48.dp)) {
-    val totalWidth = size.width
-    val centerY = size.height / 2f
-    val currentPosition = positionProvider()
-    val progress = if (duration > 0f && currentPosition.isFinite()) (currentPosition / duration).coerceIn(0f, 1f) else 0f
-    val playedPx = totalWidth * progress
-    val maxH = maxBarHeight.toPx()
-
-    val barCount = 50
-    val barWidth = 3.dp.toPx()
-    val step = totalWidth / barCount
-
-    for (i in 0 until barCount) {
-      val x = i * step + step / 2f - barWidth / 2f
-      val norm = i.toFloat() / barCount.toFloat()
-      val envelope = sin(norm * PI.toFloat())
-      val noise = (sin(i * 1.3f) * 0.3f + sin(i * 2.7f) * 0.25f)
-      val barH = maxOf(4.dp.toPx(), (envelope * 0.7f + 0.3f + noise * 0.35f) * maxH)
-      val isPlayed = (x + barWidth) <= playedPx
-
-      val top = centerY - barH / 2f
-      val barColor = if (isPlayed) {
-        primaryColor
-      } else {
-        primaryColor.copy(alpha = emptyAlpha)
-      }
-
-      drawRoundRect(
-        color = barColor,
-        topLeft = Offset(x, top),
-        size = Size(barWidth, barH),
-        cornerRadius = CornerRadius(barWidth / 2f),
-      )
-    }
-
-    // Playhead needle indicator
-    val needleH = maxH + 8.dp.toPx()
-    val needleX = if (totalWidth > 0f) playedPx.coerceIn(0f, totalWidth) else 0f
-    drawLine(
-      color = Color.White,
-      start = Offset(needleX, centerY - needleH / 2f),
-      end = Offset(needleX, centerY + needleH / 2f),
-      strokeWidth = 2.5.dp.toPx(),
-      cap = StrokeCap.Round,
-    )
-    drawCircle(
-      color = primaryColor,
-      radius = 4.5.dp.toPx(),
-      center = Offset(needleX, centerY),
-    )
-  }
-}
-
-@Composable
-private fun LiquidMercurySeekbar(
-  positionProvider: () -> Float,
-  duration: Float,
-  chapters: ImmutableList<Segment>,
-  isPaused: Boolean,
-  isScrubbing: Boolean,
-  loopStart: Float? = null,
-  loopEnd: Float? = null,
-  bufferDuration: Float? = null,
-  modifier: Modifier = Modifier,
-) {
-  val primaryColor = MaterialTheme.colorScheme.primary
-  val secondaryColor = MaterialTheme.colorScheme.secondary
-  val (readAheadAlpha, emptyAlpha) = rememberSeekbarTrackAlphas()
-  val stretchFraction by animateFloatAsState(
-    targetValue = if (isScrubbing) 1.4f else 1.0f,
-    animationSpec = spring(
-      dampingRatio = AppMotion.Spatial.Expressive.dampingRatio,
-      stiffness = AppMotion.Spatial.Expressive.stiffness,
-    ),
-    label = "liquid_mercury_stretch",
-  )
-
-  Canvas(modifier = modifier.fillMaxWidth().height(48.dp)) {
-    val totalWidth = size.width
-    val centerY = size.height / 2f
-    val currentPosition = positionProvider()
-    val progress = if (duration > 0f && currentPosition.isFinite()) (currentPosition / duration).coerceIn(0f, 1f) else 0f
-    val playedPx = totalWidth * progress
-    val trackH = 5.dp.toPx()
-
-    // 1. Unplayed rail
-    drawLine(
-      color = primaryColor.copy(alpha = emptyAlpha),
-      start = Offset(playedPx, centerY),
-      end = Offset(totalWidth, centerY),
-      strokeWidth = trackH,
-      cap = StrokeCap.Round,
-    )
-
-    // 2. Buffer range
-    if (bufferDuration != null && bufferDuration > 0f && duration > 0f) {
-      val bufferPx = bufferedEndPx(bufferDuration, duration, totalWidth, playedPx)
-      if (bufferPx > playedPx) {
-        drawLine(
-          color = primaryColor.copy(alpha = readAheadAlpha),
-          start = Offset(playedPx, centerY),
-          end = Offset(bufferPx, centerY),
-          strokeWidth = trackH,
-          cap = StrokeCap.Round,
-        )
-      }
-    }
-
-    // 3. Liquid Mercury Stream
-    if (playedPx > 0f) {
-      drawLine(
-        brush = Brush.horizontalGradient(
-          colors = listOf(primaryColor, secondaryColor),
-          startX = 0f,
-          endX = playedPx,
-        ),
-        start = Offset(0f, centerY),
-        end = Offset(playedPx, centerY),
-        strokeWidth = trackH,
-        cap = StrokeCap.Round,
-      )
-    }
-
-    // 4. Elastic Liquid Droplet Thumb
-    val baseR = 7.dp.toPx()
-    val rx = baseR * stretchFraction
-    val ry = baseR / (stretchFraction * 0.7f).coerceAtLeast(0.7f)
-    val thumbCenter = Offset(if (totalWidth > rx * 2f) playedPx.coerceIn(rx, totalWidth - rx) else totalWidth / 2f, centerY)
-
-    // Glow halo
-    drawCircle(
-      color = primaryColor.copy(alpha = 0.35f),
-      radius = rx + 3.dp.toPx(),
-      center = thumbCenter,
-    )
-    // Droplet body (ellipse)
-    drawOval(
-      color = primaryColor,
-      topLeft = Offset(thumbCenter.x - rx, thumbCenter.y - ry),
-      size = Size(rx * 2f, ry * 2f),
-    )
-    // 3D Specular reflection highlight arc
-    drawOval(
-      color = Color.White.copy(alpha = 0.75f),
-      topLeft = Offset(thumbCenter.x - rx * 0.5f, thumbCenter.y - ry * 0.5f),
-      size = Size(rx * 0.6f, ry * 0.45f),
-    )
-  }
-}
-
-@Composable
 fun SeekbarStylePreview(
   style: SeekbarStyle,
   progress: Float = 0.38f,
@@ -2511,69 +2318,6 @@ fun SeekbarStylePreview(
             center = Offset(playedPx.coerceIn(thumbR, size.width - thumbR), centerY),
           )
         }
-        SeekbarStyle.SonicWaveform -> {
-          val maxH = 26.dp.toPx()
-          val barCount = 45
-          val barWidth = 3.dp.toPx()
-          val step = size.width / barCount
-          for (i in 0 until barCount) {
-            val x = i * step + step / 2f - barWidth / 2f
-            val norm = i.toFloat() / barCount.toFloat()
-            val envelope = sin(norm * PI.toFloat())
-            val noise = (sin(i * 1.3f) * 0.3f + sin(i * 2.7f) * 0.25f)
-            val barH = maxOf(4.dp.toPx(), (envelope * 0.7f + 0.3f + noise * 0.35f) * maxH)
-            val isPlayed = (x + barWidth) <= playedPx
-            drawRoundRect(
-              color = if (isPlayed) primaryColor else primaryColor.copy(alpha = emptyAlpha),
-              topLeft = Offset(x, centerY - barH / 2f),
-              size = Size(barWidth, barH),
-              cornerRadius = CornerRadius(barWidth / 2f),
-            )
-          }
-          drawLine(
-            color = Color.White,
-            start = Offset(playedPx, centerY - maxH / 2f - 4.dp.toPx()),
-            end = Offset(playedPx, centerY + maxH / 2f + 4.dp.toPx()),
-            strokeWidth = 2.5.dp.toPx(),
-            cap = StrokeCap.Round,
-          )
-        }
-        SeekbarStyle.LiquidMercury -> {
-          val trackH = 5.dp.toPx()
-          drawLine(
-            color = primaryColor.copy(alpha = emptyAlpha),
-            start = Offset(playedPx, centerY),
-            end = Offset(size.width, centerY),
-            strokeWidth = trackH,
-            cap = StrokeCap.Round,
-          )
-          if (playedPx > 0f) {
-            drawLine(
-              brush = Brush.horizontalGradient(
-                colors = listOf(primaryColor, secondaryColor),
-                startX = 0f,
-                endX = playedPx,
-              ),
-              start = Offset(0f, centerY),
-              end = Offset(playedPx, centerY),
-              strokeWidth = trackH,
-              cap = StrokeCap.Round,
-            )
-          }
-          val rx = 9.dp.toPx()
-          val ry = 6.dp.toPx()
-          val thumbCenter = Offset(playedPx.coerceIn(rx, size.width - rx), centerY)
-          drawOval(
-            color = primaryColor,
-            topLeft = Offset(thumbCenter.x - rx, thumbCenter.y - ry),
-            size = Size(rx * 2f, ry * 2f),
-          )
-          drawOval(
-            color = Color.White.copy(alpha = 0.75f),
-            topLeft = Offset(thumbCenter.x - rx * 0.5f, thumbCenter.y - ry * 0.5f),
-            size = Size(rx * 0.6f, ry * 0.45f),
-          )
-        }
         SeekbarStyle.Wavy,
         SeekbarStyle.Liquid -> {
           // Handled in parent branch
@@ -2649,8 +2393,6 @@ fun SeekbarStyleLivePreview(
         SeekbarStyle.Liquid -> stringResource(R.string.pref_seekbar_style_liquid)
         SeekbarStyle.CyberLaser -> stringResource(R.string.pref_seekbar_style_cyber_laser)
         SeekbarStyle.FrostedCapsule -> stringResource(R.string.pref_seekbar_style_frosted_capsule)
-        SeekbarStyle.SonicWaveform -> stringResource(R.string.pref_seekbar_style_sonic_waveform)
-        SeekbarStyle.LiquidMercury -> stringResource(R.string.pref_seekbar_style_liquid_mercury)
       }
       Text(
         text = styleLabel,
