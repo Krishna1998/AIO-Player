@@ -37,6 +37,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
+import app.video.player.ui.liquidglass.appGlassSurface
+import app.video.player.ui.liquidglass.liquidGlassActive
+import app.video.player.ui.theme.LocalAppWallpaperActive
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -120,15 +126,30 @@ object SettingsSearchScreen : Screen {
       searchHistoryPref.set("")
     }
 
+    val glassActive = liquidGlassActive()
+    val wallpaperActive = LocalAppWallpaperActive.current
+
     Scaffold(
-      
       containerColor = wallpaperAwareBackgroundColor(),
       topBar = {
         TopAppBar(
+          modifier = if (glassActive) {
+            Modifier.appGlassSurface(
+              shape = RectangleShape,
+              containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.82f),
+              enabled = true,
+            )
+          } else Modifier,
+          colors = if (glassActive || wallpaperActive) {
+            TopAppBarDefaults.topAppBarColors(
+              containerColor = Color.Transparent,
+            )
+          } else TopAppBarDefaults.topAppBarColors(),
           title = {
             Text(
               text = stringResource(R.string.settings_search_title),
               style = emphasizedTypography.headlineSmall,
+              fontWeight = FontWeight.ExtraBold,
               color = MaterialTheme.colorScheme.primary,
             )
           },
@@ -136,7 +157,7 @@ object SettingsSearchScreen : Screen {
             IconButton(onClick = { backstack.popSafely() }) {
               Icon(
                 Icons.RoundedFilled.ArrowBack,
-                contentDescription = null,
+                contentDescription = stringResource(R.string.back),
                 tint = MaterialTheme.colorScheme.secondary,
               )
             }
