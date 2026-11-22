@@ -25,7 +25,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -229,18 +230,58 @@ object PreferencesScreen : Screen {
               )
             }
           },
-          actions = {
-            IconButton(
-              onClick = { backstack.navigateTo(SettingsSearchScreen) },
+        )
+      },
+      bottomBar = {
+        // Samsung One UI style floating bottom search bar for effortless one-handed reach
+        Box(
+          modifier =
+            Modifier
+              .fillMaxWidth()
+              .padding(horizontal = 20.dp, vertical = 12.dp)
+              .navigationBarsPadding(),
+          contentAlignment = Alignment.Center,
+        ) {
+          Surface(
+            modifier =
+              Modifier
+                .widthIn(max = 520.dp)
+                .fillMaxWidth()
+                .height(48.dp)
+                .clip(RoundedCornerShape(24.dp))
+                .clickable { backstack.navigateTo(SettingsSearchScreen) },
+            shape = RoundedCornerShape(24.dp),
+            color = if (wallpaperActive) {
+              colorScheme.surfaceContainerHigh.copy(alpha = 0.72f)
+            } else {
+              colorScheme.surfaceContainerHigh
+            },
+            tonalElevation = 6.dp,
+            shadowElevation = 8.dp,
+            border = androidx.compose.foundation.BorderStroke(
+              width = 1.dp,
+              color = colorScheme.outlineVariant.copy(alpha = 0.45f),
+            ),
+          ) {
+            Row(
+              modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
               Icon(
                 Icons.RoundedFilled.Search,
                 contentDescription = stringResource(R.string.generic_search),
                 tint = colorScheme.primary,
+                modifier = Modifier.size(20.dp),
+              )
+              Text(
+                text = stringResource(R.string.settings_search_hint),
+                style = MaterialTheme.typography.bodyMedium,
+                color = colorScheme.onSurfaceVariant,
               )
             }
-          },
-        )
+          }
+        }
       },
     ) { padding ->
       LazyColumn(
@@ -250,7 +291,7 @@ object PreferencesScreen : Screen {
             .tvContentFocus()
             .padding(padding),
         // Keep the settings page full-height and let its list scroll clear of any
-        // transient mini-player overlay without clipping the entire screen.
+        // transient mini-player overlay and floating bottom search bar without clipping the entire screen.
         contentPadding = PaddingValues(bottom = 28.dp + LocalNavigationBarHeight.current),
         verticalArrangement = Arrangement.spacedBy(4.dp),
       ) {
