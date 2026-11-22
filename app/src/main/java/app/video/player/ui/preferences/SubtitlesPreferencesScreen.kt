@@ -9,6 +9,7 @@
 
 package app.video.player.ui.preferences
 
+import app.video.player.ui.theme.wallpaperAwareBackgroundColor
 import android.content.Intent
 import android.net.Uri
 import app.video.player.ui.components.AppToast as Toast
@@ -137,6 +138,8 @@ object SubtitlesPreferencesScreen : Screen {
       }
 
     Scaffold(
+      
+      containerColor = wallpaperAwareBackgroundColor(),
       contentWindowInsets = settingsContentWindowInsets(),
       topBar = {
         SettingsTopAppBar(

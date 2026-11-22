@@ -9,6 +9,7 @@
 
 package app.video.player.ui.preferences
 
+import app.video.player.ui.theme.wallpaperAwareBackgroundColor
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -250,6 +251,8 @@ object AdvancedPreferencesScreen : Screen {
     }
 
     Scaffold(
+      
+      containerColor = wallpaperAwareBackgroundColor(),
       topBar = {
         SettingsTopAppBar(
           title = stringResource(R.string.pref_advanced),

@@ -9,6 +9,7 @@
 
 package app.video.player.ui.preferences
 
+import app.video.player.ui.theme.wallpaperAwareBackgroundColor
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -71,6 +72,8 @@ object GesturePreferencesScreen : Screen {
     var customSeekValue by remember { mutableStateOf("") }
 
     Scaffold(
+      
+      containerColor = wallpaperAwareBackgroundColor(),
       contentWindowInsets = settingsContentWindowInsets(),
       topBar = {
         SettingsTopAppBar(

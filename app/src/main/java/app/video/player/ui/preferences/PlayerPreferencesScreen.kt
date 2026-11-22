@@ -9,6 +9,7 @@
 
 package app.video.player.ui.preferences
 
+import app.video.player.ui.theme.wallpaperAwareBackgroundColor
 import android.Manifest
 import android.content.ComponentName
 import android.content.pm.PackageManager
@@ -87,6 +88,8 @@ object PlayerPreferencesScreen : Screen {
         contract = ActivityResultContracts.RequestPermission(),
       ) { _ -> }
     Scaffold(
+      
+      containerColor = wallpaperAwareBackgroundColor(),
       contentWindowInsets = settingsContentWindowInsets(),
       topBar = {
         SettingsTopAppBar(

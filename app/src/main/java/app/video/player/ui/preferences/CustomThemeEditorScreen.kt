@@ -9,6 +9,7 @@
 
 package app.video.player.ui.preferences
 
+import app.video.player.ui.theme.wallpaperAwareBackgroundColor
 import android.graphics.Color as AndroidColor
 import app.video.player.ui.components.ExpressiveColorPicker
 import androidx.compose.foundation.background
@@ -145,6 +146,8 @@ data class CustomThemeEditorScreen(
       )
 
     Scaffold(
+      
+      containerColor = wallpaperAwareBackgroundColor(),
       topBar = {
         TopAppBar(
           title = {

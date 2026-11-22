@@ -9,6 +9,7 @@
 
 package app.video.player.ui.preferences
 
+import app.video.player.ui.theme.wallpaperAwareBackgroundColor
 import app.video.player.ui.tv.tvContentFocus
 
 import app.video.player.ui.theme.rememberConnectedShape
@@ -157,6 +158,8 @@ object LuaScriptsScreen : Screen {
     }
 
     Scaffold(
+      
+      containerColor = wallpaperAwareBackgroundColor(),
       topBar = {
         TopAppBar(
           title = {

@@ -1,5 +1,6 @@
 package app.video.player.ui.preferences
 
+import app.video.player.ui.theme.wallpaperAwareBackgroundColor
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -93,6 +94,8 @@ object VideoSwipePreferencesScreen : Screen {
     var editingRight by rememberSaveable { mutableStateOf<Boolean?>(null) }
 
     Scaffold(
+      
+      containerColor = wallpaperAwareBackgroundColor(),
       topBar = {
         TopAppBar(
           title = {

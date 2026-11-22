@@ -9,6 +9,7 @@
 
 package app.video.player.ui.preferences
 
+import app.video.player.ui.theme.wallpaperAwareBackgroundColor
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -120,6 +121,8 @@ object SettingsSearchScreen : Screen {
     }
 
     Scaffold(
+      
+      containerColor = wallpaperAwareBackgroundColor(),
       topBar = {
         TopAppBar(
           title = {

@@ -9,6 +9,7 @@
 
 package app.video.player.ui.preferences
 
+import app.video.player.ui.theme.wallpaperAwareBackgroundColor
 import android.content.Context
 import android.media.MediaCodecInfo
 import android.media.MediaCodecList
@@ -608,6 +609,8 @@ object CodecCapabilitiesScreen : Screen {
     }
 
     Scaffold(
+      
+      containerColor = wallpaperAwareBackgroundColor(),
       topBar = {
         TopAppBar(
           title = {

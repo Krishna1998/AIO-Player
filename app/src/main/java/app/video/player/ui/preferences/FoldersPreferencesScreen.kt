@@ -11,6 +11,7 @@
 
 package app.video.player.ui.preferences
 
+import app.video.player.ui.theme.wallpaperAwareBackgroundColor
 import android.app.Application
 import android.content.Context
 import android.content.Intent
@@ -289,6 +290,8 @@ object FoldersPreferencesScreen : Screen {
     val mediaGroupSize = mediaGroupOffset + HIDDEN_SCAN_ROW_COUNT + SCAN_FILTER_ROW_COUNT
 
     Scaffold(
+      
+      containerColor = wallpaperAwareBackgroundColor(),
       topBar = {
         BrowserTopBar(
           title = stringResource(R.string.pref_folders_title),
@@ -658,6 +661,8 @@ object FolderBlacklistScreen : Screen {
     BackHandler(enabled = selectionState.isInSelectionMode) { selectionState = selectionState.clear() }
 
     Scaffold(
+      
+      containerColor = wallpaperAwareBackgroundColor(),
       topBar = {
         BrowserTopBar(
           title = stringResource(R.string.pref_blacklist_title),
@@ -802,6 +807,8 @@ object FolderWhitelistScreen : Screen {
     }
 
     Scaffold(
+      
+      containerColor = wallpaperAwareBackgroundColor(),
       topBar = {
         BrowserTopBar(
           title = stringResource(R.string.pref_whitelist_title),

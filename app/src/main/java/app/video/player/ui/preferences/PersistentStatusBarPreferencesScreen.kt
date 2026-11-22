@@ -3,6 +3,7 @@
  */
 package app.video.player.ui.preferences
 
+import app.video.player.ui.theme.wallpaperAwareBackgroundColor
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -68,6 +69,8 @@ object PersistentStatusBarPreferencesScreen : Screen {
     val embeddedInPlayer = LocalPlayerSettingsPanel.current
 
     Scaffold(
+      
+      containerColor = wallpaperAwareBackgroundColor(),
       contentWindowInsets = settingsContentWindowInsets(),
       topBar = {
         SettingsTopAppBar(

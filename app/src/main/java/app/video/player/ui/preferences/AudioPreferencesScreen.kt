@@ -9,6 +9,7 @@
 
 package app.video.player.ui.preferences
 
+import app.video.player.ui.theme.wallpaperAwareBackgroundColor
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -86,6 +87,8 @@ object AudioPreferencesScreen : Screen {
     val immersiveArtwork by preferences.immersiveArtwork.collectAsState()
 
     Scaffold(
+      
+      containerColor = wallpaperAwareBackgroundColor(),
       contentWindowInsets = settingsContentWindowInsets(),
       topBar = {
         SettingsTopAppBar(

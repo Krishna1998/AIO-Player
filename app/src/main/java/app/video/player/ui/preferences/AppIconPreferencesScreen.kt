@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: AGPL-3.0-or-later */
 package app.video.player.ui.preferences
 
+import app.video.player.ui.theme.wallpaperAwareBackgroundColor
 import android.app.Activity
 import android.widget.ImageView
 import androidx.compose.animation.AnimatedContent
@@ -102,6 +103,8 @@ object AppIconPreferencesScreen : Screen {
     }
 
     Scaffold(
+      
+      containerColor = wallpaperAwareBackgroundColor(),
       topBar = {
         SettingsTopAppBar(
           title = stringResource(R.string.pref_app_icon_title),

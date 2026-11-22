@@ -9,6 +9,7 @@
 
 package app.video.player.ui.preferences
 
+import app.video.player.ui.theme.wallpaperAwareBackgroundColor
 import android.app.Activity
 import app.video.player.ui.components.AppToast as Toast
 import app.video.player.ui.components.AppToastType
@@ -259,6 +260,8 @@ object AppearancePreferencesScreen : Screen {
     }
 
     Scaffold(
+      
+      containerColor = wallpaperAwareBackgroundColor(),
       topBar = {
         SettingsTopAppBar(
           title = stringResource(R.string.pref_appearance_title),

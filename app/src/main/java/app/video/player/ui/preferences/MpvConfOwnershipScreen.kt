@@ -9,6 +9,7 @@
 
 package app.video.player.ui.preferences
 
+import app.video.player.ui.theme.wallpaperAwareBackgroundColor
 import app.video.player.ui.tv.tvContentFocus
 
 import app.video.player.ui.theme.rememberConnectedShape
@@ -89,6 +90,8 @@ object MpvConfOwnershipScreen : Screen {
     fun apply(selection: Set<String>) = preferences.mpvConfOverrides.set(selection)
 
     Scaffold(
+      
+      containerColor = wallpaperAwareBackgroundColor(),
       topBar = {
         SettingsTopAppBar(
           title = stringResource(R.string.pref_mpv_conf_overrides_title),

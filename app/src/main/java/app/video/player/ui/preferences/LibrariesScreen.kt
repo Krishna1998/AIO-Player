@@ -4,6 +4,7 @@
 
 package app.video.player.ui.preferences
 
+import app.video.player.ui.theme.wallpaperAwareBackgroundColor
 import app.video.player.ui.tv.tvContentFocus
 
 import android.content.Intent
@@ -68,6 +69,8 @@ object LibrariesScreen : Screen {
     }
 
     Scaffold(
+      
+      containerColor = wallpaperAwareBackgroundColor(),
       topBar = {
         SettingsTopAppBar(
           title = stringResource(R.string.pref_about_oss_libraries),
