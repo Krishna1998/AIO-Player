@@ -432,6 +432,12 @@ object PreferencesScreen : Screen {
         items =
           listOf(
             SettingsDestination(
+              title = stringResource(R.string.pref_section_updates),
+              summary = stringResource(R.string.ui_check_for_updates_now),
+              icon = Icons.RoundedFilled.Sync,
+              screen = UpdatePreferencesScreen,
+            ),
+            SettingsDestination(
               title = stringResource(R.string.pref_about_title),
               summary = stringResource(R.string.pref_about_summary),
               icon = Icons.RoundedFilled.Info,

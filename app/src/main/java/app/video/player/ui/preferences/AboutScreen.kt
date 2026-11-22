@@ -330,59 +330,6 @@ object AboutScreen : Screen {
           }
         }
 
-        val updateViewModel = LocalUpdateViewModel.current
-        if (updateViewModel != null) {
-          Spacer(Modifier.height(8.dp))
-          PreferenceSectionHeader(
-            position = PreferenceSectionPosition.Single,
-            title = stringResource(R.string.pref_section_updates),
-          )
-          val isAutoUpdate by updateViewModel.isAutoUpdateEnabled.collectAsState()
-          val updateChannel by updateViewModel.updateChannel.collectAsState()
-          val updateState by updateViewModel.uiState.collectAsState()
-
-          PreferenceCard {
-            AppPreference(
-              title = { Text(stringResource(R.string.ui_check_for_updates_now)) },
-              summary = {
-                Text(
-                  text = when {
-                    updateState.checking -> stringResource(R.string.ui_check_for_updates_now) + "…"
-                    updateState.readyToInstall -> stringResource(R.string.update_ready_to_install)
-                    updateState.release != null -> stringResource(R.string.update_available)
-                    else -> stringResource(R.string.ui_already_using_latest_version)
-                  },
-                  color = MaterialTheme.colorScheme.outline,
-                )
-              },
-              icon = {
-                Icon(
-                  imageVector = Icons.RoundedFilled.Refresh,
-                  contentDescription = null,
-                )
-              },
-              action = PreferenceAction.Dialog,
-              onClick = {
-                updateViewModel.showPendingUpdate()
-              },
-            )
-
-            PreferenceDivider()
-
-            SwitchPreference(
-              value = isAutoUpdate,
-              onValueChange = { updateViewModel.toggleAutoUpdate(it) },
-              title = { Text(stringResource(R.string.ui_auto_check_for_updates)) },
-              summary = {
-                Text(
-                  text = stringResource(R.string.ui_check_on_startup),
-                  color = MaterialTheme.colorScheme.outline,
-                )
-              },
-            )
-          }
-        }
-
         Spacer(Modifier.height(8.dp))
 
         // System Stats Section
