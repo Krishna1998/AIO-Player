@@ -998,7 +998,6 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
       }
     }
   }
-}
 
 @Composable
 private fun ProgressiveNavigationBackdrop(
