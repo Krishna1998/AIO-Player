@@ -1143,6 +1143,7 @@ internal fun ExpressivePillNavigationBar(
   val primaryColor = MaterialTheme.colorScheme.primary
   val secondaryColor = MaterialTheme.colorScheme.secondary
   val tertiaryColor = MaterialTheme.colorScheme.tertiary
+  val selectedSurface = if (isDarkTheme) Color.White.copy(alpha = 0.22f) else accentColor.copy(alpha = 0.16f)
 
   val tabRow: @Composable (Boolean) -> Unit = { active ->
       Row(
