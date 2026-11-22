@@ -169,12 +169,14 @@ class MPVPipHelper(
       ?: return if (activity.isInPictureInPictureMode) lastAspectRatio else null
     if (width <= 0 || height <= 0) return if (activity.isInPictureInPictureMode) lastAspectRatio else null
 
-    val sourceAspect = PlaybackSession.propDouble["video-params/aspect"].value
+    val aspectOverride = PlaybackSession.getPropertyDouble("video-aspect-override")
+      ?.takeIf { it.isFinite() && it > 0.0 }
+    val baseAspect = aspectOverride ?: PlaybackSession.propDouble["video-params/aspect"].value
       ?.takeIf { it.isFinite() && it > 0.0 }
       ?: PlaybackSession.getPropertyDouble("video-params/aspect")?.takeIf { it.isFinite() && it > 0.0 }
       ?: (width.toDouble() / height.toDouble())
     val rotation = (PlaybackSession.getPropertyInt("video-params/rotate") ?: 0).mod(360)
-    val displayedAspect = if (rotation == 90 || rotation == 270) 1.0 / sourceAspect else sourceAspect
+    val displayedAspect = if (rotation == 90 || rotation == 270) 1.0 / baseAspect else baseAspect
     if (!displayedAspect.isFinite() || displayedAspect !in 0.5..2.39) {
       return if (activity.isInPictureInPictureMode) lastAspectRatio else null
     }

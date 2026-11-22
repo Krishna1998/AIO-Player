@@ -4,7 +4,9 @@
 
 package app.video.player.ui.player
 
+import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintLayout
 import app.video.player.preferences.PlayerPreferences
@@ -27,6 +29,17 @@ class StretchAwarePlayerLayout @JvmOverloads constructor(
 ) : ConstraintLayout(context, attrs, defStyleAttr), KoinComponent {
   private val playerPreferences: PlayerPreferences by inject()
 
+  private fun findActivity(): Activity? {
+    var cur = context
+    while (cur is ContextWrapper) {
+      if (cur is Activity) return cur
+      val base = cur.baseContext
+      if (base === cur) break
+      cur = base
+    }
+    return cur as? Activity
+  }
+
   override fun onSizeChanged(
     w: Int,
     h: Int,
@@ -36,8 +49,13 @@ class StretchAwarePlayerLayout @JvmOverloads constructor(
     super.onSizeChanged(w, h, oldw, oldh)
     if (w <= 0 || h <= 0 || (w == oldw && h == oldh)) return
 
+    // Never recalculate Stretch ratio while in Picture-in-Picture mode or if activity is finishing.
+    // Screen lock/unlock or PiP window resizing must not corrupt video-aspect-override with PiP/portrait dimensions.
+    if (findActivity()?.isInPictureInPictureMode == true) return
+
     // Run after the new orientation's surface/layout size has settled.
     post {
+      if (findActivity()?.isInPictureInPictureMode == true) return@post
       if (!PlaybackSession.isInitialized) return@post
       if (playerPreferences.lastCustomAspectRatio.get() > 0f) return@post
       if (playerPreferences.lastVideoAspect.get() != VideoAspect.Stretch) return@post
