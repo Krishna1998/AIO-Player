@@ -73,7 +73,7 @@ class AppearancePreferences(
   val customWallpaperZoom = preferenceStore.getFloat("custom_wallpaper_zoom", 1f)
   val customWallpaperOffsetX = preferenceStore.getFloat("custom_wallpaper_offset_x", 0f)
   val customWallpaperOffsetY = preferenceStore.getFloat("custom_wallpaper_offset_y", 0f)
-  val customWallpaperScaleMode = preferenceStore.getEnum("custom_wallpaper_scale_mode", WallpaperScaleMode.Fit)
+  val customWallpaperScaleMode = preferenceStore.getEnum("custom_wallpaper_scale_mode", WallpaperScaleMode.Fill)
   val customWallpaperBlur = preferenceStore.getFloat("custom_wallpaper_blur", 0f)
   val customWallpaperAlpha = preferenceStore.getFloat("custom_wallpaper_alpha", 1f)
   val customWallpaperUseColors = preferenceStore.getBoolean("custom_wallpaper_use_colors", false)

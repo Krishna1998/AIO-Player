@@ -130,7 +130,7 @@ fun AppWallpaperHost(content: @Composable () -> Unit) {
     ) {
       if (isWallpaperActive) {
         val blurModifier = if (wallpaperBlur > 0f) Modifier.blur(wallpaperBlur.dp) else Modifier
-        val contentScale = if (wallpaperScaleMode == WallpaperScaleMode.Fill) ContentScale.Crop else ContentScale.Fit
+        val contentScale = if (wallpaperScaleMode == WallpaperScaleMode.Fit) ContentScale.Fit else ContentScale.Crop
 
         if (activePreset != null && activePreset.gradientColors.isNotEmpty()) {
           Box(
@@ -140,6 +140,17 @@ fun AppWallpaperHost(content: @Composable () -> Unit) {
               .background(Brush.linearGradient(activePreset.gradientColors)),
           )
         } else if (customBitmap != null) {
+          // If the user selected Fit mode, render a blurred ambient fill behind it to avoid harsh black bars
+          if (wallpaperScaleMode == WallpaperScaleMode.Fit) {
+            Image(
+              bitmap = customBitmap!!.asImageBitmap(),
+              contentDescription = null,
+              contentScale = ContentScale.Crop,
+              modifier = Modifier
+                .fillMaxSize()
+                .blur(32.dp),
+            )
+          }
           Image(
             bitmap = customBitmap!!.asImageBitmap(),
             contentDescription = null,
