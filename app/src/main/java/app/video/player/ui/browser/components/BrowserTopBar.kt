@@ -299,15 +299,14 @@ private fun NormalTopBar(
 ) {
   val preferences = koinInject<AppearancePreferences>()
   val isMainTabPage = app.video.player.ui.browser.LocalIsMainTabPage.current
-  val legacyNavigationBar by preferences.legacyNavigationBar.collectAsState()
   val showProfileTab by preferences.showProfileTab.collectAsState()
   val showNetworkTab by preferences.showNetworkTab.collectAsState()
   val isOnlyHomeFilesTab = !showProfileTab && !showNetworkTab
-  val showTopBarSearch = legacyNavigationBar || !isMainTabPage || isOnlyHomeFilesTab
+  val showTopBarSearch = !isMainTabPage || isOnlyHomeFilesTab
   val profileName by preferences.profileName.collectAsState()
   val profileImagePath by preferences.profileImagePath.collectAsState()
   val profileAvatar = rememberProfileAvatar(profileImagePath)
-  val isProfileActiveInNavBar = !legacyNavigationBar && showProfileTab
+  val isProfileActiveInNavBar = showProfileTab
   val showProfilePictureInSettings = profileAvatar != null && !isProfileActiveInNavBar
   val appName = stringResource(R.string.app_name)
   val effectiveTitle = if (title == appName && profileName.isNotBlank()) profileName else title

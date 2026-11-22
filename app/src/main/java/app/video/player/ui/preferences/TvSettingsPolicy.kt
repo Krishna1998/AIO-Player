@@ -54,7 +54,6 @@ internal object TvSettingsPolicy {
     R.string.pref_quick_play_fab_direct_title,
     R.string.navbar_glow_title,
     R.string.pref_hide_navigation_bar_labels_title,
-    R.string.legacy_navigation_bar_title,
     R.string.progressive_navigation_blur_title,
     R.string.pref_custom_buttons_title,
     R.string.show_splash_ovals_on_double_tap_to_seek,

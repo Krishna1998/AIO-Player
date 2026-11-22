@@ -680,7 +680,6 @@ open class MainActivity : AppCompatActivity() {
       }
     }
     val liquidGlassEnabled by appearancePreferences.liquidGlassEnabled.collectAsState()
-    val legacyNavigationBar by appearancePreferences.legacyNavigationBar.collectAsState()
     val musicSheet = LocalInAppMusicSheet.current
 
     // Provide both LocalBackStack, LocalUpdateViewModel and the LazyList/Grid states to all screens
@@ -706,7 +705,7 @@ open class MainActivity : AppCompatActivity() {
           val leftInset = with(density) { safeInsets.getLeft(density, layoutDirection).toDp() }
           val rightInset = with(density) { safeInsets.getRight(density, layoutDirection).toDp() }
           val isMainScreen = typedBackstack.lastOrNull() == MainScreen
-          val isDualPane = isMainScreen && !legacyNavigationBar && NavigationBarState.isDualPaneLayout
+          val isDualPane = isMainScreen && NavigationBarState.isDualPaneLayout
           val isNavBarVisible = isMainScreen && NavigationBarState.isNavBarVisible
           val spacing = NavigationBarState.floatingBarSpacing
           val dockedPlayer = false
@@ -722,7 +721,7 @@ open class MainActivity : AppCompatActivity() {
           val dockStart = if (layoutDirection == LayoutDirection.Ltr) dockLeft
             else maxWidth - dockLeft - NavigationBarState.navbarWidth
           val besideStartSpacing = (navigationStart + NavigationBarState.navbarWidth + spacing).coerceAtLeast(spacing)
-          val besideNavigation = !dockedPlayer && isNavBarVisible && !legacyNavigationBar && !isDualPane &&
+          val besideNavigation = !dockedPlayer && isNavBarVisible && !isDualPane &&
             NavigationBarState.canPlaceMiniPlayerBesideNavigation(maxWidth - leftInset - rightInset) &&
             maxWidth - leftInset - rightInset - besideStartSpacing - spacing >= NavigationBarState.miniPlayerMinWidth
           SideEffect {

@@ -1376,10 +1376,6 @@ object SearchablePreferences {
           listOf("navigation", "navbar", "hide labels", "labels", "text", "names", "icons"),
         ),
         SearchEntrySpec(
-          R.string.legacy_navigation_bar_title,
-          listOf("legacy", "classic", "bottom", "navigation", "mpvex"),
-        ),
-        SearchEntrySpec(
           R.string.progressive_navigation_blur_title,
           listOf("haze", "blur", "progressive", "navigation", "navbar"),
         ),

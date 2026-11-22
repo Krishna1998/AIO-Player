@@ -247,7 +247,6 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
     val showProfileTab by appearancePreferences.showProfileTab.collectAsState()
     val showNetworkTab by appearancePreferences.showNetworkTab.collectAsState()
     val liquidGlassEnabled by appearancePreferences.liquidGlassEnabled.collectAsState()
-    val legacyNavigationBar by appearancePreferences.legacyNavigationBar.collectAsState()
     val progressiveNavigationBlur by appearancePreferences.progressiveNavigationBlur.collectAsState()
     val appBackgroundBackdrop = LocalAppBackgroundBackdrop.current
     val backdropBackgroundColor = MaterialTheme.colorScheme.background
@@ -314,8 +313,7 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
     SideEffect {
       NavigationBarState.isNavBarVisible = backStack.lastOrNull() == MainScreen && showBottomNavigation
       NavigationBarState.dockBackdrop = liquidLayerBackdrop
-      NavigationBarState.navigationBarBottomSpacing =
-        if (legacyNavigationBar) 0.dp else NavigationBarState.floatingBarSpacing
+      NavigationBarState.navigationBarBottomSpacing = NavigationBarState.floatingBarSpacing
     }
 
     val coroutineScope = rememberCoroutineScope()
@@ -511,28 +509,19 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
     val navigationBackdrop = rememberHazeState()
 
     val mainNavBar = @Composable { modifier: Modifier ->
-      if (legacyNavigationBar) {
-        LegacyMaterialNavigationBar(
-          visibleTabs = navigationTabs,
-          selectedTab = selectedTab,
-          onTabSelected = onTabSelected,
-          modifier = modifier,
-        )
-      } else {
-        ExpressivePillNavigationBar(
-          visibleTabs = navigationTabs,
-          selectedTab = selectedTab,
-          onTabSelected = onTabSelected,
-          pagerState = pagerState,
-          hazeBackdrop = navigationBackdrop,
-          kyantBackdrop = liquidNavigationBackdrop,
-          liquidGlassEnabled = liquidGlassEnabled,
-          modifier = modifier,
-        )
-      }
+      ExpressivePillNavigationBar(
+        visibleTabs = navigationTabs,
+        selectedTab = selectedTab,
+        onTabSelected = onTabSelected,
+        pagerState = pagerState,
+        hazeBackdrop = navigationBackdrop,
+        kyantBackdrop = liquidNavigationBackdrop,
+        liquidGlassEnabled = liquidGlassEnabled,
+        modifier = modifier,
+      )
     }
 
-    val isDualPaneLayout = !legacyNavigationBar && !isPermissionDenied &&
+    val isDualPaneLayout = !isPermissionDenied &&
       isDualPaneFolderSelected && selectedTab == MainTab.HOME
     SideEffect {
       NavigationBarState.isDualPaneLayout = backStack.lastOrNull() == MainScreen && isDualPaneLayout
@@ -592,8 +581,7 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
                 .then(
                     when {
                       liquidGlassEnabled -> Modifier.layerBackdrop(liquidLayerBackdrop)
-                      !legacyNavigationBar -> Modifier.hazeSource(navigationBackdrop)
-                      else -> Modifier
+                      else -> Modifier.hazeSource(navigationBackdrop)
                     },
                   ),
           ) {
@@ -623,8 +611,7 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
                   .then(
                     when {
                       liquidGlassEnabled -> Modifier.layerBackdrop(liquidLayerBackdrop)
-                      !legacyNavigationBar -> Modifier.hazeSource(navigationBackdrop)
-                      else -> Modifier
+                      else -> Modifier.hazeSource(navigationBackdrop)
                     },
                   ),
               key = { page -> visibleTabs.getOrNull(page)?.name ?: "removed-tab-$page" },
@@ -857,25 +844,9 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
                 .align(Alignment.BottomStart),
           ) {
             Box(Modifier.fillMaxWidth()) {
-              // The safe drawing area without the keyboard: the legacy bar leaves while the
-              // keyboard is open, so it stays at the bottom edge instead of rising with it.
-              val legacyBarInsets = WindowInsets.systemBars.union(WindowInsets.displayCutout)
-              // The legacy bar is edge-to-edge, but its controls must stay above the system
-              // navigation area. Paint that bottom inset with the same surface as the bar
-              // so content cannot peek through below it (gesture and 3-button modes).
-              if (legacyNavigationBar) {
-                Spacer(
-                  modifier =
-                    Modifier
-                      .align(Alignment.BottomCenter)
-                      .fillMaxWidth()
-                      .windowInsetsBottomHeight(legacyBarInsets)
-                      .background(NavigationBarDefaults.containerColor),
-                )
-              }
               Box(Modifier.matchParentSize()) {
                 // Haze only runs while its navigation surface is visible.
-                if (!liquidGlassEnabled && progressiveNavigationBlur && !legacyNavigationBar) {
+                if (!liquidGlassEnabled && progressiveNavigationBlur) {
                   ProgressiveNavigationBackdrop(
                     state = navigationBackdrop,
                     modifier =
@@ -891,23 +862,15 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
                   Modifier
                     .fillMaxWidth()
                     .windowInsetsPadding(
-                      (if (legacyNavigationBar) legacyBarInsets else WindowInsets.safeDrawing)
+                      WindowInsets.safeDrawing
                         .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom),
                     )
                     .padding(
                       top = 24.dp,
-                      bottom = if (legacyNavigationBar) 0.dp else NavigationBarState.floatingBarSpacing,
+                      bottom = NavigationBarState.floatingBarSpacing,
                     ),
               ) {
-                if (legacyNavigationBar) {
-                  LegacyMaterialNavigationBar(
-                    visibleTabs = navigationTabs,
-                    selectedTab = selectedTab,
-                    onTabSelected = onTabSelected,
-                    modifier = Modifier.fillMaxWidth(),
-                  )
-                } else {
-                  val hideNavBarLabels by appearancePreferences.hideNavigationBarLabels.collectAsState()
+                val hideNavBarLabels by appearancePreferences.hideNavigationBarLabels.collectAsState()
                   val horizontalMargin by animateDpAsState(
                     targetValue = if (NavigationBarState.isMiniPlayerDocked) NavigationBarState.floatingBarSpacing
                       else NavigationBarState.navigationPillMaxMargin - 30.dp * (if (hideNavBarLabels) 0f else NavigationBarState.navLabelVisibility),
@@ -1387,53 +1350,6 @@ internal fun mainNavigationLabel(tab: MainScreen.MainTab): String =
     MainScreen.MainTab.MUSIC -> R.string.ui_music
     MainScreen.MainTab.PROFILE -> R.string.ui_profile
   })
-
-@Composable
-private fun LegacyMaterialNavigationBar(
-  visibleTabs: List<MainScreen.MainTab>,
-  selectedTab: MainScreen.MainTab,
-  onTabSelected: (MainScreen.MainTab) -> Unit,
-  modifier: Modifier = Modifier,
-) {
-  val appearancePreferences = koinInject<AppearancePreferences>()
-  val hideNavBarLabels by appearancePreferences.hideNavigationBarLabels.collectAsState()
-  val density = LocalDensity.current
-  val primaryColor = MaterialTheme.colorScheme.primary
-  val secondaryColor = MaterialTheme.colorScheme.secondary
-  val tertiaryColor = MaterialTheme.colorScheme.tertiary
-
-  NavigationBar(
-    windowInsets = WindowInsets(0),
-    modifier =
-      modifier.onGloballyPositioned { coordinates ->
-        NavigationBarState.navbarWidth = with(density) { coordinates.size.width.toDp() }
-        NavigationBarState.navigationPillHeight = with(density) { coordinates.size.height.toDp() }
-        NavigationBarState.navbarLeftOffset = with(density) { coordinates.positionInRoot().x.toDp() }
-      },
-  ) {
-    visibleTabs.forEach { tab ->
-      val tabColor = when (tab) {
-        MainScreen.MainTab.HOME -> primaryColor
-        MainScreen.MainTab.NETWORK -> secondaryColor
-        MainScreen.MainTab.MUSIC -> tertiaryColor
-        MainScreen.MainTab.PROFILE -> primaryColor
-      }
-      NavigationBarItem(
-        selected = tab == selectedTab,
-        onClick = { onTabSelected(tab) },
-        alwaysShowLabel = !hideNavBarLabels,
-        icon = {
-          MainTabIcon(
-            tab = tab,
-            tint = if (tab == selectedTab) tabColor else tabColor.copy(alpha = 0.65f),
-            contentDescription = null,
-          )
-        },
-        label = if (hideNavBarLabels) null else ({ Text(mainNavigationLabel(tab)) }),
-      )
-    }
-  }
-}
 
 @Composable
 internal fun MainTabIcon(

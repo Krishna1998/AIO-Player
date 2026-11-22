@@ -1535,7 +1535,7 @@ object AppearancePreferencesScreen : Screen {
                     )
                   },
                   groupIndex = 0,
-                  groupSize = 6,
+                  groupSize = 5,
                 )
                 val quickPlayFabDirect by preferences.quickPlayFabDirect.collectAsState()
                 SwitchPreference(
@@ -1551,7 +1551,7 @@ object AppearancePreferencesScreen : Screen {
                     )
                   },
                   groupIndex = 1,
-                  groupSize = 6,
+                  groupSize = 5,
                 )
                 val navigationBarGlow by preferences.navigationBarGlow.collectAsState()
                 SwitchPreference(
@@ -1561,7 +1561,7 @@ object AppearancePreferencesScreen : Screen {
                   title = { Text(stringResource(R.string.navbar_glow_title)) },
                   summary = { Text(stringResource(R.string.navbar_glow_summary), color = MaterialTheme.colorScheme.outline) },
                   groupIndex = 2,
-                  groupSize = 6,
+                  groupSize = 5,
                 )
                 val hideNavigationBarLabels by preferences.hideNavigationBarLabels.collectAsState()
                 SwitchPreference(
@@ -1571,36 +1571,17 @@ object AppearancePreferencesScreen : Screen {
                   title = { Text(stringResource(R.string.pref_hide_navigation_bar_labels_title)) },
                   summary = { Text(stringResource(R.string.pref_hide_navigation_bar_labels_summary), color = MaterialTheme.colorScheme.outline) },
                   groupIndex = 3,
-                  groupSize = 6,
+                  groupSize = 5,
                 )
-                val legacyNavigationBar by preferences.legacyNavigationBar.collectAsState()
                 val progressiveNavigationBlur by preferences.progressiveNavigationBlur.collectAsState()
-                LaunchedEffect(legacyNavigationBar, progressiveNavigationBlur) {
-                  if (legacyNavigationBar && progressiveNavigationBlur) {
-                    preferences.progressiveNavigationBlur.set(false)
-                  }
-                }
-                SwitchPreference(
-                  modifier = Modifier.settingsSearchTarget(R.string.legacy_navigation_bar_title),
-                  value = legacyNavigationBar,
-                  onValueChange = { enabled ->
-                    preferences.legacyNavigationBar.set(enabled)
-                    if (enabled) preferences.progressiveNavigationBlur.set(false)
-                  },
-                  title = { Text(stringResource(R.string.legacy_navigation_bar_title)) },
-                  summary = { Text(stringResource(R.string.legacy_navigation_bar_summary), color = MaterialTheme.colorScheme.outline) },
-                  groupIndex = 4,
-                  groupSize = 6,
-                )
                 SwitchPreference(
                   modifier = Modifier.settingsSearchTarget(R.string.progressive_navigation_blur_title),
-                  value = progressiveNavigationBlur && !legacyNavigationBar,
+                  value = progressiveNavigationBlur,
                   onValueChange = preferences.progressiveNavigationBlur::set,
-                  enabled = !legacyNavigationBar,
                   title = { Text(stringResource(R.string.progressive_navigation_blur_title)) },
                   summary = { Text(stringResource(R.string.progressive_navigation_blur_summary), color = MaterialTheme.colorScheme.outline) },
-                  groupIndex = 5,
-                  groupSize = 6,
+                  groupIndex = 4,
+                  groupSize = 5,
                 )
               }
             }
