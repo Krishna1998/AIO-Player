@@ -97,6 +97,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ClipOp
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -1134,11 +1135,13 @@ internal fun ExpressivePillNavigationBar(
     }
   }
 
+  val isDarkTheme = MaterialTheme.colorScheme.surface.luminance() < 0.5f
   val surfaceColor = MaterialTheme.colorScheme.surfaceContainerHigh
   val accentColor = MaterialTheme.colorScheme.primary
-  val mutedColor = Color.White.copy(alpha = 0.88f)
-  val selectedSurface = Color.White.copy(alpha = 0.22f)
-  val selectedContent = Color.White
+
+  val mutedColor = if (isDarkTheme) Color.White.copy(alpha = 0.88f) else MaterialTheme.colorScheme.onSurfaceVariant
+  val selectedSurface = if (isDarkTheme) Color.White.copy(alpha = 0.22f) else accentColor.copy(alpha = 0.16f)
+  val selectedContent = if (isDarkTheme) Color.White else accentColor
 
   val tabRow: @Composable (Boolean) -> Unit = { active ->
       Row(
@@ -1313,11 +1316,19 @@ internal fun ExpressivePillNavigationBar(
         // Specular inner glass border on active floating pill
         val pillOutlineStroke = 1.dp.toPx()
         val pillBorderBrush = Brush.verticalGradient(
-          listOf(
-            Color.White.copy(alpha = 0.50f),
-            Color.White.copy(alpha = 0.12f),
-            Color.White.copy(alpha = 0.35f),
-          ),
+          if (isDarkTheme) {
+            listOf(
+              Color.White.copy(alpha = 0.50f),
+              Color.White.copy(alpha = 0.12f),
+              Color.White.copy(alpha = 0.35f),
+            )
+          } else {
+            listOf(
+              accentColor.copy(alpha = 0.45f),
+              Color.White.copy(alpha = 0.35f),
+              accentColor.copy(alpha = 0.25f),
+            )
+          },
         )
         drawPath(pillPath, brush = pillBorderBrush, style = Stroke(width = pillOutlineStroke))
         clipPath(pillPath) {
