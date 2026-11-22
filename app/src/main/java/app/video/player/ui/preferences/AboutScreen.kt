@@ -77,7 +77,6 @@ import app.video.player.BuildConfig
 import app.video.player.R
 import app.video.player.presentation.Screen
 import app.video.player.presentation.crash.CrashActivity.Companion.collectDeviceInfo
-import app.video.player.ui.components.AppToast as Toast
 import app.video.player.ui.icons.Icon
 import app.video.player.ui.icons.Icons
 import app.video.player.ui.liquidglass.appGlassSurface
@@ -554,7 +553,6 @@ object AboutScreen : Screen {
                     .fillMaxWidth()
                     .clickable {
                       SafeClipboard.copyPlainText(context, "videoplayer_device_info", deviceInfo)
-                      Toast.show(context, "Diagnostic Specifications Copied to Clipboard")
                     }
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
