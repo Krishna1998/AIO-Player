@@ -23,6 +23,7 @@ import app.video.player.ui.icons.Icon
 import app.video.player.ui.icons.Icons
 import app.video.player.ui.liquidglass.appGlassSurface
 import app.video.player.ui.liquidglass.liquidGlassActive
+import app.video.player.ui.theme.LocalAppWallpaperActive
 import app.video.player.ui.utils.LocalShowSettingsBackArrow
 
 /** The floating player panel already owns system/keyboard insets; embedded pages need only their content padding. */
@@ -42,6 +43,7 @@ internal fun SettingsTopAppBar(
 ) {
   if (LocalPlayerSettingsPanel.current) return
   val glassActive = liquidGlassActive()
+  val wallpaperActive = LocalAppWallpaperActive.current
   TopAppBar(
     modifier = if (glassActive) {
       Modifier.appGlassSurface(
@@ -50,7 +52,7 @@ internal fun SettingsTopAppBar(
         enabled = true,
       )
     } else Modifier,
-    colors = if (glassActive) {
+    colors = if (glassActive || wallpaperActive) {
       TopAppBarDefaults.topAppBarColors(
         containerColor = Color.Transparent,
       )

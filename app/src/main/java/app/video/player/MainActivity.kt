@@ -743,7 +743,6 @@ open class MainActivity : AppCompatActivity() {
                   .playerSheetBackdrop()
                   .captureLiquidGlassBackdrop(miniPlayerBackdrop, liquidGlassEnabled),
               backStack = typedBackstack,
-              opaqueFrom = app.video.player.ui.preferences.PreferencesScreen,
               tvSafeArea = true,
               bottomOverlayClearance = NavigationBarState.miniPlayerClearance,
               bottomOverlayExempt = MainScreen,

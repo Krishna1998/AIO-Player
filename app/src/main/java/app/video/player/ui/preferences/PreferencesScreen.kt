@@ -86,6 +86,8 @@ import app.video.player.preferences.AppearancePreferences
 import app.video.player.ui.browser.profile.ProfileScreen
 import app.video.player.ui.browser.profile.ProfileAvatar
 import app.video.player.ui.theme.LocalEmphasizedTypography
+import app.video.player.ui.theme.LocalAppWallpaperActive
+import app.video.player.ui.theme.wallpaperAwareBackgroundColor
 import app.video.player.ui.theme.rememberConnectedShape
 import app.video.player.ui.browser.LocalNavigationBarHeight
 import app.video.player.ui.utils.LocalBackStack
@@ -172,7 +174,6 @@ object PreferencesScreen : Screen {
             ScreenNavDisplay(
               backStack = detailBackstack,
               modifier = Modifier.fillMaxSize(),
-              opaqueBackground = true,
               tvAutoFocus = !television || detailPaneActivated,
               tvFocusRequestKey = detailFocusRequested,
             ) { screen ->
@@ -204,10 +205,15 @@ object PreferencesScreen : Screen {
     val colorScheme = MaterialTheme.colorScheme
     val emphasizedTypography = LocalEmphasizedTypography.current
     val television = isTelevision()
+    val wallpaperActive = LocalAppWallpaperActive.current
 
     Scaffold(
+      containerColor = wallpaperAwareBackgroundColor(),
       topBar = {
         TopAppBar(
+          colors = if (wallpaperActive) {
+            androidx.compose.material3.TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+          } else androidx.compose.material3.TopAppBarDefaults.topAppBarColors(),
           title = {
             Text(
               text = stringResource(R.string.pref_preferences),
