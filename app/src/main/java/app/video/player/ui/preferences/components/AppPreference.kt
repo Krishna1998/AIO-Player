@@ -18,7 +18,6 @@ import app.video.player.ui.icons.Icon
 import app.video.player.ui.icons.Icons
 import app.video.player.ui.preferences.playerSettingSummary
 import app.video.player.ui.preferences.playerSettingAvailability
-import me.zhanghai.compose.preference.LocalPreferenceTheme
 import androidx.compose.ui.semantics.onClick as semanticOnClick
 
 enum class PreferenceAction { Navigate, Dialog, None }
@@ -54,7 +53,6 @@ fun AppPreference(
     summary = playerSettingSummary(availability, enabled, summary),
     widgetContainer = if (onClick != null && action != PreferenceAction.None) {
       {
-        val horizontalSpacing = runCatching { LocalPreferenceTheme.current.horizontalSpacing }.getOrDefault(16.dp)
         Icon(
           imageVector = when {
             action == PreferenceAction.Dialog -> Icons.RoundedFilled.ArrowDropDown
@@ -63,7 +61,7 @@ fun AppPreference(
           },
           contentDescription = null,
           tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (canClick) 1f else 0.38f),
-          modifier = Modifier.padding(horizontal = horizontalSpacing).size(20.dp),
+          modifier = Modifier.padding(horizontal = 16.dp).size(20.dp),
         )
       }
     } else null,

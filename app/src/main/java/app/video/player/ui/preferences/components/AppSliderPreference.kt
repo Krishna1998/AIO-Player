@@ -14,12 +14,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import app.video.player.ui.components.AppSlider
 import app.video.player.ui.preferences.ExpressivePreferenceItem
 import app.video.player.ui.preferences.PlayerSettingSummary
 import app.video.player.ui.preferences.playerSettingSummary
 import app.video.player.ui.preferences.playerSettingAvailability
-import me.zhanghai.compose.preference.LocalPreferenceTheme
 import me.zhanghai.compose.preference.Preference
 
 @Composable
@@ -94,8 +94,7 @@ fun AppSliderPreference(
             onInteractionChange = { isUserInteracting = it },
           )
           if (valueText != null) {
-            val horizontalSpacing = runCatching { LocalPreferenceTheme.current.horizontalSpacing }.getOrDefault(16.dp)
-            Box(Modifier.padding(start = horizontalSpacing)) {
+            Box(Modifier.padding(start = 16.dp)) {
               valueText()
             }
           }

@@ -400,8 +400,6 @@ object AboutScreen : Screen {
       }
     }
   }
-    }
-  }
 }
 
 @Composable
