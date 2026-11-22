@@ -1478,7 +1478,6 @@ object AppearancePreferencesScreen : Screen {
           }
 
           item {
-            val showNetworkTab by preferences.showNetworkTab.collectAsState()
             val savedOrder by preferences.bottomNavigationOrder.collectAsState()
             val names = listOf("HOME", "NETWORK")
             val ordered =
@@ -1489,17 +1488,13 @@ object AppearancePreferencesScreen : Screen {
             val tabItems = ordered.map { id ->
               when (id) {
                 "HOME" -> ReorderableTabItem(id, stringResource(R.string.pref_nav_home_title), stringResource(R.string.pref_nav_home_summary), true, required = true)
-                else -> ReorderableTabItem(id, stringResource(R.string.pref_nav_network_title), stringResource(R.string.pref_nav_network_summary), showNetworkTab, titleRes = R.string.pref_nav_network_title)
+                else -> ReorderableTabItem(id, stringResource(R.string.pref_nav_network_title), stringResource(R.string.pref_nav_network_summary), true, required = true, titleRes = R.string.pref_nav_network_title)
               }
             }
             ExpressivePreferenceGroup {
               ReorderableTabPreferences(
                 tabs = tabItems,
-                onEnabledChange = { id, enabled ->
-                  when (id) {
-                    "NETWORK" -> preferences.showNetworkTab.set(enabled)
-                  }
-                },
+                onEnabledChange = { _, _ -> },
                 onMove = { id, destination ->
                   if (id != "HOME") {
                     val current = ordered.toMutableList()

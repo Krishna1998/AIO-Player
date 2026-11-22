@@ -1400,12 +1400,12 @@ private const val TV_TAB_FOCUS_RETRY_MS = 100L
  */
 internal fun mainNavigationTabs(
   showProfile: Boolean,
-  showNetwork: Boolean = false,
+  showNetwork: Boolean = true,
   order: List<String> = emptyList(),
 ): List<MainScreen.MainTab> {
   val available = buildList {
     add(MainScreen.MainTab.HOME)
-    if (showNetwork) add(MainScreen.MainTab.NETWORK)
+    add(MainScreen.MainTab.NETWORK)
     if (showProfile) add(MainScreen.MainTab.PROFILE)
   }
   val byName = available.associateBy { it.name }
