@@ -1079,7 +1079,7 @@ private fun FluidFlowStreamContent(
   onVideoAction: (Video) -> Unit,
 ) {
   var selectedFilter by remember { mutableStateOf("All") }
-  val filters = remember { listOf("All", "🎬 Videos", "🎵 Music", "✨ Top Picks") }
+  val filters = remember { listOf("All", "🎬 Videos", "🎵 Music") }
   val isPaused by PlaybackSession.propBoolean["pause"].collectAsState()
 
   Column(
@@ -1207,7 +1207,6 @@ private fun FluidFlowStreamContent(
       when (selectedFilter) {
         "🎬 Videos" -> videoItems
         "🎵 Music" -> sortedAudioByTitle
-        "✨ Top Picks" -> (videoItems.take(5) + sortedAudioByTitle.take(5)).shuffled()
         else -> (videoItems.take(6) + sortedAudioByTitle.take(6))
       }
     }
