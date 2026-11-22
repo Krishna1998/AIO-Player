@@ -387,6 +387,34 @@ object AppearancePreferencesScreen : Screen {
                   )
 
                   PreferenceCard {
+                    DevicePreference(R.string.pref_appearance_custom_wallpaper_title) {
+                      val currentWpUri by preferences.customWallpaperUri.collectAsState()
+                      val wpSummary = when {
+                        currentWpUri.isBlank() || currentWpUri == "preset:none" -> "Solid Dark (None)"
+                        currentWpUri.startsWith("preset:") -> {
+                          val key = currentWpUri.removePrefix("preset:")
+                          app.video.player.ui.theme.WallpaperPreset.entries.firstOrNull { it.id == key }?.displayName ?: "Preset"
+                        }
+                        else -> "Custom Image"
+                      }
+
+                      ExpressivePreferenceItem {
+                        Preference(
+                          modifier = Modifier.settingsSearchTarget(R.string.pref_appearance_custom_wallpaper_title),
+                          title = { Text(stringResource(R.string.pref_appearance_custom_wallpaper_title)) },
+                          summary = {
+                            Text(
+                              wpSummary,
+                              color = MaterialTheme.colorScheme.outline,
+                            )
+                          },
+                          onClick = { backstack.navigateTo(WallpaperPreferencesScreen) },
+                        )
+                      }
+
+                      PreferenceDivider()
+                    }
+
                     DevicePreference(R.string.pref_app_icon_title) {
                       ExpressivePreferenceItem {
                         Preference(
