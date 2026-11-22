@@ -248,14 +248,29 @@ fun Modifier.connectedGlassRim(
     strength: Float = 1f,
     connectionProgress: Float = 1f,
 ): Modifier = drawWithCache {
-    val edge = Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.27f), Color.White.copy(alpha = 0.02f)))
-    val strokeWidth = 0.75.dp.toPx()
+    val outerEdge = Brush.verticalGradient(
+        listOf(
+            Color.White.copy(alpha = 0.55f),
+            Color.White.copy(alpha = 0.15f),
+            Color.White.copy(alpha = 0.35f),
+        ),
+    )
+    val innerEdge = Brush.verticalGradient(
+        listOf(
+            Color.White.copy(alpha = 0.30f),
+            Color.Transparent,
+            Color.White.copy(alpha = 0.15f),
+        ),
+    )
+    val outerStroke = 1.25.dp.toPx()
+    val innerStroke = 0.75.dp.toPx()
     val outline = shape.createOutline(size, layoutDirection, this)
-    val inset = strokeWidth * connectionProgress.coerceIn(0f, 1f)
+    val inset = outerStroke * connectionProgress.coerceIn(0f, 1f)
     onDrawWithContent {
         drawContent()
         clipRect(top = if (joinedAtTop) inset else 0f, bottom = size.height - if (joinedAtTop) 0f else inset) {
-            drawOutline(outline, brush = edge, style = Stroke(strokeWidth), alpha = strength)
+            drawOutline(outline, brush = outerEdge, style = Stroke(outerStroke), alpha = strength)
+            drawOutline(outline, brush = innerEdge, style = Stroke(innerStroke), alpha = strength * 0.75f)
         }
     }
 }

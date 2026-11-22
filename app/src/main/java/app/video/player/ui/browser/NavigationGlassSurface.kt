@@ -49,8 +49,8 @@ internal fun NavigationGlassSurface(
 
   val blurStyle = remember(surfaceColor) {
     HazeBlurStyle {
-      blurRadius(24.dp)
-      backgroundColor(surfaceColor)
+      blurRadius(28.dp)
+      backgroundColor(Color.Black.copy(alpha = 0.45f))
       colorEffects(listOf(HazeColorEffect.tint(Color.Transparent)))
       noiseFactor(0f)
     }
@@ -59,7 +59,7 @@ internal fun NavigationGlassSurface(
   if (shape == CircleShape && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && backdrop != null && glowStrength > 0f) {
     RefractedNavigationGlass(surfaceColor, glowStrength, modifier, backing)
   } else {
-    Box(modifier.clip(shape).then(backing).background(surfaceColor.copy(alpha = if (backdrop != null) 0.55f else 0.82f))
+    Box(modifier.clip(shape).then(backing).background(Color.Black.copy(alpha = if (backdrop != null) 0.38f else 0.75f))
       .navigationGlassRim(glowStrength, shape, connectionProgress))
   }
 }

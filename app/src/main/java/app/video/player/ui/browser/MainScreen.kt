@@ -1135,9 +1135,9 @@ internal fun ExpressivePillNavigationBar(
 
   val surfaceColor = MaterialTheme.colorScheme.surfaceContainerHigh
   val accentColor = MaterialTheme.colorScheme.primary
-  val mutedColor = MaterialTheme.colorScheme.onSurfaceVariant
-  val selectedSurface = MaterialTheme.colorScheme.secondaryContainer
-  val selectedContent = MaterialTheme.colorScheme.primary
+  val mutedColor = Color.White.copy(alpha = 0.88f)
+  val selectedSurface = Color.White.copy(alpha = 0.22f)
+  val selectedContent = Color.White
 
   val tabRow: @Composable (Boolean) -> Unit = { active ->
       Row(
@@ -1307,7 +1307,18 @@ internal fun ExpressivePillNavigationBar(
       }) { tabRow(false) }
       Box(Modifier.matchParentSize().drawWithContent {
         val pillPath = navigationJellyPath(motion.frame, visibleTabs.size)
+        // Outer pill frosted highlight
         drawPath(pillPath, selectedSurface)
+        // Specular inner glass border on active floating pill
+        val pillOutlineStroke = 1.dp.toPx()
+        val pillBorderBrush = Brush.verticalGradient(
+          listOf(
+            Color.White.copy(alpha = 0.50f),
+            Color.White.copy(alpha = 0.12f),
+            Color.White.copy(alpha = 0.35f),
+          ),
+        )
+        drawPath(pillPath, brush = pillBorderBrush, style = Stroke(width = pillOutlineStroke))
         clipPath(pillPath) {
           drawNavigationJellyGlow(motion.frame, accentColor.copy(alpha = glowStrength))
           this@drawWithContent.drawContent()
