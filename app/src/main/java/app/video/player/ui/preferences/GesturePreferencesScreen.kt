@@ -159,18 +159,6 @@ object GesturePreferencesScreen : Screen {
 
               PreferenceDivider()
 
-              val audioPreferences = org.koin.compose.koinInject<app.video.player.preferences.AudioPreferences>()
-              val audioVolumeGesture by audioPreferences.audioVolumeGesture.collectAsState()
-              SwitchPreference(
-                modifier = Modifier.settingsSearchTarget(R.string.pref_audio_volume_gesture_title),
-                value = audioVolumeGesture,
-                onValueChange = audioPreferences.audioVolumeGesture::set,
-                title = { Text(stringResource(R.string.pref_audio_volume_gesture_title)) },
-                summary = { Text(stringResource(R.string.pref_audio_volume_gesture_summary)) },
-              )
-
-              PreferenceDivider()
-
               val pinchToZoomGesture by playerPreferences.pinchToZoomGesture.collectAsState()
               SwitchPreference(
                 modifier = Modifier.settingsSearchTarget(R.string.pref_player_gestures_pinch_to_zoom),
