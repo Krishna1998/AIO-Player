@@ -235,7 +235,7 @@ object PreferencesScreen : Screen {
             ) {
               Icon(
                 Icons.RoundedFilled.Search,
-                contentDescription = stringResource(R.string.search),
+                contentDescription = stringResource(R.string.generic_search),
                 tint = colorScheme.primary,
               )
             }

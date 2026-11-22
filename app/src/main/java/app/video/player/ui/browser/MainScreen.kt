@@ -1144,28 +1144,6 @@ internal fun ExpressivePillNavigationBar(
   val secondaryColor = MaterialTheme.colorScheme.secondary
   val tertiaryColor = MaterialTheme.colorScheme.tertiary
 
-  fun mainTabColor(tab: MainScreen.MainTab, active: Boolean): Color {
-    val base = when (tab) {
-      MainScreen.MainTab.HOME -> primaryColor
-      MainScreen.MainTab.NETWORK -> secondaryColor
-      MainScreen.MainTab.MUSIC -> tertiaryColor
-      MainScreen.MainTab.PROFILE -> primaryColor
-    }
-    return if (active) {
-      // In dark mode, active tab is full-brightness theme color; in light mode, solid theme tone
-      base
-    } else {
-      // Inactive tab: subtly tinted with its respective theme color (harmonized with surface)
-      if (isDarkTheme) {
-        androidx.compose.ui.graphics.lerp(Color.White.copy(alpha = 0.55f), base, 0.40f)
-      } else {
-        androidx.compose.ui.graphics.lerp(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.70f), base, 0.45f)
-      }
-    }
-  }
-
-  val selectedSurface = if (isDarkTheme) Color.White.copy(alpha = 0.22f) else accentColor.copy(alpha = 0.16f)
-
   val tabRow: @Composable (Boolean) -> Unit = { active ->
       Row(
         modifier = Modifier.fillMaxSize().padding(4.dp).clearAndSetSemantics {},
@@ -1174,7 +1152,21 @@ internal fun ExpressivePillNavigationBar(
         visibleTabs.forEachIndexed { index, tab ->
           key(tab) {
             val label = labels[index]
-            val contentColor = mainTabColor(tab, active)
+            val baseColor = when (tab) {
+              MainScreen.MainTab.HOME -> primaryColor
+              MainScreen.MainTab.NETWORK -> secondaryColor
+              MainScreen.MainTab.MUSIC -> tertiaryColor
+              MainScreen.MainTab.PROFILE -> primaryColor
+            }
+            val contentColor = if (active) {
+              baseColor
+            } else {
+              if (isDarkTheme) {
+                androidx.compose.ui.graphics.lerp(Color.White.copy(alpha = 0.55f), baseColor, 0.40f)
+              } else {
+                androidx.compose.ui.graphics.lerp(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.70f), baseColor, 0.45f)
+              }
+            }
 
             Box(
               modifier =

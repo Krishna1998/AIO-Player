@@ -325,13 +325,13 @@ class SecureFolderViewModel(
       val result = runCatching {
         val allEntities = repository.getAll()
         if (allEntities.isEmpty()) {
-          Result.success(0)
+          0
         } else {
           val batch = repository.restore(getApplication(), allEntities).getOrThrow()
           if (batch.failedIds.isEmpty()) {
-            Result.success(batch.succeededIds.size)
+            batch.succeededIds.size
           } else {
-            Result.failure(java.io.IOException("Failed to restore ${batch.failedIds.size} file(s)"))
+            throw java.io.IOException("Failed to restore ${batch.failedIds.size} file(s)")
           }
         }
       }
