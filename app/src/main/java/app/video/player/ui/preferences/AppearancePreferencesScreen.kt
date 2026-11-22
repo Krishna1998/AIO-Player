@@ -898,8 +898,8 @@ object AppearancePreferencesScreen : Screen {
               val autoFetchOnlinePosters by browserPreferences.autoFetchOnlinePosters.collectAsState()
               val replaceEmbeddedWithOnlinePosters by browserPreferences.replaceEmbeddedWithOnlinePosters.collectAsState()
               val autoFetchOnlineMusicArtwork by browserPreferences.autoFetchOnlineMusicArtwork.collectAsState()
-              val baseCount = if (showFramePosition) 7 else 6
-              val itemCount = baseCount + 3
+              val baseCount = if (showFramePosition) 6 else 5
+              val itemCount = baseCount + 4
               val showVideoThumbnails by browserPreferences.showVideoThumbnails.collectAsState()
               SwitchPreference(
                 modifier = Modifier.settingsSearchTarget(R.string.pref_appearance_show_video_thumbnails_title),
