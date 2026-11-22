@@ -397,6 +397,7 @@ object AboutScreen : Screen {
         }
 
         Spacer(Modifier.height(12.dp))
+        }
       }
     }
   }
