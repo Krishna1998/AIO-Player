@@ -53,7 +53,10 @@ val LocalLightTextOnWallpaper = compositionLocalOf { false }
 
 @Composable
 @androidx.compose.runtime.ReadOnlyComposable
-fun Color.onWallpaper(): Color = this
+fun Color.onWallpaper(): Color {
+  val isWallpaperActive = LocalAppWallpaperActive.current
+  return if (isWallpaperActive) Color.White else this
+}
 
 enum class WallpaperScaleMode {
   Fit,

@@ -293,6 +293,10 @@ fun VideoPlayerTheme(
   val googleFontFamily by preferences.googleFontFamily.collectAsState()
   val googleFontRevision by preferences.googleFontRevision.collectAsState()
   val appFontScale by preferences.appFontScale.collectAsState()
+  val customWallpaperUri by preferences.customWallpaperUri.collectAsState()
+  val isWallpaperActive = remember(customWallpaperUri) {
+    customWallpaperUri.isNotBlank() && customWallpaperUri != "preset:none"
+  }
   val googleFontsRepository =
     if (loadDownloadedFonts) koinInject<GoogleFontsRepository>() else null
   val darkTheme = isSystemInDarkTheme()
@@ -341,10 +345,16 @@ fun VideoPlayerTheme(
   val emphasizedTypography = remember(typography) { emphasizedTypography(typography) }
 
   val useDarkTheme =
-    when (darkMode) {
-      DarkMode.Dark -> true
-      DarkMode.Light -> false
-      DarkMode.System -> darkTheme
+    if (isWallpaperActive) {
+      // Atmospheric wallpapers and presets feature deep gradients and media backdrops.
+      // Force dark typography and icon contrast so titles and controls remain crisp and readable.
+      true
+    } else {
+      when (darkMode) {
+        DarkMode.Dark -> true
+        DarkMode.Light -> false
+        DarkMode.System -> darkTheme
+      }
     }
   val customThemeDefinition =
     CustomThemeDefinition
