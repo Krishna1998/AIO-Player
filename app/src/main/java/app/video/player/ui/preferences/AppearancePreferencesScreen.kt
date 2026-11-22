@@ -1396,64 +1396,6 @@ object AppearancePreferencesScreen : Screen {
           }
 
           item {
-            val bentoSectionOrder by browserPreferences.bentoFusionSectionOrder.collectAsState()
-            val bentoShowVideo by browserPreferences.bentoFusionShowVideoRail.collectAsState()
-            val bentoShowPulsing by browserPreferences.bentoFusionShowAudioPulsing.collectAsState()
-            val bentoShowMusic by browserPreferences.bentoFusionShowMusicRail.collectAsState()
-            val defaults = listOf("VIDEO", "PULSING", "MUSIC")
-            val orderedSections = (bentoSectionOrder.filter { it in defaults } + defaults).distinct()
-            val bentoOrderItems = orderedSections.map { id ->
-              when (id) {
-                "VIDEO" -> ReorderableTabItem(
-                  id = id,
-                  title = stringResource(R.string.pref_bentofusion_section_video),
-                  summary = stringResource(R.string.pref_bentofusion_show_video_card_summary),
-                  enabled = bentoShowVideo,
-                  titleRes = R.string.pref_bentofusion_section_video,
-                )
-                "PULSING" -> ReorderableTabItem(
-                  id = id,
-                  title = stringResource(R.string.pref_bentofusion_section_audio_pulsing),
-                  summary = stringResource(R.string.pref_bentofusion_show_audio_pulsing_summary),
-                  enabled = bentoShowPulsing,
-                  titleRes = R.string.pref_bentofusion_section_audio_pulsing,
-                )
-                else -> ReorderableTabItem(
-                  id = id,
-                  title = stringResource(R.string.pref_bentofusion_section_music),
-                  summary = stringResource(R.string.pref_bentofusion_show_music_card_summary),
-                  enabled = bentoShowMusic,
-                  titleRes = R.string.pref_bentofusion_section_music,
-                )
-              }
-            }
-            ExpressivePreferenceGroup {
-              Text(
-                text = stringResource(R.string.pref_bentofusion_section_order_title),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-              )
-              ReorderableTabPreferences(
-                tabs = bentoOrderItems,
-                onEnabledChange = { id, enabled ->
-                  when (id) {
-                    "VIDEO" -> browserPreferences.bentoFusionShowVideoRail.set(enabled)
-                    "PULSING" -> browserPreferences.bentoFusionShowAudioPulsing.set(enabled)
-                    "MUSIC" -> browserPreferences.bentoFusionShowMusicRail.set(enabled)
-                  }
-                },
-                onMove = { id, destination ->
-                  val next = orderedSections.toMutableList()
-                  next.remove(id)
-                  next.add(destination.coerceIn(0, next.size), id)
-                  browserPreferences.bentoFusionSectionOrder.set(next)
-                },
-              )
-            }
-          }
-
-          item {
             val librarySubTabsOrder by browserPreferences.mediaLibrarySubTabsOrder.collectAsState()
             val libraryShowMusicTab by browserPreferences.libraryShowMusicTab.collectAsState()
             val bentoShowVideo by browserPreferences.bentoFusionShowVideoRail.collectAsState()
