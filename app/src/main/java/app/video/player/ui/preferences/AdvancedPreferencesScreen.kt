@@ -512,45 +512,7 @@ object AdvancedPreferencesScreen : Screen {
             }
           }
 
-          // Notification style group.
-          item {
-            PreferenceSectionHeader(
-              position = PreferenceSectionPosition.Middle,
-              title = stringResource(R.string.pref_advanced),
-              modifier = Modifier.settingsSearchTarget(R.string.pref_advanced),
-            )
-          }
 
-          item {
-            val notificationStyle by preferences.notificationStyle.collectAsState()
-            val supportedNotificationStyles =
-              remember {
-                NotificationStyle.entries.filter { it.isSupportedOn(Build.VERSION.SDK_INT) }
-              }
-            val selectedNotificationStyle =
-              notificationStyle.takeIf { it.isSupportedOn(Build.VERSION.SDK_INT) }
-                ?: NotificationStyle.Media
-            PreferenceCard {
-              DevicePreference(R.string.pref_advanced_notification_style) {
-                ExpressivePreferenceItem {
-                  ListPreference(
-                    modifier = Modifier.settingsSearchTarget(R.string.pref_advanced_notification_style),
-                    value = selectedNotificationStyle,
-                    onValueChange = preferences.notificationStyle::set,
-                    values = supportedNotificationStyles,
-                    valueToText = { AnnotatedString(it.displayName) },
-                    title = { Text(text = stringResource(R.string.pref_advanced_notification_style)) },
-                    summary = {
-                      Text(
-                        text = selectedNotificationStyle.displayName,
-                        color = MaterialTheme.colorScheme.outline,
-                      )
-                    },
-                  )
-                }
-              }
-            }
-          }
 
           // Data & Cache Section
           item {

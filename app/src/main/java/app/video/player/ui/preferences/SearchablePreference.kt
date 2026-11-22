@@ -1628,7 +1628,6 @@ object SearchablePreferences {
         category = "Advanced",
         screen = AdvancedPreferencesScreen,
         anchorItemIndex = 1,
-        SearchEntrySpec(R.string.pref_advanced_notification_style, listOf("notification", "style", "media", "compact")),
         SearchEntrySpec(R.string.pref_auto_backup_title, listOf("automatic", "backup", "settings", "restore", "folder")),
       )
       addSearchEntries(
