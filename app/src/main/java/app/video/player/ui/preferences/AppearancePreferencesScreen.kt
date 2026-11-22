@@ -1179,7 +1179,6 @@ object AppearancePreferencesScreen : Screen {
 
           item {
             val bentoItemCount = 6
-            var tileIndex = 0
 
             ExpressivePreferenceGroup {
               val bentoFusionShowVideoRail by browserPreferences.bentoFusionShowVideoRail.collectAsState()
@@ -1194,7 +1193,7 @@ object AppearancePreferencesScreen : Screen {
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
-                groupIndex = tileIndex++,
+                groupIndex = 0,
                 groupSize = bentoItemCount,
               )
 
@@ -1210,12 +1209,12 @@ object AppearancePreferencesScreen : Screen {
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
-                groupIndex = tileIndex++,
+                groupIndex = 1,
                 groupSize = bentoItemCount,
               )
 
               val audioPulsingProgressStyle by browserPreferences.audioPulsingProgressStyle.collectAsState()
-              ExpressivePreferenceTile(index = tileIndex++, itemCount = bentoItemCount) {
+              ExpressivePreferenceTile(index = 2, itemCount = bentoItemCount) {
                 ListPreference(
                   modifier = Modifier.settingsSearchTarget(R.string.pref_audio_pulsing_progress_style_title),
                   value = audioPulsingProgressStyle,
@@ -1239,7 +1238,7 @@ object AppearancePreferencesScreen : Screen {
               }
 
               val bentoFusionHeaderStyle by browserPreferences.bentoFusionHeaderStyle.collectAsState()
-              ExpressivePreferenceTile(index = tileIndex++, itemCount = bentoItemCount) {
+              ExpressivePreferenceTile(index = 3, itemCount = bentoItemCount) {
                 ListPreference(
                   modifier = Modifier.settingsSearchTarget(R.string.pref_bentofusion_header_style_title),
                   value = bentoFusionHeaderStyle,
@@ -1273,7 +1272,7 @@ object AppearancePreferencesScreen : Screen {
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
-                groupIndex = tileIndex++,
+                groupIndex = 4,
                 groupSize = bentoItemCount,
               )
 
@@ -1289,7 +1288,7 @@ object AppearancePreferencesScreen : Screen {
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
-                groupIndex = tileIndex++,
+                groupIndex = 5,
                 groupSize = bentoItemCount,
               )
             }
