@@ -259,6 +259,10 @@ fun BentoFusionHeader(
   val showVideoRail by browserPreferences.bentoFusionShowVideoRail.collectAsState()
   val showAudioPulsing by browserPreferences.bentoFusionShowAudioPulsing.collectAsState()
   val showCinematicSpotlight by browserPreferences.cinematicShowHeroSpotlight.collectAsState()
+  val cinematicSpotlightScale by browserPreferences.cinematicSpotlightScale.collectAsState()
+  val audioPulsingScale by browserPreferences.bentoFusionAudioPulsingScale.collectAsState()
+  val videoRailScale by browserPreferences.bentoFusionVideoRailScale.collectAsState()
+  val musicRailScale by browserPreferences.bentoFusionMusicRailScale.collectAsState()
   val bentoFusionHeaderStyle by browserPreferences.bentoFusionHeaderStyle.collectAsState()
   val showMusicRail by browserPreferences.bentoFusionShowMusicRail.collectAsState()
   val sectionOrder by browserPreferences.bentoFusionSectionOrder.collectAsState()
@@ -497,6 +501,10 @@ fun BentoFusionHeader(
         showAudioPulsing = showAudioPulsing,
         showMusicRail = showMusicRail,
         showSpotlight = showCinematicSpotlight,
+        spotlightScale = cinematicSpotlightScale,
+        audioPulsingScale = audioPulsingScale,
+        videoRailScale = videoRailScale,
+        musicRailScale = musicRailScale,
         bentoFusionHeaderStyle = bentoFusionHeaderStyle,
         onPlayMedia = onPlayMedia,
         playAudioInBackground = { targetVideo, pos -> playAudioInBackground(targetVideo, pos) },
@@ -549,6 +557,7 @@ fun BentoFusionHeader(
                 ) { item ->
                   BentoHorizonVideoCard(
                     item = item,
+                    scale = videoRailScale,
                     onClick = { onPlayMedia(item.video, null, videoItems.map { it.video }) },
                     onLongClick = { actionTargetVideo = item.video },
                   )
@@ -580,6 +589,7 @@ fun BentoFusionHeader(
 
             BentoHeroSpotlightCard(
               item = heroToDisplay,
+              scale = audioPulsingScale,
               onClick = {
                 if (heroToDisplay.video.isAudio) {
                   if (isCurrentlyInSession) {
@@ -673,6 +683,7 @@ fun BentoFusionHeader(
                 ) { item ->
                   BentoHorizonAudioCard(
                     item = item,
+                    scale = musicRailScale,
                     onClick = {
                       playAudioInBackground(item.video, null)
                     },
@@ -793,6 +804,10 @@ private fun CinematicHorizonContent(
   showAudioPulsing: Boolean = true,
   showMusicRail: Boolean = true,
   showSpotlight: Boolean = true,
+  spotlightScale: Float = 1.0f,
+  audioPulsingScale: Float = 1.0f,
+  videoRailScale: Float = 1.0f,
+  musicRailScale: Float = 1.0f,
   bentoFusionHeaderStyle: BentoFusionHeaderStyle = BentoFusionHeaderStyle.LiquidCapsule,
   onPlayMedia: (Video, Double?, List<Video>) -> Unit,
   playAudioInBackground: (Video, Double?) -> Unit,
@@ -826,11 +841,12 @@ private fun CinematicHorizonContent(
         } else 0.0
       }
 
+      val heroHeight = (280f * spotlightScale.coerceIn(0.7f, 1.3f)).dp
       Box(
         modifier = Modifier
           .fillMaxWidth()
           .padding(horizontal = 16.dp)
-          .height(280.dp)
+          .height(heroHeight)
           .clip(RoundedCornerShape(28.dp))
           .background(MaterialTheme.colorScheme.surfaceContainerHighest)
           .border(
@@ -1006,6 +1022,7 @@ private fun CinematicHorizonContent(
                 items(items = videoItems, key = { it.video.path }) { item ->
                   BentoHorizonVideoCard(
                     item = item,
+                    scale = videoRailScale,
                     onClick = { onPlayMedia(item.video, null, videoItems.map { it.video }) },
                     onLongClick = { onVideoAction(item.video) },
                   )
@@ -1036,6 +1053,7 @@ private fun CinematicHorizonContent(
             Box(modifier = Modifier.padding(horizontal = 16.dp)) {
               BentoHeroSpotlightCard(
                 item = heroToDisplay,
+                scale = audioPulsingScale,
                 onClick = {
                   if (heroToDisplay.video.isAudio) {
                     if (isCurrentlyInSession) {
@@ -1129,7 +1147,10 @@ private fun CinematicHorizonContent(
                 items(items = sortedAudioByTitle, key = { it.video.path }) { item ->
                   BentoHorizonAudioCard(
                     item = item,
+                    scale = musicRailScale,
                     onClick = { playAudioInBackground(item.video, null) },
+                    onLongClick = { onVideoAction(item.video) },
+                  )
                     onLongClick = { onVideoAction(item.video) },
                   )
                 }
@@ -1696,15 +1717,18 @@ private fun BentoHorizonVideoCard(
   item: VideoWithPlaybackInfo,
   onClick: () -> Unit,
   onLongClick: (() -> Unit)? = null,
+  scale: Float = 1.0f,
   modifier: Modifier = Modifier,
 ) {
   val video = item.video
   val progress = item.progressPercentage
   val haptics = LocalHapticFeedback.current
+  val cardWidth = (216f * scale.coerceIn(0.7f, 1.3f)).dp
+  val thumbHeight = (122f * scale.coerceIn(0.7f, 1.3f)).dp
 
   Card(
     modifier = modifier
-      .width(216.dp)
+      .width(cardWidth)
       .clip(RoundedCornerShape(18.dp))
       .combinedClickable(
         onClick = onClick,
@@ -1726,7 +1750,7 @@ private fun BentoHorizonVideoCard(
       Box(
         modifier = Modifier
           .fillMaxWidth()
-          .height(122.dp)
+          .height(thumbHeight)
           .clip(RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp)),
       ) {
         BentoMediaThumbnail(
@@ -1848,6 +1872,7 @@ private fun BentoHorizonAudioCard(
   item: VideoWithPlaybackInfo,
   onClick: () -> Unit,
   onLongClick: (() -> Unit)? = null,
+  scale: Float = 1.0f,
   modifier: Modifier = Modifier,
 ) {
   val video = item.video
@@ -1857,10 +1882,12 @@ private fun BentoHorizonAudioCard(
     video.durationFormatted.ifBlank { "00:00" }
   }
   val haptics = LocalHapticFeedback.current
+  val cardWidth = (164f * scale.coerceIn(0.7f, 1.3f)).dp
+  val thumbHeight = (186f * scale.coerceIn(0.7f, 1.3f)).dp
 
   Card(
     modifier = modifier
-      .width(164.dp)
+      .width(cardWidth)
       .clip(RoundedCornerShape(18.dp))
       .combinedClickable(
         onClick = onClick,
@@ -1882,7 +1909,7 @@ private fun BentoHorizonAudioCard(
       Box(
         modifier = Modifier
           .fillMaxWidth()
-          .height(186.dp)
+          .height(thumbHeight)
           .clip(RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp)),
       ) {
         BentoMediaThumbnail(
@@ -2006,6 +2033,7 @@ private fun BentoHeroSpotlightCard(
   onPrevious: () -> Unit = {},
   onPlayPause: () -> Unit = {},
   onNext: () -> Unit = {},
+  scale: Float = 1.0f,
   modifier: Modifier = Modifier,
 ) {
   val appearancePreferences = koinInject<AppearancePreferences>()
@@ -2266,8 +2294,8 @@ private fun BentoHeroSpotlightCard(
         Column(
           modifier = Modifier
             .fillMaxWidth()
-            .padding(14.dp),
-          verticalArrangement = Arrangement.spacedBy(8.dp),
+            .padding((14f * scale.coerceIn(0.7f, 1.3f)).dp),
+          verticalArrangement = Arrangement.spacedBy((8f * scale.coerceIn(0.7f, 1.3f)).dp),
         ) {
           // Top Header Row: Status Badge & Format Chip
           Row(
@@ -2345,10 +2373,12 @@ private fun BentoHeroSpotlightCard(
           ) {
             // Media Thumbnail Box (clean thumbnail: NO play button overlay, NO codec badge)
             Box {
+              val thumbW = if (isAudio) (70f * scale.coerceIn(0.7f, 1.3f)).dp else (108f * scale.coerceIn(0.7f, 1.3f)).dp
+              val thumbH = (66f * scale.coerceIn(0.7f, 1.3f)).dp
               BentoMediaThumbnail(
                 video = item.video,
                 modifier = Modifier
-                  .size(width = if (isAudio) 70.dp else 108.dp, height = 66.dp)
+                  .size(width = thumbW, height = thumbH)
                   .clip(RoundedCornerShape(16.dp)),
                 showPlayOverlay = !isAudio,
               )

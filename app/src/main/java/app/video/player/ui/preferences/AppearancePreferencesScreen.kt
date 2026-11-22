@@ -1178,12 +1178,12 @@ object AppearancePreferencesScreen : Screen {
           }
 
           item {
-            ExpressivePreferenceGroup {
-              val homeScreenLayout by browserPreferences.homeScreenLayout.collectAsState()
-              val isCinematic = homeScreenLayout == HomeScreenLayout.CinematicHorizon
-              val bentoItemCount = if (isCinematic) 8 else 7
-              var tileIndex = 0
+            val homeScreenLayout by browserPreferences.homeScreenLayout.collectAsState()
+            val isCinematic = homeScreenLayout == HomeScreenLayout.CinematicHorizon
+            val bentoItemCount = if (isCinematic) 8 else 7
+            var tileIndex = 0
 
+            ExpressivePreferenceGroup {
               ExpressivePreferenceTile(index = tileIndex++, itemCount = bentoItemCount) {
                 ListPreference(
                   modifier = Modifier.settingsSearchTarget(R.string.pref_home_screen_layout_title),
@@ -1334,6 +1334,112 @@ object AppearancePreferencesScreen : Screen {
                 groupIndex = tileIndex++,
                 groupSize = bentoItemCount,
               )
+            }
+          }
+
+          item {
+            val homeScreenLayout by browserPreferences.homeScreenLayout.collectAsState()
+            val isCinematic = homeScreenLayout == HomeScreenLayout.CinematicHorizon
+            val bentoShowVideo by browserPreferences.bentoFusionShowVideoRail.collectAsState()
+            val bentoShowPulsing by browserPreferences.bentoFusionShowAudioPulsing.collectAsState()
+            val bentoShowMusic by browserPreferences.bentoFusionShowMusicRail.collectAsState()
+            val showSpotlight by browserPreferences.cinematicShowHeroSpotlight.collectAsState()
+
+            PreferenceCard {
+              if (isCinematic && showSpotlight) {
+                val spotlightScale by browserPreferences.cinematicSpotlightScale.collectAsState()
+                ExpressivePreferenceItem(standalone = true) {
+                  SliderPreference(
+                    modifier = Modifier.settingsSearchTarget(R.string.pref_cinematic_spotlight_scale_title),
+                    value = spotlightScale,
+                    onValueChange = { browserPreferences.cinematicSpotlightScale.set(it) },
+                    sliderValue = spotlightScale,
+                    onSliderValueChange = { browserPreferences.cinematicSpotlightScale.set(it) },
+                    valueRange = 0.70f..1.30f,
+                    valueSteps = 12,
+                    title = { Text(stringResource(R.string.pref_cinematic_spotlight_scale_title)) },
+                    summary = {
+                      val pct = (spotlightScale * 100).roundToInt()
+                      Text(
+                        text = if (pct == 100) "100% (Default)" else "$pct%",
+                        color = MaterialTheme.colorScheme.outline,
+                      )
+                    },
+                  )
+                }
+                PreferenceDivider()
+              }
+
+              if (bentoShowPulsing) {
+                val pulsingScale by browserPreferences.bentoFusionAudioPulsingScale.collectAsState()
+                ExpressivePreferenceItem(standalone = true) {
+                  SliderPreference(
+                    modifier = Modifier.settingsSearchTarget(R.string.pref_audio_pulsing_scale_title),
+                    value = pulsingScale,
+                    onValueChange = { browserPreferences.bentoFusionAudioPulsingScale.set(it) },
+                    sliderValue = pulsingScale,
+                    onSliderValueChange = { browserPreferences.bentoFusionAudioPulsingScale.set(it) },
+                    valueRange = 0.70f..1.30f,
+                    valueSteps = 12,
+                    title = { Text(stringResource(R.string.pref_audio_pulsing_scale_title)) },
+                    summary = {
+                      val pct = (pulsingScale * 100).roundToInt()
+                      Text(
+                        text = if (pct == 100) "100% (Default)" else "$pct%",
+                        color = MaterialTheme.colorScheme.outline,
+                      )
+                    },
+                  )
+                }
+                PreferenceDivider()
+              }
+
+              if (bentoShowVideo) {
+                val videoScale by browserPreferences.bentoFusionVideoRailScale.collectAsState()
+                ExpressivePreferenceItem(standalone = true) {
+                  SliderPreference(
+                    modifier = Modifier.settingsSearchTarget(R.string.pref_video_rail_scale_title),
+                    value = videoScale,
+                    onValueChange = { browserPreferences.bentoFusionVideoRailScale.set(it) },
+                    sliderValue = videoScale,
+                    onSliderValueChange = { browserPreferences.bentoFusionVideoRailScale.set(it) },
+                    valueRange = 0.70f..1.30f,
+                    valueSteps = 12,
+                    title = { Text(stringResource(R.string.pref_video_rail_scale_title)) },
+                    summary = {
+                      val pct = (videoScale * 100).roundToInt()
+                      Text(
+                        text = if (pct == 100) "100% (Default)" else "$pct%",
+                        color = MaterialTheme.colorScheme.outline,
+                      )
+                    },
+                  )
+                }
+                PreferenceDivider()
+              }
+
+              if (bentoShowMusic) {
+                val musicScale by browserPreferences.bentoFusionMusicRailScale.collectAsState()
+                ExpressivePreferenceItem(standalone = true) {
+                  SliderPreference(
+                    modifier = Modifier.settingsSearchTarget(R.string.pref_music_rail_scale_title),
+                    value = musicScale,
+                    onValueChange = { browserPreferences.bentoFusionMusicRailScale.set(it) },
+                    sliderValue = musicScale,
+                    onSliderValueChange = { browserPreferences.bentoFusionMusicRailScale.set(it) },
+                    valueRange = 0.70f..1.30f,
+                    valueSteps = 12,
+                    title = { Text(stringResource(R.string.pref_music_rail_scale_title)) },
+                    summary = {
+                      val pct = (musicScale * 100).roundToInt()
+                      Text(
+                        text = if (pct == 100) "100% (Default)" else "$pct%",
+                        color = MaterialTheme.colorScheme.outline,
+                      )
+                    },
+                  )
+                }
+              }
             }
           }
 
