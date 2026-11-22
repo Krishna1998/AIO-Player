@@ -256,13 +256,13 @@ internal fun WaveVisualizerOverlay(
         if (renderBottom) {
           // Design 2: Galaxy Singularity (Dual Event Horizon Ribbons)
           // Gravitational pull distortion as x approaches the playhead event horizon
-          val distToThumb = maxOf(18f, ribbonEnd - x)
-          val warpLift = (320f / distToThumb) * envelope * warpRingMultiplier
+          val distToThumb = maxOf(16f, ribbonEnd - x)
+          val warpLift = (380f / distToThumb) * envelope * warpRingMultiplier
           val wave = lift * (0.50f + 0.50f * sin((x / wavelength) * twoPi - phase)) * envelope
           return if (!isBottom) {
-            wave + warpLift * 0.80f
+            wave + warpLift * 0.90f
           } else {
-            wave * 0.85f + warpLift * 0.80f
+            wave * 0.90f + warpLift * 0.90f
           }
         } else {
           val undulation = 0.60f + 0.40f * sin((x / wavelength) * twoPi - phase)
