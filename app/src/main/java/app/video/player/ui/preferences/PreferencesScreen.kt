@@ -450,6 +450,7 @@ private fun QuickSettingsRow(
       Triple("Gestures", Icons.RoundedFilled.Gesture, GesturePreferencesScreen to null),
       Triple("Audio & Wavy", Icons.RoundedFilled.Audiotrack, AudioPreferencesScreen to null),
       Triple("Folders", Icons.RoundedFilled.Folder, FoldersPreferencesScreen to null),
+      Triple("About & OTA", Icons.RoundedFilled.Info, AboutScreen to null),
     )
   }
 
