@@ -116,8 +116,11 @@ class MPVPipHelper(
     PictureInPictureParams
       .Builder()
       .apply {
-        val aspectRatio = getVideoAspectRatio()
-          ?: if (activity.isInPictureInPictureMode) lastAspectRatio else null
+        val aspectRatio = if (activity.isInPictureInPictureMode) {
+          lastAspectRatio ?: getVideoAspectRatio()
+        } else {
+          getVideoAspectRatio() ?: lastAspectRatio
+        }
 
         aspectRatio?.let { ratio ->
           setAspectRatio(ratio)

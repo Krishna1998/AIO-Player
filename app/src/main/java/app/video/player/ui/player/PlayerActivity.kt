@@ -3877,7 +3877,7 @@ class PlayerActivity :
 
   private fun isDeviceScreenOffOrLocked(): Boolean {
     val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-    return keyguardManager.isDeviceLocked || !powerManager.isInteractive
+    return keyguardManager.isKeyguardLocked || keyguardManager.isDeviceLocked || !powerManager.isInteractive
   }
 
   /**
@@ -6683,11 +6683,13 @@ private suspend fun restorePlaybackPosition(state: PlaybackStateEntity?, loadGen
 
     if (isInPictureInPictureMode) {
       val isLandscape = pipPreservedLandscape || ((sourceAspect ?: player.getVideoOutAspect()) ?: 0.0) > 1.0
-      if (isLandscape) {
-        val target = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-        if (requestedOrientation != target) requestedOrientation = target
-        return
+      val target = if (isLandscape) {
+        ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+      } else {
+        ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
       }
+      if (requestedOrientation != target) requestedOrientation = target
+      return
     }
 
     val target =
