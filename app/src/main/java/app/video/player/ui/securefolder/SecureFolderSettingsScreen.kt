@@ -79,7 +79,6 @@ data object SecureFolderSettingsScreen : Screen {
 
     val isBiometricEnabled by preferences.isBiometricEnabled.collectAsState()
     val isEntryPointHidden by preferences.isEntryPointHidden.collectAsState()
-    val restoreOnDestroy by preferences.restoreOnDestroy.collectAsState()
 
     var changePinOpen by remember { mutableStateOf(false) }
     var changeSecurityQuestionOpen by remember { mutableStateOf(false) }
@@ -106,9 +105,7 @@ data object SecureFolderSettingsScreen : Screen {
     val requestDestroy =
       rememberDeviceCredentialPrompt(
         title = stringResource(R.string.secure_folder_destroy_title),
-        subtitle = stringResource(
-          if (restoreOnDestroy) R.string.secure_folder_destroy_summary_restore else R.string.secure_folder_destroy_summary,
-        ),
+        subtitle = stringResource(R.string.secure_folder_destroy_summary),
         onUnavailable = { toast(noScreenLockMessage) },
         onSuccess = {
           viewModel.destroySecureFolder { success ->
@@ -262,22 +259,11 @@ data object SecureFolderSettingsScreen : Screen {
             },
           )
           PreferenceDivider()
-          SwitchPreference(
-            modifier = Modifier.settingsSearchTarget(R.string.secure_folder_restore_on_destroy_title),
-            value = restoreOnDestroy,
-            onValueChange = { preferences.restoreOnDestroy.set(it) },
-            title = { Text(stringResource(R.string.secure_folder_restore_on_destroy_title)) },
-            summary = { Text(stringResource(R.string.secure_folder_restore_on_destroy_summary)) },
-            icon = { SettingsIcon(Icons.RoundedFilled.Restore) },
-          )
-          PreferenceDivider()
           SecureSettingsRow(
             modifier = Modifier.settingsSearchTarget(R.string.secure_folder_destroy_title),
             icon = Icons.RoundedFilled.Delete,
             title = stringResource(R.string.secure_folder_destroy_title),
-            summary = stringResource(
-              if (restoreOnDestroy) R.string.secure_folder_destroy_summary_restore else R.string.secure_folder_destroy_summary,
-            ),
+            summary = stringResource(R.string.secure_folder_destroy_summary),
             onClick = requestDestroy,
             titleColor = MaterialTheme.colorScheme.error,
             iconTint = MaterialTheme.colorScheme.error,
