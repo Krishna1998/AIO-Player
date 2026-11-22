@@ -176,13 +176,31 @@ fun AppWallpaperHost(content: @Composable () -> Unit) {
       }
     }
 
+    val baseColorScheme = MaterialTheme.colorScheme
+    val wallpaperColorScheme = remember(baseColorScheme, isWallpaperActive) {
+      if (isWallpaperActive) {
+        baseColorScheme.copy(
+          onSurface = Color.White,
+          onSurfaceVariant = Color.White.copy(alpha = 0.82f),
+          onBackground = Color.White,
+          outline = Color.White.copy(alpha = 0.65f),
+          outlineVariant = Color.White.copy(alpha = 0.40f),
+        )
+      } else {
+        baseColorScheme
+      }
+    }
+
     CompositionLocalProvider(
       LocalAppWallpaperActive provides isWallpaperActive,
       LocalAppBackgroundBackdrop provides backgroundBackdrop,
       LocalLightTextOnWallpaper provides isWallpaperActive,
+      androidx.compose.material3.LocalContentColor provides (if (isWallpaperActive) Color.White else baseColorScheme.onSurface),
     ) {
-      Box(modifier = Modifier.fillMaxSize()) {
-        content()
+      MaterialTheme(colorScheme = wallpaperColorScheme) {
+        Box(modifier = Modifier.fillMaxSize()) {
+          content()
+        }
       }
     }
   }

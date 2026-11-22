@@ -5,6 +5,8 @@
 package app.video.player.ui.preferences
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.graphics.Color
+import app.video.player.ui.theme.LocalAppWallpaperActive
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontWeight
@@ -27,6 +29,9 @@ internal fun ProvideExpressivePreferenceLocals(
 ) {
   val colors = MaterialTheme.colorScheme
   val typography = MaterialTheme.typography
+  val isWallpaperActive = LocalAppWallpaperActive.current
+  val titleColor = if (isWallpaperActive) Color.White else colors.onSurface
+  val summaryColor = if (isWallpaperActive) Color.White.copy(alpha = 0.82f) else colors.onSurfaceVariant
   ProvidePreferenceLocals(
     theme =
       preferenceTheme(
@@ -38,9 +43,9 @@ internal fun ProvideExpressivePreferenceLocals(
         verticalSpacing = 4.dp,
         iconContainerMinWidth = 52.dp,
         iconColor = colors.primary,
-        titleColor = colors.onSurface,
+        titleColor = titleColor,
         titleTextStyle = typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
-        summaryColor = colors.onSurfaceVariant,
+        summaryColor = summaryColor,
         summaryTextStyle = typography.bodyMedium,
         dividerHeight = 20.dp,
       ),

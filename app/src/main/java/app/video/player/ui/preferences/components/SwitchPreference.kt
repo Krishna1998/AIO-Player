@@ -153,7 +153,7 @@ fun SwitchPreference(
             .padding(end = 16.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
       ) {
-        ProvideTextStyle(value = titleStyle) {
+        ProvideTextStyle(value = titleStyle.copy(color = MaterialTheme.colorScheme.onSurface)) {
           title()
         }
         if (effectiveSummary != null) {

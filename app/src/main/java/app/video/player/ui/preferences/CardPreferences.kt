@@ -26,6 +26,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.ui.graphics.Color
+import app.video.player.ui.theme.LocalAppWallpaperActive
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.CompositionLocalProvider
@@ -321,11 +323,13 @@ fun PreferenceSectionHeader(
       content = {},
     )
     Spacer(modifier = Modifier.width(10.dp))
+    val isWallpaperActive = LocalAppWallpaperActive.current
+    val headerTextColor = if (isWallpaperActive) Color.White else MaterialTheme.colorScheme.onSurface
     Text(
       text = title,
       style = MaterialTheme.typography.titleMedium,
       fontWeight = FontWeight.Bold,
-      color = MaterialTheme.colorScheme.onSurface,
+      color = headerTextColor,
     )
   }
 }
