@@ -180,6 +180,7 @@ class PlaylistRepository(
       items.any { isPathMatching(it.filePath, filePath) }
     }
 
+  @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
   fun observeFavoriteAudioPaths(): Flow<Set<String>> =
     playlistDao.observeAllPlaylists().flatMapLatest { playlists ->
       val favPlaylist = playlists.find {

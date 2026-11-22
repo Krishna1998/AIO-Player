@@ -1220,7 +1220,7 @@ fun MusicLibraryContent(
             itemType = itemType,
             itemNames = itemNames,
             itemPaths = if (selectedTab == MusicTab.SONGS || selectedTab == MusicTab.FAVORITES) {
-              (activeSelectionManager.getSelectedItems() as List<MusicSong>).map { it.uri.toString() }
+              activeSelectionManager.getSelectedItems().filterIsInstance<MusicSong>().map { it.uri.toString() }
             } else emptyList(),
           )
         }

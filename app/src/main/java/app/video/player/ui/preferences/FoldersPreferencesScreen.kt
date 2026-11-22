@@ -425,6 +425,7 @@ object FoldersPreferencesScreen : Screen {
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
               )
+              @Suppress("DEPRECATION")
               Slider(
                 value = minHorizonVideoMinutes.toFloat().coerceIn(0f, 120f),
                 onValueChange = { rawMinutes ->

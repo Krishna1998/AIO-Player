@@ -102,7 +102,7 @@ object UpdatePreferencesScreen : Screen {
                       text = when {
                         updateState.checking -> stringResource(R.string.ui_check_for_updates_now) + "…"
                         updateState.readyToInstall -> stringResource(R.string.update_ready_to_install)
-                        updateState.release != null -> stringResource(R.string.update_available) + " (${updateState.release?.name ?: ""})"
+                        updateState.release != null -> stringResource(R.string.update_available) + " (${updateState.release.name})"
                         else -> stringResource(R.string.ui_already_using_latest_version)
                       },
                       color = MaterialTheme.colorScheme.outline,

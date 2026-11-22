@@ -6184,7 +6184,7 @@ private suspend fun restorePlaybackPosition(state: PlaybackStateEntity?, loadGen
             } else if (item.artworkUri.isNullOrBlank() && HttpUtils.isMusicStreamingUrl(resolvedOriginalUri)) {
               val artwork = HttpUtils.fetchMusicStreamingArtwork(resolvedOriginalUri)
               if (!artwork.isNullOrBlank()) item.copy(artworkUri = artwork) else item
-            } else if (isCurrentPlaybackAudio() && (item.artworkUri.isNullOrBlank() || item.artworkUri?.startsWith("content://") == true)) {
+            } else if (isCurrentPlaybackAudio() && (item.artworkUri.isNullOrBlank() || item.artworkUri.startsWith("content://"))) {
               val cachedArt = thumbnailRepository.onlineMusicArtworkRepository.getCachedArtworkFile(
                 pathOrUri = item.originalUri,
                 title = item.title,

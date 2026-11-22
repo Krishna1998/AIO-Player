@@ -180,6 +180,7 @@ object AudioPreferencesScreen : Screen {
                   color = MaterialTheme.colorScheme.outline,
                   style = MaterialTheme.typography.bodyMedium,
                 )
+                @Suppress("DEPRECATION")
                 Slider(
                   value =
                     minimumAudioDurationSeconds

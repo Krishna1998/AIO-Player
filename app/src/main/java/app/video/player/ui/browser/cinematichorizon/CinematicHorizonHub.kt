@@ -2854,6 +2854,7 @@ private fun BentoMediaActionSheet(
   onDelete: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
+  @Suppress("DEPRECATION")
   val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
   val isAudio = video.isAudio
   val (artist, title) = if (isAudio) {

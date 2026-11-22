@@ -220,7 +220,7 @@ object AboutScreen : Screen {
                     onDrawBehind {
                       drawRect(brush = cosmicAura)
                       stars.forEach { (pos, radius) ->
-                        val twinkle = (0.35f + 0.65f * sin((nebulaBreathing * 2 * PI + pos.x).toDouble()).toFloat()).coerceIn(0.2f, 1f)
+                        val twinkle = (0.35f + 0.65f * sin((nebulaBreathing * 2 * PI + pos.x))).coerceIn(0.2f, 1f)
                         drawCircle(
                           color = Color.White.copy(alpha = twinkle * 0.75f),
                           radius = radius,

@@ -537,9 +537,9 @@ private fun NormalTopBar(
           onClick = onSettingsClick,
           modifier = Modifier.padding(horizontal = 2.dp).browserTopBarFocus(),
         ) {
-          if (showProfilePictureInSettings && profileAvatar != null) {
+          if (showProfilePictureInSettings) {
             Image(
-              bitmap = profileAvatar,
+              bitmap = profileAvatar!!,
               contentDescription = profileName.ifBlank { stringResource(R.string.ui_settings) },
               contentScale = ContentScale.Crop,
               modifier = Modifier
