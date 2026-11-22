@@ -39,9 +39,12 @@ import app.video.player.domain.update.AppUpdateChannel
 import app.video.player.presentation.Screen
 import app.video.player.ui.icons.Icon
 import app.video.player.ui.icons.Icons
+import app.video.player.ui.preferences.PreferenceCard
+import app.video.player.ui.preferences.PreferenceDivider
+import app.video.player.ui.preferences.PreferenceSectionHeader
+import app.video.player.ui.preferences.PreferenceSectionPosition
 import app.video.player.ui.preferences.components.AppPreference
 import app.video.player.ui.preferences.components.PreferenceAction
-import app.video.player.ui.preferences.components.PreferenceDivider
 import app.video.player.ui.preferences.components.SwitchPreference
 import app.video.player.ui.theme.LocalAppWallpaperActive
 import app.video.player.ui.theme.wallpaperAwareBackgroundColor
@@ -49,8 +52,6 @@ import app.video.player.ui.utils.LocalBackStack
 import app.video.player.ui.utils.LocalUpdateViewModel
 import app.video.player.ui.utils.popSafely
 import kotlinx.serialization.Serializable
-import me.zhanghai.compose.preference.ListPreference
-import me.zhanghai.compose.preference.PreferenceSectionHeader
 
 @Serializable
 object UpdatePreferencesScreen : Screen {
@@ -60,6 +61,11 @@ object UpdatePreferencesScreen : Screen {
     val backstack = LocalBackStack.current
     val wallpaperActive = LocalAppWallpaperActive.current
     val updateViewModel = LocalUpdateViewModel.current
+
+    val isAutoUpdate = updateViewModel?.isAutoUpdateEnabled?.collectAsState()?.value ?: false
+    val isAutoInstall = updateViewModel?.isAutoInstallEnabled?.collectAsState()?.value ?: false
+    val updateChannel = updateViewModel?.updateChannel?.collectAsState()?.value ?: AppUpdateChannel.STABLE
+    val updateState = updateViewModel?.uiState?.collectAsState()?.value
 
     Scaffold(
       containerColor = wallpaperAwareBackgroundColor(),
@@ -79,12 +85,7 @@ object UpdatePreferencesScreen : Screen {
           contentPadding = PaddingValues(bottom = 32.dp),
           verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-          if (updateViewModel != null) {
-            val isAutoUpdate by updateViewModel.isAutoUpdateEnabled.collectAsState()
-            val isAutoInstall by updateViewModel.isAutoInstallEnabled.collectAsState()
-            val updateChannel by updateViewModel.updateChannel.collectAsState()
-            val updateState by updateViewModel.uiState.collectAsState()
-
+          if (updateViewModel != null && updateState != null) {
             item {
               PreferenceSectionHeader(
                 position = PreferenceSectionPosition.First,
@@ -198,7 +199,7 @@ object UpdatePreferencesScreen : Screen {
                   },
                   icon = {
                     Icon(
-                      imageVector = Icons.RoundedFilled.Sync,
+                      imageVector = Icons.RoundedFilled.Refresh,
                       contentDescription = null,
                     )
                   },

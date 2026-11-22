@@ -83,7 +83,10 @@ import app.video.player.ui.icons.Icon
 import app.video.player.ui.icons.Icons
 import app.video.player.ui.liquidglass.appGlassSurface
 import app.video.player.ui.liquidglass.liquidGlassActive
-import app.video.player.ui.preferences.components.PreferenceDivider
+import app.video.player.ui.preferences.PreferenceDivider
+import app.video.player.ui.preferences.PreferenceSectionHeader
+import app.video.player.ui.preferences.PreferenceSectionPosition
+import app.video.player.ui.preferences.PreferenceCard
 import app.video.player.ui.theme.LocalAppWallpaperActive
 import app.video.player.ui.theme.wallpaperAwareBackgroundColor
 import app.video.player.ui.utils.LocalBackStack
@@ -91,7 +94,6 @@ import app.video.player.ui.utils.navigateTo
 import app.video.player.ui.utils.popSafely
 import app.video.player.utils.clipboard.SafeClipboard
 import kotlinx.serialization.Serializable
-import me.zhanghai.compose.preference.PreferenceSectionHeader
 
 @Serializable
 object AboutScreen : Screen {
@@ -425,6 +427,7 @@ object AboutScreen : Screen {
           }
 
           // 3. Detailed Real-time System Specs
+          val systemStats = remember { collectSystemStats(context) }
           item {
             PreferenceSectionHeader(
               position = PreferenceSectionPosition.Middle,
@@ -432,7 +435,6 @@ object AboutScreen : Screen {
             )
           }
 
-          val systemStats = remember { collectSystemStats(context) }
           item {
             PreferenceCard {
               systemStats.forEachIndexed { index, (label, value) ->

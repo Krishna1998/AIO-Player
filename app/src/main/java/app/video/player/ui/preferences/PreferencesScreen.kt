@@ -434,7 +434,7 @@ object PreferencesScreen : Screen {
             SettingsDestination(
               title = stringResource(R.string.pref_section_updates),
               summary = stringResource(R.string.ui_check_for_updates_now),
-              icon = Icons.RoundedFilled.Sync,
+              icon = Icons.RoundedFilled.Refresh,
               screen = UpdatePreferencesScreen,
             ),
             SettingsDestination(
