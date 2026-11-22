@@ -123,10 +123,16 @@ object NetworkStreamingScreen : Screen {
   @OptIn(ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
+    Content(null)
+  }
+
+  @OptIn(ExperimentalMaterial3Api::class)
+  @Composable
+  fun Content(providedViewModel: NetworkStreamingViewModel? = null) {
     val backstack = LocalBackStack.current
     val context = LocalContext.current
     val viewModel: NetworkStreamingViewModel =
-      viewModel(factory = NetworkStreamingViewModel.factory(context.applicationContext as android.app.Application))
+      providedViewModel ?: viewModel(factory = NetworkStreamingViewModel.factory(context.applicationContext as android.app.Application))
     val ytdlPreferences = koinInject<YtdlPreferences>()
     val bookmarkPreferences = koinInject<NetworkBookmarkPreferences>()
     val linkDownloadCoordinator = koinInject<app.video.player.domain.download.LinkDownloadCoordinator>()

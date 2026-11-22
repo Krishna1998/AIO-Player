@@ -547,6 +547,13 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
         PaddingValues(0.dp)
       }
     val context = androidx.compose.ui.platform.LocalContext.current
+    val networkStreamingViewModel: app.video.player.ui.browser.networkstreaming.NetworkStreamingViewModel =
+      androidx.lifecycle.viewmodel.compose.viewModel(
+        factory =
+          app.video.player.ui.browser.networkstreaming.NetworkStreamingViewModel.factory(
+            context.applicationContext as android.app.Application,
+          ),
+      )
     val jellyfinViewModel: app.video.player.ui.browser.jellyfin.JellyfinViewModel =
       androidx.lifecycle.viewmodel.compose.viewModel(
         factory =
@@ -622,7 +629,7 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
               val tab = visibleTabs.getOrNull(page) ?: return@NavigationPager
               when (tab) {
                 MainTab.HOME -> FolderListScreen.Content()
-                MainTab.NETWORK -> NetworkStreamingScreen.Content()
+                MainTab.NETWORK -> NetworkStreamingScreen.Content(networkStreamingViewModel)
                 MainTab.MUSIC -> {
                   if (musicSourceProvider == MusicSourceProvider.JELLYFIN) {
                     val jellyfinUiState by jellyfinViewModel.uiState.collectAsStateWithLifecycle()
