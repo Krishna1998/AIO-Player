@@ -236,3 +236,4 @@ object UpdatePreferencesScreen : Screen {
     }
   }
 }
+
