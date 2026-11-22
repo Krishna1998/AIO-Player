@@ -229,6 +229,17 @@ object PreferencesScreen : Screen {
               )
             }
           },
+          actions = {
+            IconButton(
+              onClick = { backstack.navigateTo(SettingsSearchScreen) },
+            ) {
+              Icon(
+                Icons.RoundedFilled.Search,
+                contentDescription = stringResource(R.string.search),
+                tint = colorScheme.primary,
+              )
+            }
+          },
         )
       },
     ) { padding ->
@@ -243,37 +254,6 @@ object PreferencesScreen : Screen {
         contentPadding = PaddingValues(bottom = 28.dp + LocalNavigationBarHeight.current),
         verticalArrangement = Arrangement.spacedBy(4.dp),
       ) {
-        item {
-          SettingsSearchEntry(
-            onClick = { backstack.navigateTo(SettingsSearchScreen) },
-            modifier =
-              Modifier
-                .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 12.dp)
-                .tvFocusMemory("settings-search"),
-          )
-        }
-
-        if (!television) {
-          item {
-            QuickSettingsRow(
-              onDestinationClick = { targetScreen, targetAnchor ->
-                if (targetAnchor != null) {
-                  SettingsSearchNavigation.open(
-                    SearchablePreference(
-                      titleRes = targetAnchor,
-                      category = "Quick",
-                      screen = targetScreen,
-                      targetRes = targetAnchor,
-                    ),
-                  )
-                }
-                onScreenSelected(targetScreen)
-              },
-              modifier = Modifier.padding(bottom = 14.dp),
-            )
-          }
-        }
-
         items(sections, key = { it.title }) { section ->
           SettingsSectionBlock(
             section = section,

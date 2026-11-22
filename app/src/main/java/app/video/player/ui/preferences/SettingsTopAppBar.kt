@@ -4,6 +4,7 @@
 
 package app.video.player.ui.preferences
 
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
@@ -39,6 +40,7 @@ internal fun SettingsTopAppBar(
   onBack: () -> Unit,
   titleModifier: Modifier = Modifier,
   onClose: (() -> Unit)? = null,
+  actions: @Composable RowScope.() -> Unit = {},
   windowInsets: WindowInsets = TopAppBarDefaults.windowInsets,
 ) {
   if (LocalPlayerSettingsPanel.current) return
@@ -78,6 +80,7 @@ internal fun SettingsTopAppBar(
       }
     },
     actions = {
+      actions()
       if (onClose != null) {
         IconButton(onClick = onClose) {
           Icon(
