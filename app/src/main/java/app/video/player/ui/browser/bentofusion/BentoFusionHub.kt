@@ -1149,8 +1149,6 @@ private fun CinematicHorizonContent(
                     onClick = { playAudioInBackground(item.video, null) },
                     onLongClick = { onVideoAction(item.video) },
                   )
-                    onLongClick = { onVideoAction(item.video) },
-                  )
                 }
               }
             }
