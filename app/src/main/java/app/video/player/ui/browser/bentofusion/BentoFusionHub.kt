@@ -844,29 +844,36 @@ private fun CinematicHorizonContent(
       val heroHeight = (280f * spotlightScale.coerceIn(0.7f, 1.3f)).dp
       Box(
         modifier = Modifier
-          .fillMaxWidth()
-          .padding(horizontal = 16.dp)
-          .height(heroHeight)
-          .clip(RoundedCornerShape(28.dp))
-          .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-          .border(
-            1.dp,
-            Brush.linearGradient(
-              listOf(
-                MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
-                MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f),
-                Color.Transparent,
-              ),
-            ),
-            RoundedCornerShape(28.dp),
-          ),
+          .fillMaxWidth(),
+        contentAlignment = Alignment.Center,
       ) {
-        // Backdrop Media Thumbnail
-        BentoMediaThumbnail(
-          video = video,
-          modifier = Modifier.fillMaxSize(),
-          showPlayOverlay = false,
-        )
+        Box(
+          modifier = Modifier
+            .fillMaxWidth()
+            .widthIn(max = 800.dp)
+            .padding(horizontal = 16.dp)
+            .height(heroHeight)
+            .clip(RoundedCornerShape(28.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+            .border(
+              1.dp,
+              Brush.linearGradient(
+                listOf(
+                  MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                  MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f),
+                  Color.Transparent,
+                ),
+              ),
+              RoundedCornerShape(28.dp),
+            ),
+        ) {
+          // Backdrop Media Thumbnail (High definition for hero spotlight banner)
+          BentoMediaThumbnail(
+            video = video,
+            modifier = Modifier.fillMaxSize(),
+            showPlayOverlay = false,
+            highDefinition = true,
+          )
 
         // Gradient Shade Overlays
         Box(
@@ -3050,18 +3057,31 @@ private fun BentoMediaThumbnail(
   video: Video,
   modifier: Modifier = Modifier,
   showPlayOverlay: Boolean = true,
+  highDefinition: Boolean = false,
 ) {
   val thumbnailRepository = koinInject<ThumbnailRepository>()
   val density = LocalDensity.current
   val isAudio = video.isAudio
-  val thumbWidthPx = with(density) { (if (isAudio) 328.dp else 432.dp).roundToPx() }
-  val thumbHeightPx = with(density) { (if (isAudio) 372.dp else 244.dp).roundToPx() }
+  val thumbWidthPx = with(density) {
+    if (highDefinition) {
+      if (isAudio) 640.dp.roundToPx() else 960.dp.roundToPx()
+    } else {
+      (if (isAudio) 328.dp else 432.dp).roundToPx()
+    }
+  }
+  val thumbHeightPx = with(density) {
+    if (highDefinition) {
+      if (isAudio) 640.dp.roundToPx() else 540.dp.roundToPx()
+    } else {
+      (if (isAudio) 372.dp else 244.dp).roundToPx()
+    }
+  }
 
-  var thumbnail by remember(video.path) {
+  var thumbnail by remember(video.path, highDefinition) {
     mutableStateOf<Bitmap?>(thumbnailRepository.peekThumbnailFromMemory(video, thumbWidthPx, thumbHeightPx))
   }
 
-  LaunchedEffect(video.path) {
+  LaunchedEffect(video.path, highDefinition) {
     if (thumbnail == null) {
       val loaded = thumbnailRepository.getThumbnail(video, thumbWidthPx, thumbHeightPx)
       if (loaded != null) thumbnail = loaded
