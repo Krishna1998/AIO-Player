@@ -38,11 +38,11 @@ internal data class NavigationJellyFrame(
 
 @Stable
 internal class NavigationJellyMotion(initialIndex: Int, private val tabCount: Int) {
-  private val position = NavigationJellySpring(initialIndex.coerceIn(0, tabCount - 1).toDouble(), 1000.0, 1.0)
-  private val velocity = NavigationJellySpring(0.0, 300.0, 0.5)
-  private val press = NavigationJellySpring(0.0, 1000.0, 1.0)
-  private val scaleX = NavigationJellySpring(1.0, 250.0, 0.6)
-  private val scaleY = NavigationJellySpring(1.0, 250.0, 0.7)
+  private val position = NavigationJellySpring(initialIndex.coerceIn(0, tabCount - 1).toDouble(), 750.0, 0.82)
+  private val velocity = NavigationJellySpring(0.0, 320.0, 0.45)
+  private val press = NavigationJellySpring(0.0, 800.0, 0.78)
+  private val scaleX = NavigationJellySpring(1.0, 320.0, 0.52)
+  private val scaleY = NavigationJellySpring(1.0, 320.0, 0.56)
   private val panel = NavigationJellySpring(0.0, 300.0, 1.0)
   private val distortionDamping = 18.0 / (2 * sqrt(240.0 * 0.9))
   private val trackY = NavigationJellySpring(0.0, 240.0 / 0.9, distortionDamping)
@@ -98,6 +98,12 @@ internal class NavigationJellyMotion(initialIndex: Int, private val tabCount: In
     releasePending = true
     pressTarget = 0.0
     shapeTarget = 1.0
+    val dist = abs(target - position.value)
+    if (dist > 0.05) {
+      // Fluid jelly elongation along movement direction
+      scaleX.velocity = 1.8 * dist.coerceAtMost(2.5)
+      scaleY.velocity = -0.9 * dist.coerceAtMost(2.5)
+    }
     running = true
   }
 
@@ -175,9 +181,9 @@ internal class NavigationJellyMotion(initialIndex: Int, private val tabCount: In
     val speed = velocity.value / 10
     frame = NavigationJellyFrame(
       position = position.value.toFloat(),
-      pillScaleX = (scaleX.value / (1 - (speed * 0.75).coerceIn(-0.2, 0.2))).toFloat(),
-      pillScaleY = (scaleY.value * (1 - (speed * 0.25).coerceIn(-0.2, 0.2))).toFloat(),
-      contentScale = (1 + 0.2 * press.value).toFloat(),
+      pillScaleX = (scaleX.value / (1 - (speed * 0.95).coerceIn(-0.35, 0.35))).toFloat(),
+      pillScaleY = (scaleY.value * (1 - (speed * 0.35).coerceIn(-0.25, 0.25))).toFloat(),
+      contentScale = (1 + 0.15 * press.value).toFloat(),
       panelOffset = navigationPanelOffset(panel.value, width),
       trackScale = trackPress.value.toFloat(),
       trackScaleX = trackX.value.toFloat(),

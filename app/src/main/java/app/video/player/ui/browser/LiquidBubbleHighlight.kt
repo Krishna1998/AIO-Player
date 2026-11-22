@@ -25,56 +25,56 @@ internal fun DrawScope.drawLiquidBubbleHighlight(
   if (strength <= 0f || size.width <= 0f || size.height <= 0f) return
 
   val radius = size.minDimension * 0.5f
-  val rimWidth = 0.8.dp.toPx().coerceAtMost(radius)
+  val rimWidth = 1.1.dp.toPx().coerceAtMost(radius)
   val rimStroke = Stroke(rimWidth)
-  val oppositeStroke = Stroke(0.45.dp.toPx().coerceAtMost(radius))
-  val broadShade = Stroke(6.dp.toPx().coerceAtMost(radius))
-  val middleShade = Stroke(3.5.dp.toPx().coerceAtMost(radius))
-  val narrowShade = Stroke(1.5.dp.toPx().coerceAtMost(radius))
+  val oppositeStroke = Stroke(0.65.dp.toPx().coerceAtMost(radius))
+  val broadShade = Stroke(8.dp.toPx().coerceAtMost(radius))
+  val middleShade = Stroke(4.5.dp.toPx().coerceAtMost(radius))
+  val narrowShade = Stroke(2.0.dp.toPx().coerceAtMost(radius))
 
-  // Upper-left specular light reflection
+  // Upper-left specular light reflection (bright glass glint)
   val upperReflection = Brush.linearGradient(
-    0f to (if (isDark) Color.White.copy(alpha = 0.75f) else Color.White.copy(alpha = 0.90f)),
-    0.24f to (if (isDark) Color.White.copy(alpha = 0.35f) else accentColor.copy(alpha = 0.45f)),
-    0.52f to Color.Transparent,
+    0f to (if (isDark) Color.White.copy(alpha = 0.88f) else Color.White.copy(alpha = 0.95f)),
+    0.28f to (if (isDark) Color.White.copy(alpha = 0.45f) else accentColor.copy(alpha = 0.55f)),
+    0.58f to Color.Transparent,
     1f to Color.Transparent,
     start = Offset.Zero,
-    end = Offset(size.width * 0.78f, size.height),
+    end = Offset(size.width * 0.82f, size.height),
   )
 
   // Opposite bottom-right subtle reflection
   val oppositeReflection = Brush.linearGradient(
     0f to Color.Transparent,
-    0.62f to Color.Transparent,
-    0.84f to Color.White.copy(alpha = 0.08f),
-    1f to (if (isDark) Color.White.copy(alpha = 0.32f) else accentColor.copy(alpha = 0.30f)),
+    0.55f to Color.Transparent,
+    0.80f to Color.White.copy(alpha = 0.14f),
+    1f to (if (isDark) Color.White.copy(alpha = 0.42f) else accentColor.copy(alpha = 0.38f)),
     start = Offset.Zero,
     end = Offset(size.width, size.height),
   )
 
-  // Soft inset shade for depth
+  // Soft inset shade for depth (curved glass meniscus)
   val lowerShade = Brush.verticalGradient(
     0f to Color.Transparent,
-    0.50f to Color.Transparent,
-    0.74f to Color.Black.copy(alpha = 0.035f),
-    1f to Color.Black.copy(alpha = if (isDark) 0.16f else 0.10f),
+    0.45f to Color.Transparent,
+    0.70f to Color.Black.copy(alpha = 0.05f),
+    1f to Color.Black.copy(alpha = if (isDark) 0.22f else 0.14f),
     endY = size.height,
   )
 
-  // Subtle glassy surface sheen
+  // Glassy surface sheen and light spill
   val surfaceReflection = Brush.verticalGradient(
-    0f to Color.White.copy(alpha = if (isDark) 0.07f else 0.05f),
-    0.38f to Color.White.copy(alpha = 0.01f),
-    0.64f to Color.Transparent,
-    1f to Color.White.copy(alpha = 0.02f),
+    0f to Color.White.copy(alpha = if (isDark) 0.12f else 0.08f),
+    0.35f to Color.White.copy(alpha = 0.03f),
+    0.65f to Color.Transparent,
+    1f to Color.White.copy(alpha = 0.04f),
     endY = size.height,
   )
 
   clipPath(path) {
     drawRect(surfaceReflection, alpha = strength)
-    drawPath(path, lowerShade, alpha = strength * 0.40f, style = broadShade)
-    drawPath(path, lowerShade, alpha = strength * 0.50f, style = middleShade)
-    drawPath(path, lowerShade, alpha = strength * 0.65f, style = narrowShade)
+    drawPath(path, lowerShade, alpha = strength * 0.50f, style = broadShade)
+    drawPath(path, lowerShade, alpha = strength * 0.65f, style = middleShade)
+    drawPath(path, lowerShade, alpha = strength * 0.80f, style = narrowShade)
     drawPath(path, upperReflection, alpha = strength, style = rimStroke)
     drawPath(path, oppositeReflection, alpha = strength, style = oppositeStroke)
   }
