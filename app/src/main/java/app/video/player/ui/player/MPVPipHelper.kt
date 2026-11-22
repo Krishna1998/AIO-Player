@@ -98,6 +98,7 @@ class MPVPipHelper(
   }
 
   private fun unregisterPipReceiver() {
+    if (activity.isInPictureInPictureMode) return
     pipReceiver?.let {
       runCatching { activity.unregisterReceiver(it) }
       pipReceiver = null
@@ -240,7 +241,7 @@ class MPVPipHelper(
         activity,
         actionCode,
         intent,
-        PendingIntent.FLAG_IMMUTABLE,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
       )
 
     return RemoteAction(

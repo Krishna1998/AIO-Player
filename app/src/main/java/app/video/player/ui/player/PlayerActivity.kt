@@ -2294,7 +2294,7 @@ class PlayerActivity :
       // Unregister the screen-state receiver while stopped so the Activity
       // is not woken by ACTION_SCREEN_OFF / ACTION_USER_PRESENT while in
       // the background. It is re-registered in onStart(). See issue 2.3.
-      if (screenStateReceiverRegistered) {
+      if (!isInPictureInPictureMode && screenStateReceiverRegistered) {
         unregisterReceiver(screenStateReceiver)
         screenStateReceiverRegistered = false
       }

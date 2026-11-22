@@ -130,5 +130,5 @@ internal object PlayerLifecyclePolicy {
       !backgroundPlaybackSessionActive &&
       !isUserFinishing &&
       !isFinishing &&
-      (!isInPictureInPictureMode || isScreenOffOrLocked)
+      !isInPictureInPictureMode
 }
