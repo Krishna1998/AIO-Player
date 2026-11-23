@@ -481,10 +481,10 @@ private fun HyperNotchMatrixHud(
 }
 
 /**
- * VisionOS dual-chamber glass card with separate icon badge and slider (Aero Dual-Tone Bento style).
+ * VisionOS dual-chamber glass card with separate icon badge and slider (Aero Dual-Tone style).
  */
 @Composable
-private fun AeroDualToneBentoHud(
+private fun AeroDualToneHud(
   fraction: Float,
   overflowFraction: Float,
   label: String,
@@ -944,8 +944,8 @@ private fun MasterHud(
         isVolume = isVolume,
         modifier = modifier,
       )
-    VolumeAndBrightnessHudStyle.AeroDualToneBento ->
-      AeroDualToneBentoHud(
+    VolumeAndBrightnessHudStyle.AeroDualTone ->
+      AeroDualToneHud(
         fraction = fraction,
         overflowFraction = overflowFraction,
         label = label,

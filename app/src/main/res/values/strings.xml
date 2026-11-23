@@ -66,7 +66,7 @@
   <string name="pref_hud_style_summary">Choose the visual HUD design for volume and brightness gesture controls</string>
   <string name="hud_style_dynamic_island">Dynamic Island</string>
   <string name="hud_style_hyper_notch_matrix">Hyper-Notch Matrix</string>
-  <string name="hud_style_aero_dual_tone_bento">Aero Dual-Tone Bento</string>
+  <string name="hud_style_aero_dual_tone">Aero Dual-Tone</string>
   <string name="hud_style_segmented_blocks">Segmented Blocks</string>
   <string name="hud_style_soundstage_bento">SoundStage Bento</string>
   <string name="hud_style_classic_capsule">Classic Capsule</string>

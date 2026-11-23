@@ -15,7 +15,7 @@ import app.video.player.R
 enum class VolumeAndBrightnessHudStyle(@StringRes val titleRes: Int) {
   DynamicIsland(R.string.hud_style_dynamic_island),
   HyperNotchMatrix(R.string.hud_style_hyper_notch_matrix),
-  AeroDualToneBento(R.string.hud_style_aero_dual_tone_bento),
+  AeroDualTone(R.string.hud_style_aero_dual_tone),
   SegmentedBlocks(R.string.hud_style_segmented_blocks),
   SoundStageBento(R.string.hud_style_soundstage_bento),
   ClassicCapsule(R.string.hud_style_classic_capsule);
@@ -24,6 +24,6 @@ enum class VolumeAndBrightnessHudStyle(@StringRes val titleRes: Int) {
     get() =
       this == DynamicIsland ||
         this == HyperNotchMatrix ||
-        this == AeroDualToneBento ||
+        this == AeroDualTone ||
         this == SoundStageBento
 }
