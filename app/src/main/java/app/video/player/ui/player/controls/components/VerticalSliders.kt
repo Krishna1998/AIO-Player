@@ -55,11 +55,11 @@ fun percentage(
   range: ClosedFloatingPointRange<Float>,
 ): Float = ((value - range.start) / (range.endInclusive - range.start)).coerceIn(0f, 1f)
 
-private val LevelPillWidth = 36.dp
-private val LevelPillHeight = 180.dp
-private val LevelPillInset = 12.dp
-private val LevelPillIconSize = 18.dp
-private val LevelPillLabelHeight = 16.dp
+private val LevelPillWidth = 42.dp
+private val LevelPillHeight = 220.dp
+private val LevelPillInset = 14.dp
+private val LevelPillIconSize = 20.dp
+private val LevelPillLabelHeight = 18.dp
 
 /**
  * Android TV style level indicator: one capsule filled from the bottom with the theme gradient,
@@ -215,8 +215,8 @@ private fun DynamicIslandHud(
 
   Box(
     modifier = modifier
-      .width(228.dp)
-      .height(44.dp)
+      .width(272.dp)
+      .height(48.dp)
       .then(
         if (glassBackdrop != null) {
           Modifier.drawBackdrop(
@@ -252,7 +252,7 @@ private fun DynamicIslandHud(
         imageVector = icon,
         contentDescription = null,
         tint = if (overflow > 0f) colors.error else colors.primary,
-        modifier = Modifier.size(19.dp),
+        modifier = Modifier.size(20.dp),
       )
 
       Spacer(modifier = Modifier.width(10.dp))
@@ -260,7 +260,7 @@ private fun DynamicIslandHud(
       Box(
         modifier = Modifier
           .weight(1f)
-          .height(7.dp)
+          .height(8.dp)
           .clip(CircleShape)
           .background(Color.White.copy(alpha = 0.14f)),
       ) {
@@ -348,7 +348,7 @@ private fun HyperNotchMatrixHud(
     // Left Satellite Orb
     Box(
       modifier = Modifier
-        .size(38.dp)
+        .size(42.dp)
         .then(
           if (glassBackdrop != null) {
             Modifier.drawBackdrop(
@@ -383,7 +383,7 @@ private fun HyperNotchMatrixHud(
         imageVector = icon,
         contentDescription = null,
         tint = if (overflow > 0f) colors.error else colors.primary,
-        modifier = Modifier.size(19.dp),
+        modifier = Modifier.size(20.dp),
       )
     }
 
@@ -392,8 +392,8 @@ private fun HyperNotchMatrixHud(
     // Right Floating Glass Pill
     Box(
       modifier = Modifier
-        .width(185.dp)
-        .height(38.dp)
+        .width(225.dp)
+        .height(42.dp)
         .then(
           if (glassBackdrop != null) {
             Modifier.drawBackdrop(
@@ -428,7 +428,7 @@ private fun HyperNotchMatrixHud(
         Box(
           modifier = Modifier
             .weight(1f)
-            .height(6.dp)
+            .height(7.5.dp)
             .clip(CircleShape)
             .background(Color.White.copy(alpha = 0.14f)),
         ) {
@@ -511,8 +511,8 @@ private fun AeroDualToneHud(
 
   Box(
     modifier = modifier
-      .width(245.dp)
-      .height(64.dp)
+      .width(288.dp)
+      .height(68.dp)
       .then(
         if (glassBackdrop != null) {
           Modifier.drawBackdrop(
@@ -545,8 +545,8 @@ private fun AeroDualToneHud(
     ) {
       Box(
         modifier = Modifier
-          .size(46.dp)
-          .clip(RoundedCornerShape(13.dp))
+          .size(48.dp)
+          .clip(RoundedCornerShape(14.dp))
           .background(
             if (overflow > 0f) colors.errorContainer.copy(alpha = 0.28f)
             else colors.primaryContainer.copy(alpha = 0.28f),
@@ -555,7 +555,7 @@ private fun AeroDualToneHud(
             1.dp,
             if (overflow > 0f) colors.error.copy(alpha = 0.35f)
             else Color.White.copy(alpha = 0.15f),
-            RoundedCornerShape(13.dp),
+            RoundedCornerShape(14.dp),
           ),
         contentAlignment = Alignment.Center,
       ) {
@@ -567,7 +567,7 @@ private fun AeroDualToneHud(
             imageVector = icon,
             contentDescription = null,
             tint = if (overflow > 0f) colors.error else colors.primary,
-            modifier = Modifier.size(18.dp),
+            modifier = Modifier.size(19.dp),
           )
           Text(
             text = if (overflow > 0f) "BST" else if (isVolume) "VOL" else "BRI",
@@ -633,7 +633,7 @@ private fun AeroDualToneHud(
         Box(
           modifier = Modifier
             .fillMaxWidth()
-            .height(6.dp)
+            .height(7.5.dp)
             .clip(CircleShape)
             .background(Color.White.copy(alpha = 0.14f)),
         ) {
@@ -685,8 +685,8 @@ private fun SegmentedBlocksHud(
 
   Box(
     modifier = modifier
-      .width(44.dp)
-      .height(196.dp)
+      .width(48.dp)
+      .height(232.dp)
       .then(
         if (glassBackdrop != null) {
           Modifier.drawBackdrop(
@@ -730,7 +730,7 @@ private fun SegmentedBlocksHud(
       )
 
       Column(
-        verticalArrangement = Arrangement.spacedBy(3.dp),
+        verticalArrangement = Arrangement.spacedBy(3.5.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
       ) {
         for (i in 9 downTo 0) {
@@ -744,9 +744,9 @@ private fun SegmentedBlocksHud(
 
           Box(
             modifier = Modifier
-              .width(26.dp)
-              .height(7.dp)
-              .clip(RoundedCornerShape(3.dp))
+              .width(30.dp)
+              .height(8.5.dp)
+              .clip(RoundedCornerShape(3.5.dp))
               .background(blockColor),
           )
         }
@@ -756,7 +756,7 @@ private fun SegmentedBlocksHud(
         imageVector = icon,
         contentDescription = null,
         tint = if (overflow > 0f) colors.error else colors.primary,
-        modifier = Modifier.size(17.dp),
+        modifier = Modifier.size(19.dp),
       )
     }
   }
@@ -793,8 +793,8 @@ private fun SoundStageBentoHud(
 
   Box(
     modifier = modifier
-      .width(236.dp)
-      .height(62.dp)
+      .width(280.dp)
+      .height(68.dp)
       .then(
         if (glassBackdrop != null) {
           Modifier.drawBackdrop(
@@ -833,7 +833,7 @@ private fun SoundStageBentoHud(
         Row(verticalAlignment = Alignment.CenterVertically) {
           Box(
             modifier = Modifier
-              .size(24.dp)
+              .size(26.dp)
               .clip(CircleShape)
               .background(
                 if (overflow > 0f) colors.errorContainer.copy(alpha = 0.35f)
@@ -845,7 +845,7 @@ private fun SoundStageBentoHud(
               imageVector = icon,
               contentDescription = null,
               tint = if (overflow > 0f) colors.error else colors.primary,
-              modifier = Modifier.size(15.dp),
+              modifier = Modifier.size(16.dp),
             )
           }
 
@@ -890,7 +890,7 @@ private fun SoundStageBentoHud(
       Box(
         modifier = Modifier
           .fillMaxWidth()
-          .height(6.dp)
+          .height(7.5.dp)
           .clip(CircleShape)
           .background(Color.White.copy(alpha = 0.14f)),
       ) {
