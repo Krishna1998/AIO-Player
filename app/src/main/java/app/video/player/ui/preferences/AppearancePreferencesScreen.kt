@@ -58,7 +58,6 @@ import app.video.player.preferences.ThumbnailGenerator
 import app.video.player.preferences.ThumbnailMode
 import app.video.player.preferences.ThumbnailQuality
 import app.video.player.preferences.TreeFlattenDepth
-import app.video.player.preferences.VolumeAndBrightnessHudStyle
 import app.video.player.preferences.preference.collectAsState
 import app.video.player.presentation.Screen
 import app.video.player.presentation.components.ConfirmDialog
@@ -681,35 +680,6 @@ object AppearancePreferencesScreen : Screen {
 
                   }
                 }
-              }
-            }
-          }
-
-          item {
-            PreferenceSectionHeader(
-              position = PreferenceSectionPosition.Middle,
-              title = stringResource(id = R.string.pref_appearance_category_player_hud),
-            )
-          }
-
-          item {
-            ExpressivePreferenceGroup {
-              val volumeAndBrightnessHudStyle by preferences.volumeAndBrightnessHudStyle.collectAsState()
-              ExpressivePreferenceTile(index = 0, itemCount = 1) {
-                ListPreference(
-                  modifier = Modifier.settingsSearchTarget(R.string.pref_hud_style_title),
-                  value = volumeAndBrightnessHudStyle,
-                  onValueChange = preferences.volumeAndBrightnessHudStyle::set,
-                  values = VolumeAndBrightnessHudStyle.entries,
-                  valueToText = { AnnotatedString(stringResource(it.titleRes)) },
-                  title = { Text(stringResource(R.string.pref_hud_style_title)) },
-                  summary = {
-                    Text(
-                      stringResource(volumeAndBrightnessHudStyle.titleRes),
-                      color = MaterialTheme.colorScheme.outline,
-                    )
-                  },
-                )
               }
             }
           }

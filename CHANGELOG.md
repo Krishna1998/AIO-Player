@@ -16,7 +16,7 @@ These notes are written in plain English and focus on what changed for real use.
     - **Hyper-Notch Matrix**: Dual-body floating architecture featuring a standalone satellite radar orb and frosted glass pill slider.
     - **Aero Dual-Tone**: Apple VisionOS-inspired dual-chamber glass card with an isolated tactile icon chamber and illuminated slider.
     - **Segmented Blocks**: Cyberpunk-inspired discrete vertical 10-block glass ladder with progressive glow and overboost indicators.
-    - **SoundStage Bento**: Expansive horizontal bento card with separate circular icon badge, tabular digit readouts, and overboost banner.
+    - **Soundstage**: Expansive horizontal bento card with separate circular icon badge, tabular digit readouts, and overboost banner.
     - **Classic Capsule**: Iconic vertical rounded pill filled with the active theme gradient.
 - **Enlarged High-Visibility Dimensions:**
   - Significantly expanded horizontal sliders (up to `336.dp` width, `78.dp` height, and `9–10.dp` thick progress tracks) for effortless glanceability and one-handed thumb reach.
