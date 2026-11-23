@@ -377,17 +377,17 @@ private fun DownloadProgressSection(progress: Float) {
   }
 }
 
-private fun formatFileSize(
+internal fun formatFileSize(
   size: Long,
-  unknownLabel: String,
+  unknownLabel: String = "Unknown size",
 ): String {
   if (size <= 0) return unknownLabel
   val units = arrayOf("B", "KB", "MB", "GB", "TB")
   val digitGroups = (Math.log10(size.toDouble()) / Math.log10(1024.0)).toInt()
-  return String.format("%.1f %s", size / Math.pow(1024.0, digitGroups.toDouble()), units[digitGroups])
+  return String.format(Locale.US, "%.1f %s", size / Math.pow(1024.0, digitGroups.toDouble()), units[digitGroups])
 }
 
-private fun formatDate(dateString: String): String {
+internal fun formatDate(dateString: String): String {
   return try {
     // GitHub API returns ISO 8601 format: "2024-01-15T10:30:00Z"
     val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
