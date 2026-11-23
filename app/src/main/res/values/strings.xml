@@ -142,8 +142,8 @@
   <string name="pref_dual_horizon_show_video_card_summary">Display the horizontal Movies / Videos in Dual Horizon / All Media</string>
   <string name="pref_dual_horizon_show_audio_pulsing_title">Show Audio Pulsing</string>
   <string name="pref_dual_horizon_show_audio_pulsing_summary">Display the dynamic Audio Pulsing spotlight card</string>
-  <string name="pref_cinematic_show_hero_spotlight_title">Show Continue Watching hero spotlight</string>
-  <string name="pref_cinematic_show_hero_spotlight_summary">Display the panoramic hero spotlight card at the top of Cinematic Horizon</string>
+  <string name="pref_cinematic_show_hero_spotlight_title">Show Continue Watching</string>
+  <string name="pref_cinematic_show_hero_spotlight_summary">Display the Continue Watching hero spotlight card at the top of Cinematic Horizon</string>
   <string name="pref_cinematic_spotlight_scale_title">Hero spotlight size</string>
   <string name="pref_audio_pulsing_scale_title">Audio Pulsing card size</string>
   <string name="pref_video_rail_scale_title">Movies / Videos rail card size</string>

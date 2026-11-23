@@ -1178,12 +1178,46 @@ object AppearancePreferencesScreen : Screen {
           }
 
           item {
-            val dualHorizonItemCount = 3
+            val dualHorizonItemCount = 5
 
             ExpressivePreferenceGroup {
+              val homeScreenLayout by browserPreferences.homeScreenLayout.collectAsState()
+              ExpressivePreferenceTile(index = 0, itemCount = dualHorizonItemCount) {
+                ListPreference(
+                  modifier = Modifier.settingsSearchTarget(R.string.pref_home_screen_layout_title),
+                  value = homeScreenLayout,
+                  onValueChange = { browserPreferences.homeScreenLayout.set(it) },
+                  values = HomeScreenLayout.entries,
+                  valueToText = { AnnotatedString(stringResource(it.titleRes)) },
+                  title = { Text(stringResource(R.string.pref_home_screen_layout_title)) },
+                  summary = {
+                    Text(
+                      stringResource(homeScreenLayout.titleRes),
+                      color = MaterialTheme.colorScheme.outline,
+                    )
+                  },
+                )
+              }
+
+              val cinematicShowHeroSpotlight by browserPreferences.cinematicShowHeroSpotlight.collectAsState()
+              SwitchPreference(
+                modifier = Modifier.settingsSearchTarget(R.string.pref_cinematic_show_hero_spotlight_title),
+                value = cinematicShowHeroSpotlight,
+                onValueChange = { browserPreferences.cinematicShowHeroSpotlight.set(it) },
+                title = { Text(stringResource(R.string.pref_cinematic_show_hero_spotlight_title)) },
+                summary = {
+                  Text(
+                    text = stringResource(R.string.pref_cinematic_show_hero_spotlight_summary),
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+                groupIndex = 1,
+                groupSize = dualHorizonItemCount,
+              )
+
               val audioPulsingProgressStyle by browserPreferences.audioPulsingProgressStyle.collectAsState()
               val dualHorizonShowAudioPulsing by browserPreferences.dualHorizonShowAudioPulsing.collectAsState()
-              ExpressivePreferenceTile(index = 0, itemCount = dualHorizonItemCount) {
+              ExpressivePreferenceTile(index = 2, itemCount = dualHorizonItemCount) {
                 ListPreference(
                   modifier = Modifier.settingsSearchTarget(R.string.pref_audio_pulsing_progress_style_title),
                   value = audioPulsingProgressStyle,
@@ -1207,7 +1241,7 @@ object AppearancePreferencesScreen : Screen {
               }
 
               val dualHorizonHeaderStyle by browserPreferences.dualHorizonHeaderStyle.collectAsState()
-              ExpressivePreferenceTile(index = 1, itemCount = dualHorizonItemCount) {
+              ExpressivePreferenceTile(index = 3, itemCount = dualHorizonItemCount) {
                 ListPreference(
                   modifier = Modifier.settingsSearchTarget(R.string.pref_dual_horizon_header_style_title),
                   value = dualHorizonHeaderStyle,
@@ -1241,108 +1275,119 @@ object AppearancePreferencesScreen : Screen {
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
-                groupIndex = 2,
+                groupIndex = 4,
                 groupSize = dualHorizonItemCount,
               )
             }
           }
 
           item {
+            val cinematicShowHeroSpotlight by browserPreferences.cinematicShowHeroSpotlight.collectAsState()
             val dualHorizonShowVideo by browserPreferences.dualHorizonShowVideoRail.collectAsState()
             val dualHorizonShowPulsing by browserPreferences.dualHorizonShowAudioPulsing.collectAsState()
             val dualHorizonShowMusic by browserPreferences.dualHorizonShowMusicRail.collectAsState()
+            val hasAnySlider = cinematicShowHeroSpotlight || dualHorizonShowPulsing || dualHorizonShowVideo || dualHorizonShowMusic
 
-            PreferenceCard {
-              val spotlightScale by browserPreferences.cinematicSpotlightScale.collectAsState()
-              ExpressivePreferenceItem(standalone = true) {
-                SliderPreference(
-                  modifier = Modifier.settingsSearchTarget(R.string.pref_cinematic_spotlight_scale_title),
-                  value = spotlightScale,
-                  onValueChange = { browserPreferences.cinematicSpotlightScale.set(it) },
-                  sliderValue = spotlightScale,
-                  onSliderValueChange = { browserPreferences.cinematicSpotlightScale.set(it) },
-                  valueRange = 0.70f..1.30f,
-                  valueSteps = 12,
-                  title = { Text(stringResource(R.string.pref_cinematic_spotlight_scale_title)) },
-                  summary = {
-                    val pct = (spotlightScale * 100).roundToInt()
-                    Text(
-                      text = if (pct == 100) "100% (Default)" else "$pct%",
-                      color = MaterialTheme.colorScheme.outline,
+            if (hasAnySlider) {
+              PreferenceCard {
+                var hasPrecedingItem = false
+
+                if (cinematicShowHeroSpotlight) {
+                  val spotlightScale by browserPreferences.cinematicSpotlightScale.collectAsState()
+                  ExpressivePreferenceItem(standalone = true) {
+                    SliderPreference(
+                      modifier = Modifier.settingsSearchTarget(R.string.pref_cinematic_spotlight_scale_title),
+                      value = spotlightScale,
+                      onValueChange = { browserPreferences.cinematicSpotlightScale.set(it) },
+                      sliderValue = spotlightScale,
+                      onSliderValueChange = { browserPreferences.cinematicSpotlightScale.set(it) },
+                      valueRange = 0.70f..1.30f,
+                      valueSteps = 12,
+                      title = { Text(stringResource(R.string.pref_cinematic_spotlight_scale_title)) },
+                      summary = {
+                        val pct = (spotlightScale * 100).roundToInt()
+                        Text(
+                          text = if (pct == 100) "100% (Default)" else "$pct%",
+                          color = MaterialTheme.colorScheme.outline,
+                        )
+                      },
                     )
-                  },
-                )
-              }
-              PreferenceDivider()
-
-              if (dualHorizonShowPulsing) {
-                val pulsingScale by browserPreferences.dualHorizonAudioPulsingScale.collectAsState()
-                ExpressivePreferenceItem(standalone = true) {
-                  SliderPreference(
-                    modifier = Modifier.settingsSearchTarget(R.string.pref_audio_pulsing_scale_title),
-                    value = pulsingScale,
-                    onValueChange = { browserPreferences.dualHorizonAudioPulsingScale.set(it) },
-                    sliderValue = pulsingScale,
-                    onSliderValueChange = { browserPreferences.dualHorizonAudioPulsingScale.set(it) },
-                    valueRange = 0.70f..1.30f,
-                    valueSteps = 12,
-                    title = { Text(stringResource(R.string.pref_audio_pulsing_scale_title)) },
-                    summary = {
-                      val pct = (pulsingScale * 100).roundToInt()
-                      Text(
-                        text = if (pct == 100) "100% (Default)" else "$pct%",
-                        color = MaterialTheme.colorScheme.outline,
-                      )
-                    },
-                  )
+                  }
+                  hasPrecedingItem = true
                 }
-                PreferenceDivider()
-              }
 
-              if (dualHorizonShowVideo) {
-                val videoScale by browserPreferences.dualHorizonVideoRailScale.collectAsState()
-                ExpressivePreferenceItem(standalone = true) {
-                  SliderPreference(
-                    modifier = Modifier.settingsSearchTarget(R.string.pref_video_rail_scale_title),
-                    value = videoScale,
-                    onValueChange = { browserPreferences.dualHorizonVideoRailScale.set(it) },
-                    sliderValue = videoScale,
-                    onSliderValueChange = { browserPreferences.dualHorizonVideoRailScale.set(it) },
-                    valueRange = 0.70f..1.30f,
-                    valueSteps = 12,
-                    title = { Text(stringResource(R.string.pref_video_rail_scale_title)) },
-                    summary = {
-                      val pct = (videoScale * 100).roundToInt()
-                      Text(
-                        text = if (pct == 100) "100% (Default)" else "$pct%",
-                        color = MaterialTheme.colorScheme.outline,
-                      )
-                    },
-                  )
+                if (dualHorizonShowPulsing) {
+                  if (hasPrecedingItem) PreferenceDivider()
+                  val pulsingScale by browserPreferences.dualHorizonAudioPulsingScale.collectAsState()
+                  ExpressivePreferenceItem(standalone = true) {
+                    SliderPreference(
+                      modifier = Modifier.settingsSearchTarget(R.string.pref_audio_pulsing_scale_title),
+                      value = pulsingScale,
+                      onValueChange = { browserPreferences.dualHorizonAudioPulsingScale.set(it) },
+                      sliderValue = pulsingScale,
+                      onSliderValueChange = { browserPreferences.dualHorizonAudioPulsingScale.set(it) },
+                      valueRange = 0.70f..1.30f,
+                      valueSteps = 12,
+                      title = { Text(stringResource(R.string.pref_audio_pulsing_scale_title)) },
+                      summary = {
+                        val pct = (pulsingScale * 100).roundToInt()
+                        Text(
+                          text = if (pct == 100) "100% (Default)" else "$pct%",
+                          color = MaterialTheme.colorScheme.outline,
+                        )
+                      },
+                    )
+                  }
+                  hasPrecedingItem = true
                 }
-                PreferenceDivider()
-              }
 
-              if (dualHorizonShowMusic) {
-                val musicScale by browserPreferences.dualHorizonMusicRailScale.collectAsState()
-                ExpressivePreferenceItem(standalone = true) {
-                  SliderPreference(
-                    modifier = Modifier.settingsSearchTarget(R.string.pref_music_rail_scale_title),
-                    value = musicScale,
-                    onValueChange = { browserPreferences.dualHorizonMusicRailScale.set(it) },
-                    sliderValue = musicScale,
-                    onSliderValueChange = { browserPreferences.dualHorizonMusicRailScale.set(it) },
-                    valueRange = 0.70f..1.30f,
-                    valueSteps = 12,
-                    title = { Text(stringResource(R.string.pref_music_rail_scale_title)) },
-                    summary = {
-                      val pct = (musicScale * 100).roundToInt()
-                      Text(
-                        text = if (pct == 100) "100% (Default)" else "$pct%",
-                        color = MaterialTheme.colorScheme.outline,
-                      )
-                    },
-                  )
+                if (dualHorizonShowVideo) {
+                  if (hasPrecedingItem) PreferenceDivider()
+                  val videoScale by browserPreferences.dualHorizonVideoRailScale.collectAsState()
+                  ExpressivePreferenceItem(standalone = true) {
+                    SliderPreference(
+                      modifier = Modifier.settingsSearchTarget(R.string.pref_video_rail_scale_title),
+                      value = videoScale,
+                      onValueChange = { browserPreferences.dualHorizonVideoRailScale.set(it) },
+                      sliderValue = videoScale,
+                      onSliderValueChange = { browserPreferences.dualHorizonVideoRailScale.set(it) },
+                      valueRange = 0.70f..1.30f,
+                      valueSteps = 12,
+                      title = { Text(stringResource(R.string.pref_video_rail_scale_title)) },
+                      summary = {
+                        val pct = (videoScale * 100).roundToInt()
+                        Text(
+                          text = if (pct == 100) "100% (Default)" else "$pct%",
+                          color = MaterialTheme.colorScheme.outline,
+                        )
+                      },
+                    )
+                  }
+                  hasPrecedingItem = true
+                }
+
+                if (dualHorizonShowMusic) {
+                  if (hasPrecedingItem) PreferenceDivider()
+                  val musicScale by browserPreferences.dualHorizonMusicRailScale.collectAsState()
+                  ExpressivePreferenceItem(standalone = true) {
+                    SliderPreference(
+                      modifier = Modifier.settingsSearchTarget(R.string.pref_music_rail_scale_title),
+                      value = musicScale,
+                      onValueChange = { browserPreferences.dualHorizonMusicRailScale.set(it) },
+                      sliderValue = musicScale,
+                      onSliderValueChange = { browserPreferences.dualHorizonMusicRailScale.set(it) },
+                      valueRange = 0.70f..1.30f,
+                      valueSteps = 12,
+                      title = { Text(stringResource(R.string.pref_music_rail_scale_title)) },
+                      summary = {
+                        val pct = (musicScale * 100).roundToInt()
+                        Text(
+                          text = if (pct == 100) "100% (Default)" else "$pct%",
+                          color = MaterialTheme.colorScheme.outline,
+                        )
+                      },
+                    )
+                  }
                 }
               }
             }
@@ -1412,7 +1457,13 @@ object AppearancePreferencesScreen : Screen {
             val dualHorizonShowVideo by browserPreferences.dualHorizonShowVideoRail.collectAsState()
             val dualHorizonShowPulsing by browserPreferences.dualHorizonShowAudioPulsing.collectAsState()
             val dualHorizonShowMusic by browserPreferences.dualHorizonShowMusicRail.collectAsState()
-            val isAllMediaActive = dualHorizonShowVideo || dualHorizonShowPulsing || dualHorizonShowMusic
+            val cinematicShowHeroSpotlight by browserPreferences.cinematicShowHeroSpotlight.collectAsState()
+            val homeScreenLayout by browserPreferences.homeScreenLayout.collectAsState()
+            val isAllMediaActive = if (homeScreenLayout == HomeScreenLayout.CinematicHorizon) {
+              cinematicShowHeroSpotlight || dualHorizonShowVideo || dualHorizonShowPulsing || dualHorizonShowMusic
+            } else {
+              dualHorizonShowVideo || dualHorizonShowPulsing || dualHorizonShowMusic
+            }
             val subTabDefaults = listOf("ALL", "VIDEO", "AUDIO")
             val orderedSubTabs = (librarySubTabsOrder.filter { it in subTabDefaults } + subTabDefaults).distinct()
             val subTabItems = orderedSubTabs.map { id ->

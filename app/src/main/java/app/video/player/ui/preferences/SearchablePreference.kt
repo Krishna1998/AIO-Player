@@ -1357,6 +1357,8 @@ object SearchablePreferences {
         category = "Appearance",
         screen = AppearancePreferencesScreen,
         anchorItemIndex = 7,
+        SearchEntrySpec(R.string.pref_home_screen_layout_title, listOf("home", "layout", "screen", "dual", "horizon", "cinematic", "appearance")),
+        SearchEntrySpec(R.string.pref_cinematic_show_hero_spotlight_title, listOf("continue watching", "cinematic", "horizon", "spotlight", "hero", "hide", "show", "toggle")),
         SearchEntrySpec(R.string.pref_dual_horizon_show_video_card_title, listOf("dual", "horizon", "fusion", "video", "movie", "rail", "card", "hide", "show")),
         SearchEntrySpec(R.string.pref_cinematic_spotlight_scale_title, listOf("cinematic", "hero", "spotlight", "size", "scale", "height")),
         SearchEntrySpec(R.string.pref_audio_pulsing_scale_title, listOf("audio", "pulsing", "size", "scale")),
