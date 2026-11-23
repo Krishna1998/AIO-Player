@@ -2,6 +2,42 @@
 
 These notes are written in plain English and focus on what changed for real use.
 
+## 1.0.2
+
+### 📱 Picture-in-Picture & Stretch Mode Fixes
+- **Persistent Stretch Aspect Ratio in PiP:**
+  - Resolved an issue where selecting Stretch aspect ratio and entering Picture-in-Picture (PiP) mode would shrink or squish the video into a narrow portrait pillarbox frame upon locking and unlocking the device.
+  - PiP now preserves the correct landscape stretch geometry across lockscreen and orientation changes.
+  - Kept PiP actions, receivers, and playback transitions active across lock/unlock cycles.
+
+### 🌅 Cinematic Horizon & Dual Horizon Evolution
+- **Cinematic Horizon Default Home Layout:**
+  - Introduced **Cinematic Horizon** as the flagship home layout with customizable Hero Spotlight cards and smooth media rails.
+  - Renamed BentoFusion cleanly across settings, themes, and views to **Dual Horizon**.
+  - Added full section reordering and independent card/rail scale controls (Hero spotlight, Video rail, and Audio Pulsing).
+
+### 🧭 Navigation & Fluid Experience
+- **Liquid Bubble Glass Floating Navigation Bar:**
+  - Upgraded floating bottom navigation pill with frosted specular reflections, convex rim lighting, and theme-synced colorful icons.
+  - Fully removed the obsolete legacy navigation bar in favor of modern edge-to-edge floating navigation.
+  - Enforced permanent visibility for essential tabs (Home & Streaming) with customizable optional tabs.
+  - Pre-warmed `NetworkStreamingViewModel` at launch to eliminate lag when switching to the Streaming tab.
+
+### 🌌 Visualizer & Customization Upgrades
+- **Galaxy Singularity (Dual Event Horizon) Wavy Visualizer:**
+  - Revamped audio visualizer with Galaxy Singularity dual ribbon event horizon aesthetics and smooth vsync animations.
+- **Custom App Wallpaper System:**
+  - Added background wallpaper engine with customizable preset gradients, custom image picker, and ambient blur fallbacks.
+- **Samsung One UI Style Floating Bottom Search Pill:**
+  - Moved settings search to an ergonomic, one-handed bottom floating pill that neatly docks above the audio mini-player.
+
+### ℹ️ Futuristic Quantum Spatial About Screen & OTA Updates
+- **Futuristic About Hub:**
+  - Completely redesigned About Screen featuring interactive cosmic nebula canvas with spatial gyroscope tilt interactions.
+  - Integrated in-app OTA update checker directly connected with GitHub releases.
+- **Enhanced Secure Folder Protection:**
+  - Added prominent data loss safety warnings and one-tap restore functionality for Xiaomi/HyperOS dual space uninstallation safety.
+
 ## 1.0.1
 
 ### 🔊 Audio Player Vertical Volume Gestures & Floating HUD Pill

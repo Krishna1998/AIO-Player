@@ -7,7 +7,7 @@
 **Lightweight, high-performance video & music player for Android.**  
 Powered by the raw playback power of **mpv** and a modern **Material 3 / Liquid Glass** interface.
 
-[![Release](https://img.shields.io/badge/Release-v1.0.1-00F5FF?style=flat-square&logo=android&logoColor=black)](https://github.com/Krishna1998/Video-Music-Player/releases)
+[![Release](https://img.shields.io/badge/Release-v1.0.2-00F5FF?style=flat-square&logo=android&logoColor=black)](https://github.com/Krishna1998/Video-Music-Player/releases)
 [![Android](https://img.shields.io/badge/Android-8.0%2B-3DDC84?style=flat-square&logo=android&logoColor=white)](https://developer.android.com)
 [![Engine](https://img.shields.io/badge/Core-mpv%20%2B%20FFmpeg-9D4EDD?style=flat-square&logo=cplusplus&logoColor=white)](https://mpv.io)
 [![UI](https://img.shields.io/badge/UI-Jetpack%20Compose-4285F4?style=flat-square&logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
@@ -34,10 +34,11 @@ Powered by the raw playback power of **mpv** and a modern **Material 3 / Liquid 
 - **Synchronized Lyrics**: Timed line-by-line and word-by-word lyrics from over 15 online providers.
 - **Smart Sleep Timer**: Gentle audio fade-out and active-only countdown timer.
 
-### 🔮 Fusion Hub & Design
-- **Unified Media Browser**: Customizable rails for Videos, Music, and Recent items.
+### 🔮 Cinematic Horizon & Dual Horizon Design
+- **Unified Media Browser**: Customizable Cinematic Horizon and Dual Horizon layouts with interactive media rails.
 - **Reorderable Music Tabs**: Easily organize All Songs, Favorites, Playlists, Folders, Albums, and Artists.
-- **Liquid Glass Aesthetics**: Elegant frosted glass effects, AMOLED pure black, and curated color palettes.
+- **Liquid Bubble Glass Navigation**: Expressive floating capsule navigation bar with colorful dynamic icons and specular glass lighting.
+- **Custom Wallpapers & Themes**: Customizable background wallpapers with ambient blur, pure AMOLED black, and curated color palettes.
 - **Custom Launcher Icons**: 10 hand-crafted app icon designs with Material You dynamic color support.
 - **Jitter-Free Navigation**: Hardware-accelerated panel transitions for silky-smooth 120Hz displays.
 
