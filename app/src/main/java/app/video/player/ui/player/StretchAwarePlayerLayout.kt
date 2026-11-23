@@ -43,10 +43,11 @@ class StretchAwarePlayerLayout @JvmOverloads constructor(
   }
 
   private fun isActivityInPipOrScreenOffLocked(): Boolean {
-    val activity = findActivity() ?: return true
-    if (activity.isInPictureInPictureMode) return true
-    val powerManager = activity.getSystemService(Context.POWER_SERVICE) as? PowerManager
-    val keyguardManager = activity.getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
+    val activity = findActivity()
+    if (activity != null && (activity.isInPictureInPictureMode || activity.isFinishing || activity.isDestroyed)) return true
+    val appContext = context.applicationContext
+    val powerManager = appContext.getSystemService(Context.POWER_SERVICE) as? PowerManager
+    val keyguardManager = appContext.getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
     if (powerManager?.isInteractive == false) return true
     if (keyguardManager?.isKeyguardLocked == true || keyguardManager?.isDeviceLocked == true) return true
     return false
@@ -81,6 +82,13 @@ class StretchAwarePlayerLayout @JvmOverloads constructor(
         } else {
           w.toDouble() / h.toDouble()
         }
+
+      // If the layout reported narrow/portrait bounds while playing a landscape video or in PiP,
+      // never squish the video horizontally.
+      val baseAspect = PlaybackSession.getPropertyDouble("video-params/aspect")?.takeIf { it.isFinite() && it > 0.0 }
+      if (viewportRatio < 1.0 && (baseAspect ?: 0.0) >= 1.0) {
+        return@post
+      }
 
       PlaybackSession.setPropertyDouble(
         "video-aspect-override",

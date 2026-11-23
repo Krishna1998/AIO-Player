@@ -5114,6 +5114,28 @@ fun restartFromBeginning() {
       VideoAspect.Stretch -> {
         // To STRETCH: Calculate screen ratio accounting for video rotation
         val currentHost = host ?: return
+
+        // If currently in Picture-in-Picture mode, do not recalculate Stretch aspect from full-screen
+        // DisplayMetrics (which flips to portrait and distorts into a narrow vertical strip).
+        if (currentHost.isInPictureInPictureMode()) {
+          PlaybackSession.setPropertyDouble("panscan", 0.0)
+          val existingOverride = PlaybackSession.getPropertyDouble("video-aspect-override")
+          if (existingOverride == null || existingOverride <= 0.0 || !existingOverride.isFinite()) {
+            val baseAspect = PlaybackSession.getPropertyDouble("video-params/aspect")?.takeIf { it.isFinite() && it > 0.0 } ?: (16.0 / 9.0)
+            PlaybackSession.setPropertyDouble("video-aspect-override", baseAspect)
+          }
+          if (resetZoom) resetVideoZoom()
+          playerPreferences.lastVideoAspect.set(aspect)
+          playerPreferences.lastCustomAspectRatio.set(-1f)
+          _videoAspect.value = aspect
+          _currentAspectRatio.value = -1.0
+          onAmbientGeometryChanged()
+          if (showUpdate) {
+            playerUpdate.value = PlayerUpdates.AspectRatio
+          }
+          return
+        }
+
         @Suppress("DEPRECATION")
         val dm = DisplayMetrics()
         @Suppress("DEPRECATION")

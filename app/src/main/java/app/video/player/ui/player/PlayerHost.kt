@@ -49,6 +49,8 @@ interface PlayerHost {
 
   fun currentThumbnailSource(): String? = null
 
+  fun isInPictureInPictureMode(): Boolean = false
+
   fun isCurrentMediaKnownAudio(): Boolean = false
 
   fun minimizeToMiniPlayer(): Boolean = false
