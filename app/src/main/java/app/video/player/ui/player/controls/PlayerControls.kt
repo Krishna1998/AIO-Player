@@ -365,7 +365,7 @@ internal fun AudioPlayerScreen(
             viewModel.playerUpdate.value = PlayerUpdates.DynamicSpeedControl(speed)
           }
         },
-        onStartSleepTimer = viewModel::startTimer,
+        onStartSleepTimer = { sec, end -> viewModel.startTimer(sec, endOfTrack = end) },
         onOpenPanel = onOpenPanel,
         onShowSheet = onOpenSheet,
         onDismissRequest = { onOpenSheet(Sheets.None) },
@@ -910,7 +910,7 @@ fun PlayerControls(
             onResetDefaultSpeed = {
               PlaybackSession.setPropertyFloat("speed", playerPreferences.defaultSpeed.deleteAndGet().toFixed(2))
             },
-            onStartSleepTimer = viewModel::startTimer,
+            onStartSleepTimer = { sec, end -> viewModel.startTimer(sec, endOfTrack = end) },
             onOpenPanel = onOpenPanel,
             onShowSheet = onOpenSheet,
             onDismissRequest = { onOpenSheet(Sheets.None) },
@@ -2445,7 +2445,7 @@ fun PlayerControls(
         PlaybackSession.setPropertyFloat("speed", target)
         viewModel.playerUpdate.value = PlayerUpdates.DynamicSpeedControl(target)
       },
-      onStartSleepTimer = viewModel::startTimer,
+      onStartSleepTimer = { sec, end -> viewModel.startTimer(sec, endOfTrack = end) },
       onOpenPanel = onOpenPanel,
       onShowSheet = onOpenSheet,
       onDismissRequest = { onOpenSheet(Sheets.None) },

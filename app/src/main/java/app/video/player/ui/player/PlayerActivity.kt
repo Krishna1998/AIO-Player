@@ -1800,6 +1800,7 @@ class PlayerActivity :
   }
 
   override fun onDestroy() {
+    PlaybackSession.isPipMode = false
     releaseRendererRecoveryWakeLock()
     Log.d(TAG, "PlayerActivity onDestroy")
     val ownsPlaybackSession = ownsPlaybackSession()
@@ -2386,6 +2387,7 @@ class PlayerActivity :
     Log.d(TAG, "PiP dismissed; stopping terminal playback exactly once")
     pendingPipExitResolution = false
     handledPipDismissal = true
+    PlaybackSession.isPipMode = false
     isUserFinishing = true
     isBackgroundPlaybackSessionActive = false
     pendingBackgroundTransition = false
@@ -2414,6 +2416,7 @@ class PlayerActivity :
     pendingPipExitResolution = false
     handledPipDismissal = false
     wasInPipMode = false
+    PlaybackSession.isPipMode = false
     if (startedBackgroundForPip) {
       startedBackgroundForPip = false
       endBackgroundPlayback()
@@ -2509,7 +2512,12 @@ class PlayerActivity :
       applyPlaybackBrightnessPolicy()
 
       if (!isInPictureInPictureMode) {
-        if (!pendingPipExitResolution) wasInPipMode = false
+        if (!pendingPipExitResolution) {
+          wasInPipMode = false
+          PlaybackSession.isPipMode = false
+        }
+      } else {
+        PlaybackSession.isPipMode = true
       }
     }.onFailure { e ->
       Log.e(TAG, "Error during onStart", e)
@@ -4601,6 +4609,10 @@ class PlayerActivity :
       isAdvancingAtEof = false
       return
     }
+    if (PlaybackSession.sleepTimerEndOfTrack) {
+      PlaybackSession.setPropertyBoolean("pause", true)
+      return
+    }
     if (isAdvancingAtEof) return
     // Enabling background playback while watching does not transfer EOF ownership to the service.
     if (!MediaPlaybackService.activityForeground) return
@@ -6503,6 +6515,7 @@ private suspend fun restorePlaybackPosition(state: PlaybackStateEntity?, loadGen
     super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig)
     if (!mpvInitialized) return
 
+    PlaybackSession.isPipMode = isInPictureInPictureMode
     isAmbientPipMode = isInPictureInPictureMode
     viewModel.setAmbientPipActive(isInPictureInPictureMode)
     if (isInPictureInPictureMode) setVideoAmbientPresentationActive(false)

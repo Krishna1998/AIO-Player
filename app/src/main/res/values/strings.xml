@@ -659,6 +659,9 @@
   <string name="sleep_timer_fade_out_duration">Fade-out duration</string>
   <string name="sleep_timer_fade_out_duration_summary">%d seconds</string>
   <string name="sleep_timer_end_of_track">End of track</string>
+  <string name="time_picker_hours">Hours</string>
+  <string name="time_picker_minutes">Minutes</string>
+  <string name="time_picker_seconds">Seconds</string>
   <string name="sleep_timer_stops_at">Stops at %s</string>
   <string name="sleep_timer_extend_5">+5m</string>
   <string name="sleep_timer_extend_15">+15m</string>

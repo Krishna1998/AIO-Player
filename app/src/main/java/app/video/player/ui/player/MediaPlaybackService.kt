@@ -1213,6 +1213,10 @@ class MediaPlaybackService :
       if (duration > 0.0 && position < duration - 2.0) return
     }
     handledEofGeneration = expectedGeneration
+    if (PlaybackSession.sleepTimerEndOfTrack) {
+      stopPlaybackAndService()
+      return
+    }
     if (AudiobookPlayback.handleEndOfFile()) return
     val queueState = PlaybackSession.queue.value
     val autoplay = queueState.currentItem?.audiobook != null ||

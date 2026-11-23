@@ -38,6 +38,13 @@ import java.util.Date
 import java.util.Locale
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -45,8 +52,6 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import app.video.player.presentation.components.AppDialogTextButton as TextButton
-import androidx.compose.material3.TimeInput
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -75,7 +80,7 @@ import org.koin.compose.koinInject
 @Composable
 fun MoreSheet(
   remainingTime: Int,
-  onStartTimer: (Int) -> Unit,
+  onStartTimer: (Int, Boolean) -> Unit,
   onDismissRequest: () -> Unit,
   onEnterFiltersPanel: () -> Unit,
   onEnterLuaScriptsPanel: (() -> Unit)? = null,
@@ -90,7 +95,7 @@ fun MoreSheet(
   onToggleFadeOut: (Boolean) -> Unit = {},
   fadeOutDurationSeconds: Int = 10,
   onChangeFadeOutDuration: (Int) -> Unit = {},
-  onCancelTimer: () -> Unit = { onStartTimer(0) },
+  onCancelTimer: () -> Unit = { onStartTimer(0, false) },
   onExtendTimer: (Int) -> Unit = {},
   remainingTrackSeconds: Int = 0,
   modifier: Modifier = Modifier,
@@ -290,26 +295,79 @@ fun MoreSheet(
 
 private val sleepTimerPresets = listOf(15, 30, 45, 60)
 
+@Composable
+private fun HmsInputBox(
+  value: String,
+  onValueChange: (String) -> Unit,
+  label: String,
+  imeAction: ImeAction,
+  modifier: Modifier = Modifier,
+) {
+  Column(
+    horizontalAlignment = Alignment.CenterHorizontally,
+    modifier = modifier,
+  ) {
+    Surface(
+      shape = RoundedCornerShape(12.dp),
+      color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.6f),
+      modifier = Modifier.size(width = 72.dp, height = 64.dp),
+    ) {
+      Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.padding(horizontal = 8.dp),
+      ) {
+        BasicTextField(
+          value = value,
+          onValueChange = { input ->
+            val digits = input.filter { it.isDigit() }.take(2)
+            onValueChange(digits)
+          },
+          textStyle = MaterialTheme.typography.headlineMedium.copy(
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurface,
+          ),
+          cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+          keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Number,
+            imeAction = imeAction,
+          ),
+          singleLine = true,
+        )
+      }
+    }
+    Spacer(Modifier.height(4.dp))
+    Text(
+      text = label,
+      style = MaterialTheme.typography.labelSmall,
+      color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+  }
+}
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun TimePickerDialog(
   onDismissRequest: () -> Unit,
-  onTimeSelect: (Int) -> Unit,
+  onTimeSelect: (Int, Boolean) -> Unit,
   modifier: Modifier = Modifier,
   remainingTime: Int = 0,
   fadeOutEnabled: Boolean = true,
   onToggleFadeOut: (Boolean) -> Unit = {},
   fadeOutDurationSeconds: Int = 10,
   onChangeFadeOutDuration: (Int) -> Unit = {},
-  onCancelTimer: () -> Unit = { onTimeSelect(0) },
+  onCancelTimer: () -> Unit = { onTimeSelect(0, false) },
   onExtendTimer: (Int) -> Unit = {},
   remainingTrackSeconds: Int = 0,
 ) {
-  val state = rememberTimePickerState(
-    remainingTime / 3600,
-    (remainingTime % 3600) / 60,
-    is24Hour = true,
-  )
+  var hours by remember(remainingTime) {
+    mutableStateOf(if (remainingTime > 0) "%02d".format(remainingTime / 3600) else "00")
+  }
+  var minutes by remember(remainingTime) {
+    mutableStateOf(if (remainingTime > 0) "%02d".format((remainingTime % 3600) / 60) else "00")
+  }
+  var seconds by remember(remainingTime) {
+    mutableStateOf(if (remainingTime > 0) "%02d".format(remainingTime % 60) else "00")
+  }
 
   val stopTimeString = remember(remainingTime) {
     if (remainingTime > 0) {
@@ -424,7 +482,7 @@ fun TimePickerDialog(
               FilterChip(
                 selected = false,
                 onClick = {
-                  onTimeSelect(minutes * 60)
+                  onTimeSelect(minutes * 60, false)
                   onDismissRequest()
                 },
                 label = { Text(stringResource(R.string.generic_minutes_short, minutes)) },
@@ -440,7 +498,7 @@ fun TimePickerDialog(
               FilterChip(
                 selected = false,
                 onClick = {
-                  onTimeSelect(remainingTrackSeconds)
+                  onTimeSelect(remainingTrackSeconds, true)
                   onDismissRequest()
                 },
                 label = {
@@ -460,8 +518,43 @@ fun TimePickerDialog(
           }
         }
 
-        // Time Input
-        TimeInput(state = state)
+        // Hour : Minute : Second Input
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.Center,
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          HmsInputBox(
+            value = hours,
+            onValueChange = { hours = it },
+            label = stringResource(R.string.time_picker_hours),
+            imeAction = ImeAction.Next,
+          )
+          Text(
+            text = ":",
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 6.dp).padding(bottom = 16.dp),
+          )
+          HmsInputBox(
+            value = minutes,
+            onValueChange = { minutes = it },
+            label = stringResource(R.string.time_picker_minutes),
+            imeAction = ImeAction.Next,
+          )
+          Text(
+            text = ":",
+            style = MaterialTheme.typography.headlineMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 6.dp).padding(bottom = 16.dp),
+          )
+          HmsInputBox(
+            value = seconds,
+            onValueChange = { seconds = it },
+            label = stringResource(R.string.time_picker_seconds),
+            imeAction = ImeAction.Done,
+          )
+        }
 
         // Gentle Audio Fade-out Toggle & Duration Slider
         Surface(
@@ -519,9 +612,9 @@ fun TimePickerDialog(
               }
               Slider(
                 value = fadeOutDurationSeconds.toFloat(),
-                onValueChange = { onChangeFadeOutDuration(it.roundToInt().coerceIn(5, 60)) },
-                valueRange = 5f..60f,
-                steps = 10,
+                onValueChange = { onChangeFadeOutDuration(it.roundToInt().coerceIn(3, 30)) },
+                valueRange = 3f..30f,
+                steps = 26,
                 modifier = Modifier.fillMaxWidth(),
               )
             }
@@ -545,9 +638,12 @@ fun TimePickerDialog(
     confirmButton = {
       TextButton(
         onClick = {
-          val customSeconds = state.hour * 3600 + state.minute * 60
+          val h = hours.toIntOrNull() ?: 0
+          val m = minutes.toIntOrNull() ?: 0
+          val s = seconds.toIntOrNull() ?: 0
+          val customSeconds = h * 3600 + m * 60 + s
           if (customSeconds > 0) {
-            onTimeSelect(customSeconds)
+            onTimeSelect(customSeconds, false)
           }
           onDismissRequest()
         },

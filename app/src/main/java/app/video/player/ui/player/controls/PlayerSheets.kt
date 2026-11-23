@@ -101,7 +101,7 @@ fun PlayerSheets(
   onMakeDefaultSpeed: (Float) -> Unit,
   onResetDefaultSpeed: () -> Unit,
   // More sheet
-  onStartSleepTimer: (Int) -> Unit,
+  onStartSleepTimer: (Int, Boolean) -> Unit,
   onOpenPanel: (Panels) -> Unit,
   onShowSheet: (Sheets) -> Unit,
   onDismissRequest: () -> Unit,

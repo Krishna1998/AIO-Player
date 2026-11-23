@@ -327,6 +327,8 @@ object PlaybackSession : MPVLib.EventObserver {
   private var ambientVideoTransform: MutableMap<String, Double>? = null
   @Volatile var isAmbientShaderActive: Boolean = false
     private set
+  @Volatile var isPipMode: Boolean = false
+  @Volatile var sleepTimerEndOfTrack: Boolean = false
   private val ambientTransformProperties = setOf("video-zoom", "video-pan-x", "video-pan-y")
   private var streamingOptionsApplied = false
   private var appliedUserAgent: String? = null
@@ -743,6 +745,8 @@ internal fun userScriptsNeedReload(currentKey: String): Boolean {
 
       val nextGeneration = _state.value.generation + 1L
       supersededStopGeneration = 0L
+      sleepTimerEndOfTrack = false
+      isPipMode = false
       suspendedVideoTrack = null
       deferredVideoSelectionGeneration = null
       desiredPaused = true
@@ -884,6 +888,8 @@ internal fun userScriptsNeedReload(currentKey: String): Boolean {
   }
 
   private fun destroyLocked() {
+    sleepTimerEndOfTrack = false
+    isPipMode = false
     AudiobookPlayback.capture()
     loadedPlaybackItem = null
     speedBeforeAudiobook = null

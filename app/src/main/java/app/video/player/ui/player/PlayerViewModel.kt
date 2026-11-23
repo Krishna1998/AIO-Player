@@ -3439,7 +3439,7 @@ fun restartFromBeginning() {
   }
 
   fun setSleepTimerFadeOutDuration(seconds: Int) {
-    audioPreferences.sleepTimerFadeOutDuration.set(seconds.coerceIn(5, 60))
+    audioPreferences.sleepTimerFadeOutDuration.set(seconds.coerceIn(3, 30))
   }
 
   fun remainingTrackSeconds(): Int {
@@ -3453,6 +3453,7 @@ fun restartFromBeginning() {
     timerJob = null
     _remainingTime.value = 0
     _sleepTimerEndOfTrack.value = false
+    PlaybackSession.sleepTimerEndOfTrack = false
     preTimerVolume?.let { restoredVolume ->
       changeMPVVolumeTo(restoredVolume)
       preTimerVolume = null
@@ -3480,38 +3481,70 @@ fun restartFromBeginning() {
     _remainingTime.value = seconds
     _sleepTimerFadeOut.value = fadeOut
     _sleepTimerEndOfTrack.value = endOfTrack
+    PlaybackSession.sleepTimerEndOfTrack = endOfTrack
     if (seconds < 1) return
 
     val initialVolume = PlaybackSession.getPropertyInt("volume") ?: 100
     preTimerVolume = initialVolume
-    val configuredFade = audioPreferences.sleepTimerFadeOutDuration.get().coerceIn(5, 60)
+    val configuredFade = audioPreferences.sleepTimerFadeOutDuration.get().coerceIn(3, 30)
     val fadeDuration = if (seconds > 0) configuredFade.coerceAtMost(seconds) else configuredFade
 
     timerJob =
       viewModelScope.launch {
-        var currentLeft = seconds
-        while (currentLeft > 0) {
-          _remainingTime.value = currentLeft
-
-          val phase = PlaybackSession.state.value.phase
-          if (phase in setOf(PlaybackPhase.STOPPING, PlaybackPhase.ERROR)) {
-            cancelSleepTimer()
-            return@launch
-          }
-
-          // Timer only ticks down when music/playback is actively running (not paused)
-          val isPaused = paused == true || (PlaybackSession.getPropertyBoolean("pause") ?: false)
-          if (!isPaused) {
-            // Gentle Audio Fade-out over the last 5 seconds
-            if (fadeOut && currentLeft <= fadeDuration) {
-              val fadeRatio = (currentLeft.toFloat() / fadeDuration).coerceIn(0f, 1f)
-              val fadedVolume = (initialVolume * fadeRatio).roundToInt().coerceIn(0, initialVolume)
-              changeMPVVolumeTo(fadedVolume)
+        if (endOfTrack) {
+          while (true) {
+            val phase = PlaybackSession.state.value.phase
+            if (phase in setOf(PlaybackPhase.STOPPING, PlaybackPhase.ERROR)) {
+              cancelSleepTimer()
+              return@launch
             }
-            currentLeft--
-          }
 
-          delay(1000)
+            val isPaused = paused == true || (PlaybackSession.getPropertyBoolean("pause") ?: false)
+            val isEof = PlaybackSession.getPropertyBoolean("eof-reached") ?: false
+            val dur = duration?.toDouble() ?: PlaybackSession.getPropertyDouble("duration") ?: 0.0
+            val pos = PlaybackSession.getPropertyDouble("time-pos") ?: (this@PlayerViewModel.pos?.toDouble() ?: 0.0)
+            val remainingExact = (dur - pos).coerceAtLeast(0.0)
+
+            _remainingTime.value = remainingExact.roundToInt()
+
+            // Stop immediately when reaching EOF or 1.0 second before track completion
+            if (isEof || (dur > 0.0 && remainingExact <= 1.0)) {
+              break
+            }
+
+            if (!isPaused && dur > 0.0) {
+              if (fadeOut && remainingExact <= fadeDuration) {
+                val fadeRatio = (remainingExact.toFloat() / fadeDuration).coerceIn(0f, 1f)
+                val fadedVolume = (initialVolume * fadeRatio).roundToInt().coerceIn(0, initialVolume)
+                changeMPVVolumeTo(fadedVolume)
+              }
+            }
+
+            delay(250)
+          }
+        } else {
+          var currentLeft = seconds
+          while (currentLeft > 0) {
+            _remainingTime.value = currentLeft
+
+            val phase = PlaybackSession.state.value.phase
+            if (phase in setOf(PlaybackPhase.STOPPING, PlaybackPhase.ERROR)) {
+              cancelSleepTimer()
+              return@launch
+            }
+
+            val isPaused = paused == true || (PlaybackSession.getPropertyBoolean("pause") ?: false)
+            if (!isPaused) {
+              if (fadeOut && currentLeft <= fadeDuration) {
+                val fadeRatio = (currentLeft.toFloat() / fadeDuration).coerceIn(0f, 1f)
+                val fadedVolume = (initialVolume * fadeRatio).roundToInt().coerceIn(0, initialVolume)
+                changeMPVVolumeTo(fadedVolume)
+              }
+              currentLeft--
+            }
+
+            delay(1000)
+          }
         }
 
         _remainingTime.value = 0
@@ -3520,6 +3553,7 @@ fun restartFromBeginning() {
         changeMPVVolumeTo(initialVolume)
         preTimerVolume = null
         _sleepTimerEndOfTrack.value = false
+        PlaybackSession.sleepTimerEndOfTrack = false
         showToast(appContext.getString(R.string.toast_sleep_timer_ended))
 
         // When sleep timer ends: close app completely
@@ -5121,12 +5155,16 @@ fun restartFromBeginning() {
         // To STRETCH: Calculate screen ratio accounting for video rotation
         val currentHost = host ?: return
 
+        val width = PlaybackSession.getPropertyInt("video-params/w") ?: PlaybackSession.getPropertyInt("width") ?: 0
+        val height = PlaybackSession.getPropertyInt("video-params/h") ?: PlaybackSession.getPropertyInt("height") ?: 0
+        val baseAspect = PlaybackSession.getPropertyDouble("video-params/aspect")?.takeIf { it.isFinite() && it > 0.0 }
+          ?: if (width > 0 && height > 0) width.toDouble() / height.toDouble() else (16.0 / 9.0)
+
         // If currently in Picture-in-Picture mode or screen is off/locked, do not recalculate Stretch aspect from full-screen
         // DisplayMetrics (which flips to portrait and distorts into a narrow vertical strip).
-        if (currentHost.isHostInPictureInPictureMode() || currentHost.isHostScreenOffOrLocked()) {
+        if (PlaybackSession.isPipMode || currentHost.isHostInPictureInPictureMode() || currentHost.isHostScreenOffOrLocked()) {
           PlaybackSession.setPropertyDouble("panscan", 0.0)
           val existingOverride = PlaybackSession.getPropertyDouble("video-aspect-override")
-          val baseAspect = PlaybackSession.getPropertyDouble("video-params/aspect")?.takeIf { it.isFinite() && it > 0.0 } ?: (16.0 / 9.0)
           if (existingOverride == null || existingOverride <= 0.0 || !existingOverride.isFinite() || (existingOverride < 1.0 && baseAspect >= 1.0)) {
             PlaybackSession.setPropertyDouble("video-aspect-override", baseAspect)
           }
@@ -5150,8 +5188,6 @@ fun restartFromBeginning() {
         // Get video rotation from metadata
         val rotate = PlaybackSession.getPropertyInt("video-params/rotate") ?: 0
         val isVideoRotated = (rotate % 180 == 90) // 90° or 270° rotation
-
-        val baseAspect = PlaybackSession.getPropertyDouble("video-params/aspect")?.takeIf { it.isFinite() && it > 0.0 } ?: 0.0
 
         // Calculate screen ratio, inverting if video is rotated
         var screenRatio =
