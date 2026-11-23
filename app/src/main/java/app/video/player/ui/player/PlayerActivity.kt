@@ -574,16 +574,17 @@ class PlayerActivity :
         if (!ownsPlaybackSession()) return
         when (intent?.action) {
           Intent.ACTION_SCREEN_OFF -> {
-            val isPip = isInPictureInPictureMode || PlaybackSession.isPipMode
+            val isPip = isInPictureInPictureMode || PlaybackSession.isPipMode || wasInPipMode || startedBackgroundForPip
             val pauseOnLock = isPip && playerPreferences.pipPauseOnScreenLock.get()
             if (pauseOnLock) {
               viewModel.pause()
+              PlaybackSession.setPropertyBoolean("pause", true)
             }
             screenUnlockPlaybackController.onScreenTurnedOff(
               autoplayAfterScreenUnlockEnabled = !pauseOnLock && !isTelevision && playerPreferences.autoplayAfterScreenUnlock.get(),
               wasPlayingBeforePause = if (pauseOnLock) false else wasPlayingBeforePause,
               isCurrentlyPaused = if (pauseOnLock) true else viewModel.paused,
-              backgroundPlaybackActive = isBackgroundPlaybackEnabled(),
+              backgroundPlaybackActive = if (pauseOnLock) false else isBackgroundPlaybackEnabled(),
               isUserFinishing = isUserFinishing,
               isFinishing = isFinishing,
             )
@@ -2088,6 +2089,12 @@ class PlayerActivity :
     }
 
     runCatching {
+      val isPip = isInPictureInPictureMode || PlaybackSession.isPipMode || wasInPipMode || startedBackgroundForPip
+      if (isPip && isDeviceScreenOffOrLocked() && playerPreferences.pipPauseOnScreenLock.get()) {
+        viewModel.pause()
+        PlaybackSession.setPropertyBoolean("pause", true)
+      }
+
       // Permission/system dialogs and orientation changes pause the Activity without actually
       // backgrounding it. Playback ownership changes in onStop, where that distinction is known.
       if (isUserFinishing && !isInPictureInPictureMode && !isBackgroundPlaybackSessionActive) {
@@ -2324,7 +2331,12 @@ class PlayerActivity :
         return@runCatching
       }
 
-      if (
+      val isPip = isInPictureInPictureMode || PlaybackSession.isPipMode || wasInPipMode || startedBackgroundForPip
+      val pausePipOnLock = isPip && isDeviceScreenOffOrLocked() && playerPreferences.pipPauseOnScreenLock.get()
+      if (pausePipOnLock) {
+        viewModel.pause()
+        PlaybackSession.setPropertyBoolean("pause", true)
+      } else if (
         PlayerLifecyclePolicy.shouldStartBackgroundPlaybackOnStop(
           backgroundPlaybackEnabled = isBackgroundPlaybackEnabled() || externalDisplayManager?.isActive == true,
           backgroundPlaybackSessionActive = isBackgroundPlaybackSessionActive,
@@ -2342,11 +2354,6 @@ class PlayerActivity :
           viewModel.pause()
         }
         return@runCatching
-      }
-
-      val isPip = isInPictureInPictureMode || PlaybackSession.isPipMode
-      if (isPip && isDeviceScreenOffOrLocked() && playerPreferences.pipPauseOnScreenLock.get()) {
-        viewModel.pause()
       } else if (!isInPictureInPictureMode && isDeviceScreenOffOrLocked() && !isBackgroundPlaybackEnabled()) {
         rememberResumeAfterUnlockBeforeForcedPause()
         viewModel.pause()
@@ -2377,7 +2384,9 @@ class PlayerActivity :
 
     // A service retained during a foreground visit does not receive onStartCommand again.
     // Give it focus ownership on every departure, including ordinary Home/Recents navigation.
-    if (isBackgroundPlaybackSessionActive) MediaPlaybackService.takeAudioOwnershipForDetachedPlayback()
+    val pausePipOnLock = (isInPictureInPictureMode || PlaybackSession.isPipMode || wasInPipMode || startedBackgroundForPip) &&
+      isDeviceScreenOffOrLocked() && playerPreferences.pipPauseOnScreenLock.get()
+    if (isBackgroundPlaybackSessionActive && !pausePipOnLock) MediaPlaybackService.takeAudioOwnershipForDetachedPlayback()
 
     super.onStop()
   }
@@ -6532,7 +6541,8 @@ private suspend fun restorePlaybackPosition(state: PlaybackStateEntity?, loadGen
     if (isInPictureInPictureMode) setVideoAmbientPresentationActive(false)
     pipHelper.onPictureInPictureModeChanged(isInPictureInPictureMode)
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-      setShowWhenLocked(isInPictureInPictureMode)
+      val showWhenLocked = isInPictureInPictureMode && !playerPreferences.pipPauseOnScreenLock.get()
+      setShowWhenLocked(showWhenLocked)
     }
     if (isInPictureInPictureMode) {
       pendingPipExitResolution = false

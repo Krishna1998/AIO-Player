@@ -93,7 +93,6 @@ import app.video.player.BuildConfig
 import app.video.player.domain.media.model.Video
 import app.video.player.preferences.BrowserPreferences
 import app.video.player.preferences.FoldersPreferences
-import app.video.player.preferences.HomeScreenLayout
 import app.video.player.preferences.MediaLibraryType
 import app.video.player.preferences.PlayerPreferences
 import app.video.player.preferences.SecureFolderPreferences
@@ -253,13 +252,9 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   val dualHorizonShowVideoRail by browserPreferences.dualHorizonShowVideoRail.collectAsState()
   val dualHorizonShowAudioPulsing by browserPreferences.dualHorizonShowAudioPulsing.collectAsState()
   val dualHorizonShowMusicRail by browserPreferences.dualHorizonShowMusicRail.collectAsState()
-  val homeScreenLayout by browserPreferences.homeScreenLayout.collectAsState()
   val cinematicShowHeroSpotlight by browserPreferences.cinematicShowHeroSpotlight.collectAsState()
-  val isAnyDualHorizonSectionEnabled = if (homeScreenLayout == HomeScreenLayout.CinematicHorizon) {
+  val isAnyDualHorizonSectionEnabled =
     cinematicShowHeroSpotlight || dualHorizonShowVideoRail || dualHorizonShowAudioPulsing || dualHorizonShowMusicRail
-  } else {
-    dualHorizonShowVideoRail || dualHorizonShowAudioPulsing || dualHorizonShowMusicRail
-  }
   val savedMediaType by browserPreferences.mediaLibraryType.collectAsState()
   val mediaType = if (forceAudio) MediaLibraryType.Audio else if (includeAudioBrowser || browserPreferences.folderViewMode.get() == app.video.player.preferences.FolderViewMode.DualHorizon) savedMediaType else MediaLibraryType.Video
   val musicCoverArtSize by browserPreferences.musicCoverArtSize.collectAsState()

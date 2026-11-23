@@ -51,7 +51,6 @@ import app.video.player.preferences.AppearancePreferences
 import app.video.player.preferences.AudioPulsingProgressStyle
 import app.video.player.preferences.DualHorizonHeaderStyle
 import app.video.player.preferences.BrowserPreferences
-import app.video.player.preferences.HomeScreenLayout
 import app.video.player.preferences.GesturePreferences
 import app.video.player.preferences.MultiChoiceSegmentedButton
 import app.video.player.preferences.PlayerPreferences
@@ -1178,27 +1177,9 @@ object AppearancePreferencesScreen : Screen {
           }
 
           item {
-            val dualHorizonItemCount = 5
+            val dualHorizonItemCount = 4
 
             ExpressivePreferenceGroup {
-              val homeScreenLayout by browserPreferences.homeScreenLayout.collectAsState()
-              ExpressivePreferenceTile(index = 0, itemCount = dualHorizonItemCount) {
-                ListPreference(
-                  modifier = Modifier.settingsSearchTarget(R.string.pref_home_screen_layout_title),
-                  value = homeScreenLayout,
-                  onValueChange = { browserPreferences.homeScreenLayout.set(it) },
-                  values = HomeScreenLayout.entries,
-                  valueToText = { AnnotatedString(stringResource(it.titleRes)) },
-                  title = { Text(stringResource(R.string.pref_home_screen_layout_title)) },
-                  summary = {
-                    Text(
-                      stringResource(homeScreenLayout.titleRes),
-                      color = MaterialTheme.colorScheme.outline,
-                    )
-                  },
-                )
-              }
-
               val cinematicShowHeroSpotlight by browserPreferences.cinematicShowHeroSpotlight.collectAsState()
               SwitchPreference(
                 modifier = Modifier.settingsSearchTarget(R.string.pref_cinematic_show_hero_spotlight_title),
@@ -1211,13 +1192,13 @@ object AppearancePreferencesScreen : Screen {
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
-                groupIndex = 1,
+                groupIndex = 0,
                 groupSize = dualHorizonItemCount,
               )
 
               val audioPulsingProgressStyle by browserPreferences.audioPulsingProgressStyle.collectAsState()
               val dualHorizonShowAudioPulsing by browserPreferences.dualHorizonShowAudioPulsing.collectAsState()
-              ExpressivePreferenceTile(index = 2, itemCount = dualHorizonItemCount) {
+              ExpressivePreferenceTile(index = 1, itemCount = dualHorizonItemCount) {
                 ListPreference(
                   modifier = Modifier.settingsSearchTarget(R.string.pref_audio_pulsing_progress_style_title),
                   value = audioPulsingProgressStyle,
@@ -1241,7 +1222,7 @@ object AppearancePreferencesScreen : Screen {
               }
 
               val dualHorizonHeaderStyle by browserPreferences.dualHorizonHeaderStyle.collectAsState()
-              ExpressivePreferenceTile(index = 3, itemCount = dualHorizonItemCount) {
+              ExpressivePreferenceTile(index = 2, itemCount = dualHorizonItemCount) {
                 ListPreference(
                   modifier = Modifier.settingsSearchTarget(R.string.pref_dual_horizon_header_style_title),
                   value = dualHorizonHeaderStyle,
@@ -1275,7 +1256,7 @@ object AppearancePreferencesScreen : Screen {
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
-                groupIndex = 4,
+                groupIndex = 3,
                 groupSize = dualHorizonItemCount,
               )
             }
@@ -1458,12 +1439,7 @@ object AppearancePreferencesScreen : Screen {
             val dualHorizonShowPulsing by browserPreferences.dualHorizonShowAudioPulsing.collectAsState()
             val dualHorizonShowMusic by browserPreferences.dualHorizonShowMusicRail.collectAsState()
             val cinematicShowHeroSpotlight by browserPreferences.cinematicShowHeroSpotlight.collectAsState()
-            val homeScreenLayout by browserPreferences.homeScreenLayout.collectAsState()
-            val isAllMediaActive = if (homeScreenLayout == HomeScreenLayout.CinematicHorizon) {
-              cinematicShowHeroSpotlight || dualHorizonShowVideo || dualHorizonShowPulsing || dualHorizonShowMusic
-            } else {
-              dualHorizonShowVideo || dualHorizonShowPulsing || dualHorizonShowMusic
-            }
+            val isAllMediaActive = cinematicShowHeroSpotlight || dualHorizonShowVideo || dualHorizonShowPulsing || dualHorizonShowMusic
             val subTabDefaults = listOf("ALL", "VIDEO", "AUDIO")
             val orderedSubTabs = (librarySubTabsOrder.filter { it in subTabDefaults } + subTabDefaults).distinct()
             val subTabItems = orderedSubTabs.map { id ->

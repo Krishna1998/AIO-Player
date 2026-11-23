@@ -403,6 +403,13 @@ class MediaPlaybackService :
         context: Context?,
         intent: Intent?,
       ) {
+        if (intent?.action == Intent.ACTION_SCREEN_OFF) {
+          if ((PlaybackSession.isPipMode || !usesAudioBackgroundPlayback) &&
+            playerPreferences.pipPauseOnScreenLock.get()
+          ) {
+            PlaybackSession.setPropertyBoolean("pause", true)
+          }
+        }
         // Headphone disconnection still pauses detached playback when focus handling is disabled.
         if (canHandleDetachedTransport() &&
           intent?.action == AudioManager.ACTION_AUDIO_BECOMING_NOISY
@@ -484,7 +491,10 @@ class MediaPlaybackService :
     ContextCompat.registerReceiver(
       this,
       noisyReceiver,
-      IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY),
+      IntentFilter().apply {
+        addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+        addAction(Intent.ACTION_SCREEN_OFF)
+      },
       ContextCompat.RECEIVER_NOT_EXPORTED,
     )
     noisyReceiverRegistered = true

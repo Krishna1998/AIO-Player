@@ -121,7 +121,6 @@ import app.video.player.domain.recentlyplayed.repository.RecentlyPlayedRepositor
 import android.net.Uri
 import app.video.player.preferences.DualHorizonHeaderStyle
 import app.video.player.preferences.BrowserPreferences
-import app.video.player.preferences.HomeScreenLayout
 import app.video.player.preferences.MediaLibraryType
 import app.video.player.preferences.preference.collectAsState
 import app.video.player.domain.thumbnail.ThumbnailRepository
@@ -255,7 +254,6 @@ fun DualHorizonHeader(
   val recentlyPlayedRepo = koinInject<RecentlyPlayedRepository>()
   val recentEntities by recentlyPlayedRepo.observeRecentlyPlayed(limit = 50).collectAsState(initial = emptyList())
   val browserPreferences = koinInject<BrowserPreferences>()
-  val homeScreenLayout by browserPreferences.homeScreenLayout.collectAsState()
   val dualHorizonHintDismissed by browserPreferences.dualHorizonHintDismissed.collectAsState()
   val showVideoRail by browserPreferences.dualHorizonShowVideoRail.collectAsState()
   val showAudioPulsing by browserPreferences.dualHorizonShowAudioPulsing.collectAsState()
@@ -488,218 +486,27 @@ fun DualHorizonHeader(
   } ?: videoItems.firstOrNull { it.progressPercentage != null && it.progressPercentage > 0f && !it.isWatched }
     ?: videoItems.firstOrNull()
 
-  when (homeScreenLayout) {
-    HomeScreenLayout.CinematicHorizon -> {
-      CinematicHorizonContent(
-        modifier = modifier,
-        videoItems = videoItems,
-        sortedAudioByTitle = sortedAudioByTitle,
-        heroAudio = heroAudio,
-        heroVideo = heroVideo,
-        currentSessionItem = currentSessionItem,
-        sectionOrder = sectionOrder,
-        showVideoRail = showVideoRail,
-        showAudioPulsing = showAudioPulsing,
-        showMusicRail = showMusicRail,
-        showSpotlight = showCinematicSpotlight,
-        spotlightScale = cinematicSpotlightScale,
-        audioPulsingScale = audioPulsingScale,
-        videoRailScale = videoRailScale,
-        musicRailScale = musicRailScale,
-        dualHorizonHeaderStyle = dualHorizonHeaderStyle,
-        onPlayMedia = onPlayMedia,
-        playAudioInBackground = { targetVideo, pos -> playAudioInBackground(targetVideo, pos) },
-        onVideoAction = { actionTargetVideo = it },
-      )
-    }
-    HomeScreenLayout.DualHorizon -> {
-      Column(
-        modifier = modifier
-          .fillMaxWidth()
-          .padding(bottom = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
-      ) {
-    // 0. DualHorizon Audio Pulsing & Key Feature Discovery Hint
-    if (!dualHorizonHintDismissed) {
-      DualHorizonFeatureHintCard(
-        onDismiss = {
-          browserPreferences.dualHorizonHintDismissed.set(true)
-        },
-        modifier = Modifier
-          .fillMaxWidth()
-          .padding(horizontal = 16.dp),
-      )
-    }
-
-    val defaults = listOf("VIDEO", "PULSING", "MUSIC")
-    val orderedSections = remember(sectionOrder) {
-      (sectionOrder.filter { it in defaults } + defaults).distinct()
-    }
-
-    orderedSections.forEach { sectionId ->
-      when (sectionId) {
-        "VIDEO" -> {
-          // 1. Movies / Videos Rail
-          if (showVideoRail && videoItems.isNotEmpty()) {
-            HorizonRailSection(
-              title = "Movies / Videos",
-              icon = "🎬",
-              accentColor = MaterialTheme.colorScheme.primary,
-              count = videoItems.size,
-              style = dualHorizonHeaderStyle,
-            ) {
-              LazyRow(
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-              ) {
-                items(
-                  items = videoItems,
-                  key = { it.video.path },
-                ) { item ->
-                  BentoHorizonVideoCard(
-                    item = item,
-                    scale = videoRailScale,
-                    onClick = { onPlayMedia(item.video, null, videoItems.map { it.video }) },
-                    onLongClick = { actionTargetVideo = item.video },
-                  )
-                }
-              }
-            }
-          }
-        }
-        "PULSING" -> {
-          // 2. Audio Pulsing Hero Spotlight Card
-          val heroToDisplay = heroAudio ?: (if (videoItems.isEmpty()) heroVideo else null)
-          if (showAudioPulsing && heroToDisplay != null) {
-            val isCurrentlyInSession = remember(currentSessionItem, heroToDisplay.video) {
-              matchesPlaybackItem(heroToDisplay.video, currentSessionItem)
-            }
-            val isPaused by PlaybackSession.propBoolean["pause"].collectAsState()
-            val livePos = PlaybackSession.propInt["time-pos"].collectAsState().value?.toDouble()
-            val savedPos = heroToDisplay.timeRemaining?.let { rem ->
-              ((heroToDisplay.video.duration / 1000L) - rem).coerceAtLeast(0L).toDouble()
-            } ?: if ((heroToDisplay.progressPercentage ?: 0f) > 0f && heroToDisplay.video.duration > 0L) {
-              (((heroToDisplay.progressPercentage!! * heroToDisplay.video.duration) / 1000L).toLong()).toDouble()
-            } else 0.0
-
-            val resumePos = if (isCurrentlyInSession && livePos != null && livePos > 0.0) {
-              livePos
-            } else {
-              savedPos
-            }
-
-            BentoHeroSpotlightCard(
-              item = heroToDisplay,
-              scale = audioPulsingScale,
-              onClick = {
-                if (heroToDisplay.video.isAudio) {
-                  if (isCurrentlyInSession) {
-                    val currentPaused = isPaused ?: false
-                    PlaybackSession.setPropertyBoolean("pause", !currentPaused)
-                  } else {
-                    playAudioInBackground(heroToDisplay.video, resumePos.takeIf { it > 0.0 })
-                  }
-                } else {
-                  onPlayMedia(heroToDisplay.video, resumePos.takeIf { it > 0.0 }, videoItems.map { it.video })
-                }
-              },
-              onLongClick = {
-                if (heroToDisplay.video.isAudio) {
-                  if (PlaybackSession.isInitialized) {
-                    val intent = Intent(context, PlayerActivity::class.java).apply {
-                      action = MediaPlaybackService.ACTION_OPEN_PLAYER
-                      putExtra("is_audio", true)
-                      putExtra("internal_launch", true)
-                      putExtra("launch_source", "audio_pulsing")
-                      flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    }
-                    try {
-                      context.startActivity(intent)
-                    } catch (_: Exception) {}
-                  } else {
-                    onPlayMedia(heroToDisplay.video, resumePos.takeIf { it > 0.0 }, sortedAudioByTitle.map { it.video })
-                  }
-                }
-              },
-              onPrevious = {
-                if (isCurrentlyInSession) {
-                  val prev = PlaybackSession.playPrevious()
-                  if (prev == null && sortedAudioByTitle.isNotEmpty()) {
-                    val currIdx = sortedAudioByTitle.indexOfFirst { matchesPlaybackItem(it.video, currentSessionItem) }
-                    if (currIdx >= 0) {
-                      val prevIdx = (currIdx - 1 + sortedAudioByTitle.size) % sortedAudioByTitle.size
-                      playAudioInBackground(sortedAudioByTitle[prevIdx].video, null)
-                    }
-                  }
-                } else if (sortedAudioByTitle.isNotEmpty()) {
-                  val currIdx = sortedAudioByTitle.indexOfFirst { it.video.path == heroToDisplay.video.path }
-                  val prevIdx = if (currIdx >= 0) (currIdx - 1 + sortedAudioByTitle.size) % sortedAudioByTitle.size else 0
-                  playAudioInBackground(sortedAudioByTitle[prevIdx].video, null)
-                }
-              },
-              onPlayPause = {
-                if (isCurrentlyInSession) {
-                  val currentPaused = isPaused ?: false
-                  PlaybackSession.setPropertyBoolean("pause", !currentPaused)
-                } else {
-                  playAudioInBackground(heroToDisplay.video, resumePos.takeIf { it > 0.0 })
-                }
-              },
-              onNext = {
-                if (isCurrentlyInSession) {
-                  val next = PlaybackSession.playNext()
-                  if (next == null && sortedAudioByTitle.isNotEmpty()) {
-                    val currIdx = sortedAudioByTitle.indexOfFirst { matchesPlaybackItem(it.video, currentSessionItem) }
-                    if (currIdx >= 0) {
-                      val nextIdx = (currIdx + 1) % sortedAudioByTitle.size
-                      playAudioInBackground(sortedAudioByTitle[nextIdx].video, null)
-                    }
-                  }
-                } else if (sortedAudioByTitle.isNotEmpty()) {
-                  val currIdx = sortedAudioByTitle.indexOfFirst { it.video.path == heroToDisplay.video.path }
-                  val nextIdx = if (currIdx >= 0) (currIdx + 1) % sortedAudioByTitle.size else 0
-                  playAudioInBackground(sortedAudioByTitle[nextIdx].video, null)
-                }
-              },
-            )
-          }
-        }
-        "MUSIC" -> {
-          // 3. Music Rail (ALL songs sorted by title)
-          if (showMusicRail && sortedAudioByTitle.isNotEmpty()) {
-            HorizonRailSection(
-              title = "Music",
-              icon = "🎵",
-              accentColor = MaterialTheme.colorScheme.tertiary,
-              count = sortedAudioByTitle.size,
-              style = dualHorizonHeaderStyle,
-            ) {
-              LazyRow(
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-              ) {
-                items(
-                  items = sortedAudioByTitle,
-                  key = { it.video.path },
-                ) { item ->
-                  BentoHorizonAudioCard(
-                    item = item,
-                    scale = musicRailScale,
-                    onClick = {
-                      playAudioInBackground(item.video, null)
-                    },
-                    onLongClick = { actionTargetVideo = item.video },
-                  )
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-      }
-    }
-  }
+  CinematicHorizonContent(
+    modifier = modifier,
+    videoItems = videoItems,
+    sortedAudioByTitle = sortedAudioByTitle,
+    heroAudio = heroAudio,
+    heroVideo = heroVideo,
+    currentSessionItem = currentSessionItem,
+    sectionOrder = sectionOrder,
+    showVideoRail = showVideoRail,
+    showAudioPulsing = showAudioPulsing,
+    showMusicRail = showMusicRail,
+    showSpotlight = showCinematicSpotlight,
+    spotlightScale = cinematicSpotlightScale,
+    audioPulsingScale = audioPulsingScale,
+    videoRailScale = videoRailScale,
+    musicRailScale = musicRailScale,
+    dualHorizonHeaderStyle = dualHorizonHeaderStyle,
+    onPlayMedia = onPlayMedia,
+    playAudioInBackground = { targetVideo, pos -> playAudioInBackground(targetVideo, pos) },
+    onVideoAction = { actionTargetVideo = it },
+  )
 
   // Bottom Sheet for Bento Media Long-Press Actions (Rename, Hide, Delete)
   actionTargetVideo?.let { targetVideo ->
