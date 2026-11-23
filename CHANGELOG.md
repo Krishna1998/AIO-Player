@@ -2,6 +2,37 @@
 
 These notes are written in plain English and focus on what changed for real use.
 
+## 1.0.3
+
+### 📱 Picture-in-Picture Lock Automation & Persistence
+- **Automated Pause PiP on Screen Lock:**
+  - Added dedicated screen-off broadcast receiver in `MediaPlaybackService` and enhanced `PlayerActivity` PiP lifecycle tracking.
+  - Automatically pauses video/audio playback when the phone is locked or screen turns off while in Picture-in-Picture mode, keeping playback state and notification controls intact so playback can be manually resumed whenever desired.
+- **PiP Aspect Ratio & Geometry Stability:**
+  - Guaranteed persistent stretch and crop aspect ratios across lock/unlock cycles in PiP mode without pillarboxing squishing.
+
+### ⏱️ Sleep Timer Perfection & Streamlined Settings
+- **In-Sheet Fade-Out Duration Slider (3s to 30s):**
+  - Integrated the gentle audio fade-out slider (configurable from 3s to 30s) directly into the Sleep Timer dialog (`MoreSheet.kt`).
+  - Removed duplicate fade-out slider from Audio Preferences to consolidate all sleep timer controls in one intuitive location.
+- **Perfect End-of-Track Synchronization:**
+  - Synchronized track completion so the sleep timer stops playback cleanly 1 second before track end without premature cut-offs or 1–2 second bleed into the next track.
+- **Granular `HH:MM:SS` Time Input:**
+  - Upgraded custom duration input with dedicated Hours, Minutes, and Seconds fields for precise countdown configuration.
+
+### 🌅 Cinematic Horizon Streamlined Experience
+- **Dedicated Cinematic Horizon Home:**
+  - Completely unified the home experience around **Cinematic Horizon**, removing legacy Dual Horizon layout options and simplifying Home preferences.
+  - Added **Show Continue Watching** toggle in **Settings > Appearance > Home & Media Library**.
+
+### 📦 Build & Release
+- **Standardized Release Artifacts:**
+  - Updated release workflow artifact naming to `V&MPlayer-arm64-v8a-<version>.apk` with full backward and forward compatibility in the in-app OTA update manager.
+
+### 🎨 About Screen
+- **Author Badge Polish:**
+  - Highlighted "By Krishna" badge with enlarged bold styling (`titleMedium`) and refined heart icon styling.
+
 ## 1.0.2
 
 ### 📱 Picture-in-Picture & Stretch Mode Fixes

@@ -11,7 +11,7 @@ Suggested plain-text reference:
 ```text
 V&M Player — Modern Android Video & Music Player powered by libmpv.
 https://github.com/Krishna1998/AIO-Player
-Version: 1.0.2
+Version: 1.0.3
 ```
 
 ## Open-source acknowledgments
