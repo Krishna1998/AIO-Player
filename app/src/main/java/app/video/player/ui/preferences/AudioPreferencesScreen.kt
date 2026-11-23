@@ -560,27 +560,6 @@ object AudioPreferencesScreen : Screen {
               )
 
               PreferenceDivider()
-              val fadeOutDuration by preferences.sleepTimerFadeOutDuration.collectAsState()
-              ExpressivePreferenceItem {
-                SliderPreference(
-                  modifier = Modifier.settingsSearchTarget(R.string.sleep_timer_fade_out_duration),
-                  value = fadeOutDuration.toFloat(),
-                  onValueChange = { preferences.sleepTimerFadeOutDuration.set(it.roundToInt().coerceIn(3, 30)) },
-                  title = { Text(stringResource(R.string.sleep_timer_fade_out_duration)) },
-                  valueRange = 3f..30f,
-                  valueSteps = 26,
-                  summary = {
-                    Text(
-                      stringResource(R.string.sleep_timer_fade_out_duration_summary, fadeOutDuration),
-                      color = MaterialTheme.colorScheme.outline,
-                    )
-                  },
-                  onSliderValueChange = { preferences.sleepTimerFadeOutDuration.set(it.roundToInt().coerceIn(3, 30)) },
-                  sliderValue = fadeOutDuration.toFloat(),
-                )
-              }
-
-              PreferenceDivider()
               val volumeStep by preferences.volumeStep.collectAsState()
               ExpressivePreferenceItem {
                 SliderPreference(
