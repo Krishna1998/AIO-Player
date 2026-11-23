@@ -49,7 +49,7 @@ interface PlayerHost {
 
   fun currentThumbnailSource(): String? = null
 
-  fun isInPictureInPictureMode(): Boolean = false
+  fun isHostInPictureInPictureMode(): Boolean = false
 
   fun isCurrentMediaKnownAudio(): Boolean = false
 

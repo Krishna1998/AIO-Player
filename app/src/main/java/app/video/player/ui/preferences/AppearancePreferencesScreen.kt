@@ -1242,7 +1242,7 @@ object AppearancePreferencesScreen : Screen {
                   )
                 },
                 groupIndex = 2,
-                groupSize = bentoItemCount,
+                groupSize = dualHorizonItemCount,
               )
             }
           }

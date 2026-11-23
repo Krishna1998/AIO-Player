@@ -5117,7 +5117,7 @@ fun restartFromBeginning() {
 
         // If currently in Picture-in-Picture mode, do not recalculate Stretch aspect from full-screen
         // DisplayMetrics (which flips to portrait and distorts into a narrow vertical strip).
-        if (currentHost.isInPictureInPictureMode()) {
+        if (currentHost.isHostInPictureInPictureMode()) {
           PlaybackSession.setPropertyDouble("panscan", 0.0)
           val existingOverride = PlaybackSession.getPropertyDouble("video-aspect-override")
           if (existingOverride == null || existingOverride <= 0.0 || !existingOverride.isFinite()) {

@@ -7759,6 +7759,8 @@ private suspend fun restorePlaybackPosition(state: PlaybackStateEntity?, loadGen
     get() = getSystemService(AUDIO_SERVICE) as AudioManager
   private val keyguardManager: KeyguardManager
     get() = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+  override fun isHostInPictureInPictureMode(): Boolean = isInPictureInPictureMode
+
   override var hostRequestedOrientation: Int
     get() = requestedOrientation
     set(value) {
