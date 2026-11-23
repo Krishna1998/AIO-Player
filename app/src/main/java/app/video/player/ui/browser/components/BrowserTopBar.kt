@@ -539,7 +539,7 @@ private fun NormalTopBar(
         ) {
           if (showProfilePictureInSettings) {
             Image(
-              bitmap = profileAvatar!!,
+              bitmap = profileAvatar,
               contentDescription = profileName.ifBlank { stringResource(R.string.ui_settings) },
               contentScale = ContentScale.Crop,
               modifier = Modifier
