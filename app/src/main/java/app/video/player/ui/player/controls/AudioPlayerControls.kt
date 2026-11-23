@@ -56,6 +56,7 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTapGestures
 import app.video.player.ui.player.controls.components.VolumeSlider
+import app.video.player.preferences.VolumeAndBrightnessHudStyle
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -1781,14 +1782,32 @@ fun AudioPlayerControls(
               }
             }
 
-            // 4. Floating Vertical Volume HUD Pill
+            // 4. Floating Volume HUD Pill
+            val hudStyle by appearancePreferences.volumeAndBrightnessHudStyle.collectAsState()
             androidx.compose.animation.AnimatedVisibility(
               visible = isVolumeSliderShown,
-              enter = fadeIn(animationSpec = tween(150)) + scaleIn(initialScale = 0.85f, animationSpec = tween(180)),
-              exit = fadeOut(animationSpec = tween(200)) + scaleOut(targetScale = 0.85f, animationSpec = tween(180)),
-              modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(end = 16.dp),
+              enter =
+                if (hudStyle.isTopHorizontal) {
+                  slideInVertically(animationSpec = tween(180), initialOffsetY = { -it }) + fadeIn(tween(150))
+                } else {
+                  fadeIn(animationSpec = tween(150)) + scaleIn(initialScale = 0.85f, animationSpec = tween(180))
+                },
+              exit =
+                if (hudStyle.isTopHorizontal) {
+                  slideOutVertically(animationSpec = tween(180), targetOffsetY = { -it }) + fadeOut(tween(200))
+                } else {
+                  fadeOut(animationSpec = tween(200)) + scaleOut(targetScale = 0.85f, animationSpec = tween(180))
+                },
+              modifier =
+                if (hudStyle.isTopHorizontal) {
+                  Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 28.dp)
+                } else {
+                  Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(end = 16.dp)
+                },
             ) {
               val currentBoost = (currentMPVVolume ?: 100) - 100
               val showBoost = boostCap > 0 || currentBoost > 0

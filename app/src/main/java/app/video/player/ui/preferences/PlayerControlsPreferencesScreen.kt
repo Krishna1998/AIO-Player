@@ -54,6 +54,7 @@ import app.video.player.preferences.PlayerButton
 import app.video.player.preferences.PlayerClockFormat
 import app.video.player.preferences.PlayerPreferences
 import app.video.player.preferences.SeekbarStyle
+import app.video.player.preferences.VolumeAndBrightnessHudStyle
 import app.video.player.preferences.preference.collectAsState
 import app.video.player.presentation.Screen
 import app.video.player.ui.icons.Icon
@@ -326,6 +327,28 @@ object PlayerControlsPreferencesScreen : Screen {
             var customTimeValue by remember { mutableStateOf("") }
 
             PreferenceCard {
+              val volumeAndBrightnessHudStyle by appearancePrefs.volumeAndBrightnessHudStyle.collectAsState()
+              DevicePreference(R.string.pref_hud_style_title) {
+                ExpressivePreferenceItem(standalone = true) {
+                  ListPreference(
+                    modifier = Modifier.settingsSearchTarget(R.string.pref_hud_style_title),
+                    value = volumeAndBrightnessHudStyle,
+                    onValueChange = appearancePrefs.volumeAndBrightnessHudStyle::set,
+                    values = VolumeAndBrightnessHudStyle.entries,
+                    valueToText = { AnnotatedString(stringResource(it.titleRes)) },
+                    title = { Text(stringResource(R.string.pref_hud_style_title)) },
+                    summary = {
+                      Text(
+                        stringResource(volumeAndBrightnessHudStyle.titleRes),
+                        color = MaterialTheme.colorScheme.outline,
+                      )
+                    },
+                  )
+                }
+
+                PreferenceDivider()
+              }
+
               DevicePreference(R.string.pref_player_buttons_overall_opacity) {
                 ExpressivePreferenceItem(standalone = true) {
                   AppSliderPreference(

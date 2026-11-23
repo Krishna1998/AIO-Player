@@ -115,6 +115,8 @@ class AppearancePreferences(
   val unplayedOldVideoDays = preferenceStore.getInt("unplayed_old_video_days", 7)
   val hideScrollbar = preferenceStore.getBoolean("hide_scrollbar", true)
   val seekbarStyle = preferenceStore.getEnum("seekbar_style", SeekbarStyle.CyberLaser)
+  val volumeAndBrightnessHudStyle =
+    preferenceStore.getEnum("volume_and_brightness_hud_style", VolumeAndBrightnessHudStyle.DynamicIsland)
   val portraitSeekbarPlacement =
     preferenceStore.getEnum("portrait_seekbar_placement", SeekbarPlacement.AboveButtons)
   val landscapeSeekbarPlacement =

@@ -36,6 +36,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -136,6 +138,7 @@ import app.video.player.preferences.GesturePreferences
 import app.video.player.preferences.AudioPreferences
 import app.video.player.preferences.PlaybackControlsPlacement
 import app.video.player.preferences.PlayerButton
+import app.video.player.preferences.VolumeAndBrightnessHudStyle
 import app.video.player.preferences.PlayerPreferences
 import app.video.player.preferences.allPlayerButtons
 import app.video.player.preferences.preference.collectAsState
@@ -787,6 +790,7 @@ fun PlayerControls(
     val tvControlsAnimStyle by playerPreferences.controlsAnimStyle.collectAsState()
     val tvVolumeBoostCap by audioPreferences.volumeBoostCap.collectAsState()
     val tvDisplayVolumeAsPercentage by playerPreferences.displayVolumeAsPercentage.collectAsState()
+    val tvHudStyle by appearancePreferences.volumeAndBrightnessHudStyle.collectAsState()
     // Some TV remotes send volume keys to Android instead of to this Activity.
     // Observe actual system-stream changes as well as the handled key events.
     DisposableEffect(playerActivity, viewModel) {
@@ -923,21 +927,41 @@ fun PlayerControls(
           AnimatedVisibility(
             visible = tvVolumeVisible && tvShowVolumeOverlay,
             enter =
-              buildControlsEnterH(
-                tvControlsAnimStyle,
-                reduceMotion,
-                (100 * animSpeed).toInt().coerceAtLeast(30),
-              ) { if (tvSwapVolumeAndBrightness) it else -it },
+              if (tvHudStyle.isTopHorizontal) {
+                slideInVertically(
+                  animationSpec = tween((300 * animSpeed).toInt().coerceAtLeast(50)),
+                  initialOffsetY = { -it },
+                ) + fadeIn(tween((300 * animSpeed).toInt().coerceAtLeast(50)))
+              } else {
+                buildControlsEnterH(
+                  tvControlsAnimStyle,
+                  reduceMotion,
+                  (100 * animSpeed).toInt().coerceAtLeast(30),
+                ) { if (tvSwapVolumeAndBrightness) it else -it }
+              },
             exit =
-              buildControlsExitH(
-                tvControlsAnimStyle,
-                reduceMotion,
-                (300 * animSpeed).toInt().coerceAtLeast(50),
-              ) { if (tvSwapVolumeAndBrightness) it else -it },
+              if (tvHudStyle.isTopHorizontal) {
+                slideOutVertically(
+                  animationSpec = tween((300 * animSpeed).toInt().coerceAtLeast(50)),
+                  targetOffsetY = { -it },
+                ) + fadeOut(tween((300 * animSpeed).toInt().coerceAtLeast(50)))
+              } else {
+                buildControlsExitH(
+                  tvControlsAnimStyle,
+                  reduceMotion,
+                  (300 * animSpeed).toInt().coerceAtLeast(50),
+                ) { if (tvSwapVolumeAndBrightness) it else -it }
+              },
             modifier =
-              Modifier
-                .align(if (tvSwapVolumeAndBrightness) Alignment.CenterEnd else Alignment.CenterStart)
-                .padding(horizontal = 48.dp),
+              if (tvHudStyle.isTopHorizontal) {
+                Modifier
+                  .align(Alignment.TopCenter)
+                  .padding(top = 36.dp)
+              } else {
+                Modifier
+                  .align(if (tvSwapVolumeAndBrightness) Alignment.CenterEnd else Alignment.CenterStart)
+                  .padding(horizontal = 48.dp)
+              },
           ) {
             val currentBoost = (tvMpvVolume ?: 100) - 100
             val showBoost = tvVolumeBoostCap > 0 || currentBoost > 0
@@ -1319,61 +1343,103 @@ fun PlayerControls(
               )
             } ?: Modifier
 
+          val hudStyle by appearancePreferences.volumeAndBrightnessHudStyle.collectAsState()
+
           AnimatedVisibility(
             isBrightnessSliderShown && showBrightnessGestureOverlay,
             enter =
-              buildControlsEnterH(
-                controlsAnimStyle,
-                reduceMotion,
-                enterMs,
-              ) { if (swapVolumeAndBrightness) -it else it },
+              if (hudStyle.isTopHorizontal) {
+                slideInVertically(
+                  animationSpec = tween(enterMs),
+                  initialOffsetY = { -it },
+                ) + fadeIn(tween(enterMs))
+              } else {
+                buildControlsEnterH(
+                  controlsAnimStyle,
+                  reduceMotion,
+                  enterMs,
+                ) { if (swapVolumeAndBrightness) -it else it }
+              },
             exit =
-              buildControlsExitH(
-                controlsAnimStyle,
-                reduceMotion,
-                exitMs,
-              ) { if (swapVolumeAndBrightness) -it else it },
+              if (hudStyle.isTopHorizontal) {
+                slideOutVertically(
+                  animationSpec = tween(exitMs),
+                  targetOffsetY = { -it },
+                ) + fadeOut(tween(exitMs))
+              } else {
+                buildControlsExitH(
+                  controlsAnimStyle,
+                  reduceMotion,
+                  exitMs,
+                ) { if (swapVolumeAndBrightness) -it else it }
+              },
             modifier =
               Modifier.clickable {
                 viewModel.dismissAdjustmentOverlays()
                 viewModel.showControls()
               }.constrainAs(brightnessSlider) {
-                if (swapVolumeAndBrightness) {
-                  start.linkTo(parent.start, if (isPortrait) spacing.large else spacing.extraLarge)
+                if (hudStyle.isTopHorizontal) {
+                  start.linkTo(parent.start)
+                  end.linkTo(parent.end)
+                  top.linkTo(parent.top, if (isPortrait) 32.dp else 24.dp)
                 } else {
-                  end.linkTo(parent.end, if (isPortrait) spacing.large else spacing.extraLarge)
+                  if (swapVolumeAndBrightness) {
+                    start.linkTo(parent.start, if (isPortrait) spacing.large else spacing.extraLarge)
+                  } else {
+                    end.linkTo(parent.end, if (isPortrait) spacing.large else spacing.extraLarge)
+                  }
+                  top.linkTo(parent.top, spacing.larger)
+                  bottom.linkTo(parent.bottom, spacing.extraLarge)
                 }
-                top.linkTo(parent.top, spacing.larger)
-                bottom.linkTo(parent.bottom, spacing.extraLarge)
               },
           ) { BrightnessSlider(brightness, 0f..1f, 0f..0.75f) }
 
           AnimatedVisibility(
             isVolumeSliderShown && showVolumeGestureOverlay,
             enter =
-              buildControlsEnterH(
-                controlsAnimStyle,
-                reduceMotion,
-                enterMs,
-              ) { if (swapVolumeAndBrightness) it else -it },
+              if (hudStyle.isTopHorizontal) {
+                slideInVertically(
+                  animationSpec = tween(enterMs),
+                  initialOffsetY = { -it },
+                ) + fadeIn(tween(enterMs))
+              } else {
+                buildControlsEnterH(
+                  controlsAnimStyle,
+                  reduceMotion,
+                  enterMs,
+                ) { if (swapVolumeAndBrightness) it else -it }
+              },
             exit =
-              buildControlsExitH(
-                controlsAnimStyle,
-                reduceMotion,
-                exitMs,
-              ) { if (swapVolumeAndBrightness) it else -it },
+              if (hudStyle.isTopHorizontal) {
+                slideOutVertically(
+                  animationSpec = tween(exitMs),
+                  targetOffsetY = { -it },
+                ) + fadeOut(tween(exitMs))
+              } else {
+                buildControlsExitH(
+                  controlsAnimStyle,
+                  reduceMotion,
+                  exitMs,
+                ) { if (swapVolumeAndBrightness) it else -it }
+              },
             modifier =
               Modifier.clickable {
                 viewModel.dismissAdjustmentOverlays()
                 viewModel.showControls()
               }.constrainAs(volumeSlider) {
-                if (swapVolumeAndBrightness) {
-                  end.linkTo(parent.end, if (isPortrait) spacing.large else spacing.extraLarge)
+                if (hudStyle.isTopHorizontal) {
+                  start.linkTo(parent.start)
+                  end.linkTo(parent.end)
+                  top.linkTo(parent.top, if (isPortrait) 32.dp else 24.dp)
                 } else {
-                  start.linkTo(parent.start, if (isPortrait) spacing.large else spacing.extraLarge)
+                  if (swapVolumeAndBrightness) {
+                    end.linkTo(parent.end, if (isPortrait) spacing.large else spacing.extraLarge)
+                  } else {
+                    start.linkTo(parent.start, if (isPortrait) spacing.large else spacing.extraLarge)
+                  }
+                  top.linkTo(parent.top, spacing.larger)
+                  bottom.linkTo(parent.bottom, spacing.extraLarge)
                 }
-                top.linkTo(parent.top, spacing.larger)
-                bottom.linkTo(parent.bottom, spacing.extraLarge)
               },
           ) {
             val boostCap by audioPreferences.volumeBoostCap.collectAsState()
