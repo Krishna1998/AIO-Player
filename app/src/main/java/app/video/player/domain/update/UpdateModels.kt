@@ -88,13 +88,11 @@ data class Release(
       val channelName = ciChannelName ?: return assets
       val buildNumber = ciBuildNumber ?: return assets
       val specific = assets.filter {
-        it.name.startsWith("V&MPlayer-$channelName-r$buildNumber-", ignoreCase = true) ||
-          it.name.startsWith("VideoPlayer-$channelName-r$buildNumber-", ignoreCase = true)
+        it.matchesPlayerAsset("$channelName-r$buildNumber-")
       }
       if (specific.isNotEmpty()) return specific
       return assets.filter {
-        it.name.startsWith("V&MPlayer-", ignoreCase = true) ||
-          it.name.startsWith("VideoPlayer-", ignoreCase = true)
+        it.matchesPlayerAsset()
       }
     }
 
@@ -105,12 +103,25 @@ data class Release(
   }
 }
 
+internal fun isPlayerApkName(name: String, ciPrefix: String = ""): Boolean {
+  val lower = name.lowercase()
+  val prefixes = listOf("v&mplayer", "v.mplayer", "vmplayer", "videoplayer")
+  return prefixes.any { prefix ->
+    lower.startsWith("$prefix$ciPrefix", ignoreCase = true) ||
+      (ciPrefix.isEmpty() && lower.startsWith("$prefix-", ignoreCase = true))
+  }
+}
+
+internal fun Asset.matchesPlayerAsset(ciPrefix: String = ""): Boolean =
+  isPlayerApkName(name, ciPrefix) || (label != null && isPlayerApkName(label, ciPrefix))
+
 @Serializable
 data class Asset(
   @SerialName("browser_download_url") val downloadUrl: String,
   @SerialName("name") val name: String,
   @SerialName("size") val size: Long,
-  @SerialName("content_type") val contentType: String,
+  @SerialName("content_type") val contentType: String? = null,
+  @SerialName("label") val label: String? = null,
   // Pages feeds publish "sha256"; GitHub release assets publish "digest" as "sha256:<hex>".
   @SerialName("sha256") val sha256: String? = null,
   @SerialName("digest") val digest: String? = null,

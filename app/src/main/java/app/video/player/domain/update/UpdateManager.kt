@@ -224,7 +224,7 @@ class UpdateManager(
   private fun selectBestApkAsset(assets: List<Asset>): Asset? {
     val compatibleAssets =
       assets.filter { asset ->
-        (asset.name.startsWith("V&MPlayer-", ignoreCase = true) || asset.name.startsWith("VideoPlayer-", ignoreCase = true)) &&
+        asset.matchesPlayerAsset() &&
           asset.name.endsWith(".apk", ignoreCase = true) &&
           asset.name.matchesApkVariant(BuildConfig.UPDATE_APK_VARIANT)
       }
@@ -437,7 +437,7 @@ class UpdateManager(
   private fun pruneOtherDownloads(keep: Set<String>) {
     File(context.externalCacheDir ?: context.cacheDir, "updates").listFiles()?.forEach { file ->
       val isUpdateDownload =
-        file.name.startsWith("VideoPlayer-", ignoreCase = true) &&
+        isPlayerApkName(file.name) &&
           (file.name.endsWith(".apk") || file.name.endsWith(PART_SUFFIX))
       if (isUpdateDownload && file.name !in keep) file.delete()
     }

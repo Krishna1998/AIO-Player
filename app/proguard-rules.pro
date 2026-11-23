@@ -57,3 +57,8 @@
     java.lang.Object writeReplace();
     java.lang.Object readResolve();
 }
+
+# Preserve update domain models and Kotlin serialization metadata for release OTA checks
+-keep class app.video.player.domain.update.** { *; }
+-keepclassmembers class app.video.player.domain.update.** { *; }
+
