@@ -2377,7 +2377,6 @@ fun OneUi9WaveformVisualizer(
     label = "waveAmpScale",
   )
 
-  val outlineVariantColor = MaterialTheme.colorScheme.outlineVariant
   val minWaveActiveWidth = with(LocalDensity.current) { 2.dp.toPx() }
   val filledPath = remember { Path() }
   val contourPath = remember { Path() }
@@ -2394,30 +2393,6 @@ fun OneUi9WaveformVisualizer(
     val step = 2.dp.toPx().coerceAtLeast(1f)
     val clampedProgress = progress.coerceIn(0f, 1f)
     val waveActiveWidth = (width * clampedProgress).coerceIn(0f, width)
-
-    // Unplayed track baseline line
-    drawLine(
-      color = outlineVariantColor.copy(alpha = 0.25f),
-      start = Offset(0f, baselineY),
-      end = Offset(width, baselineY),
-      strokeWidth = 1.dp.toPx(),
-      cap = StrokeCap.Round,
-    )
-
-    // Played track baseline accent glow
-    if (waveActiveWidth > 0f) {
-      drawLine(
-        brush = Brush.horizontalGradient(
-          colors = listOf(wave1Color.copy(alpha = 0.6f), wave3Color),
-          startX = 0f,
-          endX = waveActiveWidth,
-        ),
-        start = Offset(0f, baselineY),
-        end = Offset(waveActiveWidth, baselineY),
-        strokeWidth = 2.dp.toPx(),
-        cap = StrokeCap.Round,
-      )
-    }
 
     if (waveActiveWidth <= minWaveActiveWidth || availableLift <= 0.5f) return@Canvas
 
