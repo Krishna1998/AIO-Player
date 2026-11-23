@@ -878,6 +878,7 @@ class MediaPlaybackService :
   }
 
   private fun playNextFromSession(): Boolean {
+    if (PlaybackSession.sleepTimerEndOfTrack) return false
     if (!canHandleTransportAction()) return false
     schedulePlaybackStateSave(force = true)
     val item = PlaybackSession.playNext()
@@ -922,6 +923,7 @@ class MediaPlaybackService :
   }
 
   private fun applySessionItem(item: PlaybackItem) {
+    if (PlaybackSession.sleepTimerEndOfTrack) return
     val itemChanged = mediaIdentifier != item.stableId || mediaUri != item.originalUri
     val artworkChanged = activeArtworkUri != item.artworkUri
     val isAudio = resolveNotificationIsAudio(item, notificationIsAudio)

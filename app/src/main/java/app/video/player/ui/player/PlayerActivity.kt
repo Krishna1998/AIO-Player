@@ -4610,6 +4610,9 @@ class PlayerActivity :
       return
     }
     if (PlaybackSession.sleepTimerEndOfTrack) {
+      eofAdvanceJob?.cancel()
+      eofAdvanceJob = null
+      isAdvancingAtEof = false
       PlaybackSession.setPropertyBoolean("pause", true)
       return
     }
@@ -7864,6 +7867,7 @@ private suspend fun restorePlaybackPosition(state: PlaybackStateEntity?, loadGen
    * Play the next video in the playlist
    */
   override fun playNextQueueItem() {
+    if (PlaybackSession.sleepTimerEndOfTrack) return
     if (!PlaybackSession.hasNext() || !beginMediaRequest()) return
     PlaybackSession.selectNext() ?: return
     syncPlaylistFromSession()
@@ -7906,6 +7910,7 @@ private suspend fun restorePlaybackPosition(state: PlaybackStateEntity?, loadGen
     saveCurrentPlaybackState: Boolean = true,
     requestAlreadyStarted: Boolean = false,
   ) {
+    if (PlaybackSession.sleepTimerEndOfTrack) return
     if (index < 0 || index >= playlist.size) {
       Log.e(TAG, "Invalid playlist index: $index (playlist size: ${playlist.size})")
       return

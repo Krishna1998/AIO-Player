@@ -643,7 +643,7 @@ fun TimePickerDialog(
           val s = seconds.toIntOrNull() ?: 0
           val customSeconds = h * 3600 + m * 60 + s
           if (customSeconds > 0) {
-            onTimeSelect(customSeconds, false)
+            onTimeSelect(customSeconds, endOfTrackSelected)
           }
           onDismissRequest()
         },

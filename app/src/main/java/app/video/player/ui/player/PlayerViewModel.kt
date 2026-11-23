@@ -3507,8 +3507,8 @@ fun restartFromBeginning() {
 
             _remainingTime.value = remainingExact.roundToInt()
 
-            // Stop immediately when reaching EOF or 1.0 second before track completion
-            if (isEof || (dur > 0.0 && remainingExact <= 1.0)) {
+            // Stop immediately when reaching EOF or at the very final track boundary (<= 0.05s)
+            if (isEof || (dur > 0.0 && remainingExact <= 0.05)) {
               break
             }
 
@@ -3520,7 +3520,7 @@ fun restartFromBeginning() {
               }
             }
 
-            delay(250)
+            delay(100)
           }
         } else {
           var currentLeft = seconds
@@ -3549,15 +3549,13 @@ fun restartFromBeginning() {
 
         _remainingTime.value = 0
         PlaybackSession.setPropertyBoolean("pause", true)
-        // Reset volume back to original so subsequent playback is unmuted
-        changeMPVVolumeTo(initialVolume)
-        preTimerVolume = null
-        _sleepTimerEndOfTrack.value = false
-        PlaybackSession.sleepTimerEndOfTrack = false
+        changeMPVVolumeTo(0)
         showToast(appContext.getString(R.string.toast_sleep_timer_ended))
 
-        // When sleep timer ends: close app completely
+        // When sleep timer ends: close app completely while maintaining guard
         delay(1200)
+        PlaybackSession.sleepTimerEndOfTrack = false
+        _sleepTimerEndOfTrack.value = false
         app.video.player.App.closeAppCompletely(appContext)
       }
   }
