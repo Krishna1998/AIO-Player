@@ -312,10 +312,179 @@ private fun DynamicIslandHud(
 }
 
 /**
- * Fluid vertical capsule with meniscus glow (Mercury Droplet style).
+ * Dual-island morphology: satellite radar orb with floating glass progress pill (Hyper-Notch Matrix style).
  */
 @Composable
-private fun MercuryDropletHud(
+private fun HyperNotchMatrixHud(
+  fraction: Float,
+  overflowFraction: Float,
+  label: String,
+  icon: AppIcon,
+  isVolume: Boolean,
+  modifier: Modifier = Modifier,
+) {
+  val colors = MaterialTheme.colorScheme
+  val enableLiquidGlass = liquidGlassActive()
+  val glassSettings = rememberLiquidGlassSettings()
+  val glassBackdrop = LocalKyantPlayerBackdrop.current?.takeIf { enableLiquidGlass }
+  val density = LocalDensity.current
+  val shape = CircleShape
+  val fillSpring = spring<Float>(dampingRatio = 0.85f, stiffness = 380f)
+  val level by animateFloatAsState(fraction.coerceIn(0f, 1f), fillSpring, label = "notch_level")
+  val overflow by animateFloatAsState(overflowFraction.coerceIn(0f, 1f), fillSpring, label = "notch_overflow")
+
+  val fillBrush = remember(colors.primaryContainer, colors.primary) {
+    Brush.horizontalGradient(listOf(colors.primary, colors.primaryContainer))
+  }
+  val overflowBrush = remember(colors.errorContainer, colors.error) {
+    Brush.horizontalGradient(listOf(colors.error, colors.errorContainer))
+  }
+
+  Row(
+    modifier = modifier,
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.Center,
+  ) {
+    // Left Satellite Orb
+    Box(
+      modifier = Modifier
+        .size(38.dp)
+        .then(
+          if (glassBackdrop != null) {
+            Modifier.drawBackdrop(
+              backdrop = glassBackdrop,
+              shape = { shape },
+              effects = {
+                liquidGlassEffects(
+                  glassSettings,
+                  with(density) { 10.dp.toPx() },
+                  with(density) { 10.dp.toPx() },
+                  with(density) { 16.dp.toPx() },
+                )
+              },
+              highlight = { glassSettings.highlight(Highlight.Default) },
+              shadow = { Shadow(color = Color.Black.copy(alpha = 0.35f), radius = 8.dp) },
+              innerShadow = { InnerShadow(color = Color.White.copy(alpha = 0.2f), radius = 1.5.dp) },
+            )
+          } else {
+            Modifier
+          },
+        )
+        .clip(shape)
+        .background(Color.Black.copy(alpha = if (glassBackdrop != null) 0.35f else 0.65f))
+        .border(
+          1.2.dp,
+          if (overflow > 0f) colors.error.copy(alpha = 0.45f) else Color.White.copy(alpha = 0.2f),
+          shape,
+        ),
+      contentAlignment = Alignment.Center,
+    ) {
+      Icon(
+        imageVector = icon,
+        contentDescription = null,
+        tint = if (overflow > 0f) colors.error else colors.primary,
+        modifier = Modifier.size(19.dp),
+      )
+    }
+
+    Spacer(modifier = Modifier.width(8.dp))
+
+    // Right Floating Glass Pill
+    Box(
+      modifier = Modifier
+        .width(185.dp)
+        .height(38.dp)
+        .then(
+          if (glassBackdrop != null) {
+            Modifier.drawBackdrop(
+              backdrop = glassBackdrop,
+              shape = { shape },
+              effects = {
+                liquidGlassEffects(
+                  glassSettings,
+                  with(density) { 10.dp.toPx() },
+                  with(density) { 10.dp.toPx() },
+                  with(density) { 16.dp.toPx() },
+                )
+              },
+              highlight = { glassSettings.highlight(Highlight.Default) },
+              shadow = { Shadow(color = Color.Black.copy(alpha = 0.35f), radius = 8.dp) },
+              innerShadow = { InnerShadow(color = Color.White.copy(alpha = 0.15f), radius = 1.5.dp) },
+            )
+          } else {
+            Modifier
+          },
+        )
+        .clip(shape)
+        .background(Color.Black.copy(alpha = if (glassBackdrop != null) 0.35f else 0.65f))
+        .border(1.dp, Color.White.copy(alpha = 0.16f), shape)
+        .padding(horizontal = 12.dp),
+      contentAlignment = Alignment.CenterStart,
+    ) {
+      Row(
+        modifier = Modifier.fillMaxSize(),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Box(
+          modifier = Modifier
+            .weight(1f)
+            .height(6.dp)
+            .clip(CircleShape)
+            .background(Color.White.copy(alpha = 0.14f)),
+        ) {
+          Box(
+            modifier = Modifier
+              .fillMaxHeight()
+              .fillMaxWidth(level)
+              .background(fillBrush),
+          )
+          if (overflow > 0f) {
+            Box(
+              modifier = Modifier
+                .fillMaxHeight()
+                .fillMaxWidth(overflow)
+                .background(overflowBrush),
+            )
+          }
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Text(
+          text = label,
+          style = MaterialTheme.typography.labelMedium.withTabularDigits(),
+          fontWeight = FontWeight.Bold,
+          textAlign = TextAlign.End,
+          color = if (overflow > 0f) colors.error else Color.White,
+          maxLines = 1,
+          modifier = Modifier.stableNumericWidth(label),
+        )
+
+        if (overflow > 0f && isVolume) {
+          Spacer(modifier = Modifier.width(3.dp))
+          Box(
+            modifier = Modifier
+              .clip(RoundedCornerShape(4.dp))
+              .background(colors.error.copy(alpha = 0.22f))
+              .padding(horizontal = 3.dp, vertical = 1.dp),
+          ) {
+            Text(
+              text = "+dB",
+              style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.5.sp, fontWeight = FontWeight.ExtraBold),
+              color = colors.error,
+            )
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * VisionOS dual-chamber glass card with separate icon badge and slider (Aero Dual-Tone Bento style).
+ */
+@Composable
+private fun AeroDualToneBentoHud(
   fraction: Float,
   overflowFraction: Float,
   label: String,
@@ -330,41 +499,20 @@ private fun MercuryDropletHud(
   val density = LocalDensity.current
   val shape = RoundedCornerShape(20.dp)
   val fillSpring = spring<Float>(dampingRatio = 0.85f, stiffness = 380f)
-  val level by animateFloatAsState(fraction.coerceIn(0f, 1f), fillSpring, label = "mercury_level")
-  val overflow by animateFloatAsState(overflowFraction.coerceIn(0f, 1f), fillSpring, label = "mercury_overflow")
-
-  val covered = maxOf(level, overflow)
-  val iconCovered = covered >= (14.dp + 18.dp / 2) / 184.dp
-  val labelCovered = covered >= 1f - (14.dp + 16.dp / 2) / 184.dp
-  val overflowOnTop = overflow >= level
-
-  val iconTint by animateColorAsState(
-    when {
-      !iconCovered -> Color.White
-      overflowOnTop -> colors.onError
-      else -> colors.onPrimary
-    },
-    label = "mercury_icon",
-  )
-  val labelColor by animateColorAsState(
-    when {
-      !labelCovered -> Color.White
-      overflowOnTop -> colors.onErrorContainer
-      else -> colors.onPrimaryContainer
-    },
-    label = "mercury_label",
-  )
+  val level by animateFloatAsState(fraction.coerceIn(0f, 1f), fillSpring, label = "aero_level")
+  val overflow by animateFloatAsState(overflowFraction.coerceIn(0f, 1f), fillSpring, label = "aero_overflow")
 
   val fillBrush = remember(colors.primaryContainer, colors.primary) {
-    Brush.verticalGradient(listOf(colors.primaryContainer, colors.primary))
+    Brush.horizontalGradient(listOf(colors.primary, colors.primaryContainer))
   }
   val overflowBrush = remember(colors.errorContainer, colors.error) {
-    Brush.verticalGradient(listOf(colors.errorContainer, colors.error))
+    Brush.horizontalGradient(listOf(colors.error, colors.errorContainer))
   }
 
   Box(
     modifier = modifier
-      .size(40.dp, 184.dp)
+      .width(245.dp)
+      .height(64.dp)
       .then(
         if (glassBackdrop != null) {
           Modifier.drawBackdrop(
@@ -379,84 +527,133 @@ private fun MercuryDropletHud(
               )
             },
             highlight = { glassSettings.highlight(Highlight.Default) },
-            shadow = { Shadow(color = Color.Black.copy(alpha = 0.3f), radius = 10.dp) },
-            innerShadow = { InnerShadow(color = Color.White.copy(alpha = 0.2f), radius = 2.dp) },
+            shadow = { Shadow(color = Color.Black.copy(alpha = 0.35f), radius = 12.dp) },
+            innerShadow = { InnerShadow(color = Color.White.copy(alpha = 0.16f), radius = 1.5.dp) },
           )
         } else {
           Modifier
         },
       )
       .clip(shape)
-      .background(Color.Black.copy(alpha = if (glassBackdrop != null) 0.28f else 0.52f))
-      .border(1.2.dp, Color.White.copy(alpha = 0.16f), shape),
+      .background(Color.Black.copy(alpha = if (glassBackdrop != null) 0.32f else 0.65f))
+      .border(1.dp, Color.White.copy(alpha = 0.16f), shape)
+      .padding(horizontal = 10.dp, vertical = 8.dp),
   ) {
-    Box(
-      Modifier
-        .align(Alignment.BottomCenter)
-        .fillMaxWidth()
-        .fillMaxHeight(level)
-        .background(fillBrush),
+    Row(
+      modifier = Modifier.fillMaxSize(),
+      verticalAlignment = Alignment.CenterVertically,
     ) {
       Box(
-        Modifier
-          .align(Alignment.TopCenter)
-          .fillMaxWidth()
-          .height(2.5.dp)
-          .background(Color.White.copy(alpha = 0.65f)),
-      )
-    }
-
-    if (overflow > 0f) {
-      Box(
-        Modifier
-          .align(Alignment.BottomCenter)
-          .fillMaxWidth()
-          .fillMaxHeight(overflow)
-          .background(overflowBrush),
+        modifier = Modifier
+          .size(46.dp)
+          .clip(RoundedCornerShape(13.dp))
+          .background(
+            if (overflow > 0f) colors.errorContainer.copy(alpha = 0.28f)
+            else colors.primaryContainer.copy(alpha = 0.28f),
+          )
+          .border(
+            1.dp,
+            if (overflow > 0f) colors.error.copy(alpha = 0.35f)
+            else Color.White.copy(alpha = 0.15f),
+            RoundedCornerShape(13.dp),
+          ),
+        contentAlignment = Alignment.Center,
       ) {
+        Column(
+          horizontalAlignment = Alignment.CenterHorizontally,
+          verticalArrangement = Arrangement.Center,
+        ) {
+          Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = if (overflow > 0f) colors.error else colors.primary,
+            modifier = Modifier.size(18.dp),
+          )
+          Text(
+            text = if (overflow > 0f) "BST" else if (isVolume) "VOL" else "BRI",
+            style = MaterialTheme.typography.labelSmall.copy(
+              fontSize = 8.5.sp,
+              fontWeight = FontWeight.ExtraBold,
+              letterSpacing = 0.5.sp,
+            ),
+            color = if (overflow > 0f) colors.error else Color.White.copy(alpha = 0.7f),
+          )
+        }
+      }
+
+      Spacer(modifier = Modifier.width(10.dp))
+
+      Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.SpaceBetween,
+      ) {
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+          Text(
+            text = if (isVolume) "Volume" else "Brightness",
+            style = MaterialTheme.typography.labelSmall.copy(
+              fontSize = 11.sp,
+              fontWeight = FontWeight.SemiBold,
+            ),
+            color = Color.White.copy(alpha = 0.65f),
+          )
+
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+              text = label,
+              style = MaterialTheme.typography.labelMedium.withTabularDigits(),
+              fontWeight = FontWeight.Black,
+              color = if (overflow > 0f) colors.error else Color.White,
+            )
+
+            if (overflow > 0f && isVolume) {
+              Spacer(modifier = Modifier.width(4.dp))
+              Box(
+                modifier = Modifier
+                  .clip(RoundedCornerShape(4.dp))
+                  .background(colors.error.copy(alpha = 0.22f))
+                  .padding(horizontal = 3.dp, vertical = 1.dp),
+              ) {
+                Text(
+                  text = "BOOST",
+                  style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 8.sp,
+                    fontWeight = FontWeight.Black,
+                  ),
+                  color = colors.error,
+                )
+              }
+            }
+          }
+        }
+
         Box(
-          Modifier
-            .align(Alignment.TopCenter)
+          modifier = Modifier
             .fillMaxWidth()
-            .height(2.5.dp)
-            .background(Color.White.copy(alpha = 0.8f)),
-        )
+            .height(6.dp)
+            .clip(CircleShape)
+            .background(Color.White.copy(alpha = 0.14f)),
+        ) {
+          Box(
+            modifier = Modifier
+              .fillMaxHeight()
+              .fillMaxWidth(level)
+              .background(fillBrush),
+          )
+          if (overflow > 0f) {
+            Box(
+              modifier = Modifier
+                .fillMaxHeight()
+                .fillMaxWidth(overflow)
+                .background(overflowBrush),
+            )
+          }
+        }
       }
     }
-
-    Box(
-      Modifier
-        .align(Alignment.TopStart)
-        .padding(start = 4.dp, top = 8.dp)
-        .width(2.5.dp)
-        .height(30.dp)
-        .clip(CircleShape)
-        .background(Color.White.copy(alpha = 0.22f)),
-    )
-
-    Text(
-      text = label,
-      style = MaterialTheme.typography.labelSmall.withTabularDigits(),
-      fontWeight = FontWeight.Bold,
-      textAlign = TextAlign.Center,
-      color = labelColor,
-      maxLines = 1,
-      modifier = Modifier
-        .align(Alignment.TopCenter)
-        .padding(top = 12.dp)
-        .height(16.dp)
-        .stableNumericWidth(label),
-    )
-
-    Icon(
-      imageVector = icon,
-      contentDescription = null,
-      tint = iconTint,
-      modifier = Modifier
-        .align(Alignment.BottomCenter)
-        .padding(bottom = 12.dp)
-        .size(18.dp),
-    )
   }
 }
 
@@ -738,8 +935,17 @@ private fun MasterHud(
         isVolume = isVolume,
         modifier = modifier,
       )
-    VolumeAndBrightnessHudStyle.MercuryDroplet ->
-      MercuryDropletHud(
+    VolumeAndBrightnessHudStyle.HyperNotchMatrix ->
+      HyperNotchMatrixHud(
+        fraction = fraction,
+        overflowFraction = overflowFraction,
+        label = label,
+        icon = icon,
+        isVolume = isVolume,
+        modifier = modifier,
+      )
+    VolumeAndBrightnessHudStyle.AeroDualToneBento ->
+      AeroDualToneBentoHud(
         fraction = fraction,
         overflowFraction = overflowFraction,
         label = label,
