@@ -391,28 +391,28 @@ object AboutScreen : Screen {
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Developer Badge with Subtle Cosmic Glow
+                // Developer Badge with Cosmic Glow
                 Surface(
-                  shape = RoundedCornerShape(16.dp),
+                  shape = RoundedCornerShape(20.dp),
                   color = cs.surfaceContainerHighest.copy(alpha = 0.55f),
-                  border = androidx.compose.foundation.BorderStroke(0.8.dp, Color(0xFF8B5CF6).copy(alpha = 0.3f)),
+                  border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF8B5CF6).copy(alpha = 0.35f)),
                 ) {
                   Row(
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                   ) {
                     Icon(
                       imageVector = Icons.RoundedFilled.Favorite,
                       contentDescription = null,
-                      modifier = Modifier.size(14.dp),
+                      modifier = Modifier.size(18.dp),
                       tint = Color(0xFFEC4899),
                     )
                     Text(
                       text = stringResource(R.string.ui_by_ritesh_pandit),
-                      style = MaterialTheme.typography.labelMedium,
-                      fontWeight = FontWeight.SemiBold,
-                      color = cs.onSurfaceVariant,
+                      style = MaterialTheme.typography.titleMedium,
+                      fontWeight = FontWeight.Bold,
+                      color = cs.onSurface,
                     )
                   }
                 }
