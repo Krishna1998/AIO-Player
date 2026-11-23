@@ -215,8 +215,8 @@ private fun DynamicIslandHud(
 
   Box(
     modifier = modifier
-      .width(272.dp)
-      .height(48.dp)
+      .width(324.dp)
+      .height(56.dp)
       .then(
         if (glassBackdrop != null) {
           Modifier.drawBackdrop(
@@ -241,7 +241,7 @@ private fun DynamicIslandHud(
       .clip(shape)
       .background(Color.Black.copy(alpha = if (glassBackdrop != null) 0.35f else 0.65f))
       .border(1.dp, Color.White.copy(alpha = 0.16f), shape)
-      .padding(horizontal = 14.dp),
+      .padding(horizontal = 18.dp),
     contentAlignment = Alignment.CenterStart,
   ) {
     Row(
@@ -252,15 +252,15 @@ private fun DynamicIslandHud(
         imageVector = icon,
         contentDescription = null,
         tint = if (overflow > 0f) colors.error else colors.primary,
-        modifier = Modifier.size(20.dp),
+        modifier = Modifier.size(24.dp),
       )
 
-      Spacer(modifier = Modifier.width(10.dp))
+      Spacer(modifier = Modifier.width(12.dp))
 
       Box(
         modifier = Modifier
           .weight(1f)
-          .height(8.dp)
+          .height(10.dp)
           .clip(CircleShape)
           .background(Color.White.copy(alpha = 0.14f)),
       ) {
@@ -280,11 +280,11 @@ private fun DynamicIslandHud(
         }
       }
 
-      Spacer(modifier = Modifier.width(10.dp))
+      Spacer(modifier = Modifier.width(12.dp))
 
       Text(
         text = label,
-        style = MaterialTheme.typography.labelMedium.withTabularDigits(),
+        style = MaterialTheme.typography.titleSmall.withTabularDigits().copy(fontSize = 15.sp),
         fontWeight = FontWeight.Bold,
         textAlign = TextAlign.End,
         color = if (overflow > 0f) colors.error else Color.White,
@@ -293,16 +293,16 @@ private fun DynamicIslandHud(
       )
 
       if (overflow > 0f && isVolume) {
-        Spacer(modifier = Modifier.width(4.dp))
+        Spacer(modifier = Modifier.width(5.dp))
         Box(
           modifier = Modifier
             .clip(RoundedCornerShape(4.dp))
             .background(colors.error.copy(alpha = 0.22f))
-            .padding(horizontal = 3.dp, vertical = 1.dp),
+            .padding(horizontal = 4.dp, vertical = 2.dp),
         ) {
           Text(
             text = "+dB",
-            style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.sp, fontWeight = FontWeight.ExtraBold),
+            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, fontWeight = FontWeight.ExtraBold),
             color = colors.error,
           )
         }
@@ -348,7 +348,7 @@ private fun HyperNotchMatrixHud(
     // Left Satellite Orb
     Box(
       modifier = Modifier
-        .size(42.dp)
+        .size(52.dp)
         .then(
           if (glassBackdrop != null) {
             Modifier.drawBackdrop(
@@ -383,17 +383,17 @@ private fun HyperNotchMatrixHud(
         imageVector = icon,
         contentDescription = null,
         tint = if (overflow > 0f) colors.error else colors.primary,
-        modifier = Modifier.size(20.dp),
+        modifier = Modifier.size(24.dp),
       )
     }
 
-    Spacer(modifier = Modifier.width(8.dp))
+    Spacer(modifier = Modifier.width(10.dp))
 
     // Right Floating Glass Pill
     Box(
       modifier = Modifier
-        .width(225.dp)
-        .height(42.dp)
+        .width(264.dp)
+        .height(52.dp)
         .then(
           if (glassBackdrop != null) {
             Modifier.drawBackdrop(
@@ -418,7 +418,7 @@ private fun HyperNotchMatrixHud(
         .clip(shape)
         .background(Color.Black.copy(alpha = if (glassBackdrop != null) 0.35f else 0.65f))
         .border(1.dp, Color.White.copy(alpha = 0.16f), shape)
-        .padding(horizontal = 12.dp),
+        .padding(horizontal = 16.dp),
       contentAlignment = Alignment.CenterStart,
     ) {
       Row(
@@ -428,7 +428,7 @@ private fun HyperNotchMatrixHud(
         Box(
           modifier = Modifier
             .weight(1f)
-            .height(7.5.dp)
+            .height(9.dp)
             .clip(CircleShape)
             .background(Color.White.copy(alpha = 0.14f)),
         ) {
@@ -448,11 +448,11 @@ private fun HyperNotchMatrixHud(
           }
         }
 
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(10.dp))
 
         Text(
           text = label,
-          style = MaterialTheme.typography.labelMedium.withTabularDigits(),
+          style = MaterialTheme.typography.titleSmall.withTabularDigits().copy(fontSize = 14.5.sp),
           fontWeight = FontWeight.Bold,
           textAlign = TextAlign.End,
           color = if (overflow > 0f) colors.error else Color.White,
@@ -461,7 +461,7 @@ private fun HyperNotchMatrixHud(
         )
 
         if (overflow > 0f && isVolume) {
-          Spacer(modifier = Modifier.width(3.dp))
+          Spacer(modifier = Modifier.width(4.dp))
           Box(
             modifier = Modifier
               .clip(RoundedCornerShape(4.dp))
@@ -470,7 +470,7 @@ private fun HyperNotchMatrixHud(
           ) {
             Text(
               text = "+dB",
-              style = MaterialTheme.typography.labelSmall.copy(fontSize = 8.5.sp, fontWeight = FontWeight.ExtraBold),
+              style = MaterialTheme.typography.labelSmall.copy(fontSize = 9.5.sp, fontWeight = FontWeight.ExtraBold),
               color = colors.error,
             )
           }
@@ -511,8 +511,8 @@ private fun AeroDualToneHud(
 
   Box(
     modifier = modifier
-      .width(288.dp)
-      .height(68.dp)
+      .width(336.dp)
+      .height(78.dp)
       .then(
         if (glassBackdrop != null) {
           Modifier.drawBackdrop(
@@ -537,7 +537,7 @@ private fun AeroDualToneHud(
       .clip(shape)
       .background(Color.Black.copy(alpha = if (glassBackdrop != null) 0.32f else 0.65f))
       .border(1.dp, Color.White.copy(alpha = 0.16f), shape)
-      .padding(horizontal = 10.dp, vertical = 8.dp),
+      .padding(horizontal = 14.dp, vertical = 10.dp),
   ) {
     Row(
       modifier = Modifier.fillMaxSize(),
@@ -545,8 +545,8 @@ private fun AeroDualToneHud(
     ) {
       Box(
         modifier = Modifier
-          .size(48.dp)
-          .clip(RoundedCornerShape(14.dp))
+          .size(56.dp)
+          .clip(RoundedCornerShape(16.dp))
           .background(
             if (overflow > 0f) colors.errorContainer.copy(alpha = 0.28f)
             else colors.primaryContainer.copy(alpha = 0.28f),
@@ -555,7 +555,7 @@ private fun AeroDualToneHud(
             1.dp,
             if (overflow > 0f) colors.error.copy(alpha = 0.35f)
             else Color.White.copy(alpha = 0.15f),
-            RoundedCornerShape(14.dp),
+            RoundedCornerShape(16.dp),
           ),
         contentAlignment = Alignment.Center,
       ) {
@@ -567,12 +567,12 @@ private fun AeroDualToneHud(
             imageVector = icon,
             contentDescription = null,
             tint = if (overflow > 0f) colors.error else colors.primary,
-            modifier = Modifier.size(19.dp),
+            modifier = Modifier.size(23.dp),
           )
           Text(
             text = if (overflow > 0f) "BST" else if (isVolume) "VOL" else "BRI",
             style = MaterialTheme.typography.labelSmall.copy(
-              fontSize = 8.5.sp,
+              fontSize = 9.5.sp,
               fontWeight = FontWeight.ExtraBold,
               letterSpacing = 0.5.sp,
             ),
@@ -581,7 +581,7 @@ private fun AeroDualToneHud(
         }
       }
 
-      Spacer(modifier = Modifier.width(10.dp))
+      Spacer(modifier = Modifier.width(12.dp))
 
       Column(
         modifier = Modifier.fillMaxSize(),
@@ -595,7 +595,7 @@ private fun AeroDualToneHud(
           Text(
             text = if (isVolume) "Volume" else "Brightness",
             style = MaterialTheme.typography.labelSmall.copy(
-              fontSize = 11.sp,
+              fontSize = 12.5.sp,
               fontWeight = FontWeight.SemiBold,
             ),
             color = Color.White.copy(alpha = 0.65f),
@@ -604,7 +604,7 @@ private fun AeroDualToneHud(
           Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
               text = label,
-              style = MaterialTheme.typography.labelMedium.withTabularDigits(),
+              style = MaterialTheme.typography.titleMedium.withTabularDigits().copy(fontSize = 15.sp),
               fontWeight = FontWeight.Black,
               color = if (overflow > 0f) colors.error else Color.White,
             )
@@ -620,7 +620,7 @@ private fun AeroDualToneHud(
                 Text(
                   text = "BOOST",
                   style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 8.sp,
+                    fontSize = 8.5.sp,
                     fontWeight = FontWeight.Black,
                   ),
                   color = colors.error,
@@ -633,7 +633,7 @@ private fun AeroDualToneHud(
         Box(
           modifier = Modifier
             .fillMaxWidth()
-            .height(7.5.dp)
+            .height(9.dp)
             .clip(CircleShape)
             .background(Color.White.copy(alpha = 0.14f)),
         ) {
@@ -793,8 +793,8 @@ private fun SoundStageBentoHud(
 
   Box(
     modifier = modifier
-      .width(280.dp)
-      .height(68.dp)
+      .width(334.dp)
+      .height(76.dp)
       .then(
         if (glassBackdrop != null) {
           Modifier.drawBackdrop(
@@ -819,7 +819,7 @@ private fun SoundStageBentoHud(
       .clip(shape)
       .background(Color.Black.copy(alpha = if (glassBackdrop != null) 0.32f else 0.62f))
       .border(1.dp, Color.White.copy(alpha = 0.15f), shape)
-      .padding(horizontal = 14.dp, vertical = 9.dp),
+      .padding(horizontal = 16.dp, vertical = 11.dp),
   ) {
     Column(
       modifier = Modifier.fillMaxSize(),
@@ -833,7 +833,7 @@ private fun SoundStageBentoHud(
         Row(verticalAlignment = Alignment.CenterVertically) {
           Box(
             modifier = Modifier
-              .size(26.dp)
+              .size(32.dp)
               .clip(CircleShape)
               .background(
                 if (overflow > 0f) colors.errorContainer.copy(alpha = 0.35f)
@@ -845,26 +845,26 @@ private fun SoundStageBentoHud(
               imageVector = icon,
               contentDescription = null,
               tint = if (overflow > 0f) colors.error else colors.primary,
-              modifier = Modifier.size(16.dp),
+              modifier = Modifier.size(19.dp),
             )
           }
 
           Text(
             text = if (isVolume) "VOLUME" else "BRIGHTNESS",
             style = MaterialTheme.typography.labelSmall.copy(
-              fontSize = 10.5.sp,
+              fontSize = 11.5.sp,
               letterSpacing = 0.8.sp,
               fontWeight = FontWeight.Bold,
             ),
             color = Color.White.copy(alpha = 0.7f),
-            modifier = Modifier.padding(start = 7.dp),
+            modifier = Modifier.padding(start = 8.dp),
           )
         }
 
         Row(verticalAlignment = Alignment.CenterVertically) {
           Text(
             text = label,
-            style = MaterialTheme.typography.titleSmall.withTabularDigits(),
+            style = MaterialTheme.typography.titleMedium.withTabularDigits().copy(fontSize = 15.sp),
             fontWeight = FontWeight.ExtraBold,
             color = if (overflow > 0f) colors.error else Color.White,
           )
@@ -890,7 +890,7 @@ private fun SoundStageBentoHud(
       Box(
         modifier = Modifier
           .fillMaxWidth()
-          .height(7.5.dp)
+          .height(9.dp)
           .clip(CircleShape)
           .background(Color.White.copy(alpha = 0.14f)),
       ) {
