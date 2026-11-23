@@ -409,7 +409,7 @@ object AboutScreen : Screen {
                       tint = Color(0xFFEC4899),
                     )
                     Text(
-                      text = stringResource(R.string.ui_by_ritesh_pandit),
+                      text = stringResource(R.string.ui_by_krishna),
                       style = MaterialTheme.typography.titleMedium,
                       fontWeight = FontWeight.Bold,
                       color = cs.onSurface,
