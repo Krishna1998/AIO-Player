@@ -201,6 +201,8 @@ jobs:
             base="app-${APK_DIR}-${abi}-release"
             sign_apk "$out_dir" "$base" "${APK_DIR} ${abi} release"
             cp "$out_dir/$base.apk" "release-assets/HorizonPlayer-${ASSET_NAME:-$abi}-${VERSION_TAG}.apk"
+            # Backward-compatible copy for older clients (e.g. v1.0.3 and earlier) looking for VideoPlayer-* prefix
+            cp "$out_dir/$base.apk" "release-assets/VideoPlayer-${ASSET_NAME:-$abi}-${VERSION_TAG}.apk"
           done
 
       - name: Upload R8 diagnostics
