@@ -440,7 +440,7 @@ class PlayerActivity :
   private var reusingPlaybackSessionOnLaunch = false
   private var playbackOwnerToken = 0L
   private var startedBackgroundForPip = false
-  private var wasInPipMode = false
+  internal var wasInPipMode = false
   private var isAmbientPipMode by mutableStateOf(false)
   private var isVideoAmbientPresentationActive = false
   private var videoAmbientBounds by mutableStateOf(Rect.Zero)

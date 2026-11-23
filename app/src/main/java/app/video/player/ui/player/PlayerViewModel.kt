@@ -2048,7 +2048,7 @@ fun restartFromBeginning() {
   val remainingTime: StateFlow<Int> = _remainingTime.asStateFlow()
   private val _sleepTimerFadeOut = MutableStateFlow(true)
   val sleepTimerFadeOut: StateFlow<Boolean> = _sleepTimerFadeOut.asStateFlow()
-  val sleepTimerFadeOutDuration: StateFlow<Int> = audioPreferences.sleepTimerFadeOutDuration.asStateFlow()
+  val sleepTimerFadeOutDuration: StateFlow<Int> = audioPreferences.sleepTimerFadeOutDuration.stateIn(viewModelScope)
   private val _sleepTimerEndOfTrack = MutableStateFlow(false)
   val sleepTimerEndOfTrack: StateFlow<Boolean> = _sleepTimerEndOfTrack.asStateFlow()
   private var preTimerVolume: Int? = null

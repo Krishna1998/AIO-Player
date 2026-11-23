@@ -9,6 +9,7 @@
 
 package app.video.player.ui.player.controls.components.sheets
 
+import app.video.player.ui.player.PlaybackSession
 import app.video.player.ui.components.AppSlider as Slider
 import kotlin.math.roundToInt
 
@@ -643,7 +644,7 @@ fun TimePickerDialog(
           val s = seconds.toIntOrNull() ?: 0
           val customSeconds = h * 3600 + m * 60 + s
           if (customSeconds > 0) {
-            onTimeSelect(customSeconds, endOfTrackSelected)
+            onTimeSelect(customSeconds, false)
           }
           onDismissRequest()
         },
