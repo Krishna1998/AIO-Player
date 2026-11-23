@@ -655,7 +655,9 @@
   <string name="timer_remaining">%s remaining</string>
   <string name="toast_sleep_timer_ended">Sleep timer ended</string>
   <string name="sleep_timer_fade_out">Gentle audio fade-out</string>
-  <string name="sleep_timer_fade_out_summary">Gradually lowers volume over the last 5 seconds</string>
+  <string name="sleep_timer_fade_out_summary">Gradually lowers volume before playback ends</string>
+  <string name="sleep_timer_fade_out_duration">Fade-out duration</string>
+  <string name="sleep_timer_fade_out_duration_summary">%d seconds</string>
   <string name="sleep_timer_end_of_track">End of track</string>
   <string name="sleep_timer_stops_at">Stops at %s</string>
   <string name="sleep_timer_extend_5">+5m</string>

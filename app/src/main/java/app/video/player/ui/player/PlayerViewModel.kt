@@ -2048,6 +2048,7 @@ fun restartFromBeginning() {
   val remainingTime: StateFlow<Int> = _remainingTime.asStateFlow()
   private val _sleepTimerFadeOut = MutableStateFlow(true)
   val sleepTimerFadeOut: StateFlow<Boolean> = _sleepTimerFadeOut.asStateFlow()
+  val sleepTimerFadeOutDuration: StateFlow<Int> = audioPreferences.sleepTimerFadeOutDuration.asStateFlow()
   private val _sleepTimerEndOfTrack = MutableStateFlow(false)
   val sleepTimerEndOfTrack: StateFlow<Boolean> = _sleepTimerEndOfTrack.asStateFlow()
   private var preTimerVolume: Int? = null
@@ -3437,6 +3438,10 @@ fun restartFromBeginning() {
     _sleepTimerFadeOut.value = enabled
   }
 
+  fun setSleepTimerFadeOutDuration(seconds: Int) {
+    audioPreferences.sleepTimerFadeOutDuration.set(seconds.coerceIn(5, 60))
+  }
+
   fun remainingTrackSeconds(): Int {
     val dur = duration ?: PlaybackSession.getPropertyDouble("duration")?.toInt() ?: 0
     val pos = PlaybackSession.getPropertyDouble("time-pos")?.toInt() ?: 0
@@ -3479,7 +3484,8 @@ fun restartFromBeginning() {
 
     val initialVolume = PlaybackSession.getPropertyInt("volume") ?: 100
     preTimerVolume = initialVolume
-    val fadeDuration = 5 // seconds of gentle fade-out
+    val configuredFade = audioPreferences.sleepTimerFadeOutDuration.get().coerceIn(5, 60)
+    val fadeDuration = if (seconds > 0) configuredFade.coerceAtMost(seconds) else configuredFade
 
     timerJob =
       viewModelScope.launch {
@@ -5115,13 +5121,13 @@ fun restartFromBeginning() {
         // To STRETCH: Calculate screen ratio accounting for video rotation
         val currentHost = host ?: return
 
-        // If currently in Picture-in-Picture mode, do not recalculate Stretch aspect from full-screen
+        // If currently in Picture-in-Picture mode or screen is off/locked, do not recalculate Stretch aspect from full-screen
         // DisplayMetrics (which flips to portrait and distorts into a narrow vertical strip).
-        if (currentHost.isHostInPictureInPictureMode()) {
+        if (currentHost.isHostInPictureInPictureMode() || currentHost.isHostScreenOffOrLocked()) {
           PlaybackSession.setPropertyDouble("panscan", 0.0)
           val existingOverride = PlaybackSession.getPropertyDouble("video-aspect-override")
-          if (existingOverride == null || existingOverride <= 0.0 || !existingOverride.isFinite()) {
-            val baseAspect = PlaybackSession.getPropertyDouble("video-params/aspect")?.takeIf { it.isFinite() && it > 0.0 } ?: (16.0 / 9.0)
+          val baseAspect = PlaybackSession.getPropertyDouble("video-params/aspect")?.takeIf { it.isFinite() && it > 0.0 } ?: (16.0 / 9.0)
+          if (existingOverride == null || existingOverride <= 0.0 || !existingOverride.isFinite() || (existingOverride < 1.0 && baseAspect >= 1.0)) {
             PlaybackSession.setPropertyDouble("video-aspect-override", baseAspect)
           }
           if (resetZoom) resetVideoZoom()
@@ -5145,8 +5151,10 @@ fun restartFromBeginning() {
         val rotate = PlaybackSession.getPropertyInt("video-params/rotate") ?: 0
         val isVideoRotated = (rotate % 180 == 90) // 90° or 270° rotation
 
+        val baseAspect = PlaybackSession.getPropertyDouble("video-params/aspect")?.takeIf { it.isFinite() && it > 0.0 } ?: 0.0
+
         // Calculate screen ratio, inverting if video is rotated
-        val screenRatio =
+        var screenRatio =
           if (isVideoRotated) {
             // Video is rotated, so invert the screen ratio
             dm.heightPixels.toDouble() / dm.widthPixels.toDouble()
@@ -5154,6 +5162,12 @@ fun restartFromBeginning() {
             // Video is not rotated, use normal screen ratio
             dm.widthPixels.toDouble() / dm.heightPixels.toDouble()
           }
+
+        // If DisplayMetrics reported portrait orientation for a landscape video (e.g. during screen lock/unlock transitions),
+        // ensure we never squish a landscape video into portrait.
+        if (screenRatio < 1.0 && baseAspect >= 1.0) {
+          screenRatio = 1.0 / screenRatio
+        }
 
         // Set aspect override first, then reset panscan
         // This prevents the brief flash of Fit mode

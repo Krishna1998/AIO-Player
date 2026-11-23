@@ -51,6 +51,8 @@ interface PlayerHost {
 
   fun isHostInPictureInPictureMode(): Boolean = false
 
+  fun isHostScreenOffOrLocked(): Boolean = false
+
   fun isCurrentMediaKnownAudio(): Boolean = false
 
   fun minimizeToMiniPlayer(): Boolean = false

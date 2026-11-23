@@ -9,7 +9,8 @@
 
 package app.video.player.ui.player.controls.components.sheets
 
-import app.video.player.ui.player.PlaybackSession
+import app.video.player.ui.components.AppSlider as Slider
+import kotlin.math.roundToInt
 
 import android.content.res.Configuration
 import android.text.format.DateUtils
@@ -87,6 +88,8 @@ fun MoreSheet(
   anime4KEnabled: Boolean = true,
   fadeOutEnabled: Boolean = true,
   onToggleFadeOut: (Boolean) -> Unit = {},
+  fadeOutDurationSeconds: Int = 10,
+  onChangeFadeOutDuration: (Int) -> Unit = {},
   onCancelTimer: () -> Unit = { onStartTimer(0) },
   onExtendTimer: (Int) -> Unit = {},
   remainingTrackSeconds: Int = 0,
@@ -157,6 +160,8 @@ fun MoreSheet(
                   onTimeSelect = onStartTimer,
                   fadeOutEnabled = fadeOutEnabled,
                   onToggleFadeOut = onToggleFadeOut,
+                  fadeOutDurationSeconds = fadeOutDurationSeconds,
+                  onChangeFadeOutDuration = onChangeFadeOutDuration,
                   onCancelTimer = onCancelTimer,
                   onExtendTimer = onExtendTimer,
                   remainingTrackSeconds = remainingTrackSeconds,
@@ -294,6 +299,8 @@ fun TimePickerDialog(
   remainingTime: Int = 0,
   fadeOutEnabled: Boolean = true,
   onToggleFadeOut: (Boolean) -> Unit = {},
+  fadeOutDurationSeconds: Int = 10,
+  onChangeFadeOutDuration: (Int) -> Unit = {},
   onCancelTimer: () -> Unit = { onTimeSelect(0) },
   onExtendTimer: (Int) -> Unit = {},
   remainingTrackSeconds: Int = 0,
@@ -456,35 +463,68 @@ fun TimePickerDialog(
         // Time Input
         TimeInput(state = state)
 
-        // Gentle Audio Fade-out Toggle
+        // Gentle Audio Fade-out Toggle & Duration Slider
         Surface(
           shape = RoundedCornerShape(12.dp),
           color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.4f),
-          modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onToggleFadeOut(!fadeOutEnabled) },
+          modifier = Modifier.fillMaxWidth(),
         ) {
-          Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
+          Column(
+            modifier = Modifier
+              .fillMaxWidth()
+              .padding(horizontal = 14.dp, vertical = 10.dp),
           ) {
-            Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
-              Text(
-                text = stringResource(R.string.sleep_timer_fade_out),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-              )
-              Text(
-                text = stringResource(R.string.sleep_timer_fade_out_summary),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            Row(
+              modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onToggleFadeOut(!fadeOutEnabled) },
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+              Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
+                Text(
+                  text = stringResource(R.string.sleep_timer_fade_out),
+                  style = MaterialTheme.typography.bodyMedium,
+                  color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                  text = stringResource(R.string.sleep_timer_fade_out_summary),
+                  style = MaterialTheme.typography.bodySmall,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+              }
+              Switch(
+                checked = fadeOutEnabled,
+                onCheckedChange = onToggleFadeOut,
               )
             }
-            Switch(
-              checked = fadeOutEnabled,
-              onCheckedChange = onToggleFadeOut,
-            )
+
+            if (fadeOutEnabled) {
+              Spacer(modifier = Modifier.height(10.dp))
+              Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+              ) {
+                Text(
+                  text = stringResource(R.string.sleep_timer_fade_out_duration),
+                  style = MaterialTheme.typography.labelMedium,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                  text = stringResource(R.string.sleep_timer_fade_out_duration_summary, fadeOutDurationSeconds),
+                  style = MaterialTheme.typography.labelMedium,
+                  color = MaterialTheme.colorScheme.primary,
+                )
+              }
+              Slider(
+                value = fadeOutDurationSeconds.toFloat(),
+                onValueChange = { onChangeFadeOutDuration(it.roundToInt().coerceIn(5, 60)) },
+                valueRange = 5f..60f,
+                steps = 10,
+                modifier = Modifier.fillMaxWidth(),
+              )
+            }
           }
         }
       }

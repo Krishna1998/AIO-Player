@@ -131,6 +131,7 @@ fun PlayerSheets(
     Sheets.SleepTimer -> {
       val sleepTimerTimeRemaining by viewModel.remainingTime.composeCollectAsState()
       val sleepTimerFadeOut by viewModel.sleepTimerFadeOut.composeCollectAsState()
+      val sleepTimerFadeOutDuration by viewModel.sleepTimerFadeOutDuration.composeCollectAsState()
 
       TimePickerDialog(
         remainingTime = sleepTimerTimeRemaining,
@@ -138,6 +139,8 @@ fun PlayerSheets(
         onTimeSelect = onStartSleepTimer,
         fadeOutEnabled = sleepTimerFadeOut,
         onToggleFadeOut = viewModel::setSleepTimerFadeOut,
+        fadeOutDurationSeconds = sleepTimerFadeOutDuration,
+        onChangeFadeOutDuration = viewModel::setSleepTimerFadeOutDuration,
         onCancelTimer = viewModel::cancelSleepTimer,
         onExtendTimer = viewModel::extendSleepTimer,
         remainingTrackSeconds = viewModel.remainingTrackSeconds(),
@@ -432,11 +435,14 @@ fun PlayerSheets(
       // re-ran the entire controls tree on each tick even while this sheet was closed.
       val sleepTimerTimeRemaining by viewModel.remainingTime.composeCollectAsState()
       val sleepTimerFadeOut by viewModel.sleepTimerFadeOut.composeCollectAsState()
+      val sleepTimerFadeOutDuration by viewModel.sleepTimerFadeOutDuration.composeCollectAsState()
       MoreSheet(
         remainingTime = sleepTimerTimeRemaining,
         onStartTimer = onStartSleepTimer,
         fadeOutEnabled = sleepTimerFadeOut,
         onToggleFadeOut = viewModel::setSleepTimerFadeOut,
+        fadeOutDurationSeconds = sleepTimerFadeOutDuration,
+        onChangeFadeOutDuration = viewModel::setSleepTimerFadeOutDuration,
         onCancelTimer = viewModel::cancelSleepTimer,
         onExtendTimer = viewModel::extendSleepTimer,
         remainingTrackSeconds = viewModel.remainingTrackSeconds(),
