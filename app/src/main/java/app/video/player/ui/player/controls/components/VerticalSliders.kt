@@ -20,7 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import app.video.player.preferences.preference.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -519,7 +519,7 @@ private fun SegmentedBlocksHud(
   ) {
     Column(
       modifier = Modifier.fillMaxHeight(),
-      horizontalAlignment = Alignment.CenterVertically,
+      horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.SpaceBetween,
     ) {
       Text(
@@ -534,7 +534,7 @@ private fun SegmentedBlocksHud(
 
       Column(
         verticalArrangement = Arrangement.spacedBy(3.dp),
-        horizontalAlignment = Alignment.CenterVertically,
+        horizontalAlignment = Alignment.CenterHorizontally,
       ) {
         for (i in 9 downTo 0) {
           val isActive = i < activeSegments
