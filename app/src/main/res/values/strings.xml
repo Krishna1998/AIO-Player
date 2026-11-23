@@ -678,7 +678,7 @@
   <string name="sleep_timer_extend_15">+15m</string>
   <string name="sleep_timer_turn_off">Turn off</string>
   <string name="volume_slider_absolute_value" translatable="false">%d</string>
-  <string name="github_repo_url" translatable="false">https://github.com/Krishna1998/AIO-Player</string>
+  <string name="github_repo_url" translatable="false">https://github.com/Krishna1998/Horizon-Player</string>
   <string name="swap_the_volume_and_brightness_slider">Swap volume and brightness slider</string>
   <string name="pref_player_display_reduce_player_animation">Reduce player animation</string>
   <!-- Animation settings -->

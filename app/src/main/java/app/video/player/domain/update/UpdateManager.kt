@@ -157,7 +157,7 @@ class UpdateManager(
         val request =
           Request.Builder()
             .url(url)
-            .header("User-Agent", "AIO-Player/${BuildConfig.VERSION_NAME} (Android; ${Build.VERSION.RELEASE})")
+            .header("User-Agent", "Horizon-Player/${BuildConfig.VERSION_NAME} (Android; ${Build.VERSION.RELEASE})")
             .header("Accept", "application/vnd.github.v3+json")
             .header("Cache-Control", "no-cache")
             .build()
@@ -332,7 +332,7 @@ class UpdateManager(
       val request =
         Request.Builder()
           .url(asset.downloadUrl)
-          .header("User-Agent", "AIO-Player/${BuildConfig.VERSION_NAME} (Android; ${Build.VERSION.RELEASE})")
+          .header("User-Agent", "Horizon-Player/${BuildConfig.VERSION_NAME} (Android; ${Build.VERSION.RELEASE})")
           .header("Accept", "application/octet-stream")
           .apply { if (alreadyDownloaded > 0L) header("Range", "bytes=$alreadyDownloaded-") }
           .build()
@@ -472,9 +472,9 @@ class UpdateManager(
   }
 
   private companion object {
-    const val STABLE_RELEASE_URL = "https://api.github.com/repos/Krishna1998/AIO-Player/releases/latest"
-    const val PREVIEW_RELEASE_URL = "https://api.github.com/repos/Krishna1998/AIO-Player/releases"
-    const val EXPERIMENTAL_RELEASE_URL = "https://api.github.com/repos/Krishna1998/AIO-Player/releases"
+    const val STABLE_RELEASE_URL = "https://api.github.com/repos/Krishna1998/Horizon-Player/releases/latest"
+    const val PREVIEW_RELEASE_URL = "https://api.github.com/repos/Krishna1998/Horizon-Player/releases"
+    const val EXPERIMENTAL_RELEASE_URL = "https://api.github.com/repos/Krishna1998/Horizon-Player/releases"
     const val LEGACY_IGNORED_VERSION_KEY = "ignored_version"
     const val PART_SUFFIX = ".part"
     const val LOCAL_HASH_LENGTH = 12

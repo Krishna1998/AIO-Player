@@ -7,12 +7,12 @@
 **Lightweight, high-performance video & music player for Android.**  
 Powered by the raw playback power of **mpv** and a modern **Material 3 / Liquid Glass** interface.
 
-[![Release](https://img.shields.io/badge/Release-v1.0.3-00F5FF?style=flat-square&logo=android&logoColor=black)](https://github.com/Krishna1998/Video-Music-Player/releases)
+[![Release](https://img.shields.io/badge/Release-v1.0.3-FF0076?style=flat-square&logo=android&logoColor=black)](https://github.com/Krishna1998/Horizon-Player/releases)
 [![Android](https://img.shields.io/badge/Android-8.0%2B-3DDC84?style=flat-square&logo=android&logoColor=white)](https://developer.android.com)
 [![Engine](https://img.shields.io/badge/Core-mpv%20%2B%20FFmpeg-9D4EDD?style=flat-square&logo=cplusplus&logoColor=white)](https://mpv.io)
 [![UI](https://img.shields.io/badge/UI-Jetpack%20Compose-4285F4?style=flat-square&logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
 [![Privacy](https://img.shields.io/badge/Telemetry-Zero-00E676?style=flat-square&logo=shield&logoColor=black)](https://github.com)
-[![CI/CD Build](https://github.com/Krishna1998/AIO-Player/actions/workflows/build.yml/badge.svg)](https://github.com/Krishna1998/AIO-Player/actions/workflows/build.yml)
+[![CI/CD Build](https://github.com/Krishna1998/Horizon-Player/actions/workflows/build.yml/badge.svg)](https://github.com/Krishna1998/Horizon-Player/actions/workflows/build.yml)
 
 </div>
 
