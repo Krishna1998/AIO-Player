@@ -151,7 +151,7 @@ android {
       buildConfigField("boolean", "IS_EXPERIMENTAL_BUILD", "false")
       applicationIdSuffix = ".debug"
       versionNameSuffix = "-${getCommitCount()}"
-      resValue("string", "app_name", "V&amp;M Player-Debug")
+      resValue("string", "app_name", "Horizon Player-Debug")
     }
   }
 

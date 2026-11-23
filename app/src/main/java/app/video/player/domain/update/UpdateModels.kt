@@ -105,7 +105,7 @@ data class Release(
 
 internal fun isPlayerApkName(name: String, ciPrefix: String = ""): Boolean {
   val lower = name.lowercase()
-  val prefixes = listOf("v&mplayer", "v.mplayer", "vmplayer", "videoplayer")
+  val prefixes = listOf("horizonplayer", "v&mplayer", "v.mplayer", "vmplayer", "videoplayer")
   return prefixes.any { prefix ->
     lower.startsWith("$prefix$ciPrefix", ignoreCase = true) ||
       (ciPrefix.isEmpty() && lower.startsWith("$prefix-", ignoreCase = true))

@@ -1,15 +1,15 @@
 # Credits and citation information
 
-V&M Player is part of an open-source media ecosystem. This page preserves the project's acknowledgments and links to the people and projects being credited.
+Horizon Player is part of an open-source media ecosystem. This page preserves the project's acknowledgments and links to the people and projects being credited.
 
-## Citing V&M Player
+## Citing Horizon Player
 
-When mentioning, reviewing, or building on V&M Player, link to the [project repository](https://github.com/Krishna1998/AIO-Player). Include the release tag or commit you used so others can identify the same version.
+When mentioning, reviewing, or building on Horizon Player, link to the [project repository](https://github.com/Krishna1998/AIO-Player). Include the release tag or commit you used so others can identify the same version.
 
 Suggested plain-text reference:
 
 ```text
-V&M Player — Modern Android Video & Music Player powered by libmpv.
+Horizon Player — Modern Android Video & Music Player powered by libmpv.
 https://github.com/Krishna1998/AIO-Player
 Version: 1.0.3
 ```

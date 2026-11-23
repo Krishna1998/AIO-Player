@@ -200,7 +200,7 @@ jobs:
           for abi in $APK_ABIS; do
             base="app-${APK_DIR}-${abi}-release"
             sign_apk "$out_dir" "$base" "${APK_DIR} ${abi} release"
-            cp "$out_dir/$base.apk" "release-assets/V&MPlayer-${ASSET_NAME:-$abi}-${VERSION_TAG}.apk"
+            cp "$out_dir/$base.apk" "release-assets/HorizonPlayer-${ASSET_NAME:-$abi}-${VERSION_TAG}.apk"
           done
 
       - name: Upload R8 diagnostics
@@ -250,7 +250,7 @@ jobs:
           : > checksums.txt
           variants=(arm64-v8a)
           for variant in "${variants[@]}"; do
-            asset="release-assets/V&MPlayer-${variant}-${VERSION_TAG}.apk"
+            asset="release-assets/HorizonPlayer-${variant}-${VERSION_TAG}.apk"
             if [[ ! -f "$asset" ]]; then
               echo "Missing expected release asset: $asset"
               find release-assets -type f -name '*.apk' -print || true
@@ -286,7 +286,7 @@ jobs:
           variant_guide = """
           ### APK variants
 
-          - **arm64-v8a** (`V&MPlayer-arm64-v8a-<version>.apk`): Built for 64-bit ARM Android devices.
+          - **arm64-v8a** (`HorizonPlayer-arm64-v8a-<version>.apk`): Built for 64-bit ARM Android devices.
           """.strip()
           Path('release-notes.md').write_text(
               latest + '\n\n---\n' + variant_guide + '\n\n### SHA-256 checksums\n\n```text\n',
@@ -302,7 +302,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ needs.prepare.outputs.version_tag }}
           target_commitish: ${{ needs.prepare.outputs.source_sha }}
-          name: V&M Player ${{ needs.prepare.outputs.version_tag }}
+          name: Horizon Player ${{ needs.prepare.outputs.version_tag }}
           body_path: release-notes.md
           generate_release_notes: false
           draft: false

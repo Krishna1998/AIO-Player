@@ -1,8 +1,8 @@
 <div align="center">
 
-<img src="app/src/main/assets/branding/videoplayer_icon.svg" width="120" height="120" alt="V&M Player" /><br>
+<img src="app/src/main/assets/branding/videoplayer_icon.svg" width="120" height="120" alt="Horizon Player" /><br>
 
-# V&M Player
+# Horizon Player
 
 **Lightweight, high-performance video & music player for Android.**  
 Powered by the raw playback power of **mpv** and a modern **Material 3 / Liquid Glass** interface.

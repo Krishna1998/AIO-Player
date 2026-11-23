@@ -1,7 +1,7 @@
 cff-version: 1.2.0
-message: "If you use V&M Player, please cite it using the metadata below."
+message: "If you use Horizon Player, please cite it using the metadata below."
 type: software
-title: "V&M Player"
+title: "Horizon Player"
 abstract: "A modern, ultra-lightweight Android video and music player powered by libmpv and Jetpack Compose."
 version: 1.0.3
 authors:
