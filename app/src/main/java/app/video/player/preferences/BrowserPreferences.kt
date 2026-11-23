@@ -190,19 +190,19 @@ class BrowserPreferences(
   // True once the user finished (or skipped through) the first-run permission flow.
   val onboardingCompleted = preferenceStore.getBoolean(ONBOARDING_COMPLETED_KEY, false)
 
-  // BentoFusion & Media Library section visibility toggles
+  // DualHorizon & Media Library section visibility toggles
   val homeScreenLayout = preferenceStore.getEnum("home_screen_layout", HomeScreenLayout.CinematicHorizon)
-  val bentoFusionShowVideoRail = preferenceStore.getBoolean("bentofusion_show_video_rail", true)
-  val bentoFusionShowAudioPulsing = preferenceStore.getBoolean("bentofusion_show_audio_pulsing", true)
+  val dualHorizonShowVideoRail = preferenceStore.getBoolean("bentofusion_show_video_rail", true)
+  val dualHorizonShowAudioPulsing = preferenceStore.getBoolean("bentofusion_show_audio_pulsing", true)
   val cinematicShowHeroSpotlight = preferenceStore.getBoolean("cinematic_show_hero_spotlight", true)
   val cinematicSpotlightScale = preferenceStore.getFloat("cinematic_spotlight_scale", 1.0f)
-  val bentoFusionAudioPulsingScale = preferenceStore.getFloat("bentofusion_audio_pulsing_scale", 1.0f)
-  val bentoFusionVideoRailScale = preferenceStore.getFloat("bentofusion_video_rail_scale", 1.0f)
-  val bentoFusionMusicRailScale = preferenceStore.getFloat("bentofusion_music_rail_scale", 1.0f)
+  val dualHorizonAudioPulsingScale = preferenceStore.getFloat("bentofusion_audio_pulsing_scale", 1.0f)
+  val dualHorizonVideoRailScale = preferenceStore.getFloat("bentofusion_video_rail_scale", 1.0f)
+  val dualHorizonMusicRailScale = preferenceStore.getFloat("bentofusion_music_rail_scale", 1.0f)
   val audioPulsingProgressStyle = preferenceStore.getEnum("audio_pulsing_progress_style", AudioPulsingProgressStyle.WavyVisualizer)
-  val bentoFusionHeaderStyle = preferenceStore.getEnum("bentofusion_header_style", BentoFusionHeaderStyle.LiquidCapsule)
-  val bentoFusionShowMusicRail = preferenceStore.getBoolean("bentofusion_show_music_rail", true)
-  val bentoFusionSectionOrder = preferenceStore.getObject(
+  val dualHorizonHeaderStyle = preferenceStore.getEnum("bentofusion_header_style", DualHorizonHeaderStyle.LiquidCapsule)
+  val dualHorizonShowMusicRail = preferenceStore.getBoolean("bentofusion_show_music_rail", true)
+  val dualHorizonSectionOrder = preferenceStore.getObject(
     key = "bentofusion_section_order",
     defaultValue = listOf("VIDEO", "PULSING", "MUSIC"),
     serializer = { order -> order.joinToString(",") },
@@ -224,8 +224,8 @@ class BrowserPreferences(
     },
   )
 
-  // Feature discovery hint for BentoFusion (Audio Pulsing gestures & interactive highlights)
-  val bentoFusionHintDismissed = preferenceStore.getBoolean("bentofusion_hint_dismissed", false)
+  // Feature discovery hint for DualHorizon (Audio Pulsing gestures & interactive highlights)
+  val dualHorizonHintDismissed = preferenceStore.getBoolean("bentofusion_hint_dismissed", false)
 
   // How to play / stream hint dismissal state for Network Streaming screen
   val networkStreamHintDismissed = preferenceStore.getBoolean("network_stream_hint_dismissed", false)
@@ -444,11 +444,8 @@ enum class FolderViewMode {
   AlbumView,
   FileManager,
   MediaLibrary,
-  @Deprecated("Replaced by DualHorizon")
-  BentoFusion,
   ;
 
-  @Suppress("DEPRECATION")
   val displayName: String
     get() =
       when (this) {
@@ -456,7 +453,6 @@ enum class FolderViewMode {
         AlbumView -> "Folder View"
         FileManager -> "Tree View"
         MediaLibrary -> "Library"
-        BentoFusion -> "Library"
       }
 }
 
@@ -511,18 +507,18 @@ enum class AudioPulsingProgressStyle(
 enum class HomeScreenLayout(
   val titleRes: Int,
 ) {
-  BentoFusion(app.video.player.R.string.pref_home_screen_layout_bentofusion),
+  DualHorizon(app.video.player.R.string.pref_home_screen_layout_dual_horizon),
   CinematicHorizon(app.video.player.R.string.pref_home_screen_layout_cinematic),
 }
 
-enum class BentoFusionHeaderStyle(
+enum class DualHorizonHeaderStyle(
   val titleRes: Int,
 ) {
-  LiquidCapsule(app.video.player.R.string.pref_bentofusion_header_style_capsule),
-  CyberPillar(app.video.player.R.string.pref_bentofusion_header_style_pillar),
-  BentoStrip(app.video.player.R.string.pref_bentofusion_header_style_card),
-  FluidPulse(app.video.player.R.string.pref_bentofusion_header_style_pulse),
-  StudioLuxury(app.video.player.R.string.pref_bentofusion_header_style_luxury),
+  LiquidCapsule(app.video.player.R.string.pref_dual_horizon_header_style_capsule),
+  CyberPillar(app.video.player.R.string.pref_dual_horizon_header_style_pillar),
+  BentoStrip(app.video.player.R.string.pref_dual_horizon_header_style_card),
+  FluidPulse(app.video.player.R.string.pref_dual_horizon_header_style_pulse),
+  StudioLuxury(app.video.player.R.string.pref_dual_horizon_header_style_luxury),
 }
 
 enum class ThumbnailGenerator {

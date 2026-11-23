@@ -185,7 +185,6 @@ object FolderListScreen : Screen {
         FolderViewMode.FileManager -> FileSystemBrowserRootScreen.Content()
         FolderViewMode.AlbumView -> MediaStoreFolderListContent()
         FolderViewMode.MediaLibrary,
-        FolderViewMode.BentoFusion,
         FolderViewMode.DualHorizon -> MediaLibraryContent()
       }
     }

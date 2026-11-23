@@ -178,8 +178,8 @@ enum class AppTheme(
   val backgroundDark: Color,
   val isDynamic: Boolean = false,
 ) {
-  BentoFusionAura(
-    titleRes = R.string.theme_bentofusion_aura,
+  DualHorizonAura(
+    titleRes = R.string.theme_dual_horizon_aura,
     primaryLight = Color(0xFF007A8A),
     primaryDark = Color(0xFF00F5FF),
     secondaryLight = Color(0xFF7E22CE),

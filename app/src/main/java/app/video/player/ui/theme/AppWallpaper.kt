@@ -75,7 +75,7 @@ enum class WallpaperPreset(
   CyberMidnight("midnight", "Cyber Glow", listOf(Color(0xFF0D0A24), Color(0xFF1F104F), Color(0xFF003B5C), Color(0xFF080612))),
   SunsetHorizon("sunset", "Sunset Glow", listOf(Color(0xFF2B092C), Color(0xFF5A1846), Color(0xFF900C3F), Color(0xFF19061A))),
   Mist("mist", "Morning Mist", listOf(Color(0xFF141E28), Color(0xFF233240), Color(0xFF32485C), Color(0xFF0E151D))),
-  BentoAura("bento", "BentoFusion Aura", listOf(Color(0xFF04101A), Color(0xFF062438), Color(0xFF0A3A54), Color(0xFF030A12))),
+  DualHorizonAura("dual_horizon", "Dual Horizon Aura", listOf(Color(0xFF04101A), Color(0xFF062438), Color(0xFF0A3A54), Color(0xFF030A12))),
   RossoPrism("rosso", "Rosso Prism", listOf(Color(0xFF22050B), Color(0xFF3D0914), Color(0xFF580C1B), Color(0xFF110206))),
   SolarGold("solar", "Solar Gold", listOf(Color(0xFF1C1304), Color(0xFF352508), Color(0xFF4E370C), Color(0xFF0E0A02))),
 }

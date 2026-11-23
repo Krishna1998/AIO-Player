@@ -49,7 +49,7 @@ import app.video.player.R
 import app.video.player.domain.thumbnail.ThumbnailRepository
 import app.video.player.preferences.AppearancePreferences
 import app.video.player.preferences.AudioPulsingProgressStyle
-import app.video.player.preferences.BentoFusionHeaderStyle
+import app.video.player.preferences.DualHorizonHeaderStyle
 import app.video.player.preferences.BrowserPreferences
 import app.video.player.preferences.HomeScreenLayout
 import app.video.player.preferences.GesturePreferences
@@ -1173,17 +1173,17 @@ object AppearancePreferencesScreen : Screen {
           item {
             PreferenceSectionHeader(
               position = PreferenceSectionPosition.Middle,
-              title = stringResource(R.string.pref_appearance_category_bentofusion),
+              title = stringResource(R.string.pref_appearance_category_dual_horizon),
             )
           }
 
           item {
-            val bentoItemCount = 3
+            val dualHorizonItemCount = 3
 
             ExpressivePreferenceGroup {
               val audioPulsingProgressStyle by browserPreferences.audioPulsingProgressStyle.collectAsState()
-              val bentoFusionShowAudioPulsing by browserPreferences.bentoFusionShowAudioPulsing.collectAsState()
-              ExpressivePreferenceTile(index = 0, itemCount = bentoItemCount) {
+              val dualHorizonShowAudioPulsing by browserPreferences.dualHorizonShowAudioPulsing.collectAsState()
+              ExpressivePreferenceTile(index = 0, itemCount = dualHorizonItemCount) {
                 ListPreference(
                   modifier = Modifier.settingsSearchTarget(R.string.pref_audio_pulsing_progress_style_title),
                   value = audioPulsingProgressStyle,
@@ -1202,27 +1202,27 @@ object AppearancePreferencesScreen : Screen {
                       color = MaterialTheme.colorScheme.outline,
                     )
                   },
-                  enabled = bentoFusionShowAudioPulsing,
+                  enabled = dualHorizonShowAudioPulsing,
                 )
               }
 
-              val bentoFusionHeaderStyle by browserPreferences.bentoFusionHeaderStyle.collectAsState()
-              ExpressivePreferenceTile(index = 1, itemCount = bentoItemCount) {
+              val dualHorizonHeaderStyle by browserPreferences.dualHorizonHeaderStyle.collectAsState()
+              ExpressivePreferenceTile(index = 1, itemCount = dualHorizonItemCount) {
                 ListPreference(
-                  modifier = Modifier.settingsSearchTarget(R.string.pref_bentofusion_header_style_title),
-                  value = bentoFusionHeaderStyle,
+                  modifier = Modifier.settingsSearchTarget(R.string.pref_dual_horizon_header_style_title),
+                  value = dualHorizonHeaderStyle,
                   onValueChange = {
-                    if (it != bentoFusionHeaderStyle) {
-                      browserPreferences.bentoFusionHeaderStyle.set(it)
+                    if (it != dualHorizonHeaderStyle) {
+                      browserPreferences.dualHorizonHeaderStyle.set(it)
                       showInterfaceRestartDialog = true
                     }
                   },
-                  values = BentoFusionHeaderStyle.entries,
+                  values = DualHorizonHeaderStyle.entries,
                   valueToText = { AnnotatedString(stringResource(it.titleRes)) },
-                  title = { Text(stringResource(R.string.pref_bentofusion_header_style_title)) },
+                  title = { Text(stringResource(R.string.pref_dual_horizon_header_style_title)) },
                   summary = {
                     Text(
-                      stringResource(bentoFusionHeaderStyle.titleRes),
+                      stringResource(dualHorizonHeaderStyle.titleRes),
                       color = MaterialTheme.colorScheme.outline,
                     )
                   },
@@ -1248,9 +1248,9 @@ object AppearancePreferencesScreen : Screen {
           }
 
           item {
-            val bentoShowVideo by browserPreferences.bentoFusionShowVideoRail.collectAsState()
-            val bentoShowPulsing by browserPreferences.bentoFusionShowAudioPulsing.collectAsState()
-            val bentoShowMusic by browserPreferences.bentoFusionShowMusicRail.collectAsState()
+            val dualHorizonShowVideo by browserPreferences.dualHorizonShowVideoRail.collectAsState()
+            val dualHorizonShowPulsing by browserPreferences.dualHorizonShowAudioPulsing.collectAsState()
+            val dualHorizonShowMusic by browserPreferences.dualHorizonShowMusicRail.collectAsState()
 
             PreferenceCard {
               val spotlightScale by browserPreferences.cinematicSpotlightScale.collectAsState()
@@ -1275,15 +1275,15 @@ object AppearancePreferencesScreen : Screen {
               }
               PreferenceDivider()
 
-              if (bentoShowPulsing) {
-                val pulsingScale by browserPreferences.bentoFusionAudioPulsingScale.collectAsState()
+              if (dualHorizonShowPulsing) {
+                val pulsingScale by browserPreferences.dualHorizonAudioPulsingScale.collectAsState()
                 ExpressivePreferenceItem(standalone = true) {
                   SliderPreference(
                     modifier = Modifier.settingsSearchTarget(R.string.pref_audio_pulsing_scale_title),
                     value = pulsingScale,
-                    onValueChange = { browserPreferences.bentoFusionAudioPulsingScale.set(it) },
+                    onValueChange = { browserPreferences.dualHorizonAudioPulsingScale.set(it) },
                     sliderValue = pulsingScale,
-                    onSliderValueChange = { browserPreferences.bentoFusionAudioPulsingScale.set(it) },
+                    onSliderValueChange = { browserPreferences.dualHorizonAudioPulsingScale.set(it) },
                     valueRange = 0.70f..1.30f,
                     valueSteps = 12,
                     title = { Text(stringResource(R.string.pref_audio_pulsing_scale_title)) },
@@ -1299,15 +1299,15 @@ object AppearancePreferencesScreen : Screen {
                 PreferenceDivider()
               }
 
-              if (bentoShowVideo) {
-                val videoScale by browserPreferences.bentoFusionVideoRailScale.collectAsState()
+              if (dualHorizonShowVideo) {
+                val videoScale by browserPreferences.dualHorizonVideoRailScale.collectAsState()
                 ExpressivePreferenceItem(standalone = true) {
                   SliderPreference(
                     modifier = Modifier.settingsSearchTarget(R.string.pref_video_rail_scale_title),
                     value = videoScale,
-                    onValueChange = { browserPreferences.bentoFusionVideoRailScale.set(it) },
+                    onValueChange = { browserPreferences.dualHorizonVideoRailScale.set(it) },
                     sliderValue = videoScale,
-                    onSliderValueChange = { browserPreferences.bentoFusionVideoRailScale.set(it) },
+                    onSliderValueChange = { browserPreferences.dualHorizonVideoRailScale.set(it) },
                     valueRange = 0.70f..1.30f,
                     valueSteps = 12,
                     title = { Text(stringResource(R.string.pref_video_rail_scale_title)) },
@@ -1323,15 +1323,15 @@ object AppearancePreferencesScreen : Screen {
                 PreferenceDivider()
               }
 
-              if (bentoShowMusic) {
-                val musicScale by browserPreferences.bentoFusionMusicRailScale.collectAsState()
+              if (dualHorizonShowMusic) {
+                val musicScale by browserPreferences.dualHorizonMusicRailScale.collectAsState()
                 ExpressivePreferenceItem(standalone = true) {
                   SliderPreference(
                     modifier = Modifier.settingsSearchTarget(R.string.pref_music_rail_scale_title),
                     value = musicScale,
-                    onValueChange = { browserPreferences.bentoFusionMusicRailScale.set(it) },
+                    onValueChange = { browserPreferences.dualHorizonMusicRailScale.set(it) },
                     sliderValue = musicScale,
-                    onSliderValueChange = { browserPreferences.bentoFusionMusicRailScale.set(it) },
+                    onSliderValueChange = { browserPreferences.dualHorizonMusicRailScale.set(it) },
                     valueRange = 0.70f..1.30f,
                     valueSteps = 12,
                     title = { Text(stringResource(R.string.pref_music_rail_scale_title)) },
@@ -1349,58 +1349,58 @@ object AppearancePreferencesScreen : Screen {
           }
 
           item {
-            val bentoSectionOrder by browserPreferences.bentoFusionSectionOrder.collectAsState()
-            val bentoShowVideo by browserPreferences.bentoFusionShowVideoRail.collectAsState()
-            val bentoShowPulsing by browserPreferences.bentoFusionShowAudioPulsing.collectAsState()
-            val bentoShowMusic by browserPreferences.bentoFusionShowMusicRail.collectAsState()
+            val dualHorizonSectionOrder by browserPreferences.dualHorizonSectionOrder.collectAsState()
+            val dualHorizonShowVideo by browserPreferences.dualHorizonShowVideoRail.collectAsState()
+            val dualHorizonShowPulsing by browserPreferences.dualHorizonShowAudioPulsing.collectAsState()
+            val dualHorizonShowMusic by browserPreferences.dualHorizonShowMusicRail.collectAsState()
             val defaults = listOf("VIDEO", "PULSING", "MUSIC")
-            val orderedSections = (bentoSectionOrder.filter { it in defaults } + defaults).distinct()
-            val bentoOrderItems = orderedSections.map { id ->
+            val orderedSections = (dualHorizonSectionOrder.filter { it in defaults } + defaults).distinct()
+            val dualHorizonOrderItems = orderedSections.map { id ->
               when (id) {
                 "VIDEO" -> ReorderableTabItem(
                   id = id,
-                  title = stringResource(R.string.pref_bentofusion_section_video),
-                  summary = stringResource(R.string.pref_bentofusion_show_video_card_summary),
-                  enabled = bentoShowVideo,
-                  titleRes = R.string.pref_bentofusion_section_video,
+                  title = stringResource(R.string.pref_dual_horizon_section_video),
+                  summary = stringResource(R.string.pref_dual_horizon_show_video_card_summary),
+                  enabled = dualHorizonShowVideo,
+                  titleRes = R.string.pref_dual_horizon_section_video,
                 )
                 "PULSING" -> ReorderableTabItem(
                   id = id,
-                  title = stringResource(R.string.pref_bentofusion_section_audio_pulsing),
-                  summary = stringResource(R.string.pref_bentofusion_show_audio_pulsing_summary),
-                  enabled = bentoShowPulsing,
-                  titleRes = R.string.pref_bentofusion_section_audio_pulsing,
+                  title = stringResource(R.string.pref_dual_horizon_section_audio_pulsing),
+                  summary = stringResource(R.string.pref_dual_horizon_show_audio_pulsing_summary),
+                  enabled = dualHorizonShowPulsing,
+                  titleRes = R.string.pref_dual_horizon_section_audio_pulsing,
                 )
                 else -> ReorderableTabItem(
                   id = id,
-                  title = stringResource(R.string.pref_bentofusion_section_music),
-                  summary = stringResource(R.string.pref_bentofusion_show_music_card_summary),
-                  enabled = bentoShowMusic,
-                  titleRes = R.string.pref_bentofusion_section_music,
+                  title = stringResource(R.string.pref_dual_horizon_section_music),
+                  summary = stringResource(R.string.pref_dual_horizon_show_music_card_summary),
+                  enabled = dualHorizonShowMusic,
+                  titleRes = R.string.pref_dual_horizon_section_music,
                 )
               }
             }
             ExpressivePreferenceGroup {
               Text(
-                text = stringResource(R.string.pref_bentofusion_section_order_title),
+                text = stringResource(R.string.pref_dual_horizon_section_order_title),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
               )
               ReorderableTabPreferences(
-                tabs = bentoOrderItems,
+                tabs = dualHorizonOrderItems,
                 onEnabledChange = { id, enabled ->
                   when (id) {
-                    "VIDEO" -> browserPreferences.bentoFusionShowVideoRail.set(enabled)
-                    "PULSING" -> browserPreferences.bentoFusionShowAudioPulsing.set(enabled)
-                    "MUSIC" -> browserPreferences.bentoFusionShowMusicRail.set(enabled)
+                    "VIDEO" -> browserPreferences.dualHorizonShowVideoRail.set(enabled)
+                    "PULSING" -> browserPreferences.dualHorizonShowAudioPulsing.set(enabled)
+                    "MUSIC" -> browserPreferences.dualHorizonShowMusicRail.set(enabled)
                   }
                 },
                 onMove = { id, destination ->
                   val next = orderedSections.toMutableList()
                   next.remove(id)
                   next.add(destination.coerceIn(0, next.size), id)
-                  browserPreferences.bentoFusionSectionOrder.set(next)
+                  browserPreferences.dualHorizonSectionOrder.set(next)
                 },
               )
             }
@@ -1409,10 +1409,10 @@ object AppearancePreferencesScreen : Screen {
           item {
             val librarySubTabsOrder by browserPreferences.mediaLibrarySubTabsOrder.collectAsState()
             val libraryShowMusicTab by browserPreferences.libraryShowMusicTab.collectAsState()
-            val bentoShowVideo by browserPreferences.bentoFusionShowVideoRail.collectAsState()
-            val bentoShowPulsing by browserPreferences.bentoFusionShowAudioPulsing.collectAsState()
-            val bentoShowMusic by browserPreferences.bentoFusionShowMusicRail.collectAsState()
-            val isAllMediaActive = bentoShowVideo || bentoShowPulsing || bentoShowMusic
+            val dualHorizonShowVideo by browserPreferences.dualHorizonShowVideoRail.collectAsState()
+            val dualHorizonShowPulsing by browserPreferences.dualHorizonShowAudioPulsing.collectAsState()
+            val dualHorizonShowMusic by browserPreferences.dualHorizonShowMusicRail.collectAsState()
+            val isAllMediaActive = dualHorizonShowVideo || dualHorizonShowPulsing || dualHorizonShowMusic
             val subTabDefaults = listOf("ALL", "VIDEO", "AUDIO")
             val orderedSubTabs = (librarySubTabsOrder.filter { it in subTabDefaults } + subTabDefaults).distinct()
             val subTabItems = orderedSubTabs.map { id ->
@@ -1420,7 +1420,7 @@ object AppearancePreferencesScreen : Screen {
                 "ALL" -> ReorderableTabItem(
                   id = id,
                   title = stringResource(R.string.ui_all_media),
-                  summary = if (isAllMediaActive) stringResource(R.string.pref_bentofusion_show_video_card_summary) else stringResource(R.string.pref_bentofusion_all_media_hidden_summary),
+                  summary = if (isAllMediaActive) stringResource(R.string.pref_dual_horizon_show_video_card_summary) else stringResource(R.string.pref_dual_horizon_all_media_hidden_summary),
                   enabled = isAllMediaActive,
                   required = isAllMediaActive,
                   titleRes = R.string.ui_all_media,
@@ -1453,9 +1453,9 @@ object AppearancePreferencesScreen : Screen {
                 tabs = subTabItems,
                 onEnabledChange = { id, enabled ->
                   if (id == "ALL") {
-                    browserPreferences.bentoFusionShowVideoRail.set(enabled)
-                    browserPreferences.bentoFusionShowAudioPulsing.set(enabled)
-                    browserPreferences.bentoFusionShowMusicRail.set(enabled)
+                    browserPreferences.dualHorizonShowVideoRail.set(enabled)
+                    browserPreferences.dualHorizonShowAudioPulsing.set(enabled)
+                    browserPreferences.dualHorizonShowMusicRail.set(enabled)
                   } else if (id == "AUDIO") {
                     browserPreferences.libraryShowMusicTab.set(enabled)
                   }

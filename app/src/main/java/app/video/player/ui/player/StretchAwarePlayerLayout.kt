@@ -5,8 +5,10 @@
 package app.video.player.ui.player
 
 import android.app.Activity
+import android.app.KeyguardManager
 import android.content.Context
 import android.content.ContextWrapper
+import android.os.PowerManager
 import android.util.AttributeSet
 import androidx.constraintlayout.widget.ConstraintLayout
 import app.video.player.preferences.PlayerPreferences
@@ -40,6 +42,16 @@ class StretchAwarePlayerLayout @JvmOverloads constructor(
     return cur as? Activity
   }
 
+  private fun isActivityInPipOrScreenOffLocked(): Boolean {
+    val activity = findActivity() ?: return true
+    if (activity.isInPictureInPictureMode) return true
+    val powerManager = activity.getSystemService(Context.POWER_SERVICE) as? PowerManager
+    val keyguardManager = activity.getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
+    if (powerManager?.isInteractive == false) return true
+    if (keyguardManager?.isKeyguardLocked == true || keyguardManager?.isDeviceLocked == true) return true
+    return false
+  }
+
   override fun onSizeChanged(
     w: Int,
     h: Int,
@@ -49,13 +61,14 @@ class StretchAwarePlayerLayout @JvmOverloads constructor(
     super.onSizeChanged(w, h, oldw, oldh)
     if (w <= 0 || h <= 0 || (w == oldw && h == oldh)) return
 
-    // Never recalculate Stretch ratio while in Picture-in-Picture mode or if activity is finishing.
-    // Screen lock/unlock or PiP window resizing must not corrupt video-aspect-override with PiP/portrait dimensions.
-    if (findActivity()?.isInPictureInPictureMode == true) return
+    // Never recalculate Stretch ratio while in Picture-in-Picture mode, while screen is locked/off,
+    // or if activity is finishing. PiP window resizing or screen lock/unlock transitions must not
+    // corrupt video-aspect-override with intermediate PiP/portrait dimensions.
+    if (isActivityInPipOrScreenOffLocked()) return
 
     // Run after the new orientation's surface/layout size has settled.
     post {
-      if (findActivity()?.isInPictureInPictureMode == true) return@post
+      if (isActivityInPipOrScreenOffLocked()) return@post
       if (!PlaybackSession.isInitialized) return@post
       if (playerPreferences.lastCustomAspectRatio.get() > 0f) return@post
       if (playerPreferences.lastVideoAspect.get() != VideoAspect.Stretch) return@post

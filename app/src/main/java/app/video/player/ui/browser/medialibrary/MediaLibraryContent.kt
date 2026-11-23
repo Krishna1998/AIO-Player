@@ -249,13 +249,13 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   val mediaLayoutMode by browserPreferences.mediaLayoutMode.collectAsState()
   val includeAudioBrowser by browserPreferences.includeAudioBrowser.collectAsState()
   val libraryShowMusicTab by browserPreferences.libraryShowMusicTab.collectAsState()
-  val bentoFusionShowVideoRail by browserPreferences.bentoFusionShowVideoRail.collectAsState()
-  val bentoFusionShowAudioPulsing by browserPreferences.bentoFusionShowAudioPulsing.collectAsState()
-  val bentoFusionShowMusicRail by browserPreferences.bentoFusionShowMusicRail.collectAsState()
+  val dualHorizonShowVideoRail by browserPreferences.dualHorizonShowVideoRail.collectAsState()
+  val dualHorizonShowAudioPulsing by browserPreferences.dualHorizonShowAudioPulsing.collectAsState()
+  val dualHorizonShowMusicRail by browserPreferences.dualHorizonShowMusicRail.collectAsState()
   val homeScreenLayout by browserPreferences.homeScreenLayout.collectAsState()
-  val isAnyBentoFusionSectionEnabled = bentoFusionShowVideoRail || bentoFusionShowAudioPulsing || bentoFusionShowMusicRail
+  val isAnyDualHorizonSectionEnabled = dualHorizonShowVideoRail || dualHorizonShowAudioPulsing || dualHorizonShowMusicRail
   val savedMediaType by browserPreferences.mediaLibraryType.collectAsState()
-  val mediaType = if (forceAudio) MediaLibraryType.Audio else if (includeAudioBrowser || browserPreferences.folderViewMode.get() == app.video.player.preferences.FolderViewMode.BentoFusion) savedMediaType else MediaLibraryType.Video
+  val mediaType = if (forceAudio) MediaLibraryType.Audio else if (includeAudioBrowser || browserPreferences.folderViewMode.get() == app.video.player.preferences.FolderViewMode.DualHorizon) savedMediaType else MediaLibraryType.Video
   val musicCoverArtSize by browserPreferences.musicCoverArtSize.collectAsState()
   val enabledMusicTabs by audioPreferences.enabledMusicTabs.collectAsState()
   val musicTabOrder by audioPreferences.musicTabOrder.collectAsState()
@@ -288,7 +288,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
     audioVideosWithInfo.filter { favoriteAudioPaths.contains(it.video.path) }
   }
   val mediaLibrarySubTabsOrder by browserPreferences.mediaLibrarySubTabsOrder.collectAsState()
-  val mediaLibraryTabs = remember(forceAudio, libraryShowMusicTab, isAnyBentoFusionSectionEnabled, mediaLibrarySubTabsOrder) {
+  val mediaLibraryTabs = remember(forceAudio, libraryShowMusicTab, isAnyDualHorizonSectionEnabled, mediaLibrarySubTabsOrder) {
     if (forceAudio) {
       listOf(MediaLibraryType.Audio)
     } else {
@@ -296,7 +296,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
       val orderedIds = (mediaLibrarySubTabsOrder.filter { it in defaults } + defaults).distinct()
       val candidateTabs = orderedIds.mapNotNull { id ->
         when (id) {
-          "ALL" -> if (isAnyBentoFusionSectionEnabled) MediaLibraryType.All else null
+          "ALL" -> if (isAnyDualHorizonSectionEnabled) MediaLibraryType.All else null
           "VIDEO" -> MediaLibraryType.Video
           "AUDIO" -> if (libraryShowMusicTab) MediaLibraryType.Audio else null
           else -> null
@@ -363,11 +363,11 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
     mediaLibraryTabs.getOrNull(pagerState.currentPage) ?: mediaType
   }
 
-  DisposableEffect(currentTab, bentoFusionShowAudioPulsing) {
-    // When Audio Pulsing is enabled in Cinematic Horizon, suppress the mini-player
+  DisposableEffect(currentTab, dualHorizonShowAudioPulsing) {
+    // When Audio Pulsing is enabled in Dual Horizon, suppress the mini-player
     // on All Media to avoid redundant controls and UI clutter with the Audio Pulsing spotlight card.
     // When Audio Pulsing is turned off, allow the mini-player to show in all media.
-    val hasAudioPulsingSpotlight = bentoFusionShowAudioPulsing
+    val hasAudioPulsingSpotlight = dualHorizonShowAudioPulsing
 
     NavigationBarState.isAllMediaTabActive = (currentTab == MediaLibraryType.All && hasAudioPulsingSpotlight)
     onDispose {
@@ -577,15 +577,15 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
     }
   }
 
-  LaunchedEffect(isAnyBentoFusionSectionEnabled, savedMediaType, mediaLibraryTabs) {
-    if (!isAnyBentoFusionSectionEnabled && savedMediaType == MediaLibraryType.All) {
+  LaunchedEffect(isAnyDualHorizonSectionEnabled, savedMediaType, mediaLibraryTabs) {
+    if (!isAnyDualHorizonSectionEnabled && savedMediaType == MediaLibraryType.All) {
       val fallbackType = mediaLibraryTabs.firstOrNull() ?: MediaLibraryType.Video
       browserPreferences.mediaLibraryType.set(fallbackType)
     }
   }
 
   LaunchedEffect(includeAudioBrowser, savedMediaType, forceAudio) {
-    if (!forceAudio && !includeAudioBrowser && browserPreferences.folderViewMode.get() != app.video.player.preferences.FolderViewMode.BentoFusion && savedMediaType != MediaLibraryType.Video) {
+    if (!forceAudio && !includeAudioBrowser && browserPreferences.folderViewMode.get() != app.video.player.preferences.FolderViewMode.DualHorizon && savedMediaType != MediaLibraryType.Video) {
       browserPreferences.mediaLibraryType.set(MediaLibraryType.Video)
     }
   }
@@ -1521,7 +1521,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                   onFabExpandedChange = { isFabExpanded.value = it },
                   headerContent = if (!isSearching && pageType == MediaLibraryType.All && pageVideosWithInfo.isNotEmpty()) {
                     {
-                      app.video.player.ui.browser.cinematichorizon.BentoFusionHeader(
+                      app.video.player.ui.browser.cinematichorizon.DualHorizonHeader(
                         videosWithInfo = pageVideosWithInfo,
                         recentlyPlayedFilePath = recentlyPlayedFilePath,
                         onPlayMedia = { video, startPos, customQueue ->
@@ -1662,7 +1662,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
           isAudio = true,
         )
       } else {
-        val isBentoFusion = currentTab == MediaLibraryType.All && !isSearching
+        val isDualHorizon = currentTab == MediaLibraryType.All && !isSearching
         VideoSortDialog(
           isOpen = sortDialogOpen.value,
           onDismiss = { sortDialogOpen.value = false },
@@ -1671,9 +1671,9 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
           onSortTypeChange = { browserPreferences.videoSortType.set(it) },
           onSortOrderChange = { browserPreferences.videoSortOrder.set(it) },
           isFolderView = false,
-          enableViewModeOptions = !forceAudio && !isBentoFusion,
-          enableLayoutModeOptions = !isBentoFusion,
-          enableFieldOptions = !isBentoFusion,
+          enableViewModeOptions = !forceAudio && !isDualHorizon,
+          enableLayoutModeOptions = !isDualHorizon,
+          enableFieldOptions = !isDualHorizon,
           isAudio = currentTab == MediaLibraryType.Audio,
           onMetadataFieldEnabled = viewModel::refresh,
         )

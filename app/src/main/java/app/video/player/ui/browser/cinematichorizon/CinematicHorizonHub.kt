@@ -119,7 +119,7 @@ import androidx.compose.ui.unit.sp
 import app.video.player.domain.media.model.Video
 import app.video.player.domain.recentlyplayed.repository.RecentlyPlayedRepository
 import android.net.Uri
-import app.video.player.preferences.BentoFusionHeaderStyle
+import app.video.player.preferences.DualHorizonHeaderStyle
 import app.video.player.preferences.BrowserPreferences
 import app.video.player.preferences.HomeScreenLayout
 import app.video.player.preferences.MediaLibraryType
@@ -224,13 +224,13 @@ fun getAudioCodec(video: Video): String {
 }
 
 /**
- * Bento Fusion Hub Header
+ * Dual Horizon Hub Header
  * Integrates a liquid-glass Hero Spotlight Card (with dynamic audio visualizer / video resume)
  * and synchronized horizon rails for Cinema, Hi-Res Audio, and Recently Played.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BentoFusionHeader(
+fun DualHorizonHeader(
   videosWithInfo: List<VideoWithPlaybackInfo>,
   recentlyPlayedFilePath: String?,
   onPlayMedia: (Video, Double?, List<Video>?) -> Unit,
@@ -256,17 +256,17 @@ fun BentoFusionHeader(
   val recentEntities by recentlyPlayedRepo.observeRecentlyPlayed(limit = 50).collectAsState(initial = emptyList())
   val browserPreferences = koinInject<BrowserPreferences>()
   val homeScreenLayout by browserPreferences.homeScreenLayout.collectAsState()
-  val bentoFusionHintDismissed by browserPreferences.bentoFusionHintDismissed.collectAsState()
-  val showVideoRail by browserPreferences.bentoFusionShowVideoRail.collectAsState()
-  val showAudioPulsing by browserPreferences.bentoFusionShowAudioPulsing.collectAsState()
+  val dualHorizonHintDismissed by browserPreferences.dualHorizonHintDismissed.collectAsState()
+  val showVideoRail by browserPreferences.dualHorizonShowVideoRail.collectAsState()
+  val showAudioPulsing by browserPreferences.dualHorizonShowAudioPulsing.collectAsState()
   val showCinematicSpotlight by browserPreferences.cinematicShowHeroSpotlight.collectAsState()
   val cinematicSpotlightScale by browserPreferences.cinematicSpotlightScale.collectAsState()
-  val audioPulsingScale by browserPreferences.bentoFusionAudioPulsingScale.collectAsState()
-  val videoRailScale by browserPreferences.bentoFusionVideoRailScale.collectAsState()
-  val musicRailScale by browserPreferences.bentoFusionMusicRailScale.collectAsState()
-  val bentoFusionHeaderStyle by browserPreferences.bentoFusionHeaderStyle.collectAsState()
-  val showMusicRail by browserPreferences.bentoFusionShowMusicRail.collectAsState()
-  val sectionOrder by browserPreferences.bentoFusionSectionOrder.collectAsState()
+  val audioPulsingScale by browserPreferences.dualHorizonAudioPulsingScale.collectAsState()
+  val videoRailScale by browserPreferences.dualHorizonVideoRailScale.collectAsState()
+  val musicRailScale by browserPreferences.dualHorizonMusicRailScale.collectAsState()
+  val dualHorizonHeaderStyle by browserPreferences.dualHorizonHeaderStyle.collectAsState()
+  val showMusicRail by browserPreferences.dualHorizonShowMusicRail.collectAsState()
+  val sectionOrder by browserPreferences.dualHorizonSectionOrder.collectAsState()
   val onlineMusicArtworkRepository = koinInject<OnlineMusicArtworkRepository>()
   val minVideoMinutes by browserPreferences.minimumVideoHorizonDurationMinutes.collectAsState()
   val minVideoDurationMs = remember(minVideoMinutes) { (minVideoMinutes * 60 * 1000L).coerceAtLeast(0L) }
@@ -506,24 +506,24 @@ fun BentoFusionHeader(
         audioPulsingScale = audioPulsingScale,
         videoRailScale = videoRailScale,
         musicRailScale = musicRailScale,
-        bentoFusionHeaderStyle = bentoFusionHeaderStyle,
+        dualHorizonHeaderStyle = dualHorizonHeaderStyle,
         onPlayMedia = onPlayMedia,
         playAudioInBackground = { targetVideo, pos -> playAudioInBackground(targetVideo, pos) },
         onVideoAction = { actionTargetVideo = it },
       )
     }
-    HomeScreenLayout.BentoFusion -> {
+    HomeScreenLayout.DualHorizon -> {
       Column(
         modifier = modifier
           .fillMaxWidth()
           .padding(bottom = 12.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
       ) {
-    // 0. BentoFusion Audio Pulsing & Key Feature Discovery Hint
-    if (!bentoFusionHintDismissed) {
-      BentoFusionFeatureHintCard(
+    // 0. DualHorizon Audio Pulsing & Key Feature Discovery Hint
+    if (!dualHorizonHintDismissed) {
+      DualHorizonFeatureHintCard(
         onDismiss = {
-          browserPreferences.bentoFusionHintDismissed.set(true)
+          browserPreferences.dualHorizonHintDismissed.set(true)
         },
         modifier = Modifier
           .fillMaxWidth()
@@ -546,7 +546,7 @@ fun BentoFusionHeader(
               icon = "🎬",
               accentColor = MaterialTheme.colorScheme.primary,
               count = videoItems.size,
-              style = bentoFusionHeaderStyle,
+              style = dualHorizonHeaderStyle,
             ) {
               LazyRow(
                 contentPadding = PaddingValues(horizontal = 16.dp),
@@ -672,7 +672,7 @@ fun BentoFusionHeader(
               icon = "🎵",
               accentColor = MaterialTheme.colorScheme.tertiary,
               count = sortedAudioByTitle.size,
-              style = bentoFusionHeaderStyle,
+              style = dualHorizonHeaderStyle,
             ) {
               LazyRow(
                 contentPadding = PaddingValues(horizontal = 16.dp),
@@ -809,7 +809,7 @@ private fun CinematicHorizonContent(
   audioPulsingScale: Float = 1.0f,
   videoRailScale: Float = 1.0f,
   musicRailScale: Float = 1.0f,
-  bentoFusionHeaderStyle: BentoFusionHeaderStyle = BentoFusionHeaderStyle.LiquidCapsule,
+  dualHorizonHeaderStyle: DualHorizonHeaderStyle = DualHorizonHeaderStyle.LiquidCapsule,
   onPlayMedia: (Video, Double?, List<Video>) -> Unit,
   playAudioInBackground: (Video, Double?) -> Unit,
   onVideoAction: (Video) -> Unit,
@@ -1022,7 +1022,7 @@ private fun CinematicHorizonContent(
               icon = "🎬",
               accentColor = MaterialTheme.colorScheme.primary,
               count = videoItems.size,
-              style = bentoFusionHeaderStyle,
+              style = dualHorizonHeaderStyle,
             ) {
               LazyRow(
                 contentPadding = PaddingValues(horizontal = 16.dp),
@@ -1145,7 +1145,7 @@ private fun CinematicHorizonContent(
               icon = "🎵",
               accentColor = MaterialTheme.colorScheme.tertiary,
               count = sortedAudioByTitle.size,
-              style = bentoFusionHeaderStyle,
+              style = dualHorizonHeaderStyle,
             ) {
               LazyRow(
                 contentPadding = PaddingValues(horizontal = 16.dp),
@@ -1169,12 +1169,12 @@ private fun CinematicHorizonContent(
 }
 
 /**
- * BentoFusion Key Feature Discovery Card
+ * DualHorizon Key Feature Discovery Card
  * Displays an elegant Liquid Glass card introducing Audio Pulsing gestures
  * and Horizon quick navigation right after permission setup.
  */
 @Composable
-fun BentoFusionFeatureHintCard(
+fun DualHorizonFeatureHintCard(
   onDismiss: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
@@ -1356,9 +1356,9 @@ fun DualHorizonRails(
   modifier: Modifier = Modifier,
 ) {
   val browserPreferences = koinInject<BrowserPreferences>()
-  val showVideoRail by browserPreferences.bentoFusionShowVideoRail.collectAsState()
-  val bentoFusionHeaderStyle by browserPreferences.bentoFusionHeaderStyle.collectAsState()
-  val showMusicRail by browserPreferences.bentoFusionShowMusicRail.collectAsState()
+  val showVideoRail by browserPreferences.dualHorizonShowVideoRail.collectAsState()
+  val dualHorizonHeaderStyle by browserPreferences.dualHorizonHeaderStyle.collectAsState()
+  val showMusicRail by browserPreferences.dualHorizonShowMusicRail.collectAsState()
   val minVideoMinutes by browserPreferences.minimumVideoHorizonDurationMinutes.collectAsState()
   val minVideoDurationMs = remember(minVideoMinutes) { (minVideoMinutes * 60 * 1000L).coerceAtLeast(0L) }
 
@@ -1389,7 +1389,7 @@ fun DualHorizonRails(
         icon = "🎬",
         accentColor = MaterialTheme.colorScheme.primary,
         count = videoItems.size,
-        style = bentoFusionHeaderStyle,
+        style = dualHorizonHeaderStyle,
       ) {
         LazyRow(
           contentPadding = PaddingValues(horizontal = 16.dp),
@@ -1416,7 +1416,7 @@ fun DualHorizonRails(
         icon = "🎵",
         accentColor = MaterialTheme.colorScheme.tertiary,
         count = sortedAudioByTitle.size,
-        style = bentoFusionHeaderStyle,
+        style = dualHorizonHeaderStyle,
       ) {
         LazyRow(
           contentPadding = PaddingValues(horizontal = 16.dp),
@@ -1444,7 +1444,7 @@ private fun HorizonRailSection(
   icon: String,
   accentColor: Color,
   count: Int,
-  style: BentoFusionHeaderStyle = BentoFusionHeaderStyle.LiquidCapsule,
+  style: DualHorizonHeaderStyle = DualHorizonHeaderStyle.LiquidCapsule,
   content: @Composable () -> Unit,
 ) {
   val isMusic = title.contains("Music", ignoreCase = true)
@@ -1463,7 +1463,7 @@ private fun HorizonRailSection(
     ) {
       when (style) {
         // 1. Liquid Glass Aura Capsule (Original / Enhanced)
-        BentoFusionHeaderStyle.LiquidCapsule -> {
+        DualHorizonHeaderStyle.LiquidCapsule -> {
           Surface(
             shape = RoundedCornerShape(999.dp),
             color = accentColor.copy(alpha = 0.16f),
@@ -1517,7 +1517,7 @@ private fun HorizonRailSection(
         }
 
         // 2. Cyber Glow Pillar
-        BentoFusionHeaderStyle.CyberPillar -> {
+        DualHorizonHeaderStyle.CyberPillar -> {
           Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -1572,7 +1572,7 @@ private fun HorizonRailSection(
         }
 
         // 3. Frosted Bento Strip
-        BentoFusionHeaderStyle.BentoStrip -> {
+        DualHorizonHeaderStyle.BentoStrip -> {
           Surface(
             shape = RoundedCornerShape(16.dp),
             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
@@ -1637,7 +1637,7 @@ private fun HorizonRailSection(
         }
 
         // 4. Fluid Pulse Dot
-        BentoFusionHeaderStyle.FluidPulse -> {
+        DualHorizonHeaderStyle.FluidPulse -> {
           Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -1673,7 +1673,7 @@ private fun HorizonRailSection(
         }
 
         // 5. Studio Luxury Aperture
-        BentoFusionHeaderStyle.StudioLuxury -> {
+        DualHorizonHeaderStyle.StudioLuxury -> {
           Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.Bottom,

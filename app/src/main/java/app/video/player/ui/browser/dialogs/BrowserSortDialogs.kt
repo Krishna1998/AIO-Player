@@ -610,8 +610,7 @@ fun FolderSortDialog(
                 label = "Library",
                 icon = Icons.RoundedFilled.VideoLibrary,
                 isSelected = folderViewMode == FolderViewMode.MediaLibrary ||
-                  folderViewMode == FolderViewMode.DualHorizon ||
-                  folderViewMode == FolderViewMode.BentoFusion,
+                  folderViewMode == FolderViewMode.DualHorizon,
                 onClick = {
                   browserPreferences.includeAudioBrowser.set(true)
                   browserPreferences.mediaLibraryType.set(MediaLibraryType.All)
@@ -1016,8 +1015,7 @@ fun VideoSortDialog(
                 label = "Library",
                 icon = Icons.RoundedFilled.VideoLibrary,
                 isSelected = folderViewMode == FolderViewMode.MediaLibrary ||
-                  folderViewMode == FolderViewMode.DualHorizon ||
-                  folderViewMode == FolderViewMode.BentoFusion,
+                  folderViewMode == FolderViewMode.DualHorizon,
                 onClick = {
                   browserPreferences.includeAudioBrowser.set(true)
                   browserPreferences.mediaLibraryType.set(MediaLibraryType.All)
@@ -1424,8 +1422,7 @@ fun FileSystemSortDialog(
               label = "Library",
               icon = Icons.RoundedFilled.VideoLibrary,
               isSelected = folderViewMode == FolderViewMode.MediaLibrary ||
-                folderViewMode == FolderViewMode.DualHorizon ||
-                folderViewMode == FolderViewMode.BentoFusion,
+                folderViewMode == FolderViewMode.DualHorizon,
               onClick = {
                 browserPreferences.includeAudioBrowser.set(true)
                 browserPreferences.mediaLibraryType.set(MediaLibraryType.All)
