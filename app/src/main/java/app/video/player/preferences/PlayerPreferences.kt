@@ -162,6 +162,7 @@ class PlayerPreferences(
 
   // MX/VLC-style: only the home gesture auto-enters PiP; Back keeps its normal close/handoff.
   val pipOnHomeGestureOnly = preferenceStore.getBoolean("auto_pip_home_gesture_only", false)
+  val pipPauseOnScreenLock = preferenceStore.getBoolean("pip_pause_on_screen_lock", false)
   val enableVideoMiniPlayer = preferenceStore.getBoolean("enable_video_mini_player", false)
 
   val keepScreenOnWhenPaused = preferenceStore.getBoolean("keep_screen_on_when_paused", false)

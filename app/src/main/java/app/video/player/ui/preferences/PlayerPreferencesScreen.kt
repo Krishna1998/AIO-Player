@@ -384,6 +384,24 @@ val savePositionOnQuit by preferences.savePositionOnQuit.collectAsState()
                 PreferenceDivider()
               }
 
+              DevicePreference(R.string.pref_pip_pause_on_screen_lock_title) {
+                val pipPauseOnScreenLock by preferences.pipPauseOnScreenLock.collectAsState()
+                SwitchPreference(
+                  modifier = Modifier.settingsSearchTarget(R.string.pref_pip_pause_on_screen_lock_title),
+                  value = pipPauseOnScreenLock,
+                  onValueChange = preferences.pipPauseOnScreenLock::set,
+                  title = { Text(stringResource(R.string.pref_pip_pause_on_screen_lock_title)) },
+                  summary = {
+                    Text(
+                      stringResource(R.string.pref_pip_pause_on_screen_lock_summary),
+                      color = MaterialTheme.colorScheme.outline,
+                    )
+                  },
+                )
+
+                PreferenceDivider()
+              }
+
               val keepScreenOnWhenPaused by preferences.keepScreenOnWhenPaused.collectAsState()
               SwitchPreference(
                 modifier = Modifier.settingsSearchTarget(R.string.pref_player_keep_screen_on_when_paused_title),

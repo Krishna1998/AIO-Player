@@ -423,6 +423,15 @@ object SearchablePreferences {
       )
       add(
         SearchablePreference(
+          titleRes = R.string.pref_pip_pause_on_screen_lock_title,
+          summaryRes = R.string.pref_pip_pause_on_screen_lock_summary,
+          keywords = listOf("pip", "picture", "lock", "screen off", "pause", "resume", "manual"),
+          category = "Player",
+          screen = PlayerPreferencesScreen,
+        ),
+      )
+      add(
+        SearchablePreference(
           titleRes = R.string.pref_player_external_display_projection_title,
           summaryRes = R.string.pref_player_external_display_projection_summary,
           keywords = listOf("external display", "hdmi", "usb-c", "wireless display", "projection", "screen"),

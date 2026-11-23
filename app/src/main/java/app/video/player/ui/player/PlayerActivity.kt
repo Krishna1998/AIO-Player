@@ -574,10 +574,15 @@ class PlayerActivity :
         if (!ownsPlaybackSession()) return
         when (intent?.action) {
           Intent.ACTION_SCREEN_OFF -> {
+            val isPip = isInPictureInPictureMode || PlaybackSession.isPipMode
+            val pauseOnLock = isPip && playerPreferences.pipPauseOnScreenLock.get()
+            if (pauseOnLock) {
+              viewModel.pause()
+            }
             screenUnlockPlaybackController.onScreenTurnedOff(
-              autoplayAfterScreenUnlockEnabled = !isTelevision && playerPreferences.autoplayAfterScreenUnlock.get(),
-              wasPlayingBeforePause = wasPlayingBeforePause,
-              isCurrentlyPaused = viewModel.paused,
+              autoplayAfterScreenUnlockEnabled = !pauseOnLock && !isTelevision && playerPreferences.autoplayAfterScreenUnlock.get(),
+              wasPlayingBeforePause = if (pauseOnLock) false else wasPlayingBeforePause,
+              isCurrentlyPaused = if (pauseOnLock) true else viewModel.paused,
               backgroundPlaybackActive = isBackgroundPlaybackEnabled(),
               isUserFinishing = isUserFinishing,
               isFinishing = isFinishing,
@@ -2339,7 +2344,10 @@ class PlayerActivity :
         return@runCatching
       }
 
-      if (!isInPictureInPictureMode && isDeviceScreenOffOrLocked() && !isBackgroundPlaybackEnabled()) {
+      val isPip = isInPictureInPictureMode || PlaybackSession.isPipMode
+      if (isPip && isDeviceScreenOffOrLocked() && playerPreferences.pipPauseOnScreenLock.get()) {
+        viewModel.pause()
+      } else if (!isInPictureInPictureMode && isDeviceScreenOffOrLocked() && !isBackgroundPlaybackEnabled()) {
         rememberResumeAfterUnlockBeforeForcedPause()
         viewModel.pause()
       } else if (!isBackgroundPlaybackSessionActive && (isUserFinishing || isFinishing)) {

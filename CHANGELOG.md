@@ -9,6 +9,9 @@ These notes are written in plain English and focus on what changed for real use.
   - Resolved an issue where selecting Stretch aspect ratio and entering Picture-in-Picture (PiP) mode would shrink or squish the video into a narrow portrait pillarbox frame upon locking and unlocking the device.
   - PiP now preserves the correct landscape stretch geometry across lockscreen and orientation changes.
   - Kept PiP actions, receivers, and playback transitions active across lock/unlock cycles.
+- **Automated Pause PiP on Screen Lock:**
+  - Added **Pause PiP on screen lock** setting under **Settings > Player Preferences**.
+  - Automatically pauses playback when locking the phone in Picture-in-Picture mode while preserving the paused frame and controls, allowing users to manually resume playback via the lockscreen notification or PiP play button.
 
 ### 🌅 Cinematic Horizon & Dual Horizon Evolution
 - **Cinematic Horizon Default Home Layout:**
