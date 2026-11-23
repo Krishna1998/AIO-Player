@@ -15,6 +15,16 @@ These notes are written in plain English and focus on what changed for real use.
   - Introduced **Cinematic Horizon** as the flagship home layout with customizable Hero Spotlight cards and smooth media rails.
   - Renamed BentoFusion cleanly across settings, themes, and views to **Dual Horizon**.
   - Added full section reordering and independent card/rail scale controls (Hero spotlight, Video rail, and Audio Pulsing).
+  - Added **Show Continue Watching** toggle and **Home Screen layout** selector under **Settings > Appearance > Home & Media Library**.
+
+### ⏱️ Intelligent Sleep Timer & Audio Fade-Out
+- **Configurable Fade-Out Slider (3s to 30s):**
+  - Added a gentle audio fade-out duration slider (configurable from 3s to 30s, default 10s) directly inside the Sleep Timer dialog (`MoreSheet.kt`) and in **Audio Preferences**.
+  - Gradually attenuates playback volume down over the selected seconds before the timer expires or track ends.
+- **Precise End-of-Track Synchronization:**
+  - Guaranteed exact track ending without spillover or bleeding into the next track (stops cleanly 1.0s before EOF or on EOF boundary).
+- **Hours : Minutes : Seconds (`HH:MM:SS`) Custom Input:**
+  - Upgraded the sleep timer custom time input with dedicated Hours, Minutes, and Seconds fields for granular countdown precision.
 
 ### 🧭 Navigation & Fluid Experience
 - **Liquid Bubble Glass Floating Navigation Bar:**
