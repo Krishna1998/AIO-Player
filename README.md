@@ -7,7 +7,7 @@
 **Lightweight, high-performance video & music player for Android.**  
 Powered by the raw playback power of **mpv** and a modern **Material 3 / Liquid Glass** interface.
 
-[![Release](https://img.shields.io/badge/Release-v1.0.3-FF0076?style=flat-square&logo=android&logoColor=black)](https://github.com/Krishna1998/Horizon-Player/releases)
+[![Release](https://img.shields.io/badge/Release-v1.0.4-FF0076?style=flat-square&logo=android&logoColor=black)](https://github.com/Krishna1998/Horizon-Player/releases)
 [![Android](https://img.shields.io/badge/Android-8.0%2B-3DDC84?style=flat-square&logo=android&logoColor=white)](https://developer.android.com)
 [![Engine](https://img.shields.io/badge/Core-mpv%20%2B%20FFmpeg-9D4EDD?style=flat-square&logo=cplusplus&logoColor=white)](https://mpv.io)
 [![UI](https://img.shields.io/badge/UI-Jetpack%20Compose-4285F4?style=flat-square&logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
@@ -25,7 +25,7 @@ Powered by the raw playback power of **mpv** and a modern **Material 3 / Liquid 
 - **Crystal-Clear Subtitles**: Full styling support for ASS, SSA, SRT, and PGS karaoke subtitles.
 - **Intuitive Gestures**: Smooth vertical swipes for brightness/volume and horizontal swipes for precise seeking.
 - **Picture-in-Picture & Background Play**: Keep watching or listening seamlessly while multitasking, with automated pause on phone lock.
-- **Customizable HUD**: Clean controls, dynamic ambient glow, and adjustable UI opacity.
+- **Selectable Volume & Brightness HUDs**: Choose between 6 futuristic designs (Dynamic Island, Hyper-Notch Matrix, Aero Dual-Tone, SoundStage Bento, Segmented Blocks, and Classic Capsule) with enlarged high-visibility layouts and volume overboost indication.
 
 ### 🎵 Music & Audio
 - **Lossless Audio**: Pristine playback for FLAC, ALAC, WAV, AAC, MP3, OPUS, and more.
