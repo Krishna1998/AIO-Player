@@ -324,7 +324,7 @@ fun VideoPlayerTheme(
     when {
       useSystemFont || localeNeedsSystemFont -> FontFamily.SansSerif
       downloadedFontFamily != null -> downloadedFontFamily
-      else -> GoogleSansRounded
+      else -> MontserratFontFamily
     }
   val typography =
     remember(resolvedFontFamily, downloadedFontFamily, useSystemFont, localeNeedsSystemFont) {
@@ -335,7 +335,7 @@ fun VideoPlayerTheme(
           fontFamily = resolvedFontFamily,
           displayFontFamily =
             if (downloadedFontFamily == null) {
-              GoogleSansExpressiveDisplay
+              MontserratExpressiveDisplay
             } else {
               resolvedFontFamily
             },

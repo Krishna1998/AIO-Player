@@ -25,9 +25,61 @@ import java.util.Locale
 
 val SystemTypography = Typography().withExpressiveEmphasis()
 
-val GoogleSansRounded: FontFamily = FontFamily.SansSerif
+@OptIn(ExperimentalTextApi::class)
+val MontserratFontFamily: FontFamily =
+  FontFamily(
+    Font(
+      resId = R.font.montserrat,
+      weight = FontWeight.Thin,
+      variationSettings = FontVariation.Settings(FontVariation.weight(FontWeight.Thin.weight)),
+    ),
+    Font(
+      resId = R.font.montserrat,
+      weight = FontWeight.ExtraLight,
+      variationSettings = FontVariation.Settings(FontVariation.weight(FontWeight.ExtraLight.weight)),
+    ),
+    Font(
+      resId = R.font.montserrat,
+      weight = FontWeight.Light,
+      variationSettings = FontVariation.Settings(FontVariation.weight(FontWeight.Light.weight)),
+    ),
+    Font(
+      resId = R.font.montserrat,
+      weight = FontWeight.Normal,
+      variationSettings = FontVariation.Settings(FontVariation.weight(FontWeight.Normal.weight)),
+    ),
+    Font(
+      resId = R.font.montserrat,
+      weight = FontWeight.Medium,
+      variationSettings = FontVariation.Settings(FontVariation.weight(FontWeight.Medium.weight)),
+    ),
+    Font(
+      resId = R.font.montserrat,
+      weight = FontWeight.SemiBold,
+      variationSettings = FontVariation.Settings(FontVariation.weight(FontWeight.SemiBold.weight)),
+    ),
+    Font(
+      resId = R.font.montserrat,
+      weight = FontWeight.Bold,
+      variationSettings = FontVariation.Settings(FontVariation.weight(FontWeight.Bold.weight)),
+    ),
+    Font(
+      resId = R.font.montserrat,
+      weight = FontWeight.ExtraBold,
+      variationSettings = FontVariation.Settings(FontVariation.weight(FontWeight.ExtraBold.weight)),
+    ),
+    Font(
+      resId = R.font.montserrat,
+      weight = FontWeight.Black,
+      variationSettings = FontVariation.Settings(FontVariation.weight(FontWeight.Black.weight)),
+    ),
+  )
 
-val GoogleSansExpressiveDisplay: FontFamily = FontFamily.SansSerif
+val MontserratExpressiveDisplay: FontFamily = MontserratFontFamily
+
+val GoogleSansRounded: FontFamily = MontserratFontFamily
+
+val GoogleSansExpressiveDisplay: FontFamily = MontserratExpressiveDisplay
 
 fun typographyWithFontFamily(
   fontFamily: FontFamily,
@@ -53,10 +105,10 @@ fun typographyWithFontFamily(
     ).withExpressiveEmphasis()
   }
 
-// Use PixelPlayer's rounded Google Sans Flex typography app-wide by default.
-val AppTypography = typographyWithFontFamily(GoogleSansRounded, GoogleSansExpressiveDisplay)
+// Use Montserrat typography app-wide by default.
+val AppTypography = typographyWithFontFamily(MontserratFontFamily, MontserratExpressiveDisplay)
 
-val LocalAppFontFamily = staticCompositionLocalOf { GoogleSansRounded }
+val LocalAppFontFamily = staticCompositionLocalOf { MontserratFontFamily }
 
 @Composable
 fun fontFamilyForText(text: String): FontFamily =
@@ -65,7 +117,7 @@ fun fontFamilyForText(text: String): FontFamily =
 @Composable
 fun expressiveDisplayFontForText(text: String): FontFamily {
   val fontFamily = fontFamilyForText(text)
-  return if (fontFamily == GoogleSansRounded) GoogleSansExpressiveDisplay else fontFamily
+  return if (fontFamily == MontserratFontFamily || fontFamily == GoogleSansRounded) MontserratExpressiveDisplay else fontFamily
 }
 
 fun localeRequiresSystemFont(locale: Locale): Boolean =

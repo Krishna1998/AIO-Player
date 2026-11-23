@@ -1571,7 +1571,7 @@ object SearchablePreferences {
         SearchEntrySpec(R.string.pref_appearance_category_theme, listOf("theme", "dark", "light", "system", "dynamic")),
         SearchEntrySpec(R.string.pref_appearance_system_font_title, listOf("font", "system", "default"), R.string.pref_appearance_app_font_title),
         SearchEntrySpec(R.string.app_font_google_fonts_title, listOf("google", "font", "download", "typeface"), R.string.pref_appearance_app_font_title),
-        SearchEntrySpec(R.string.app_font_google_sans_flex, listOf("google sans", "font", "built in"), R.string.pref_appearance_app_font_title),
+        SearchEntrySpec(R.string.app_font_google_sans_flex, listOf("montserrat", "font", "built in"), R.string.pref_appearance_app_font_title),
         SearchEntrySpec(R.string.pref_appearance_custom_theme_title, listOf("custom", "theme", "colors", "palette"), R.string.pref_appearance_category_theme),
         SearchEntrySpec(R.string.pref_appearance_custom_theme_name, listOf("custom", "theme", "name"), R.string.pref_appearance_category_theme),
         SearchEntrySpec(R.string.pref_appearance_custom_theme_light_primary, listOf("custom", "theme", "light", "primary"), R.string.pref_appearance_category_theme),

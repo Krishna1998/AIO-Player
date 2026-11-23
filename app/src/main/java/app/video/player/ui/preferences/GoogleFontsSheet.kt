@@ -383,4 +383,4 @@ private fun AppFontRow(
   }
 }
 
-private const val BUILT_IN_FONT_FAMILY = "Google Sans Flex"
+private const val BUILT_IN_FONT_FAMILY = "Montserrat"
