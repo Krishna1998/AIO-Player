@@ -224,7 +224,7 @@ class UpdateManager(
   private fun selectBestApkAsset(assets: List<Asset>): Asset? {
     val compatibleAssets =
       assets.filter { asset ->
-        asset.name.startsWith("VideoPlayer-", ignoreCase = true) &&
+        (asset.name.startsWith("V&MPlayer-", ignoreCase = true) || asset.name.startsWith("VideoPlayer-", ignoreCase = true)) &&
           asset.name.endsWith(".apk", ignoreCase = true) &&
           asset.name.matchesApkVariant(BuildConfig.UPDATE_APK_VARIANT)
       }

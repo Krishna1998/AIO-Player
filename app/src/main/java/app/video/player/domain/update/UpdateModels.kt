@@ -87,9 +87,15 @@ data class Release(
     get() {
       val channelName = ciChannelName ?: return assets
       val buildNumber = ciBuildNumber ?: return assets
-      val specific = assets.filter { it.name.startsWith("VideoPlayer-$channelName-r$buildNumber-", ignoreCase = true) }
+      val specific = assets.filter {
+        it.name.startsWith("V&MPlayer-$channelName-r$buildNumber-", ignoreCase = true) ||
+          it.name.startsWith("VideoPlayer-$channelName-r$buildNumber-", ignoreCase = true)
+      }
       if (specific.isNotEmpty()) return specific
-      return assets.filter { it.name.startsWith("VideoPlayer-", ignoreCase = true) }
+      return assets.filter {
+        it.name.startsWith("V&MPlayer-", ignoreCase = true) ||
+          it.name.startsWith("VideoPlayer-", ignoreCase = true)
+      }
     }
 
   companion object {
