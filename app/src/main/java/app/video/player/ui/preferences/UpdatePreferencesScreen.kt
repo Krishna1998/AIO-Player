@@ -151,17 +151,12 @@ object UpdatePreferencesScreen : Screen {
             }
           }
 
-          // 3. Update Channel 3-Way Bento Selector
+          // 3. Update Channel Section (Permanently Stable)
           item(key = "channel_selector_section") {
             Column(modifier = Modifier.fillMaxWidth()) {
               SectionHeaderLabel(stringResource(R.string.ui_update_channel))
               Spacer(Modifier.height(8.dp))
-              UpdateChannelBentoGrid(
-                selectedChannel = updateChannel,
-                onSelectChannel = { channel ->
-                  updateViewModel?.setUpdateChannel(channel)
-                },
-              )
+              PermanentStableChannelCard()
             }
           }
 
@@ -599,119 +594,84 @@ private fun ReleaseChangelogBentoCard(
 }
 
 // ═══════════════════════════════════════════════════════════
-// UPDATE CHANNELS 3-WAY BENTO SELECTOR
+// PERMANENT STABLE CHANNEL CARD
 // ═══════════════════════════════════════════════════════════
 
 @Composable
-private fun UpdateChannelBentoGrid(
-  selectedChannel: AppUpdateChannel,
-  onSelectChannel: (AppUpdateChannel) -> Unit,
-) {
-  Row(
-    modifier = Modifier.fillMaxWidth(),
-    horizontalArrangement = Arrangement.spacedBy(10.dp),
-  ) {
-    ChannelCard(
-      title = "Stable",
-      subtitle = "Official",
-      icon = Icons.RoundedFilled.Verified,
-      selected = selectedChannel == AppUpdateChannel.STABLE,
-      onClick = { onSelectChannel(AppUpdateChannel.STABLE) },
-      modifier = Modifier.weight(1f),
-    )
-
-    ChannelCard(
-      title = "Preview",
-      subtitle = "Beta",
-      icon = Icons.RoundedFilled.AutoAwesome,
-      selected = selectedChannel == AppUpdateChannel.PREVIEW,
-      onClick = { onSelectChannel(AppUpdateChannel.PREVIEW) },
-      modifier = Modifier.weight(1f),
-    )
-
-    ChannelCard(
-      title = "Nightly",
-      subtitle = "Master CI",
-      icon = Icons.RoundedFilled.Science,
-      selected = selectedChannel == AppUpdateChannel.EXPERIMENTAL,
-      onClick = { onSelectChannel(AppUpdateChannel.EXPERIMENTAL) },
-      modifier = Modifier.weight(1f),
-    )
-  }
-}
-
-@Composable
-private fun ChannelCard(
-  title: String,
-  subtitle: String,
-  icon: AppIcon,
-  selected: Boolean,
-  onClick: () -> Unit,
-  modifier: Modifier = Modifier,
-) {
+private fun PermanentStableChannelCard() {
   val cs = MaterialTheme.colorScheme
 
   Surface(
-    onClick = onClick,
-    shape = RoundedCornerShape(20.dp),
-    color = if (selected) cs.primaryContainer.copy(alpha = 0.35f) else cs.surfaceContainerLow,
-    border = BorderStroke(
-      width = if (selected) 1.5.dp else 1.dp,
-      color = if (selected) cs.primary else cs.outlineVariant.copy(alpha = 0.25f),
-    ),
-    modifier = modifier,
+    shape = RoundedCornerShape(22.dp),
+    color = cs.surfaceContainerLow,
+    border = BorderStroke(1.5.dp, cs.primary.copy(alpha = 0.5f)),
+    modifier = Modifier.fillMaxWidth(),
   ) {
-    Box(modifier = Modifier.padding(vertical = 16.dp, horizontal = 10.dp)) {
-      // Active Radio Dot Indicator
+    Row(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(18.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
       Box(
         modifier = Modifier
-          .size(8.dp)
-          .align(Alignment.TopEnd)
-          .background(
-            color = if (selected) cs.primary else Color.Transparent,
-            shape = CircleShape,
-          )
-          .border(1.dp, if (selected) cs.primary else cs.outlineVariant, CircleShape),
-      )
-
-      Column(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
+          .size(46.dp)
+          .background(cs.primaryContainer, CircleShape),
+        contentAlignment = Alignment.Center,
       ) {
-        Box(
-          modifier = Modifier
-            .size(38.dp)
-            .background(
-              color = if (selected) cs.primary else cs.surfaceContainerHighest,
-              shape = CircleShape,
-            ),
-          contentAlignment = Alignment.Center,
-        ) {
-          Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(20.dp),
-            tint = if (selected) cs.onPrimary else cs.onSurfaceVariant,
-          )
-        }
-
-        Spacer(Modifier.height(8.dp))
-
-        Text(
-          text = title,
-          style = MaterialTheme.typography.titleSmall,
-          fontWeight = FontWeight.Bold,
-          color = if (selected) cs.onSurface else cs.onSurfaceVariant,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
+        Icon(
+          imageVector = Icons.RoundedFilled.Verified,
+          contentDescription = null,
+          modifier = Modifier.size(24.dp),
+          tint = cs.onPrimaryContainer,
         )
+      }
 
+      Column(modifier = Modifier.weight(1f)) {
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+          Text(
+            text = "Stable Channel",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = cs.onSurface,
+          )
+          Surface(
+            shape = RoundedCornerShape(6.dp),
+            color = cs.primary.copy(alpha = 0.15f),
+          ) {
+            Text(
+              text = "PERMANENT",
+              style = MaterialTheme.typography.labelSmall,
+              fontWeight = FontWeight.ExtraBold,
+              color = cs.primary,
+              letterSpacing = 0.5.sp,
+              modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+            )
+          }
+        }
+        Spacer(Modifier.height(2.dp))
         Text(
-          text = subtitle,
-          style = MaterialTheme.typography.labelSmall,
+          text = "Permanently selected. Receives official, verified milestone releases from GitHub.",
+          style = MaterialTheme.typography.bodySmall,
           color = cs.outline,
-          maxLines = 1,
-          overflow = TextOverflow.Ellipsis,
+        )
+      }
+
+      Box(
+        modifier = Modifier
+          .size(24.dp)
+          .background(cs.primary, CircleShape),
+        contentAlignment = Alignment.Center,
+      ) {
+        Icon(
+          imageVector = Icons.RoundedFilled.CheckCircle,
+          contentDescription = null,
+          modifier = Modifier.size(16.dp),
+          tint = cs.onPrimary,
         )
       }
     }

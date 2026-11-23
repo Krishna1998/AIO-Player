@@ -63,14 +63,7 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
   private val _isAutoInstallEnabled = MutableStateFlow(UpdateWork.automaticEnabled(application))
   val isAutoInstallEnabled = _isAutoInstallEnabled.asStateFlow()
 
-  private val _updateChannel = MutableStateFlow(
-    prefs.getString(UPDATE_CHANNEL_KEY, null)?.let(AppUpdateChannel::fromStoredValue)
-      ?: when {
-        BuildConfig.IS_EXPERIMENTAL_BUILD -> AppUpdateChannel.EXPERIMENTAL
-        BuildConfig.IS_PREVIEW_BUILD -> AppUpdateChannel.PREVIEW
-        else -> AppUpdateChannel.STABLE
-      },
-  )
+  private val _updateChannel = MutableStateFlow(AppUpdateChannel.STABLE)
   val updateChannel = _updateChannel.asStateFlow()
   private val _uiState = MutableStateFlow(UpdateUiState())
   val uiState = _uiState.asStateFlow()
@@ -78,6 +71,7 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
   private var selectionJob: Job? = null
 
   init {
+    prefs.edit().putString(UPDATE_CHANNEL_KEY, AppUpdateChannel.STABLE.name).apply()
     if (BuildConfig.ENABLE_UPDATE_FEATURE) {
       viewModelScope.launch {
         UpdateWork.state(application).collect { task -> applyTask(task) }
@@ -91,11 +85,11 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
     }
   }
 
-  fun setUpdateChannel(channel: AppUpdateChannel) {
-    if (!BuildConfig.ENABLE_UPDATE_FEATURE || busy() || _uiState.value.awaitingApproval || channel == _updateChannel.value) return
+  fun setUpdateChannel(channel: AppUpdateChannel = AppUpdateChannel.STABLE) {
+    if (!BuildConfig.ENABLE_UPDATE_FEATURE || busy() || _uiState.value.awaitingApproval) return
     stopChecking()
-    prefs.edit().putString(UPDATE_CHANNEL_KEY, channel.name).apply()
-    _updateChannel.value = channel
+    prefs.edit().putString(UPDATE_CHANNEL_KEY, AppUpdateChannel.STABLE.name).apply()
+    _updateChannel.value = AppUpdateChannel.STABLE
     viewModelScope.launch {
       withContext(Dispatchers.IO) {
         UpdateWork.cancelAutomatic(getApplication())

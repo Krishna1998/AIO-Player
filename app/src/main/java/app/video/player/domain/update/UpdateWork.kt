@@ -93,12 +93,7 @@ object UpdateWork {
     context.getSharedPreferences("videoplayer_prefs", Context.MODE_PRIVATE).getBoolean(AUTO_INSTALL_KEY, false)
 
   fun selectedChannel(context: Context): AppUpdateChannel {
-    val saved = context.getSharedPreferences("videoplayer_prefs", Context.MODE_PRIVATE).getString("app_update_channel", null)
-    return saved?.let(AppUpdateChannel::fromStoredValue) ?: when {
-      BuildConfig.IS_EXPERIMENTAL_BUILD -> AppUpdateChannel.EXPERIMENTAL
-      BuildConfig.IS_PREVIEW_BUILD -> AppUpdateChannel.PREVIEW
-      else -> AppUpdateChannel.STABLE
-    }
+    return AppUpdateChannel.STABLE
   }
 
   fun schedule(context: Context) {
