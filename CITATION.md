@@ -11,7 +11,7 @@ Suggested plain-text reference:
 ```text
 Horizon Player — Modern Android Video & Music Player powered by libmpv.
 https://github.com/Krishna1998/Horizon-Player
-Version: 1.0.4
+Version: 1.0.5
 ```
 
 ## Open-source acknowledgments

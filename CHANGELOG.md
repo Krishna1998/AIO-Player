@@ -2,6 +2,29 @@
 
 These notes are written in plain English and focus on what changed for real use.
 
+## 1.0.5
+
+### 🔤 Montserrat Default Typography
+- **Built-In Geometric Montserrat Font:**
+  - Bundled the official `montserrat.ttf` variable font (full 100–900 weight range) directly within the app for 100% offline out-of-the-box typography.
+  - Set **Montserrat** as the default font family across all Material 3 Expressive headings, titles, labels, and body text.
+  - Updated **Settings > Appearance > App font** and the Google Fonts sheet with Montserrat as the recognized built-in default font.
+
+### 🚀 Redesigned Update Screen & Experience
+- **Interactive Hero Radar Status Card:**
+  - Complete visual overhaul of the update page with dynamic dual-orbital radar scanning animations during release checks.
+  - Glowing status badges for *Up to Date*, *Checking*, *Update Available*, and *Ready to Install*.
+  - Live animated download progress bar with percentage indicator, transfer status, SHA-256 verification, and cancel controls.
+- **Embedded Release Notes & Changelog Bento Card:**
+  - Displays formatted Markdown changelog, architecture badges (`arm64-v8a`), and download size directly on the update screen.
+- **Permanent Stable Channel Locking:**
+  - Update channel is permanently set to **Stable** to ensure all users receive verified official milestone releases directly from GitHub.
+  - Background workers and startup checks exclusively target the Stable release endpoint.
+
+### 🛡️ OTA Resiliency & Compatibility
+- **Backward-Compatible Asset Publishing:**
+  - CI release workflows now publish both `HorizonPlayer-*` and legacy `VideoPlayer-*` APK assets to guarantee seamless OTA discovery for older client builds (v1.0.3 and earlier).
+
 ## 1.0.4
 
 ### 🚀 Horizon Player Rebranding & Evolution
