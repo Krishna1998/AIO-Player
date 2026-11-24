@@ -124,7 +124,7 @@ data class MovieDetailsScreen(
     // Load video item and metadata
     LaunchedEffect(videoPath) {
       withContext(Dispatchers.IO) {
-        val resolved = mediaFileRepository.getVideosFromFiles(listOf(File(videoPath))).firstOrNull()
+        val resolved = mediaFileRepository.getVideosFromFiles(context, listOf(File(videoPath))).firstOrNull()
         video = resolved
         if (resolved != null) {
           isWatched = PlaybackStateOps.areAllWatched(
@@ -391,11 +391,13 @@ data class MovieDetailsScreen(
               IconButton(
                 onClick = {
                   val newWatched = !isWatched
-                  PlaybackStateOps.setWatched(currentVideo, newWatched)
-                  isWatched = newWatched
-                  val msg = if (newWatched) context.getString(R.string.movie_details_mark_watched)
-                            else context.getString(R.string.movie_details_mark_unwatched)
-                  Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                  coroutineScope.launch {
+                    PlaybackStateOps.setWatched(currentVideo, newWatched)
+                    isWatched = newWatched
+                    val msg = if (newWatched) context.getString(R.string.movie_details_mark_watched)
+                              else context.getString(R.string.movie_details_mark_unwatched)
+                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                  }
                 },
                 modifier = Modifier
                   .size(40.dp)

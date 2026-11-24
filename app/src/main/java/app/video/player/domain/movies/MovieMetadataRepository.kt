@@ -89,16 +89,17 @@ class MovieMetadataRepository(
         }
       }
       val year = parsed.year
-      val resolution = if (parsed.resolution.isNotBlank()) {
-        parsed.resolution
-      } else if (video.height > 0) {
+      val resolution = if (video.height > 0) {
         when {
           video.height >= 2160 || video.width >= 3840 -> "4K"
           video.height >= 1080 || video.width >= 1920 -> "1080p"
           video.height >= 720 || video.width >= 1280 -> "720p"
           else -> "${video.height}p"
         }
-      } else "1080p"
+      } else {
+        val match = Regex("(?i)\\b(2160p|4k|1080p|720p|480p|360p)\\b").find(video.displayName)
+        match?.value?.uppercase() ?: "1080p"
+      }
 
       val durationFormatted = video.durationFormatted.ifBlank {
         if (video.duration > 0) {

@@ -638,6 +638,9 @@ private fun CinematicHorizonContent(
   onVideoAction: (Video) -> Unit,
 ) {
   val context = LocalContext.current
+  val browserPreferences = koinInject<BrowserPreferences>()
+  val spotlightGesturesHintSeen by browserPreferences.spotlightGesturesHintSeen.collectAsState()
+  val spotlightGesturesShowEveryTime by browserPreferences.spotlightGesturesShowEveryTime.collectAsState()
   val isPaused by PlaybackSession.propBoolean["pause"].collectAsState()
   val livePos = PlaybackSession.propInt["time-pos"].collectAsState().value?.toDouble()
 
