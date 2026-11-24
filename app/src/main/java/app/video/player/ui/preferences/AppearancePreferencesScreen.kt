@@ -1178,7 +1178,7 @@ object AppearancePreferencesScreen : Screen {
           }
 
           item {
-            val dualHorizonItemCount = 5
+            val dualHorizonItemCount = 6
 
             ExpressivePreferenceGroup {
               val cinematicShowHeroSpotlight by browserPreferences.cinematicShowHeroSpotlight.collectAsState()
@@ -1281,6 +1281,22 @@ object AppearancePreferencesScreen : Screen {
                   )
                 },
                 groupIndex = 4,
+                groupSize = dualHorizonItemCount,
+              )
+
+              val spotlightGesturesShowEveryTime by browserPreferences.spotlightGesturesShowEveryTime.collectAsState()
+              SwitchPreference(
+                modifier = Modifier.settingsSearchTarget(R.string.pref_spotlight_gestures_show_every_time_title),
+                value = spotlightGesturesShowEveryTime,
+                onValueChange = { browserPreferences.spotlightGesturesShowEveryTime.set(it) },
+                title = { Text(stringResource(R.string.pref_spotlight_gestures_show_every_time_title)) },
+                summary = {
+                  Text(
+                    text = stringResource(R.string.pref_spotlight_gestures_show_every_time_summary),
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+                groupIndex = 5,
                 groupSize = dualHorizonItemCount,
               )
             }

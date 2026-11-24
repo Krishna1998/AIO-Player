@@ -62,6 +62,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
@@ -72,6 +74,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.res.stringResource
 import app.video.player.R
 import app.video.player.preferences.FoldersPreferences
@@ -263,6 +266,8 @@ fun DualHorizonHeader(
   val recentEntities by recentlyPlayedRepo.observeRecentlyPlayed(limit = 50).collectAsState(initial = emptyList())
   val browserPreferences = koinInject<BrowserPreferences>()
   val dualHorizonHintDismissed by browserPreferences.dualHorizonHintDismissed.collectAsState()
+  val spotlightGesturesHintSeen by browserPreferences.spotlightGesturesHintSeen.collectAsState()
+  val spotlightGesturesShowEveryTime by browserPreferences.spotlightGesturesShowEveryTime.collectAsState()
   val showVideoRail by browserPreferences.dualHorizonShowVideoRail.collectAsState()
   val showAudioPulsing by browserPreferences.dualHorizonShowAudioPulsing.collectAsState()
   val showCinematicSpotlight by browserPreferences.cinematicShowHeroSpotlight.collectAsState()
@@ -648,7 +653,15 @@ private fun CinematicHorizonContent(
 
   val hasDualHeroLandscape = isLandscape && showSpotlight && spotlightItem != null && showAudioPulsing && heroToDisplay != null
 
-  var showGestureInfoPopup by remember { mutableStateOf(false) }
+  var showGestureInfoPopup by rememberSaveable { mutableStateOf(false) }
+
+  // Automatically show the gestures hint guide ONE TIME on initial launch,
+  // or every time if user checked "Show every time (don't remember)".
+  LaunchedEffect(spotlightGesturesHintSeen, spotlightGesturesShowEveryTime) {
+    if (!spotlightGesturesHintSeen || spotlightGesturesShowEveryTime) {
+      showGestureInfoPopup = true
+    }
+  }
 
   @Composable
   fun RenderAudioPulsingCard(
@@ -933,7 +946,12 @@ private fun CinematicHorizonContent(
 
   if (showGestureInfoPopup) {
     SpotlightGesturesInfoDialog(
-      onDismiss = { showGestureInfoPopup = false },
+      initialShowEveryTime = spotlightGesturesShowEveryTime,
+      onDismiss = { showEveryTime ->
+        showGestureInfoPopup = false
+        browserPreferences.spotlightGesturesHintSeen.set(true)
+        browserPreferences.spotlightGesturesShowEveryTime.set(showEveryTime)
+      },
     )
   }
 }
@@ -1997,35 +2015,6 @@ private fun HeroSpotlightBox(
           )
         }
       }
-
-      Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-      ) {
-        // Gesture hint popup pill
-        Surface(
-          shape = RoundedCornerShape(999.dp),
-          color = Color.Black.copy(alpha = 0.55f),
-          border = BorderStroke(1.dp, Color(0xFF00E5FF).copy(alpha = 0.40f)),
-          modifier = Modifier.clickable { onOpenGestureHint() },
-        ) {
-          Row(
-            modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.5.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-          ) {
-            Text(text = "💡", fontSize = 10.sp)
-            Text(
-              text = "Tap ⏯ • Hold ⚙",
-              style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.Bold,
-                fontSize = 10.sp,
-              ),
-              color = Color.White.copy(alpha = 0.92f),
-            )
-          }
-        }
-      }
     }
 
     // Bottom Hero Info & Seekbar (Concept 1: Premier Cinema with Smart Media Badges & Depth Typography)
@@ -2622,33 +2611,6 @@ private fun HeroSpotlightCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
               ) {
-                // Gesture hint popup pill (Portrait mode)
-                Surface(
-                  shape = RoundedCornerShape(999.dp),
-                  color = if (isLandscapeCard) Color.Black.copy(alpha = 0.50f) else MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.50f),
-                  border = BorderStroke(
-                    width = 0.8.dp,
-                    color = (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.40f),
-                  ),
-                  modifier = Modifier.clickable { onOpenGestureHint() },
-                ) {
-                  Row(
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                  ) {
-                    Text(text = if (isAudio) "⚡" else "💡", fontSize = 10.sp)
-                    Text(
-                      text = if (isAudio) "Tap ⏯ • Swipe ◀▶" else "Tap ⏯ • Hold ⚙",
-                      style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 9.5.sp,
-                      ),
-                      color = if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
-                    )
-                  }
-                }
-
                 Surface(
                   shape = RoundedCornerShape(999.dp),
                   color = if (isLandscapeCard) Color.Black.copy(alpha = 0.45f) else MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.40f),
@@ -3201,12 +3163,11 @@ private fun LandscapeAudioPulsingConcept3(
               }
             }
           } else {
-            // Codec spec pill / hint
+            // Codec spec pill
             Surface(
               shape = RoundedCornerShape(999.dp),
               color = Color.Black.copy(alpha = 0.50f),
               border = BorderStroke(0.8.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.35f)),
-              modifier = Modifier.clickable { onOpenGestureHint() },
             ) {
               Text(
                 text = if (originalCodec in listOf("FLAC", "DSD", "WAV", "AIFF", "ALAC")) "$originalCodec • 24-BIT LOSSLESS" else "$originalCodec STREAM",
@@ -3421,39 +3382,6 @@ private fun LandscapeAudioPulsingConcept3(
               )
             }
           }
-
-          // Gesture Micro-Guide Pill (NO BUTTONS!)
-          Surface(
-            shape = RoundedCornerShape(12.dp),
-            color = Color.Black.copy(alpha = 0.50f),
-            border = BorderStroke(0.8.dp, Color.White.copy(alpha = 0.12f)),
-            modifier = Modifier
-              .fillMaxWidth()
-              .clickable { onOpenGestureHint() },
-          ) {
-            Column(
-              modifier = Modifier.padding(horizontal = 7.dp, vertical = 5.dp),
-              verticalArrangement = Arrangement.spacedBy(2.dp),
-              horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-              Text(
-                text = "Swipe ◀ ▶ Skip",
-                style = MaterialTheme.typography.labelSmall.copy(
-                  fontSize = 8.5.sp,
-                  fontWeight = FontWeight.Bold,
-                ),
-                color = Color.White.copy(alpha = 0.85f),
-              )
-              Text(
-                text = "Tap ⏯ • Hold ⚙",
-                style = MaterialTheme.typography.labelSmall.copy(
-                  fontSize = 8.sp,
-                  fontWeight = FontWeight.Medium,
-                ),
-                color = Color.White.copy(alpha = 0.60f),
-              )
-            }
-          }
         }
       }
     }
@@ -3514,10 +3442,13 @@ private fun VuChannelBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SpotlightGesturesInfoDialog(
-  onDismiss: () -> Unit,
+  initialShowEveryTime: Boolean = false,
+  onDismiss: (showEveryTime: Boolean) -> Unit,
 ) {
+  var showEveryTime by remember { mutableStateOf(initialShowEveryTime) }
+
   BasicAlertDialog(
-    onDismissRequest = onDismiss,
+    onDismissRequest = { onDismiss(showEveryTime) },
   ) {
     Surface(
       shape = RoundedCornerShape(28.dp),
@@ -3586,7 +3517,7 @@ private fun SpotlightGesturesInfoDialog(
           }
 
           IconButton(
-            onClick = onDismiss,
+            onClick = { onDismiss(showEveryTime) },
             modifier = Modifier.size(32.dp),
           ) {
             Text(
@@ -3704,9 +3635,57 @@ private fun SpotlightGesturesInfoDialog(
           }
         }
 
+        // Checkbox Option: Show every time (Don't remember)
+        Surface(
+          shape = RoundedCornerShape(14.dp),
+          color = MaterialTheme.colorScheme.surfaceContainerLowest,
+          border = BorderStroke(
+            0.8.dp,
+            if (showEveryTime) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
+          ),
+          modifier = Modifier
+            .fillMaxWidth()
+            .clickable { showEveryTime = !showEveryTime },
+        ) {
+          Row(
+            modifier = Modifier
+              .fillMaxWidth()
+              .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+          ) {
+            Checkbox(
+              checked = showEveryTime,
+              onCheckedChange = { showEveryTime = it },
+              colors = CheckboxDefaults.colors(
+                checkedColor = MaterialTheme.colorScheme.primary,
+                uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                checkmarkColor = MaterialTheme.colorScheme.onPrimary,
+              ),
+              modifier = Modifier.size(24.dp),
+            )
+            Column(modifier = Modifier.weight(1f)) {
+              Text(
+                text = stringResource(R.string.spotlight_gestures_show_every_time_checkbox_title),
+                style = MaterialTheme.typography.bodyMedium.copy(
+                  fontWeight = FontWeight.Bold,
+                  fontSize = 13.sp,
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
+              )
+              Text(
+                text = stringResource(R.string.spotlight_gestures_show_every_time_checkbox_desc),
+                style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+            }
+          }
+        }
+
         // Dismiss Button
         Button(
-          onClick = onDismiss,
+          onClick = { onDismiss(showEveryTime) },
           shape = RoundedCornerShape(999.dp),
           colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,

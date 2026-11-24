@@ -229,6 +229,12 @@ class BrowserPreferences(
   // Feature discovery hint for DualHorizon (Audio Pulsing gestures & interactive highlights)
   val dualHorizonHintDismissed = preferenceStore.getBoolean("bentofusion_hint_dismissed", false)
 
+  // Spotlight Gestures Guide hint seen state (shows automatically one time)
+  val spotlightGesturesHintSeen = preferenceStore.getBoolean("spotlight_gestures_hint_seen", false)
+
+  // Show gestures guide every time on launch (don't remember dismissal)
+  val spotlightGesturesShowEveryTime = preferenceStore.getBoolean("spotlight_gestures_show_every_time", false)
+
   // How to play / stream hint dismissal state for Network Streaming screen
   val networkStreamHintDismissed = preferenceStore.getBoolean("network_stream_hint_dismissed", false)
 

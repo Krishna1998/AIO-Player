@@ -178,6 +178,10 @@
   <string name="pref_dual_horizon_section_video">Movies / Videos</string>
   <string name="pref_dual_horizon_section_audio_pulsing">Audio Pulsing</string>
   <string name="pref_dual_horizon_section_music">Music</string>
+  <string name="pref_spotlight_gestures_show_every_time_title">Show gestures guide every time</string>
+  <string name="pref_spotlight_gestures_show_every_time_summary">Don\'t remember dismissal • Always show the gesture guide on launch</string>
+  <string name="spotlight_gestures_show_every_time_checkbox_title">Show every time</string>
+  <string name="spotlight_gestures_show_every_time_checkbox_desc">Don\'t remember • Show this guide on startup</string>
   <string name="pref_library_sub_tabs_order_title">Media Library sub-tabs order</string>
   <string name="pref_library_sub_tabs_order_summary">Drag to reorder All Media, Videos, and Music sub-tabs</string>
   <string name="pref_library_show_music_tab_title">Show Music Tab in Library</string>
