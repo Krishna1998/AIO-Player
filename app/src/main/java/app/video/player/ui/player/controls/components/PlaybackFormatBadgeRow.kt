@@ -39,7 +39,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.video.player.R
 import app.video.player.preferences.AppearancePreferences
 import app.video.player.preferences.preference.collectAsState
-import app.video.player.presentation.components.rememberAssetLogoPainter
+import coil3.compose.rememberAsyncImagePainter
 import app.video.player.ui.liquidglass.liquidGlassActive
 import app.video.player.ui.player.BadgeArtwork
 import app.video.player.ui.player.PlaybackFormatBadge
@@ -56,21 +56,21 @@ internal fun PlaybackFormatBadgeRow(
   logoHeight: Dp = 20.dp,
   tvButtonBackground: Color? = null,
 ) {
-  val preferences = koinInject<AppearancePreferences>()
-  val showBadges by preferences.showMediaFormatBadges.collectAsState()
-  if (!showBadges) return
-
   val formatFlow = remember { observePlaybackFormatBadges() }
   val badges by formatFlow.collectAsStateWithLifecycle(initialValue = emptyList())
   if (badges.isEmpty()) return
 
   val backgroundLevel = LocalPlayerButtonsOpacity.current
   val foreground = if (tvButtonBackground == null) playerButtonContentColor() else Color.White
-  val surfaceColor = if (tvButtonBackground == null) playerButtonColorScheme().surfaceContainerHigh else Color(0xFF232323)
+  val surfaceColor = if (tvButtonBackground == null) MaterialTheme.colorScheme.surfaceContainerHigh else Color(0xFF232323)
   val inkEdge = if (liquidGlassActive() || backgroundLevel < 0.45f) {
     (if (foreground.luminance() < 0.45f) Color.White else Color.Black).copy(alpha = 0.7f)
   } else Color.Unspecified
-  PlayerControlSurface(BadgeRailShape, modifier, baseColor = tvButtonBackground) {
+  Surface(
+    shape = BadgeRailShape,
+    color = surfaceColor.copy(alpha = backgroundLevel.coerceIn(0.25f, 0.92f)),
+    modifier = modifier,
+  ) {
     MediaFormatBadges(
       badges = badges,
       modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
@@ -128,7 +128,7 @@ private fun FormatBadge(
   val tintArgb = if (darkBackground) badge.darkTintArgb else badge.lightTintArgb
   val badgeForeground = tintArgb?.let(::Color) ?: foreground
   val path = badge.asset
-  val painter = if (path == null) null else rememberAssetLogoPainter("media_format_logos/$path")
+  val painter = if (path == null) null else rememberAsyncImagePainter(model = "file:///android_asset/media_format_logos/$path")
   Box(modifier.heightIn(min = logoHeight + 4.dp), contentAlignment = Alignment.Center) {
     if (painter == null) {
       val shadow = if (inkEdge.isSpecified) {

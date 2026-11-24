@@ -37,7 +37,11 @@ internal fun PlayerTitlePill(
   val height = playerTitleHeight(48.dp, MaterialTheme.typography.titleMedium.lineHeight)
   val foreground = playerButtonContentColor()
   val clickEvent = LocalPlayerButtonsClickEvent.current
-  PlayerControlSurface(CircleShape, modifier) {
+  androidx.compose.material3.Surface(
+    shape = CircleShape,
+    color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = LocalPlayerButtonsOpacity.current.coerceIn(0.25f, 0.92f)),
+    modifier = modifier,
+  ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
       IconButton(onClick = { clickEvent(); onOpenInfo() }) {
         Icon(

@@ -1732,6 +1732,8 @@ internal fun userScriptsNeedReload(currentKey: String): Boolean {
     fun double(property: String): Double?
 
     fun string(property: String): String?
+
+    fun node(property: String): `is`.xyz.mpv.MPVNode?
   }
 
   private object LockedPropertyReader : PropertyReader {
@@ -1740,6 +1742,8 @@ internal fun userScriptsNeedReload(currentKey: String): Boolean {
     override fun double(property: String): Double? = runCatching { MPVLib.getPropertyDouble(property) }.getOrNull()
 
     override fun string(property: String): String? = runCatching { MPVLib.getPropertyString(property) }.getOrNull()
+
+    override fun node(property: String): `is`.xyz.mpv.MPVNode? = runCatching { MPVLib.getPropertyNode(property) }.getOrNull()
   }
 
   /** The session owns this filter so toggles and track changes also work without a player screen. */
