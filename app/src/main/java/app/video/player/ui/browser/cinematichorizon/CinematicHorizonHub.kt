@@ -690,7 +690,7 @@ private fun CinematicHorizonContent(
       }
     }
 
-    BentoHeroSpotlightCard(
+    HeroSpotlightCard(
       item = heroToDisplay,
       scale = if (hasDualHeroLandscape) spotlightScale else audioPulsingScale,
       cardHeight = cardHeight,
@@ -2240,7 +2240,7 @@ private fun HeroSpotlightBox(
  * with dynamic visualizer waves, specular highlights, and touch gestures.
  */
 @Composable
-private fun BentoHeroSpotlightCard(
+private fun HeroSpotlightCard(
   item: VideoWithPlaybackInfo,
   onClick: () -> Unit,
   onLongClick: () -> Unit = {},
