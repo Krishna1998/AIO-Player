@@ -626,7 +626,7 @@ private fun CinematicHorizonContent(
   videoRailScale: Float = 1.0f,
   musicRailScale: Float = 1.0f,
   dualHorizonHeaderStyle: DualHorizonHeaderStyle = DualHorizonHeaderStyle.LiquidCapsule,
-  heroSpotlightSeekbarStyle: HeroSpotlightSeekbarStyle = HeroSpotlightSeekbarStyle.EdgeNeonBeam,
+  heroSpotlightSeekbarStyle: HeroSpotlightSeekbarStyle = HeroSpotlightSeekbarStyle.TimestampPill,
   onPlayMedia: (Video, Double?, List<Video>) -> Unit,
   playAudioInBackground: (Video, Double?) -> Unit,
   onVideoAction: (Video) -> Unit,
@@ -2011,7 +2011,7 @@ private fun HeroSpotlightBox(
         .fillMaxWidth()
         .padding(
           horizontal = 16.dp,
-          vertical = if (heroSpotlightSeekbarStyle == HeroSpotlightSeekbarStyle.EdgeNeonBeam) 16.dp else 12.dp,
+          vertical = 12.dp,
         ),
       verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
@@ -2029,107 +2029,6 @@ private fun HeroSpotlightBox(
       // Seekbar Placed Directly Below Media Title
       if (progress > 0f) {
         when (heroSpotlightSeekbarStyle) {
-          HeroSpotlightSeekbarStyle.EdgeNeonBeam -> {
-            // Subtle telemetry row directly below title
-            Row(
-              modifier = Modifier.padding(top = 2.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-              Text(
-                text = "Watched $progressPercent%",
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                color = Color(0xFF00E5FF),
-              )
-              Text(
-                text = "•",
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.White.copy(alpha = 0.4f),
-              )
-              Text(
-                text = "$elapsedFormatted / $totalFormatted",
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
-                color = Color.White.copy(alpha = 0.85f),
-              )
-              Text(
-                text = "•",
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.White.copy(alpha = 0.4f),
-              )
-              Text(
-                text = "$remainingFormatted left",
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                color = Color.White.copy(alpha = 0.7f),
-              )
-            }
-          }
-
-          HeroSpotlightSeekbarStyle.LiquidGlowCapsule -> {
-            Column(
-              modifier = Modifier
-                .fillMaxWidth(0.92f)
-                .padding(top = 4.dp),
-              verticalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-              Box(
-                modifier = Modifier
-                  .fillMaxWidth()
-                  .height(7.dp)
-                  .clip(CircleShape)
-                  .background(Color.White.copy(alpha = 0.18f)),
-              ) {
-                Box(
-                  modifier = Modifier
-                    .fillMaxWidth(progress)
-                    .fillMaxHeight()
-                    .background(
-                      Brush.horizontalGradient(
-                        listOf(
-                          MaterialTheme.colorScheme.primary,
-                          Color(0xFF00E5FF),
-                        ),
-                      ),
-                    ),
-                ) {
-                  val beaconPulse = rememberInfiniteTransition(label = "beacon")
-                  val beaconScale by beaconPulse.animateFloat(
-                    initialValue = 0.9f,
-                    targetValue = 1.35f,
-                    animationSpec = infiniteRepeatable(
-                      animation = tween(1200, easing = FastOutSlowInEasing),
-                      repeatMode = RepeatMode.Reverse,
-                    ),
-                    label = "beaconScale",
-                  )
-                  Box(
-                    modifier = Modifier
-                      .align(Alignment.CenterEnd)
-                      .size(11.dp)
-                      .scale(beaconScale)
-                      .background(Color.White, CircleShape)
-                      .border(1.5.dp, MaterialTheme.colorScheme.primary, CircleShape),
-                  )
-                }
-              }
-              Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-              ) {
-                Text(
-                  text = "$progressPercent% • $elapsedFormatted",
-                  style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
-                  color = Color(0xFF00E5FF),
-                )
-                Text(
-                  text = if (remainingFormatted.isNotBlank() && remainingMs > 0L) "-$remainingFormatted left" else totalFormatted,
-                  style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                  color = Color.White.copy(alpha = 0.75f),
-                )
-              }
-            }
-          }
-
           HeroSpotlightSeekbarStyle.TimestampPill -> {
             Surface(
               modifier = Modifier.padding(top = 4.dp),
@@ -2196,39 +2095,10 @@ private fun HeroSpotlightBox(
               }
             }
           }
-        }
-      }
-    }
 
-    // Full-bleed Edge Neon Beam at the bottom perimeter of the card (Default)
-    if (progress > 0f && heroSpotlightSeekbarStyle == HeroSpotlightSeekbarStyle.EdgeNeonBeam) {
-      Box(
-        modifier = Modifier
-          .align(Alignment.BottomStart)
-          .fillMaxWidth()
-          .height(5.dp)
-          .background(Color.White.copy(alpha = 0.12f)),
-      ) {
-        Box(
-          modifier = Modifier
-            .fillMaxWidth(progress)
-            .fillMaxHeight()
-            .background(
-              Brush.horizontalGradient(
-                listOf(
-                  Color(0xFF7053FF),
-                  MaterialTheme.colorScheme.primary,
-                  Color(0xFF00E5FF),
-                ),
-              ),
-            ),
-        ) {
-          Box(
-            modifier = Modifier
-              .align(Alignment.CenterEnd)
-              .size(7.dp)
-              .background(Color.White, CircleShape),
-          )
+          HeroSpotlightSeekbarStyle.Disabled -> {
+            // Seekbar disabled by user preference
+          }
         }
       }
     }

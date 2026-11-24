@@ -197,7 +197,7 @@ class BrowserPreferences(
   val cinematicShowHeroSpotlight = preferenceStore.getBoolean("cinematic_show_hero_spotlight", true)
   val cinematicSpotlightScale = preferenceStore.getFloat("cinematic_spotlight_scale", 1.0f)
   val heroSpotlightSeekbarStyle =
-    preferenceStore.getEnum("hero_spotlight_seekbar_style", HeroSpotlightSeekbarStyle.EdgeNeonBeam)
+    preferenceStore.getEnum("hero_spotlight_seekbar_style", HeroSpotlightSeekbarStyle.TimestampPill)
   val dualHorizonAudioPulsingScale = preferenceStore.getFloat("bentofusion_audio_pulsing_scale", 1.0f)
   val dualHorizonVideoRailScale = preferenceStore.getFloat("bentofusion_video_rail_scale", 1.0f)
   val dualHorizonMusicRailScale = preferenceStore.getFloat("bentofusion_music_rail_scale", 1.0f)
@@ -502,9 +502,8 @@ enum class MediaLibraryType {
 enum class HeroSpotlightSeekbarStyle(
   val titleRes: Int,
 ) {
-  EdgeNeonBeam(app.video.player.R.string.pref_hero_spotlight_seekbar_style_edge_beam),
-  LiquidGlowCapsule(app.video.player.R.string.pref_hero_spotlight_seekbar_style_liquid_glow),
   TimestampPill(app.video.player.R.string.pref_hero_spotlight_seekbar_style_timestamp_pill),
+  Disabled(app.video.player.R.string.pref_hero_spotlight_seekbar_style_disabled),
 }
 
 enum class AudioPulsingProgressStyle(
