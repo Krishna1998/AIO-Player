@@ -230,7 +230,7 @@ data object SecureFolderScreen : Screen {
 
     val playSecureVideo: (app.video.player.database.entities.SecureMediaEntity, app.video.player.domain.media.model.Video) -> Unit = { entity, video ->
       val resolvedDuration = if (video.duration > 0) video.duration else {
-        metadataCacheRepository.getMetadata(entity.secureFilePath)?.durationMs
+        secureVideoMetadata[entity.secureFilePath]?.durationMs
           ?: runCatching {
             val retriever = android.media.MediaMetadataRetriever()
             try {
