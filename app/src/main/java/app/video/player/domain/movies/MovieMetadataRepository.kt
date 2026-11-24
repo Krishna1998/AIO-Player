@@ -42,7 +42,11 @@ data class MovieMetadata(
 class MovieMetadataRepository(
   private val context: Context,
   private val wyzieSearchRepository: WyzieSearchRepository,
-  private val json: Json,
+  private val json: Json = Json {
+    ignoreUnknownKeys = true
+    isLenient = true
+    encodeDefaults = true
+  },
 ) {
   private val cacheDir = File(context.filesDir, "movie_metadata").apply { mkdirs() }
   private val memoryCache = ConcurrentHashMap<String, MovieMetadata>()

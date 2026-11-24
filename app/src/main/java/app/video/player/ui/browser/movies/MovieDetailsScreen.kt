@@ -110,7 +110,6 @@ data class MovieDetailsScreen(
     val context = LocalContext.current
     val backStack = LocalBackStack.current
     val coroutineScope = rememberCoroutineScope()
-    val mediaFileRepository = koinInject<MediaFileRepository>()
     val movieMetadataRepo = koinInject<MovieMetadataRepository>()
     val browserPreferences = koinInject<BrowserPreferences>()
 
@@ -124,7 +123,7 @@ data class MovieDetailsScreen(
     // Load video item and metadata
     LaunchedEffect(videoPath) {
       withContext(Dispatchers.IO) {
-        val resolved = mediaFileRepository.getVideosFromFiles(context, listOf(File(videoPath))).firstOrNull()
+        val resolved = MediaFileRepository.getVideosFromFiles(context, listOf(File(videoPath))).firstOrNull()
         video = resolved
         if (resolved != null) {
           isWatched = PlaybackStateOps.areAllWatched(
