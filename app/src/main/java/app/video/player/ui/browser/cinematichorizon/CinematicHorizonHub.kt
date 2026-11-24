@@ -57,6 +57,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -646,6 +647,8 @@ private fun CinematicHorizonContent(
 
   val hasDualHeroLandscape = isLandscape && showSpotlight && spotlightItem != null && showAudioPulsing && heroToDisplay != null
 
+  var showGestureInfoPopup by remember { mutableStateOf(false) }
+
   @Composable
   fun RenderAudioPulsingCard(
     modifier: Modifier = Modifier,
@@ -694,6 +697,7 @@ private fun CinematicHorizonContent(
       includeHorizontalPadding = includeHorizontalPadding,
       modifier = modifier,
       nextTrackTitle = nextTrackTitle,
+      onOpenGestureHint = { showGestureInfoPopup = true },
       onClick = {
         if (heroToDisplay.video.isAudio) {
           if (isCurrentlyInSession) {
@@ -808,6 +812,7 @@ private fun CinematicHorizonContent(
           videoItems = videoItems,
           cardHeight = landscapeHeroHeight,
           modifier = Modifier.weight(1f),
+          onOpenGestureHint = { showGestureInfoPopup = true },
         )
 
         // Right: Audio Pulsing Hero Spotlight Card
@@ -848,6 +853,7 @@ private fun CinematicHorizonContent(
             .fillMaxWidth()
             .widthIn(max = 800.dp)
             .padding(horizontal = 16.dp),
+          onOpenGestureHint = { showGestureInfoPopup = true },
         )
       }
     }
@@ -922,6 +928,12 @@ private fun CinematicHorizonContent(
         }
       }
     }
+  }
+
+  if (showGestureInfoPopup) {
+    SpotlightGesturesInfoDialog(
+      onDismiss = { showGestureInfoPopup = false },
+    )
   }
 }
 
@@ -1809,6 +1821,7 @@ private fun HeroSpotlightBox(
   videoItems: List<VideoWithPlaybackInfo>,
   cardHeight: androidx.compose.ui.unit.Dp,
   modifier: Modifier = Modifier,
+  onOpenGestureHint: () -> Unit = {},
 ) {
   val context = LocalContext.current
   val haptics = LocalHapticFeedback.current
@@ -1946,18 +1959,47 @@ private fun HeroSpotlightBox(
         }
       }
 
-      if (totalFormatted.isNotBlank()) {
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+      ) {
+        // Gesture hint popup pill
         Surface(
-          shape = CircleShape,
-          color = Color.Black.copy(alpha = 0.45f),
-          border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)),
+          shape = RoundedCornerShape(999.dp),
+          color = Color.Black.copy(alpha = 0.55f),
+          border = BorderStroke(1.dp, Color(0xFF00E5FF).copy(alpha = 0.40f)),
+          modifier = Modifier.clickable { onOpenGestureHint() },
         ) {
-          Text(
-            text = totalFormatted,
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-            color = Color.White.copy(alpha = 0.9f),
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-          )
+          Row(
+            modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.5.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+          ) {
+            Text(text = "💡", fontSize = 10.sp)
+            Text(
+              text = "Tap ⏯ • Hold ⚙",
+              style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Bold,
+                fontSize = 10.sp,
+              ),
+              color = Color.White.copy(alpha = 0.92f),
+            )
+          }
+        }
+
+        if (totalFormatted.isNotBlank()) {
+          Surface(
+            shape = CircleShape,
+            color = Color.Black.copy(alpha = 0.45f),
+            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)),
+          ) {
+            Text(
+              text = totalFormatted,
+              style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+              color = Color.White.copy(alpha = 0.9f),
+              modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+            )
+          }
         }
       }
     }
@@ -2210,6 +2252,7 @@ private fun BentoHeroSpotlightCard(
   cardHeight: androidx.compose.ui.unit.Dp? = null,
   includeHorizontalPadding: Boolean = true,
   nextTrackTitle: String? = null,
+  onOpenGestureHint: () -> Unit = {},
 ) {
   val appearancePreferences = koinInject<AppearancePreferences>()
   val browserPreferences = koinInject<BrowserPreferences>()
@@ -2493,6 +2536,7 @@ private fun BentoHeroSpotlightCard(
             wave3Color = wave3Color,
             scale = scale,
             nextTrackTitle = nextTrackTitle,
+            onOpenGestureHint = onOpenGestureHint,
           )
         } else {
           // Clean original portrait mode Audio Pulsing OR Video Spotlight Card
@@ -2592,27 +2636,59 @@ private fun BentoHeroSpotlightCard(
                 }
               }
 
-              Surface(
-                shape = RoundedCornerShape(999.dp),
-                color = if (isLandscapeCard) Color.Black.copy(alpha = 0.45f) else MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.40f),
-                border = BorderStroke(
-                  width = 0.8.dp,
-                  color = (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.35f),
-                ),
+              Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
               ) {
-                Text(
-                  text = if (isAudio) {
-                    "$originalCodec • $remainingFormatted/$totalFormatted"
-                  } else {
-                    "$originalCodec • ${item.video.durationFormatted}"
-                  },
-                  style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 11.sp,
+                // Gesture hint popup pill (Portrait mode)
+                Surface(
+                  shape = RoundedCornerShape(999.dp),
+                  color = if (isLandscapeCard) Color.Black.copy(alpha = 0.50f) else MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.50f),
+                  border = BorderStroke(
+                    width = 0.8.dp,
+                    color = (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.40f),
                   ),
-                  color = if (isLandscapeCard) Color.White.copy(alpha = 0.90f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.90f),
-                  modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                )
+                  modifier = Modifier.clickable { onOpenGestureHint() },
+                ) {
+                  Row(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                  ) {
+                    Text(text = if (isAudio) "⚡" else "💡", fontSize = 10.sp)
+                    Text(
+                      text = if (isAudio) "Tap ⏯ • Swipe ◀▶" else "Tap ⏯ • Hold ⚙",
+                      style = MaterialTheme.typography.labelSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 9.5.sp,
+                      ),
+                      color = if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
+                    )
+                  }
+                }
+
+                Surface(
+                  shape = RoundedCornerShape(999.dp),
+                  color = if (isLandscapeCard) Color.Black.copy(alpha = 0.45f) else MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.40f),
+                  border = BorderStroke(
+                    width = 0.8.dp,
+                    color = (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.35f),
+                  ),
+                ) {
+                  Text(
+                    text = if (isAudio) {
+                      "$originalCodec • $remainingFormatted/$totalFormatted"
+                    } else {
+                      "$originalCodec • ${item.video.durationFormatted}"
+                    },
+                    style = MaterialTheme.typography.labelSmall.copy(
+                      fontWeight = FontWeight.SemiBold,
+                      fontSize = 11.sp,
+                    ),
+                    color = if (isLandscapeCard) Color.White.copy(alpha = 0.90f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.90f),
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                  )
+                }
               }
             }
 
@@ -2787,6 +2863,7 @@ private fun LandscapeAudioPulsingConcept3(
   wave3Color: Color,
   scale: Float = 1.0f,
   nextTrackTitle: String? = null,
+  onOpenGestureHint: () -> Unit = {},
 ) {
   val playbackSessionState by PlaybackSession.state.collectAsState()
   val isPaused by PlaybackSession.propBoolean["pause"].collectAsState()
@@ -3142,11 +3219,12 @@ private fun LandscapeAudioPulsingConcept3(
               }
             }
           } else {
-            // Codec spec pill
+            // Codec spec pill / hint
             Surface(
               shape = RoundedCornerShape(999.dp),
               color = Color.Black.copy(alpha = 0.50f),
               border = BorderStroke(0.8.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.35f)),
+              modifier = Modifier.clickable { onOpenGestureHint() },
             ) {
               Text(
                 text = if (originalCodec in listOf("FLAC", "DSD", "WAV", "AIFF", "ALAC")) "$originalCodec • 24-BIT LOSSLESS" else "$originalCodec STREAM",
@@ -3367,7 +3445,9 @@ private fun LandscapeAudioPulsingConcept3(
             shape = RoundedCornerShape(12.dp),
             color = Color.Black.copy(alpha = 0.50f),
             border = BorderStroke(0.8.dp, Color.White.copy(alpha = 0.12f)),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+              .fillMaxWidth()
+              .clickable { onOpenGestureHint() },
           ) {
             Column(
               modifier = Modifier.padding(horizontal = 7.dp, vertical = 5.dp),
@@ -3440,6 +3520,269 @@ private fun VuChannelBar(
               ),
             ),
           ),
+      )
+    }
+  }
+}
+
+/**
+ * Spotlight Gestures Information Modal Dialog
+ * Liquid-glass interactive guide explaining touch gestures for Continue Watching & Audio Pulsing cards.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SpotlightGesturesInfoDialog(
+  onDismiss: () -> Unit,
+) {
+  BasicAlertDialog(
+    onDismissRequest = onDismiss,
+  ) {
+    Surface(
+      shape = RoundedCornerShape(28.dp),
+      color = MaterialTheme.colorScheme.surfaceContainerHigh,
+      border = BorderStroke(
+        width = 1.dp,
+        brush = Brush.linearGradient(
+          listOf(
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+            MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5f),
+            Color.Transparent,
+          ),
+        ),
+      ),
+      tonalElevation = 6.dp,
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 16.dp),
+    ) {
+      Column(
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(22.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+      ) {
+        // Dialog Title Row
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+          ) {
+            Box(
+              modifier = Modifier
+                .size(38.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(
+                  Brush.linearGradient(
+                    listOf(
+                      MaterialTheme.colorScheme.primary,
+                      MaterialTheme.colorScheme.tertiary,
+                    ),
+                  ),
+                ),
+              contentAlignment = Alignment.Center,
+            ) {
+              Text(text = "✨", fontSize = 18.sp)
+            }
+            Column {
+              Text(
+                text = "Spotlight Gestures Guide",
+                style = MaterialTheme.typography.titleMedium.copy(
+                  fontWeight = FontWeight.ExtraBold,
+                ),
+                color = MaterialTheme.colorScheme.onSurface,
+              )
+              Text(
+                text = "Touch controls for quick playback",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+            }
+          }
+
+          IconButton(
+            onClick = onDismiss,
+            modifier = Modifier.size(32.dp),
+          ) {
+            Text(
+              text = "✕",
+              style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
+        }
+
+        // Section 1: Continue Watching (Video Card)
+        Surface(
+          shape = RoundedCornerShape(18.dp),
+          color = MaterialTheme.colorScheme.surfaceContainerLowest,
+          border = BorderStroke(0.8.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)),
+          modifier = Modifier.fillMaxWidth(),
+        ) {
+          Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+          ) {
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Text(
+                text = "🎬 CONTINUE WATCHING",
+                style = MaterialTheme.typography.labelSmall.copy(
+                  fontWeight = FontWeight.Black,
+                  letterSpacing = 0.8.sp,
+                ),
+                color = MaterialTheme.colorScheme.primary,
+              )
+              Text(
+                text = "VIDEO SPOTLIGHT",
+                style = MaterialTheme.typography.labelSmall.copy(
+                  fontSize = 8.sp,
+                  fontWeight = FontWeight.SemiBold,
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+              )
+            }
+
+            GestureGuideItem(
+              icon = "👆",
+              gestureName = "Single Tap",
+              description = "Resume video from saved position",
+              accentColor = MaterialTheme.colorScheme.primary,
+            )
+
+            GestureGuideItem(
+              icon = "👆⏳",
+              gestureName = "Long Press",
+              description = "Options menu (Rename, Hide in Secure Folder, Delete)",
+              accentColor = MaterialTheme.colorScheme.primary,
+            )
+          }
+        }
+
+        // Section 2: Audio Pulsing (Music Card)
+        Surface(
+          shape = RoundedCornerShape(18.dp),
+          color = MaterialTheme.colorScheme.surfaceContainerLowest,
+          border = BorderStroke(0.8.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f)),
+          modifier = Modifier.fillMaxWidth(),
+        ) {
+          Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+          ) {
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Text(
+                text = "🎵 AUDIO PULSING",
+                style = MaterialTheme.typography.labelSmall.copy(
+                  fontWeight = FontWeight.Black,
+                  letterSpacing = 0.8.sp,
+                ),
+                color = MaterialTheme.colorScheme.tertiary,
+              )
+              Text(
+                text = "LOSSLESS MUSIC",
+                style = MaterialTheme.typography.labelSmall.copy(
+                  fontSize = 8.sp,
+                  fontWeight = FontWeight.SemiBold,
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+              )
+            }
+
+            GestureGuideItem(
+              icon = "👆",
+              gestureName = "Single Tap",
+              description = "Play / Pause background audio",
+              accentColor = MaterialTheme.colorScheme.tertiary,
+            )
+
+            GestureGuideItem(
+              icon = "👈👉",
+              gestureName = "Horizontal Swipe",
+              description = "Swipe left for next • Swipe right for previous track",
+              accentColor = MaterialTheme.colorScheme.tertiary,
+            )
+
+            GestureGuideItem(
+              icon = "👆⏳",
+              gestureName = "Long Press",
+              description = "Open full music player & queue screen",
+              accentColor = MaterialTheme.colorScheme.tertiary,
+            )
+          }
+        }
+
+        // Dismiss Button
+        Button(
+          onClick = onDismiss,
+          shape = RoundedCornerShape(999.dp),
+          colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+          ),
+          modifier = Modifier
+            .fillMaxWidth()
+            .height(46.dp),
+        ) {
+          Text(
+            text = "Got It",
+            style = MaterialTheme.typography.labelLarge.copy(
+              fontWeight = FontWeight.Bold,
+            ),
+          )
+        }
+      }
+    }
+  }
+}
+
+@Composable
+private fun GestureGuideItem(
+  icon: String,
+  gestureName: String,
+  description: String,
+  accentColor: Color,
+  modifier: Modifier = Modifier,
+) {
+  Row(
+    modifier = modifier.fillMaxWidth(),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(10.dp),
+  ) {
+    Surface(
+      shape = RoundedCornerShape(10.dp),
+      color = accentColor.copy(alpha = 0.12f),
+      border = BorderStroke(0.8.dp, accentColor.copy(alpha = 0.30f)),
+      modifier = Modifier.size(34.dp),
+    ) {
+      Box(contentAlignment = Alignment.Center) {
+        Text(text = icon, fontSize = 14.sp)
+      }
+    }
+    Column(modifier = Modifier.weight(1f)) {
+      Text(
+        text = gestureName,
+        style = MaterialTheme.typography.labelMedium.copy(
+          fontWeight = FontWeight.Bold,
+        ),
+        color = MaterialTheme.colorScheme.onSurface,
+      )
+      Text(
+        text = description,
+        style = MaterialTheme.typography.bodySmall.copy(
+          fontSize = 11.sp,
+        ),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
       )
     }
   }
