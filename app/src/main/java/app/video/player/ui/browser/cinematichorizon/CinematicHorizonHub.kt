@@ -107,6 +107,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.asImageBitmap
@@ -1863,6 +1864,44 @@ private fun HeroSpotlightBox(
   val remainingFormatted = VideoScanUtils.formatDuration(remainingMs)
   val progressPercent = (progress * 100f).roundToInt()
 
+  val qualityBadge = remember(video.width, video.height, video.resolution, video.isAudio) {
+    if (video.isAudio) {
+      val ext = video.displayName.substringAfterLast('.', "").trim().uppercase()
+      if (ext in listOf("FLAC", "ALAC", "WAV", "AIFF", "DSD")) "LOSSLESS" else null
+    } else {
+      val maxDim = maxOf(video.width, video.height)
+      val minDim = minOf(video.width, video.height)
+      val resUpper = video.resolution.uppercase()
+      when {
+        maxDim >= 3800 || minDim >= 2100 || resUpper.contains("4K") || resUpper.contains("2160") -> "4K ULTRA HD"
+        maxDim >= 1900 || minDim >= 1000 || resUpper.contains("1080") || resUpper.contains("FHD") -> "1080P FHD"
+        maxDim >= 1200 || minDim >= 700 || resUpper.contains("720") || resUpper.contains("HD") -> "720P HD"
+        video.resolution.isNotBlank() -> video.resolution.uppercase()
+        else -> null
+      }
+    }
+  }
+
+  val extensionBadge = remember(video.displayName) {
+    val ext = video.displayName.substringAfterLast('.', "").trim().uppercase()
+    if (ext.length in 2..5 && ext.all { it.isLetterOrDigit() }) ext else null
+  }
+
+  val runtimeFormatted = remember(totalSec, durationMs) {
+    val sec = if (totalSec > 0L) totalSec else durationMs / 1000L
+    if (sec <= 0L) ""
+    else {
+      val h = sec / 3600
+      val m = (sec % 3600) / 60
+      when {
+        h > 0 && m > 0 -> "${h}h ${m}m"
+        h > 0 -> "${h}h"
+        m > 0 -> "${m}m"
+        else -> "${sec}s"
+      }
+    }
+  }
+
   Box(
     modifier = modifier
       .height(cardHeight)
@@ -1986,25 +2025,10 @@ private fun HeroSpotlightBox(
             )
           }
         }
-
-        if (totalFormatted.isNotBlank()) {
-          Surface(
-            shape = CircleShape,
-            color = Color.Black.copy(alpha = 0.45f),
-            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)),
-          ) {
-            Text(
-              text = totalFormatted,
-              style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-              color = Color.White.copy(alpha = 0.9f),
-              modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-            )
-          }
-        }
       }
     }
 
-    // Bottom Hero Info & Seekbar (Buttons removed; media title takes their place directly above seekbar)
+    // Bottom Hero Info & Seekbar (Concept 1: Premier Cinema with Smart Media Badges & Depth Typography)
     Column(
       modifier = Modifier
         .align(Alignment.BottomStart)
@@ -2013,13 +2037,95 @@ private fun HeroSpotlightBox(
           horizontal = 16.dp,
           vertical = 12.dp,
         ),
-      verticalArrangement = Arrangement.spacedBy(6.dp),
+      verticalArrangement = Arrangement.spacedBy(5.dp),
     ) {
+      // Smart Media Badges Row
+      if (qualityBadge != null || extensionBadge != null || runtimeFormatted.isNotBlank()) {
+        Row(
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+          if (qualityBadge != null) {
+            Surface(
+              shape = RoundedCornerShape(5.dp),
+              color = Color(0xFF00E5FF).copy(alpha = 0.16f),
+              border = BorderStroke(0.8.dp, Color(0xFF00E5FF).copy(alpha = 0.45f)),
+            ) {
+              Text(
+                text = qualityBadge,
+                style = MaterialTheme.typography.labelSmall.copy(
+                  fontWeight = FontWeight.ExtraBold,
+                  fontSize = 9.sp,
+                  letterSpacing = 0.6.sp,
+                ),
+                color = Color(0xFF00E5FF),
+                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+              )
+            }
+          }
+
+          if (extensionBadge != null) {
+            Surface(
+              shape = RoundedCornerShape(5.dp),
+              color = Color(0xFF7C4DFF).copy(alpha = 0.18f),
+              border = BorderStroke(0.8.dp, Color(0xFF7C4DFF).copy(alpha = 0.45f)),
+            ) {
+              Text(
+                text = extensionBadge,
+                style = MaterialTheme.typography.labelSmall.copy(
+                  fontWeight = FontWeight.ExtraBold,
+                  fontSize = 9.sp,
+                  letterSpacing = 0.6.sp,
+                ),
+                color = Color(0xFFB388FF),
+                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+              )
+            }
+          }
+
+          if (video.hasEmbeddedSubtitles) {
+            Surface(
+              shape = RoundedCornerShape(5.dp),
+              color = Color.White.copy(alpha = 0.12f),
+              border = BorderStroke(0.8.dp, Color.White.copy(alpha = 0.25f)),
+            ) {
+              Text(
+                text = "CC",
+                style = MaterialTheme.typography.labelSmall.copy(
+                  fontWeight = FontWeight.ExtraBold,
+                  fontSize = 9.sp,
+                  letterSpacing = 0.6.sp,
+                ),
+                color = Color.White.copy(alpha = 0.90f),
+                modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
+              )
+            }
+          }
+
+          if (runtimeFormatted.isNotBlank()) {
+            Text(
+              text = "• $runtimeFormatted",
+              style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 11.sp,
+              ),
+              color = Color.White.copy(alpha = 0.70f),
+            )
+          }
+        }
+      }
+
       Text(
         text = if (video.title.isNotBlank()) video.title else FileTypeUtils.stripExtension(video.displayName),
         style = MaterialTheme.typography.titleLarge.copy(
-          fontWeight = FontWeight.ExtraBold,
-          fontSize = 20.sp,
+          fontWeight = FontWeight.Black,
+          fontSize = 21.sp,
+          letterSpacing = (-0.4).sp,
+          shadow = Shadow(
+            color = Color.Black.copy(alpha = 0.90f),
+            offset = Offset(0f, 2f),
+            blurRadius = 8f,
+          ),
         ),
         color = Color.White,
         maxLines = 1,
