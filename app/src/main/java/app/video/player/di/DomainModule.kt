@@ -56,4 +56,5 @@ val domainModule =
     single { app.video.player.repository.SeerrRepository(get(), get(), get()) }
     single { app.video.player.domain.thumbnail.OnlineMoviePosterRepository(androidContext(), get(), get(), get()) }
     single { app.video.player.domain.thumbnail.OnlineMusicArtworkRepository(androidContext(), get(), get(), get()) }
+    single { app.video.player.domain.movies.MovieMetadataRepository(androidContext(), get(), get()) }
   }

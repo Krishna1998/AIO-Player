@@ -215,12 +215,14 @@ class BrowserPreferences(
     },
   )
   val libraryShowMusicTab = preferenceStore.getBoolean("library_show_music_tab", true)
+  val libraryShowMoviesTab = preferenceStore.getBoolean("library_show_movies_tab", true)
+  val openMovieDetailsOnTap = preferenceStore.getBoolean("open_movie_details_on_tap", true)
   val mediaLibrarySubTabsOrder = preferenceStore.getObject(
     key = "media_library_sub_tabs_order",
-    defaultValue = listOf("ALL", "VIDEO", "AUDIO"),
+    defaultValue = listOf("ALL", "MOVIES", "VIDEO", "AUDIO"),
     serializer = { order -> order.joinToString(",") },
     deserializer = { stored ->
-      val defaults = listOf("ALL", "VIDEO", "AUDIO")
+      val defaults = listOf("ALL", "MOVIES", "VIDEO", "AUDIO")
       val parsed = stored.split(",").map(String::trim).filter { it in defaults }.distinct()
       parsed + defaults.filterNot { it in parsed }
     },

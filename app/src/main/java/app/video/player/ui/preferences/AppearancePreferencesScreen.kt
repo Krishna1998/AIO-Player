@@ -1178,7 +1178,7 @@ object AppearancePreferencesScreen : Screen {
           }
 
           item {
-            val dualHorizonItemCount = 6
+            val dualHorizonItemCount = 8
 
             ExpressivePreferenceGroup {
               val cinematicShowHeroSpotlight by browserPreferences.cinematicShowHeroSpotlight.collectAsState()
@@ -1284,6 +1284,38 @@ object AppearancePreferencesScreen : Screen {
                 groupSize = dualHorizonItemCount,
               )
 
+              val libraryShowMoviesTab by browserPreferences.libraryShowMoviesTab.collectAsState()
+              SwitchPreference(
+                modifier = Modifier.settingsSearchTarget(R.string.pref_library_show_movies_tab_title),
+                value = libraryShowMoviesTab,
+                onValueChange = { browserPreferences.libraryShowMoviesTab.set(it) },
+                title = { Text(stringResource(R.string.pref_library_show_movies_tab_title)) },
+                summary = {
+                  Text(
+                    text = stringResource(R.string.pref_library_show_movies_tab_summary),
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+                groupIndex = 5,
+                groupSize = dualHorizonItemCount,
+              )
+
+              val openMovieDetailsOnTap by browserPreferences.openMovieDetailsOnTap.collectAsState()
+              SwitchPreference(
+                modifier = Modifier.settingsSearchTarget(R.string.pref_open_movie_details_on_tap_title),
+                value = openMovieDetailsOnTap,
+                onValueChange = { browserPreferences.openMovieDetailsOnTap.set(it) },
+                title = { Text(stringResource(R.string.pref_open_movie_details_on_tap_title)) },
+                summary = {
+                  Text(
+                    text = stringResource(R.string.pref_open_movie_details_on_tap_summary),
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+                groupIndex = 6,
+                groupSize = dualHorizonItemCount,
+              )
+
               val spotlightGesturesShowEveryTime by browserPreferences.spotlightGesturesShowEveryTime.collectAsState()
               SwitchPreference(
                 modifier = Modifier.settingsSearchTarget(R.string.pref_spotlight_gestures_show_every_time_title),
@@ -1296,7 +1328,7 @@ object AppearancePreferencesScreen : Screen {
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
-                groupIndex = 5,
+                groupIndex = 7,
                 groupSize = dualHorizonItemCount,
               )
             }
