@@ -2408,6 +2408,8 @@ private fun BentoHeroSpotlightCard(
       }
     }
 
+    val isLandscapeCard = cardHeight != null
+
     Card(
       modifier = Modifier
         .fillMaxWidth()
@@ -2432,47 +2434,63 @@ private fun BentoHeroSpotlightCard(
         modifier = Modifier
           .fillMaxWidth()
           .then(if (cardHeight != null) Modifier.fillMaxHeight() else Modifier)
-          .clip(RoundedCornerShape(24.dp)),
+          .then(
+            if (isLandscapeCard) {
+              Modifier.clip(RoundedCornerShape(24.dp))
+            } else {
+              Modifier.background(
+                Brush.linearGradient(
+                  colors = listOf(
+                    (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.12f),
+                    MaterialTheme.colorScheme.surfaceContainerLow,
+                    MaterialTheme.colorScheme.surfaceContainerLowest,
+                  ),
+                ),
+              )
+            }
+          ),
       ) {
-        // Full-bleed Blurred Backdrop Thumbnail for Audio Pulsing
-        BentoMediaThumbnail(
-          video = item.video,
-          modifier = Modifier
-            .fillMaxSize()
-            .scale(1.25f)
-            .blur(25.dp)
-            .alpha(0.85f),
-          showPlayOverlay = false,
-          highDefinition = true,
-        )
+        if (isLandscapeCard) {
+          // Full-bleed Blurred Backdrop Thumbnail for Landscape Audio Pulsing ONLY
+          BentoMediaThumbnail(
+            video = item.video,
+            modifier = Modifier
+              .fillMaxSize()
+              .scale(1.25f)
+              .blur(25.dp)
+              .alpha(0.85f),
+            showPlayOverlay = false,
+            highDefinition = true,
+          )
 
-        // Dark Atmospheric Gradient Vignettes (Ensures maximum contrast & readability)
-        Box(
-          modifier = Modifier
-            .fillMaxSize()
-            .background(
-              Brush.verticalGradient(
-                colors = listOf(
-                  Color.Black.copy(alpha = 0.50f),
-                  Color.Black.copy(alpha = 0.65f),
-                  Color.Black.copy(alpha = 0.94f),
+          // Dark Atmospheric Gradient Vignettes (Landscape only)
+          Box(
+            modifier = Modifier
+              .fillMaxSize()
+              .background(
+                Brush.verticalGradient(
+                  colors = listOf(
+                    Color.Black.copy(alpha = 0.50f),
+                    Color.Black.copy(alpha = 0.65f),
+                    Color.Black.copy(alpha = 0.94f),
+                  ),
                 ),
               ),
-            ),
-        )
-        Box(
-          modifier = Modifier
-            .fillMaxSize()
-            .background(
-              Brush.horizontalGradient(
-                colors = listOf(
-                  Color.Black.copy(alpha = 0.85f),
-                  Color.Black.copy(alpha = 0.45f),
-                  Color.Black.copy(alpha = 0.75f),
+          )
+          Box(
+            modifier = Modifier
+              .fillMaxSize()
+              .background(
+                Brush.horizontalGradient(
+                  colors = listOf(
+                    Color.Black.copy(alpha = 0.85f),
+                    Color.Black.copy(alpha = 0.45f),
+                    Color.Black.copy(alpha = 0.75f),
+                  ),
                 ),
               ),
-            ),
-        )
+          )
+        }
 
         Column(
           modifier = Modifier
@@ -2492,7 +2510,7 @@ private fun BentoHeroSpotlightCard(
           ) {
             Surface(
               shape = RoundedCornerShape(999.dp),
-              color = Color.Black.copy(alpha = 0.50f),
+              color = if (isLandscapeCard) Color.Black.copy(alpha = 0.50f) else MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.45f),
               border = BorderStroke(
                 width = 1.dp,
                 brush = Brush.linearGradient(
@@ -2530,7 +2548,7 @@ private fun BentoHeroSpotlightCard(
 
             Surface(
               shape = RoundedCornerShape(999.dp),
-              color = Color.Black.copy(alpha = 0.45f),
+              color = if (isLandscapeCard) Color.Black.copy(alpha = 0.45f) else MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.40f),
               border = BorderStroke(
                 width = 0.8.dp,
                 color = (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.35f),
@@ -2546,7 +2564,7 @@ private fun BentoHeroSpotlightCard(
                   fontWeight = FontWeight.SemiBold,
                   fontSize = 11.sp,
                 ),
-                color = Color.White.copy(alpha = 0.90f),
+                color = if (isLandscapeCard) Color.White.copy(alpha = 0.90f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.90f),
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
               )
             }
@@ -2558,45 +2576,47 @@ private fun BentoHeroSpotlightCard(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
           ) {
-            // Media Thumbnail Box (Big prominent artwork with 3D glass border & ambient drop shadow)
-            val isLandscapeCard = cardHeight != null
-            val thumbW = if (isLandscapeCard) {
-              (145f * scale.coerceIn(0.7f, 1.3f)).dp
-            } else if (isAudio) {
-              (96f * scale.coerceIn(0.7f, 1.3f)).dp
-            } else {
-              (108f * scale.coerceIn(0.7f, 1.3f)).dp
-            }
-            val thumbH = if (isLandscapeCard) {
-              (145f * scale.coerceIn(0.7f, 1.3f)).dp
-            } else if (isAudio) {
-              (96f * scale.coerceIn(0.7f, 1.3f)).dp
-            } else {
-              (70f * scale.coerceIn(0.7f, 1.3f)).dp
-            }
+            if (isLandscapeCard) {
+              // Media Thumbnail Box (Big prominent artwork with 3D glass border & ambient drop shadow - Landscape only)
+              val thumbW = (145f * scale.coerceIn(0.7f, 1.3f)).dp
+              val thumbH = (145f * scale.coerceIn(0.7f, 1.3f)).dp
 
-            Box(
-              modifier = Modifier
-                .size(width = thumbW, height = thumbH)
-                .clip(RoundedCornerShape(20.dp))
-                .border(
-                  width = 1.dp,
-                  brush = Brush.linearGradient(
-                    listOf(
-                      Color.White.copy(alpha = 0.35f),
-                      Color.White.copy(alpha = 0.10f),
-                      Color.Transparent,
+              Box(
+                modifier = Modifier
+                  .size(width = thumbW, height = thumbH)
+                  .clip(RoundedCornerShape(20.dp))
+                  .border(
+                    width = 1.dp,
+                    brush = Brush.linearGradient(
+                      listOf(
+                        Color.White.copy(alpha = 0.35f),
+                        Color.White.copy(alpha = 0.10f),
+                        Color.Transparent,
+                      ),
                     ),
+                    shape = RoundedCornerShape(20.dp),
                   ),
-                  shape = RoundedCornerShape(20.dp),
+              ) {
+                BentoMediaThumbnail(
+                  video = item.video,
+                  modifier = Modifier.fillMaxSize(),
+                  showPlayOverlay = !isAudio,
+                  highDefinition = true,
                 )
-            ) {
-              BentoMediaThumbnail(
-                video = item.video,
-                modifier = Modifier.fillMaxSize(),
-                showPlayOverlay = !isAudio,
-                highDefinition = true,
-              )
+              }
+            } else {
+              // Media Thumbnail Box (Clean original thumbnail - Portrait mode)
+              Box {
+                val thumbW = if (isAudio) (70f * scale.coerceIn(0.7f, 1.3f)).dp else (108f * scale.coerceIn(0.7f, 1.3f)).dp
+                val thumbH = (66f * scale.coerceIn(0.7f, 1.3f)).dp
+                BentoMediaThumbnail(
+                  video = item.video,
+                  modifier = Modifier
+                    .size(width = thumbW, height = thumbH)
+                    .clip(RoundedCornerShape(16.dp)),
+                  showPlayOverlay = !isAudio,
+                )
+              }
             }
 
             // Information & Visualizer
@@ -2620,8 +2640,8 @@ private fun BentoHeroSpotlightCard(
 
               Text(
                 text = title,
-                style = if (cardHeight != null) MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold) else MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = Color.White,
+                style = if (isLandscapeCard) MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold) else MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = if (isLandscapeCard) Color.White else MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
               )
@@ -2637,7 +2657,7 @@ private fun BentoHeroSpotlightCard(
                   "${item.video.sizeFormatted} • ${item.video.bucketDisplayName}"
                 },
                 style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.80f),
+                color = if (isLandscapeCard) Color.White.copy(alpha = 0.80f) else MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
               )
@@ -2665,7 +2685,7 @@ private fun BentoHeroSpotlightCard(
                   OneUi9WaveformVisualizer(
                     modifier = Modifier
                       .fillMaxWidth()
-                      .height(if (cardHeight != null) 34.dp else 24.dp)
+                      .height(if (isLandscapeCard) 34.dp else 24.dp)
                       .padding(top = 2.dp),
                     wave1Color = wave1Color,
                     wave2Color = wave2Color,

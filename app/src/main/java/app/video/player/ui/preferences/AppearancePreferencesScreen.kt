@@ -1294,10 +1294,15 @@ object AppearancePreferencesScreen : Screen {
             val hasAnySlider = cinematicShowHeroSpotlight || dualHorizonShowPulsing || dualHorizonShowVideo || dualHorizonShowMusic
 
             if (hasAnySlider) {
+              val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+              val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+              val hasDualHeroLandscape = isLandscape && cinematicShowHeroSpotlight && dualHorizonShowPulsing
+
               PreferenceCard {
                 var hasPrecedingItem = false
 
-                if (cinematicShowHeroSpotlight && dualHorizonShowPulsing) {
+                if (hasDualHeroLandscape) {
+                  // Merged slider in landscape mode when both hero cards are active side-by-side
                   val spotlightScale by browserPreferences.cinematicSpotlightScale.collectAsState()
                   ExpressivePreferenceItem(standalone = true) {
                     SliderPreference(
@@ -1325,50 +1330,56 @@ object AppearancePreferencesScreen : Screen {
                     )
                   }
                   hasPrecedingItem = true
-                } else if (cinematicShowHeroSpotlight) {
-                  val spotlightScale by browserPreferences.cinematicSpotlightScale.collectAsState()
-                  ExpressivePreferenceItem(standalone = true) {
-                    SliderPreference(
-                      modifier = Modifier.settingsSearchTarget(R.string.pref_cinematic_spotlight_scale_title),
-                      value = spotlightScale,
-                      onValueChange = { browserPreferences.cinematicSpotlightScale.set(it) },
-                      sliderValue = spotlightScale,
-                      onSliderValueChange = { browserPreferences.cinematicSpotlightScale.set(it) },
-                      valueRange = 0.70f..1.30f,
-                      valueSteps = 12,
-                      title = { Text(stringResource(R.string.pref_cinematic_spotlight_scale_title)) },
-                      summary = {
-                        val pct = (spotlightScale * 100).roundToInt()
-                        Text(
-                          text = if (pct == 100) "100% (Default)" else "$pct%",
-                          color = MaterialTheme.colorScheme.outline,
-                        )
-                      },
-                    )
+                } else {
+                  // In portrait mode (or when not both active in landscape), keep separate sliders
+                  if (cinematicShowHeroSpotlight) {
+                    val spotlightScale by browserPreferences.cinematicSpotlightScale.collectAsState()
+                    ExpressivePreferenceItem(standalone = true) {
+                      SliderPreference(
+                        modifier = Modifier.settingsSearchTarget(R.string.pref_cinematic_spotlight_scale_title),
+                        value = spotlightScale,
+                        onValueChange = { browserPreferences.cinematicSpotlightScale.set(it) },
+                        sliderValue = spotlightScale,
+                        onSliderValueChange = { browserPreferences.cinematicSpotlightScale.set(it) },
+                        valueRange = 0.70f..1.30f,
+                        valueSteps = 12,
+                        title = { Text(stringResource(R.string.pref_cinematic_spotlight_scale_title)) },
+                        summary = {
+                          val pct = (spotlightScale * 100).roundToInt()
+                          Text(
+                            text = if (pct == 100) "100% (Default)" else "$pct%",
+                            color = MaterialTheme.colorScheme.outline,
+                          )
+                        },
+                      )
+                    }
+                    hasPrecedingItem = true
                   }
-                  hasPrecedingItem = true
-                } else if (dualHorizonShowPulsing) {
-                  val pulsingScale by browserPreferences.dualHorizonAudioPulsingScale.collectAsState()
-                  ExpressivePreferenceItem(standalone = true) {
-                    SliderPreference(
-                      modifier = Modifier.settingsSearchTarget(R.string.pref_audio_pulsing_scale_title),
-                      value = pulsingScale,
-                      onValueChange = { browserPreferences.dualHorizonAudioPulsingScale.set(it) },
-                      sliderValue = pulsingScale,
-                      onSliderValueChange = { browserPreferences.dualHorizonAudioPulsingScale.set(it) },
-                      valueRange = 0.70f..1.30f,
-                      valueSteps = 12,
-                      title = { Text(stringResource(R.string.pref_audio_pulsing_scale_title)) },
-                      summary = {
-                        val pct = (pulsingScale * 100).roundToInt()
-                        Text(
-                          text = if (pct == 100) "100% (Default)" else "$pct%",
-                          color = MaterialTheme.colorScheme.outline,
-                        )
-                      },
-                    )
+
+                  if (dualHorizonShowPulsing) {
+                    if (hasPrecedingItem) PreferenceDivider()
+                    val pulsingScale by browserPreferences.dualHorizonAudioPulsingScale.collectAsState()
+                    ExpressivePreferenceItem(standalone = true) {
+                      SliderPreference(
+                        modifier = Modifier.settingsSearchTarget(R.string.pref_audio_pulsing_scale_title),
+                        value = pulsingScale,
+                        onValueChange = { browserPreferences.dualHorizonAudioPulsingScale.set(it) },
+                        sliderValue = pulsingScale,
+                        onSliderValueChange = { browserPreferences.dualHorizonAudioPulsingScale.set(it) },
+                        valueRange = 0.70f..1.30f,
+                        valueSteps = 12,
+                        title = { Text(stringResource(R.string.pref_audio_pulsing_scale_title)) },
+                        summary = {
+                          val pct = (pulsingScale * 100).roundToInt()
+                          Text(
+                            text = if (pct == 100) "100% (Default)" else "$pct%",
+                            color = MaterialTheme.colorScheme.outline,
+                          )
+                        },
+                      )
+                    }
+                    hasPrecedingItem = true
                   }
-                  hasPrecedingItem = true
                 }
 
                 if (dualHorizonShowVideo) {
