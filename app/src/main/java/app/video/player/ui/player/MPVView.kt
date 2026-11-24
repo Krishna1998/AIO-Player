@@ -534,7 +534,9 @@ class MPVView(
     // This prevents timing jitter when the display refresh rate doesn't perfectly
     // match the video frame rate (e.g., 24fps content on 60Hz display).
     PlaybackSession.setOptionString("video-sync", "audio")
-    PlaybackSession.setOptionString("demuxer-lavf-linearize-timestamps", "yes")
+    // Keep demuxer-lavf-linearize-timestamps on auto (mpv default).
+    // Forcing it to "yes" breaks video seeking and causes forward timestamp drift on seeks.
+    PlaybackSession.setOptionString("demuxer-lavf-linearize-timestamps", "auto")
 
     // These are native property/command operations (shader list changes), not mpv options.
     // Running them before MPVLib.init() fails with "mpv_command: core not initialized".

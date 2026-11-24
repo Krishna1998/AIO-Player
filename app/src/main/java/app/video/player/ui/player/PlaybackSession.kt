@@ -1935,9 +1935,13 @@ internal fun userScriptsNeedReload(currentKey: String): Boolean {
       return
     }
     if (property == "time-pos" && _state.value.paused == false && _state.value.phase.let { it == PlaybackPhase.READY || it == PlaybackPhase.BACKGROUND }) {
-      val lastPos = propLong["time-pos"].value
-      if (lastPos != null && value < lastPos && (lastPos - value) <= 1L) {
-        return
+      val isAudio = _state.value.currentItem?.isDefinitelyAudioOnly() == true
+      val isSeeking = propBoolean["seeking"].value == true
+      if (isAudio && !isSeeking) {
+        val lastPos = propLong["time-pos"].value
+        if (lastPos != null && value < lastPos && (lastPos - value) <= 1L) {
+          return
+        }
       }
     }
     propLong.emit(property, value)
@@ -1975,9 +1979,13 @@ internal fun userScriptsNeedReload(currentKey: String): Boolean {
       return
     }
     if (property == "time-pos" && _state.value.paused == false && _state.value.phase.let { it == PlaybackPhase.READY || it == PlaybackPhase.BACKGROUND }) {
-      val lastPos = propDouble["time-pos"].value
-      if (lastPos != null && value < lastPos && (lastPos - value) < 1.5) {
-        return
+      val isAudio = _state.value.currentItem?.isDefinitelyAudioOnly() == true
+      val isSeeking = propBoolean["seeking"].value == true
+      if (isAudio && !isSeeking) {
+        val lastPos = propDouble["time-pos"].value
+        if (lastPos != null && value < lastPos && (lastPos - value) < 0.25) {
+          return
+        }
       }
     }
     propDouble.emit(property, value)

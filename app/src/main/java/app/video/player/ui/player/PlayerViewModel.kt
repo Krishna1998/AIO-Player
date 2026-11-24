@@ -3333,11 +3333,14 @@ fun restartFromBeginning() {
   private fun publishPrecisePosition(time: Double) {
     val posFloat = time.toFloat()
     if (isGestureSeeking || _precisePosition.value == posFloat) return
-    val current = _precisePosition.value
+    val isAudio = PlaybackSession.state.value.currentItem?.isDefinitelyAudioOnly() == true
     val isPlaying = paused == false && PlaybackSession.state.value.paused == false
-    val isSeeking = isGestureSeeking || !lastScrubTarget.isNaN()
-    if (isPlaying && !isSeeking && current > 0f && posFloat < current && (current - posFloat) < 1.5f) {
-      return
+    val isSeeking = isGestureSeeking || !lastScrubTarget.isNaN() || PlaybackSession.propBoolean["seeking"].value == true
+    if (isAudio && isPlaying && !isSeeking) {
+      val current = _precisePosition.value
+      if (current > 0f && posFloat < current && (current - posFloat) < 0.25f) {
+        return
+      }
     }
     _precisePosition.value = posFloat
     updateLyricsActiveLine()
@@ -4729,6 +4732,9 @@ fun restartFromBeginning() {
     if (reachesEnd) {
       // Keep the existing explicit EOF transition when skipping past the final frame.
       PlaybackSession.command("seek", "100", "absolute-percent+exact")
+    } else if (currentPos + offset <= 0.0) {
+      // Seeking past the beginning: clamp to 0 with absolute seek to avoid negative relative seek edge-cases
+      PlaybackSession.command("seek", "0", "absolute+exact")
     } else {
       val isNetwork = PlaybackSession.state.value.currentItem?.let {
         it.networkSource != null || it.playableUri.startsWith("http://", ignoreCase = true) || it.playableUri.startsWith("https://", ignoreCase = true)
@@ -4812,11 +4818,7 @@ fun restartFromBeginning() {
         it.networkSource != null || it.playableUri.startsWith("http://", ignoreCase = true) || it.playableUri.startsWith("https://", ignoreCase = true)
       } == true
       val useExact = playerPreferences.usePreciseSeeking.get() || !isNetwork
-      if (useExact) {
-        PlaybackSession.setPropertyDouble("time-pos", target)
-      } else {
-        PlaybackSession.command("seek", target.toString(), "absolute+keyframes")
-      }
+      PlaybackSession.command("seek", target.toString(), if (useExact) "absolute+exact" else "absolute+keyframes")
       _precisePosition.value = target.toFloat()
       syncplayManager.updatePlayerState(target, paused ?: false, doSeek = true)
     } else {
