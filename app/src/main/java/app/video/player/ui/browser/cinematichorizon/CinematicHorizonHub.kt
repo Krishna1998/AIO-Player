@@ -2041,18 +2041,24 @@ private fun HeroSpotlightBox(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
               ) {
-                Box(
-                  modifier = Modifier
-                    .size(16.dp)
-                    .background(MaterialTheme.colorScheme.primary, CircleShape),
-                  contentAlignment = Alignment.Center,
+                Surface(
+                  shape = CircleShape,
+                  color = MaterialTheme.colorScheme.primary,
+                  modifier = Modifier.size(18.dp),
                 ) {
-                  Text(
-                    text = "▶",
-                    fontSize = 8.sp,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                  )
+                  Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxSize(),
+                  ) {
+                    Icon(
+                      imageVector = Icons.RoundedFilled.PlayArrow,
+                      contentDescription = null,
+                      modifier = Modifier
+                        .size(12.dp)
+                        .padding(start = 0.75.dp),
+                      tint = MaterialTheme.colorScheme.onPrimary,
+                    )
+                  }
                 }
                 Text(
                   text = elapsedFormatted,
