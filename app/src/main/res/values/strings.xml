@@ -159,6 +159,7 @@
   <string name="pref_hero_spotlight_seekbar_style_timestamp_pill">Timestamp Pill</string>
   <string name="pref_cinematic_spotlight_scale_title">Hero spotlight size</string>
   <string name="pref_audio_pulsing_scale_title">Audio Pulsing card size</string>
+  <string name="pref_dual_hero_scale_title">Hero spotlight &amp; Audio Pulsing size</string>
   <string name="pref_video_rail_scale_title">Movies / Videos rail card size</string>
   <string name="pref_music_rail_scale_title">Music rail card size</string>
   <string name="pref_audio_pulsing_progress_style_title">Audio Pulsing progress style</string>

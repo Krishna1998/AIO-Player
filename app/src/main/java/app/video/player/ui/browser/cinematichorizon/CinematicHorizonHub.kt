@@ -483,11 +483,11 @@ fun DualHorizonHeader(
     }
   }
 
-  val heroVideo = remember(videoItems, recentlyPlayedFilePath) {
-    if (recentlyPlayedFilePath != null) {
+  val heroVideo = activeVideoFromSession
+    ?: (if (recentlyPlayedFilePath != null) {
       videoItems.firstOrNull { it.video.path == recentlyPlayedFilePath }
-    } else null
-  } ?: videoItems.firstOrNull { it.progressPercentage != null && it.progressPercentage > 0f && !it.isWatched }
+    } else null)
+    ?: videoItems.firstOrNull { it.progressPercentage != null && it.progressPercentage > 0f && !it.isWatched }
     ?: videoItems.firstOrNull()
 
   CinematicHorizonContent(
@@ -667,7 +667,7 @@ private fun CinematicHorizonContent(
 
     BentoHeroSpotlightCard(
       item = heroToDisplay,
-      scale = audioPulsingScale,
+      scale = if (hasDualHeroLandscape) spotlightScale else audioPulsingScale,
       cardHeight = cardHeight,
       includeHorizontalPadding = includeHorizontalPadding,
       modifier = modifier,
@@ -1459,6 +1459,22 @@ private fun BentoHorizonVideoCard(
 ) {
   val video = item.video
   val progress = item.progressPercentage
+
+  val playbackSessionState by PlaybackSession.state.collectAsState()
+  val livePositionSec by PlaybackSession.propInt["time-pos"].collectAsState()
+  val liveDurationSec by PlaybackSession.propInt["duration"].collectAsState()
+
+  val isCurrentlyInSession = remember(playbackSessionState.currentItem, video) {
+    matchesPlaybackItem(video, playbackSessionState.currentItem)
+  }
+
+  val effectiveProgress = if (isCurrentlyInSession && livePositionSec != null && livePositionSec!! >= 0) {
+    val totalSec = if (liveDurationSec != null && liveDurationSec!! > 0) liveDurationSec!!.toLong() else (video.duration / 1000L).coerceAtLeast(0L)
+    if (totalSec > 0L) (livePositionSec!!.toFloat() / totalSec.toFloat()).coerceIn(0f, 1f) else progress
+  } else {
+    progress
+  }
+
   val haptics = LocalHapticFeedback.current
   val cardWidth = (216f * scale.coerceIn(0.7f, 1.3f)).dp
   val thumbHeight = (122f * scale.coerceIn(0.7f, 1.3f)).dp
@@ -1542,14 +1558,14 @@ private fun BentoHorizonVideoCard(
         }
 
         // Bottom seek/progress indicator
-        if (progress != null && progress > 0f) {
+        if (effectiveProgress != null && effectiveProgress > 0f) {
           LinearProgressIndicator(
-            progress = { progress },
+            progress = { effectiveProgress },
             modifier = Modifier
               .fillMaxWidth()
               .height(3.5.dp)
               .align(Alignment.BottomCenter),
-            color = MaterialTheme.colorScheme.primary,
+            color = if (isCurrentlyInSession) Color(0xFF00E5FF) else MaterialTheme.colorScheme.primary,
             trackColor = Color.Black.copy(alpha = 0.4f),
           )
         }
@@ -1769,11 +1785,70 @@ private fun HeroSpotlightBox(
   cardHeight: androidx.compose.ui.unit.Dp,
   modifier: Modifier = Modifier,
 ) {
+  val context = LocalContext.current
+  val haptics = LocalHapticFeedback.current
   val video = spotlightItem.video
+
+  val playbackSessionState by PlaybackSession.state.collectAsState()
+  val livePositionSec by PlaybackSession.propInt["time-pos"].collectAsState()
+  val liveDurationSec by PlaybackSession.propInt["duration"].collectAsState()
+  val isPaused by PlaybackSession.propBoolean["pause"].collectAsState()
+
+  val isCurrentlyInSession = remember(playbackSessionState.currentItem, video) {
+    matchesPlaybackItem(video, playbackSessionState.currentItem)
+  }
+
+  val totalSec = if (isCurrentlyInSession && liveDurationSec != null && liveDurationSec!! > 0) {
+    liveDurationSec!!.toLong()
+  } else {
+    (video.duration / 1000L).coerceAtLeast(0L)
+  }
+  val durationMs = if (totalSec > 0L) totalSec * 1000L else video.duration.coerceAtLeast(0L)
+
+  val currentPosSec = if (isCurrentlyInSession && livePositionSec != null && livePositionSec!! >= 0) {
+    livePositionSec!!.toDouble()
+  } else if (isCurrentlyInSession && resumePos > 0.0) {
+    resumePos
+  } else {
+    null
+  }
+
+  val elapsedMs = currentPosSec?.let { (it * 1000.0).toLong().coerceIn(0L, durationMs.coerceAtLeast(1L)) }
+    ?: (spotlightItem.progressPercentage?.let { (it * durationMs).toLong() }
+    ?: spotlightItem.timeRemaining?.let { ((durationMs / 1000L) - it).coerceAtLeast(0L) * 1000L }
+    ?: 0L)
+
+  val progress = if (durationMs > 0L) (elapsedMs.toFloat() / durationMs.toFloat()).coerceIn(0f, 1f) else 0f
+  val remainingMs = (durationMs - elapsedMs).coerceAtLeast(0L)
+  val elapsedFormatted = VideoScanUtils.formatDuration(elapsedMs)
+  val totalFormatted = if (totalSec > 0L) VideoScanUtils.formatDuration(totalSec * 1000L) else video.durationFormatted.ifBlank { VideoScanUtils.formatDuration(durationMs) }
+  val remainingFormatted = VideoScanUtils.formatDuration(remainingMs)
+  val progressPercent = (progress * 100f).roundToInt()
+
   Box(
     modifier = modifier
       .height(cardHeight)
       .clip(RoundedCornerShape(28.dp))
+      .combinedClickable(
+        onClick = {
+          if (isCurrentlyInSession && PlaybackSession.isInitialized) {
+            val intent = Intent(context, PlayerActivity::class.java).apply {
+              flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            try {
+              context.startActivity(intent)
+            } catch (_: Exception) {
+              onPlayMedia(video, resumePos.takeIf { it > 0.0 }, videoItems.map { it.video })
+            }
+          } else {
+            onPlayMedia(video, resumePos.takeIf { it > 0.0 }, videoItems.map { it.video })
+          }
+        },
+        onLongClick = {
+          haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+          onVideoAction(video)
+        },
+      )
       .background(MaterialTheme.colorScheme.surfaceContainerHighest)
       .border(
         1.dp,
@@ -1823,25 +1898,37 @@ private fun HeroSpotlightBox(
         color = Color.Black.copy(alpha = 0.5f),
         border = BorderStroke(1.dp, Color.White.copy(alpha = 0.2f)),
       ) {
-        Text(
-          text = if (video.isAudio) "SONIC HORIZON" else "CONTINUE WATCHING",
-          style = MaterialTheme.typography.labelSmall.copy(
-            fontWeight = FontWeight.ExtraBold,
-            letterSpacing = 1.2.sp,
-          ),
-          color = Color.White,
+        Row(
           modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-        )
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+          if (isCurrentlyInSession) {
+            Box(
+              modifier = Modifier
+                .size(6.dp)
+                .background(Color(0xFF00E5FF), CircleShape),
+            )
+          }
+          Text(
+            text = if (isCurrentlyInSession && !video.isAudio) "NOW PLAYING IN PIP" else (if (video.isAudio) "SONIC HORIZON" else "CONTINUE WATCHING"),
+            style = MaterialTheme.typography.labelSmall.copy(
+              fontWeight = FontWeight.ExtraBold,
+              letterSpacing = 1.2.sp,
+            ),
+            color = Color.White,
+          )
+        }
       }
 
-      if (video.durationFormatted.isNotBlank()) {
+      if (totalFormatted.isNotBlank()) {
         Surface(
           shape = CircleShape,
           color = Color.Black.copy(alpha = 0.45f),
           border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)),
         ) {
           Text(
-            text = video.durationFormatted,
+            text = totalFormatted,
             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
             color = Color.White.copy(alpha = 0.9f),
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
@@ -1850,66 +1937,33 @@ private fun HeroSpotlightBox(
       }
     }
 
-    // Progress telemetry calculations for seekbar below buttons
-    val progress = spotlightItem.progressPercentage?.coerceIn(0f, 1f) ?: 0f
-    val durationMs = video.duration.coerceAtLeast(0L)
-    val elapsedMs = (progress * durationMs).toLong()
-    val remainingMs = spotlightItem.timeRemaining?.let { it * 1000L } ?: (durationMs - elapsedMs).coerceAtLeast(0L)
-    val elapsedFormatted = VideoScanUtils.formatDuration(elapsedMs)
-    val totalFormatted = video.durationFormatted.ifBlank { VideoScanUtils.formatDuration(durationMs) }
-    val remainingFormatted = VideoScanUtils.formatDuration(remainingMs)
-    val progressPercent = (progress * 100f).roundToInt()
-
-    // Bottom Hero Info & Action Bar
+    // Bottom Hero Info & Seekbar (Buttons removed; media title takes their place directly above seekbar)
     Column(
       modifier = Modifier
         .align(Alignment.BottomStart)
         .fillMaxWidth()
-        .padding(horizontal = 16.dp, vertical = if (heroSpotlightSeekbarStyle == HeroSpotlightSeekbarStyle.EdgeNeonBeam) 18.dp else 14.dp),
-      verticalArrangement = Arrangement.spacedBy(8.dp),
+        .padding(
+          horizontal = 16.dp,
+          vertical = if (heroSpotlightSeekbarStyle == HeroSpotlightSeekbarStyle.EdgeNeonBeam) 16.dp else 12.dp,
+        ),
+      verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
       Text(
         text = if (video.title.isNotBlank()) video.title else FileTypeUtils.stripExtension(video.displayName),
-        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+        style = MaterialTheme.typography.titleLarge.copy(
+          fontWeight = FontWeight.ExtraBold,
+          fontSize = 20.sp,
+        ),
         color = Color.White,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
       )
 
-      // Primary Action Buttons (Resume & Options)
-      Row(
-        modifier = Modifier.padding(top = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-      ) {
-        Button(
-          onClick = { onPlayMedia(video, resumePos.takeIf { it > 0.0 }, videoItems.map { it.video }) },
-          shape = CircleShape,
-          colors = ButtonDefaults.buttonColors(
-            containerColor = Color.White,
-            contentColor = Color.Black,
-          ),
-          contentPadding = PaddingValues(horizontal = 18.dp, vertical = 8.dp),
-        ) {
-          Text("▶ Resume", fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
-        }
-
-        OutlinedButton(
-          onClick = { onVideoAction(video) },
-          shape = CircleShape,
-          border = BorderStroke(1.dp, Color.White.copy(alpha = 0.35f)),
-          colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
-          contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
-        ) {
-          Text("Options", fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
-        }
-      }
-
-      // Seekbar Placed Below Resume / Options Buttons
+      // Seekbar Placed Directly Below Media Title
       if (progress > 0f) {
         when (heroSpotlightSeekbarStyle) {
           HeroSpotlightSeekbarStyle.EdgeNeonBeam -> {
-            // Subtle telemetry row directly below buttons
+            // Subtle telemetry row directly below title
             Row(
               modifier = Modifier.padding(top = 2.dp),
               verticalAlignment = Alignment.CenterVertically,
@@ -2378,16 +2432,48 @@ private fun BentoHeroSpotlightCard(
         modifier = Modifier
           .fillMaxWidth()
           .then(if (cardHeight != null) Modifier.fillMaxHeight() else Modifier)
-          .background(
-            Brush.linearGradient(
-              colors = listOf(
-                (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.12f),
-                MaterialTheme.colorScheme.surfaceContainerLow,
-                MaterialTheme.colorScheme.surfaceContainerLowest,
+          .clip(RoundedCornerShape(24.dp)),
+      ) {
+        // Full-bleed Blurred Backdrop Thumbnail for Audio Pulsing
+        BentoMediaThumbnail(
+          video = item.video,
+          modifier = Modifier
+            .fillMaxSize()
+            .scale(1.25f)
+            .blur(25.dp)
+            .alpha(0.85f),
+          showPlayOverlay = false,
+          highDefinition = true,
+        )
+
+        // Dark Atmospheric Gradient Vignettes (Ensures maximum contrast & readability)
+        Box(
+          modifier = Modifier
+            .fillMaxSize()
+            .background(
+              Brush.verticalGradient(
+                colors = listOf(
+                  Color.Black.copy(alpha = 0.50f),
+                  Color.Black.copy(alpha = 0.65f),
+                  Color.Black.copy(alpha = 0.94f),
+                ),
               ),
             ),
-          ),
-      ) {
+        )
+        Box(
+          modifier = Modifier
+            .fillMaxSize()
+            .background(
+              Brush.horizontalGradient(
+                colors = listOf(
+                  Color.Black.copy(alpha = 0.85f),
+                  Color.Black.copy(alpha = 0.45f),
+                  Color.Black.copy(alpha = 0.75f),
+                ),
+              ),
+            ),
+        )
+
         Column(
           modifier = Modifier
             .fillMaxWidth()
@@ -2406,7 +2492,7 @@ private fun BentoHeroSpotlightCard(
           ) {
             Surface(
               shape = RoundedCornerShape(999.dp),
-              color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.45f),
+              color = Color.Black.copy(alpha = 0.50f),
               border = BorderStroke(
                 width = 1.dp,
                 brush = Brush.linearGradient(
@@ -2444,7 +2530,7 @@ private fun BentoHeroSpotlightCard(
 
             Surface(
               shape = RoundedCornerShape(999.dp),
-              color = MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.40f),
+              color = Color.Black.copy(alpha = 0.45f),
               border = BorderStroke(
                 width = 0.8.dp,
                 color = (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.35f),
@@ -2460,7 +2546,7 @@ private fun BentoHeroSpotlightCard(
                   fontWeight = FontWeight.SemiBold,
                   fontSize = 11.sp,
                 ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.90f),
+                color = Color.White.copy(alpha = 0.90f),
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
               )
             }
@@ -2472,23 +2558,53 @@ private fun BentoHeroSpotlightCard(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
           ) {
-            // Media Thumbnail Box (clean thumbnail: NO play button overlay, NO codec badge)
-            Box {
-              val thumbW = if (isAudio) (70f * scale.coerceIn(0.7f, 1.3f)).dp else (108f * scale.coerceIn(0.7f, 1.3f)).dp
-              val thumbH = (66f * scale.coerceIn(0.7f, 1.3f)).dp
+            // Media Thumbnail Box (Big prominent artwork with 3D glass border & ambient drop shadow)
+            val isLandscapeCard = cardHeight != null
+            val thumbW = if (isLandscapeCard) {
+              (145f * scale.coerceIn(0.7f, 1.3f)).dp
+            } else if (isAudio) {
+              (96f * scale.coerceIn(0.7f, 1.3f)).dp
+            } else {
+              (108f * scale.coerceIn(0.7f, 1.3f)).dp
+            }
+            val thumbH = if (isLandscapeCard) {
+              (145f * scale.coerceIn(0.7f, 1.3f)).dp
+            } else if (isAudio) {
+              (96f * scale.coerceIn(0.7f, 1.3f)).dp
+            } else {
+              (70f * scale.coerceIn(0.7f, 1.3f)).dp
+            }
+
+            Box(
+              modifier = Modifier
+                .size(width = thumbW, height = thumbH)
+                .clip(RoundedCornerShape(20.dp))
+                .border(
+                  width = 1.dp,
+                  brush = Brush.linearGradient(
+                    listOf(
+                      Color.White.copy(alpha = 0.35f),
+                      Color.White.copy(alpha = 0.10f),
+                      Color.Transparent,
+                    ),
+                  ),
+                  shape = RoundedCornerShape(20.dp),
+                )
+            ) {
               BentoMediaThumbnail(
                 video = item.video,
-                modifier = Modifier
-                  .size(width = thumbW, height = thumbH)
-                  .clip(RoundedCornerShape(16.dp)),
+                modifier = Modifier.fillMaxSize(),
                 showPlayOverlay = !isAudio,
+                highDefinition = true,
               )
             }
 
             // Information & Visualizer
             Column(
-              modifier = Modifier.weight(1f),
-              verticalArrangement = Arrangement.spacedBy(4.dp),
+              modifier = Modifier
+                .weight(1f)
+                .then(if (cardHeight != null) Modifier.fillMaxHeight() else Modifier),
+              verticalArrangement = if (cardHeight != null) Arrangement.SpaceBetween else Arrangement.spacedBy(4.dp),
             ) {
               val (artist, title) = if (isCurrentlyPlayingInSession && playbackSessionState.currentItem != null) {
                 val cur = playbackSessionState.currentItem!!
@@ -2504,8 +2620,8 @@ private fun BentoHeroSpotlightCard(
 
               Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurface,
+                style = if (cardHeight != null) MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold) else MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = Color.White,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
               )
@@ -2521,7 +2637,7 @@ private fun BentoHeroSpotlightCard(
                   "${item.video.sizeFormatted} • ${item.video.bucketDisplayName}"
                 },
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = Color.White.copy(alpha = 0.80f),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
               )
@@ -2549,7 +2665,7 @@ private fun BentoHeroSpotlightCard(
                   OneUi9WaveformVisualizer(
                     modifier = Modifier
                       .fillMaxWidth()
-                      .height(24.dp)
+                      .height(if (cardHeight != null) 34.dp else 24.dp)
                       .padding(top = 2.dp),
                     wave1Color = wave1Color,
                     wave2Color = wave2Color,
