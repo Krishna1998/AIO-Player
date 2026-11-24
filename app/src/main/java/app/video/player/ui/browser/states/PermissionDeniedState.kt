@@ -101,17 +101,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import app.video.player.BuildConfig
 import app.video.player.R
-import app.video.player.domain.download.DownloadLocations
-import app.video.player.preferences.AdvancedPreferences
 import app.video.player.preferences.BrowserPreferences
-import app.video.player.preferences.FoldersPreferences
-import app.video.player.preferences.SettingsManager
-import app.video.player.preferences.SubtitlesPreferences
 import app.video.player.ui.icons.Icon
 import app.video.player.ui.icons.Icons
 import app.video.player.ui.player.controls.components.rememberTvInitialFocusRequester
@@ -121,12 +115,7 @@ import app.video.player.ui.theme.AppShapeScale
 import app.video.player.ui.theme.AppMotion
 import app.video.player.ui.theme.expressiveDisplayFontForText
 import app.video.player.utils.device.DeviceFormFactor
-import app.video.player.utils.media.findChildIgnoreCase
 import app.video.player.utils.permission.PermissionRecovery
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
 
 private fun checkFilePermission(context: Context): Boolean = PermissionRecovery.isStorageGranted(context)
@@ -194,109 +183,11 @@ fun PermissionDeniedState(
   }
 
   val browserPreferences = koinInject<BrowserPreferences>()
-  val advancedPreferences = koinInject<AdvancedPreferences>()
-  val foldersPreferences = koinInject<FoldersPreferences>()
-  val subtitlesPreferences = koinInject<SubtitlesPreferences>()
-  val settingsManager = koinInject<SettingsManager>()
-  val downloadLocations = koinInject<DownloadLocations>()
-  var configurationFolderUri by rememberSaveable { mutableStateOf(advancedPreferences.mpvConfStorageUri.get()) }
-  var configurationMessage by rememberSaveable { mutableStateOf<String?>(null) }
-  var restoredSettings by rememberSaveable { mutableStateOf(false) }
-  var configuringFolder by remember { mutableStateOf(false) }
-
-  val configurationFolderLauncher =
-    rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
-      if (uri == null) return@rememberLauncherForActivityResult
-      runCatching {
-        context.contentResolver.takePersistableUriPermission(
-          uri,
-          Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
-        )
-      }
-      configuringFolder = true
-      configurationMessage = context.getString(R.string.onboarding_configuration_restoring)
-      scope.launch {
-        val uriString = uri.toString()
-        try {
-          withContext(Dispatchers.IO) {
-            val root = DocumentFile.fromTreeUri(context, uri) ?: error("Configuration folder is unavailable")
-            listOf("Backup", "Downloads", "fonts", "Subtitles", "scripts", "script-opts", "shaders").forEach { name ->
-              val existing = root.findChildIgnoreCase(name)
-              if (existing == null) root.createDirectory(name) else require(existing.isDirectory) { "$name is not a folder" }
-            }
-            check(downloadLocations.prepareLocationUnderTree(uri, "Downloads") != null) {
-              "Downloads folder is not accessible"
-            }
-          }
-          val restored = settingsManager.restoreNewestFromConfiguration(uriString)
-          val previousBaseStorageFolder = foldersPreferences.baseStorageFolder.get()
-          if (subtitlesPreferences.fontsFolder.get() == previousBaseStorageFolder) {
-            subtitlesPreferences.fontsFolder.set("")
-          }
-          foldersPreferences.baseStorageFolder.set(uriString)
-          advancedPreferences.mpvConfStorageUri.set(uriString)
-          subtitlesPreferences.subtitleSaveFolder.set(uriString)
-          check(downloadLocations.setLocationUnderTree(uri, "Downloads") != null) {
-            "Downloads folder is not accessible"
-          }
-          configurationFolderUri = uriString
-          configurationMessage = restored.fold(
-            onSuccess = { result ->
-              if (result == null) {
-                context.getString(R.string.onboarding_configuration_no_backup)
-              } else {
-                restoredSettings = true
-                val skipped = result.importStats.failed
-                if (skipped > 0) {
-                  context.resources.getQuantityString(
-                    R.plurals.onboarding_configuration_restored_partial,
-                    skipped,
-                    result.fileName,
-                    skipped,
-                  )
-                } else {
-                  context.getString(R.string.onboarding_configuration_restored, result.fileName)
-                }
-              }
-            },
-            onFailure = { error ->
-              context.getString(
-                R.string.onboarding_configuration_restore_failed,
-                error.message ?: context.getString(R.string.generic_unknown_error),
-              )
-            },
-          )
-        } catch (cancelled: CancellationException) {
-          throw cancelled
-        } catch (error: Exception) {
-          configurationMessage = context.getString(
-            R.string.onboarding_configuration_restore_failed,
-            error.message ?: context.getString(R.string.generic_unknown_error),
-          )
-        } finally {
-          configuringFolder = false
-        }
-      }
-    }
-
-  val isConfigured = configurationFolderUri.isNotBlank() && !configuringFolder
-  val folderDisplayName = remember(configurationFolderUri) {
-    if (configurationFolderUri.isBlank()) {
-      "Not Selected"
-    } else {
-      runCatching {
-        val parsed = Uri.parse(configurationFolderUri)
-        parsed.lastPathSegment?.substringAfterLast(':')?.ifBlank { null } ?: "Configured"
-      }.getOrDefault("Configured")
-    }
-  }
 
   val finishSetup: () -> Unit = {
     browserPreferences.onboardingCompleted.set(true)
     onNext?.invoke()
-    if (restoredSettings) {
-      (context as? Activity)?.recreate()
-    } else if (onNext == null) {
+    if (onNext == null) {
       onRequestPermission()
     }
   }
@@ -416,16 +307,16 @@ fun PermissionDeniedState(
         )
       }
 
-      // Bento Grid Cards Area
+      // Cards Area
       if (isLandscape || isTelevision) {
-        // Landscape & Tablet/TV Layout: 2-column balanced grid
+        // Landscape & Tablet/TV Layout: balanced row
         Row(
           modifier = Modifier
             .widthIn(max = 880.dp)
             .fillMaxWidth(),
           horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-          // Column 1: Primary Storage Card (Full height / dominant)
+          // Primary Storage Card
           AuraPermissionCard(
             title = stringResource(R.string.ui_file_permission_title),
             description = if (isPlayStoreBuild) {
@@ -461,46 +352,27 @@ fun PermissionDeniedState(
               .tvInitialFocus(primaryFocusRequester),
           )
 
-          // Column 2: Configuration & Notifications
-          Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-          ) {
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             AuraPermissionCard(
-              title = stringResource(R.string.onboarding_configuration_card_title),
-              description = configurationMessage ?: stringResource(R.string.onboarding_configuration_card_desc),
-              isGranted = isConfigured,
-              statusLabel = if (isConfigured) "LINKED ✓" else "RECOMMENDED",
-              actionLabel = if (isConfigured) "Change" else "Select Folder",
-              icon = Icons.RoundedFilled.Settings,
-              detailText = folderDisplayName,
-              accentColor = MaterialTheme.colorScheme.tertiary,
+              title = stringResource(R.string.ui_notification_permission_title),
+              description = stringResource(R.string.ui_notification_permission_desc),
+              isGranted = isNotificationGranted,
+              statusLabel = if (isNotificationGranted) "ENABLED ✓" else "OPTIONAL",
+              actionLabel = if (isNotificationGranted) "Enabled ✓" else "Enable",
+              icon = Icons.RoundedFilled.Notifications,
+              detailText = "Lockscreen & Controls",
+              accentColor = MaterialTheme.colorScheme.secondary,
               onClick = {
-                if (!configuringFolder) configurationFolderLauncher.launch(null)
+                if (!isNotificationGranted) {
+                  notificationLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                }
               },
+              modifier = Modifier.weight(1f),
             )
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-              AuraPermissionCard(
-                title = stringResource(R.string.ui_notification_permission_title),
-                description = stringResource(R.string.ui_notification_permission_desc),
-                isGranted = isNotificationGranted,
-                statusLabel = if (isNotificationGranted) "ENABLED ✓" else "OPTIONAL",
-                actionLabel = if (isNotificationGranted) "Enabled ✓" else "Enable",
-                icon = Icons.RoundedFilled.Notifications,
-                detailText = "Lockscreen & Controls",
-                accentColor = MaterialTheme.colorScheme.secondary,
-                onClick = {
-                  if (!isNotificationGranted) {
-                    notificationLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-                  }
-                },
-              )
-            }
           }
         }
       } else {
-        // Portrait Layout: Linear Bento Column
+        // Portrait Layout: Linear Column
         Column(
           modifier = Modifier
             .widthIn(max = 560.dp)
@@ -538,20 +410,6 @@ fun PermissionDeniedState(
               }
             },
             modifier = Modifier.tvInitialFocus(primaryFocusRequester),
-          )
-
-          AuraPermissionCard(
-            title = stringResource(R.string.onboarding_configuration_card_title),
-            description = configurationMessage ?: stringResource(R.string.onboarding_configuration_card_desc),
-            isGranted = isConfigured,
-            statusLabel = if (isConfigured) "LINKED ✓" else "RECOMMENDED",
-            actionLabel = if (isConfigured) "Change" else "Select Folder",
-            icon = Icons.RoundedFilled.Settings,
-            detailText = folderDisplayName,
-            accentColor = MaterialTheme.colorScheme.tertiary,
-            onClick = {
-              if (!configuringFolder) configurationFolderLauncher.launch(null)
-            },
           )
 
           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
