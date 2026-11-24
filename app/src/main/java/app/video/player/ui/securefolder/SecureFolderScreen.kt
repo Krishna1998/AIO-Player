@@ -228,6 +228,32 @@ data object SecureFolderScreen : Screen {
     var pendingAction by remember { mutableStateOf<PendingAction?>(null) }
     var sortDialogOpen by rememberSaveable { mutableStateOf(false) }
 
+    val playSecureVideo: (app.video.player.database.entities.SecureMediaEntity, app.video.player.domain.media.model.Video) -> Unit = { entity, video ->
+      val resolvedDuration = if (video.duration > 0) video.duration else {
+        metadataCacheRepository.getMetadata(entity.secureFilePath)?.durationMs
+          ?: runCatching {
+            val retriever = android.media.MediaMetadataRetriever()
+            try {
+              retriever.setDataSource(entity.secureFilePath)
+              retriever.extractMetadata(android.media.MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLongOrNull() ?: 0L
+            } finally {
+              retriever.release()
+            }
+          }.getOrDefault(0L)
+      }
+      val playableVideo = if (resolvedDuration > 0 && video.duration <= 0) {
+        video.copy(duration = resolvedDuration)
+      } else {
+        video
+      }
+      MediaUtils.playFile(
+        playableVideo,
+        context,
+        launchSource = "secure_folder",
+        title = entity.fileName,
+      )
+    }
+
     LaunchedEffect(operationResult) {
       operationResult?.let {
         snackbarHostState.showSnackbar(it)
@@ -363,12 +389,7 @@ data object SecureFolderScreen : Screen {
                         if (isInSelectionMode) {
                           viewModel.toggleSelection(entity.id)
                         } else {
-                          MediaUtils.playFile(
-                            entity.secureFilePath,
-                            context,
-                            launchSource = "secure_folder",
-                            title = entity.fileName,
-                          )
+                          playSecureVideo(entity, video)
                         }
                       },
                       onLongClick = { viewModel.handleLongClick(entity.id) },
@@ -376,12 +397,7 @@ data object SecureFolderScreen : Screen {
                         if (isInSelectionMode) {
                           viewModel.toggleSelection(entity.id)
                         } else {
-                          MediaUtils.playFile(
-                            entity.secureFilePath,
-                            context,
-                            launchSource = "secure_folder",
-                            title = entity.fileName,
-                          )
+                          playSecureVideo(entity, video)
                         }
                       },
                       isGridMode = true,
@@ -423,12 +439,7 @@ data object SecureFolderScreen : Screen {
                         if (isInSelectionMode) {
                           viewModel.toggleSelection(entity.id)
                         } else {
-                          MediaUtils.playFile(
-                            entity.secureFilePath,
-                            context,
-                            launchSource = "secure_folder",
-                            title = entity.fileName,
-                          )
+                          playSecureVideo(entity, video)
                         }
                       },
                       onLongClick = { viewModel.handleLongClick(entity.id) },
@@ -436,12 +447,7 @@ data object SecureFolderScreen : Screen {
                         if (isInSelectionMode) {
                           viewModel.toggleSelection(entity.id)
                         } else {
-                          MediaUtils.playFile(
-                            entity.secureFilePath,
-                            context,
-                            launchSource = "secure_folder",
-                            title = entity.fileName,
-                          )
+                          playSecureVideo(entity, video)
                         }
                       },
                       isGridMode = false,

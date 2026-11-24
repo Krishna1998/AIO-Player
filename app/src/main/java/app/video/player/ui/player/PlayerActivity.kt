@@ -868,6 +868,7 @@ class PlayerActivity :
     // Autoplay and visible navigation controls independently need a sibling queue.
     if (playlist.isEmpty() &&
       playlistId == null &&
+      !isSecureFolderLaunch &&
       !intent.hasExtra(AudiobookPlayback.EXTRA_BOOK_ID) &&
       playerPreferences.shouldBuildAutomaticQueue(isKnownAudioLaunch(intent)) &&
       !hasReusableSavedPlaybackSession
@@ -8753,7 +8754,7 @@ private suspend fun restorePlaybackPosition(state: PlaybackStateEntity?, loadGen
   }
 
   private fun generatePlaylistFromFolder(currentPath: String) {
-    if (intent.hasExtra(AudiobookPlayback.EXTRA_BOOK_ID)) return
+    if (isSecureFolderLaunch || intent.hasExtra(AudiobookPlayback.EXTRA_BOOK_ID)) return
     val expectedGeneration = mediaRequestGeneration
     lifecycleScope.launch(Dispatchers.IO) {
       generatePlaylistFromFolderInternal(currentPath, expectedGeneration)

@@ -1260,11 +1260,9 @@ internal fun userScriptsNeedReload(currentKey: String): Boolean {
           add(if (selectVideoForNewFile && (!deferVideoSelectionUntilSurface || ytdlVideoRequiresSelection)) "vid=auto" else "vid=no")
           initialPosition?.let { add("start=$it") }
           // Keep ordinary files on mpv's fast path. Only files with no indexed duration need
-          // bounded stream probing; loadfile scopes these options to the current file.
+          // stream probing; loadfile scopes these options to the current file.
           if (shouldProbeMissingDuration(resolvedItem, playableUri)) {
             add("demuxer-lavf-probe-info=yes")
-            add("demuxer-lavf-probesize=4MiB")
-            add("demuxer-lavf-analyzeduration=5")
           }
           if (flattenEditions && !MpvConfigOverridePolicy.isOwnedByMpvConf("flatten-editions")) {
             add("flatten-editions=yes")
@@ -2035,7 +2033,7 @@ internal fun userScriptsNeedReload(currentKey: String): Boolean {
               AudiobookPlayback.onFileLoaded(item, current.generation)
               val rawPath = item.originalUri.ifBlank { item.playableUri }
               val path = if (rawPath.startsWith("file://")) rawPath.removePrefix("file://") else rawPath
-              if (path.isNotBlank()) {
+              if (path.isNotBlank() && !path.contains("secure_media")) {
                 val title = item.title?.takeIf { it.isNotBlank() } ?: path.substringAfterLast('/')
                 val durationMs = loadedAudiobookDurationMs.takeIf { it > 0 } ?: ((item.durationSeconds ?: 0) * 1000L)
                 nativeEvents.launch(Dispatchers.IO) {

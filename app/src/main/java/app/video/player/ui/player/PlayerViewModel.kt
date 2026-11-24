@@ -4730,7 +4730,11 @@ fun restartFromBeginning() {
       // Keep the existing explicit EOF transition when skipping past the final frame.
       PlaybackSession.command("seek", "100", "absolute-percent+exact")
     } else {
-      PlaybackSession.command("seek", offset.toString(), "relative")
+      val isNetwork = PlaybackSession.state.value.currentItem?.let {
+        it.networkSource != null || it.playableUri.startsWith("http://", ignoreCase = true) || it.playableUri.startsWith("https://", ignoreCase = true)
+      } == true
+      val useExact = playerPreferences.usePreciseSeeking.get() || !isNetwork
+      PlaybackSession.command("seek", offset.toString(), if (useExact) "relative+exact" else "relative")
     }
     syncplayManager.updatePlayerState(
       if (reachesEnd) durationSeconds else (currentPos + offset).coerceAtLeast(0.0),
@@ -4798,17 +4802,26 @@ fun restartFromBeginning() {
     PlaybackSession.command("seek", target.toString(), "absolute+keyframes")
   }
 
-  /** Ends a swipe (null cancels it). With precise seeking on, it lands exactly where the swipe stopped. */
+  /** Ends a swipe (null cancels it). Lands cleanly at the user's swiped target time. */
   fun finishGestureSeek(position: Float?) {
     isGestureSeeking = false
     lastScrubTarget = Double.NaN
     val target = position?.takeIf { it.isFinite() }?.let { clampSeekTarget(it.toDouble()) }
-    if (target != null && playerPreferences.usePreciseSeeking.get()) {
-      PlaybackSession.setPropertyDouble("time-pos", target)
+    if (target != null) {
+      val isNetwork = PlaybackSession.state.value.currentItem?.let {
+        it.networkSource != null || it.playableUri.startsWith("http://", ignoreCase = true) || it.playableUri.startsWith("https://", ignoreCase = true)
+      } == true
+      val useExact = playerPreferences.usePreciseSeeking.get() || !isNetwork
+      if (useExact) {
+        PlaybackSession.setPropertyDouble("time-pos", target)
+      } else {
+        PlaybackSession.command("seek", target.toString(), "absolute+keyframes")
+      }
+      _precisePosition.value = target.toFloat()
+      syncplayManager.updatePlayerState(target, paused ?: false, doSeek = true)
     } else {
       PlaybackSession.getPropertyDouble("time-pos")?.let(::publishPrecisePosition)
     }
-    if (target != null) syncplayManager.updatePlayerState(target, paused ?: false, doSeek = true)
   }
 
   fun seekTo(
