@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
@@ -37,6 +38,7 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -113,6 +115,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
@@ -665,12 +668,32 @@ private fun CinematicHorizonContent(
       savedPos
     }
 
+    val nextTrackTitle = remember(sortedAudioByTitle, currentSessionItem, heroToDisplay.video) {
+      if (sortedAudioByTitle.isEmpty()) {
+        null
+      } else {
+        val currIdx = if (isCurrentlyInSession) {
+          sortedAudioByTitle.indexOfFirst { matchesPlaybackItem(it.video, currentSessionItem) }
+        } else {
+          sortedAudioByTitle.indexOfFirst { it.video.path == heroToDisplay.video.path }
+        }
+        if (currIdx >= 0 && sortedAudioByTitle.size > 1) {
+          val nextIdx = (currIdx + 1) % sortedAudioByTitle.size
+          val nextVideo = sortedAudioByTitle[nextIdx].video
+          nextVideo.title.ifBlank { FileTypeUtils.stripExtension(nextVideo.displayName) }
+        } else {
+          null
+        }
+      }
+    }
+
     BentoHeroSpotlightCard(
       item = heroToDisplay,
       scale = if (hasDualHeroLandscape) spotlightScale else audioPulsingScale,
       cardHeight = cardHeight,
       includeHorizontalPadding = includeHorizontalPadding,
       modifier = modifier,
+      nextTrackTitle = nextTrackTitle,
       onClick = {
         if (heroToDisplay.video.isAudio) {
           if (isCurrentlyInSession) {
@@ -866,7 +889,9 @@ private fun CinematicHorizonContent(
         "PULSING" -> {
           // Audio Pulsing Hero Spotlight Card (skipped in landscape if already shown in dual hero row)
           if (!hasDualHeroLandscape && showAudioPulsing && heroToDisplay != null) {
-            RenderAudioPulsingCard()
+            RenderAudioPulsingCard(
+              cardHeight = if (isLandscape) landscapeHeroHeight else null,
+            )
           }
         }
         "MUSIC" -> {
@@ -2184,6 +2209,7 @@ private fun BentoHeroSpotlightCard(
   modifier: Modifier = Modifier,
   cardHeight: androidx.compose.ui.unit.Dp? = null,
   includeHorizontalPadding: Boolean = true,
+  nextTrackTitle: String? = null,
 ) {
   val appearancePreferences = koinInject<AppearancePreferences>()
   val browserPreferences = koinInject<BrowserPreferences>()
@@ -2408,12 +2434,13 @@ private fun BentoHeroSpotlightCard(
       }
     }
 
-    val isLandscapeCard = cardHeight != null
+    val isLandscape = LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val isLandscapeCard = cardHeight != null || isLandscape
 
     Card(
       modifier = Modifier
         .fillMaxWidth()
-        .then(if (cardHeight != null) Modifier.height(cardHeight) else Modifier)
+        .then(if (cardHeight != null) Modifier.height(cardHeight) else if (isLandscapeCard) Modifier.height(236.dp) else Modifier)
         .offset { IntOffset(swipeOffset.value.roundToInt(), 0) }
         .clip(RoundedCornerShape(24.dp))
         .then(gestureModifier),
@@ -2433,7 +2460,7 @@ private fun BentoHeroSpotlightCard(
       Box(
         modifier = Modifier
           .fillMaxWidth()
-          .then(if (cardHeight != null) Modifier.fillMaxHeight() else Modifier)
+          .then(if (cardHeight != null) Modifier.fillMaxHeight() else if (isLandscapeCard) Modifier.height(236.dp) else Modifier)
           .then(
             if (isLandscapeCard) {
               Modifier.clip(RoundedCornerShape(24.dp))
@@ -2450,303 +2477,970 @@ private fun BentoHeroSpotlightCard(
             }
           ),
       ) {
-        if (isLandscapeCard) {
-          // Full-bleed Blurred Backdrop Thumbnail for Landscape Audio Pulsing ONLY
-          BentoMediaThumbnail(
-            video = item.video,
-            modifier = Modifier
-              .fillMaxSize()
-              .scale(1.25f)
-              .blur(25.dp)
-              .alpha(0.85f),
-            showPlayOverlay = false,
-            highDefinition = true,
+        if (isLandscapeCard && isAudio) {
+          // Concept 3: Cyberpunk DeX Console (Landscape Exclusive, NO BUTTONS)
+          LandscapeAudioPulsingConcept3(
+            item = item,
+            isCurrentlyPlayingInSession = isCurrentlyPlayingInSession,
+            originalCodec = originalCodec,
+            totalSec = totalSec,
+            totalFormatted = totalFormatted,
+            remainingSec = remainingSec,
+            remainingFormatted = remainingFormatted,
+            pulseScale = pulseScale,
+            wave1Color = wave1Color,
+            wave2Color = wave2Color,
+            wave3Color = wave3Color,
+            scale = scale,
+            nextTrackTitle = nextTrackTitle,
           )
+        } else {
+          // Clean original portrait mode Audio Pulsing OR Video Spotlight Card
+          if (isLandscapeCard) {
+            // Full-bleed Blurred Backdrop Thumbnail for Landscape Video Spotlight ONLY
+            BentoMediaThumbnail(
+              video = item.video,
+              modifier = Modifier
+                .fillMaxSize()
+                .scale(1.25f)
+                .blur(25.dp)
+                .alpha(0.85f),
+              showPlayOverlay = false,
+              highDefinition = true,
+            )
 
-          // Dark Atmospheric Gradient Vignettes (Landscape only)
-          Box(
-            modifier = Modifier
-              .fillMaxSize()
-              .background(
-                Brush.verticalGradient(
-                  colors = listOf(
-                    Color.Black.copy(alpha = 0.50f),
-                    Color.Black.copy(alpha = 0.65f),
-                    Color.Black.copy(alpha = 0.94f),
+            // Dark Atmospheric Gradient Vignettes (Landscape only)
+            Box(
+              modifier = Modifier
+                .fillMaxSize()
+                .background(
+                  Brush.verticalGradient(
+                    colors = listOf(
+                      Color.Black.copy(alpha = 0.50f),
+                      Color.Black.copy(alpha = 0.65f),
+                      Color.Black.copy(alpha = 0.94f),
+                    ),
                   ),
                 ),
-              ),
-          )
-          Box(
-            modifier = Modifier
-              .fillMaxSize()
-              .background(
-                Brush.horizontalGradient(
-                  colors = listOf(
-                    Color.Black.copy(alpha = 0.85f),
-                    Color.Black.copy(alpha = 0.45f),
-                    Color.Black.copy(alpha = 0.75f),
+            )
+            Box(
+              modifier = Modifier
+                .fillMaxSize()
+                .background(
+                  Brush.horizontalGradient(
+                    colors = listOf(
+                      Color.Black.copy(alpha = 0.85f),
+                      Color.Black.copy(alpha = 0.45f),
+                      Color.Black.copy(alpha = 0.75f),
+                    ),
                   ),
                 ),
-              ),
-          )
-        }
-
-        Column(
-          modifier = Modifier
-            .fillMaxWidth()
-            .then(if (cardHeight != null) Modifier.fillMaxHeight() else Modifier)
-            .padding(
-              horizontal = 14.dp,
-              vertical = (12f * scale.coerceIn(0.7f, 1.3f)).dp,
-            ),
-          verticalArrangement = if (cardHeight != null) Arrangement.SpaceBetween else Arrangement.spacedBy((7f * scale.coerceIn(0.7f, 1.3f)).dp),
-        ) {
-          // Top Header Row: Status Badge & Format Chip
-          Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-          ) {
-            Surface(
-              shape = RoundedCornerShape(999.dp),
-              color = if (isLandscapeCard) Color.Black.copy(alpha = 0.50f) else MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.45f),
-              border = BorderStroke(
-                width = 1.dp,
-                brush = Brush.linearGradient(
-                  colors = listOf(
-                    (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.65f),
-                    Color.White.copy(alpha = 0.25f),
-                    (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.15f),
-                  ),
-                ),
-              ),
-              shadowElevation = 2.dp,
-            ) {
-              Row(
-                modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.5.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-              ) {
-                Box(
-                  modifier = Modifier
-                    .size(7.dp)
-                    .scale(pulseScale)
-                    .clip(CircleShape)
-                    .background(if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary),
-                )
-                Text(
-                  text = if (isAudio) "AUDIO PULSING" else if (progress > 0f) "RESUME PLAYING" else "SPOTLIGHT",
-                  style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp,
-                  ),
-                  color = if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
-                )
-              }
-            }
-
-            Surface(
-              shape = RoundedCornerShape(999.dp),
-              color = if (isLandscapeCard) Color.Black.copy(alpha = 0.45f) else MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.40f),
-              border = BorderStroke(
-                width = 0.8.dp,
-                color = (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.35f),
-              ),
-            ) {
-              Text(
-                text = if (isAudio) {
-                  "$originalCodec • $remainingFormatted/$totalFormatted"
-                } else {
-                  "$originalCodec • ${item.video.durationFormatted}"
-                },
-                style = MaterialTheme.typography.labelSmall.copy(
-                  fontWeight = FontWeight.SemiBold,
-                  fontSize = 11.sp,
-                ),
-                color = if (isLandscapeCard) Color.White.copy(alpha = 0.90f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.90f),
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-              )
-            }
+            )
           }
 
-          // Middle Row: Thumbnail Preview & Metadata
-          Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
+          Column(
+            modifier = Modifier
+              .fillMaxWidth()
+              .then(if (cardHeight != null) Modifier.fillMaxHeight() else Modifier)
+              .padding(
+                horizontal = 14.dp,
+                vertical = (12f * scale.coerceIn(0.7f, 1.3f)).dp,
+              ),
+            verticalArrangement = if (cardHeight != null) Arrangement.SpaceBetween else Arrangement.spacedBy((7f * scale.coerceIn(0.7f, 1.3f)).dp),
           ) {
-            if (isLandscapeCard) {
-              // Media Thumbnail Box (Big prominent artwork with 3D glass border & ambient drop shadow - Landscape only)
-              val thumbW = (145f * scale.coerceIn(0.7f, 1.3f)).dp
-              val thumbH = (145f * scale.coerceIn(0.7f, 1.3f)).dp
-
-              Box(
-                modifier = Modifier
-                  .size(width = thumbW, height = thumbH)
-                  .clip(RoundedCornerShape(20.dp))
-                  .border(
-                    width = 1.dp,
-                    brush = Brush.linearGradient(
-                      listOf(
-                        Color.White.copy(alpha = 0.35f),
-                        Color.White.copy(alpha = 0.10f),
-                        Color.Transparent,
-                      ),
+            // Top Header Row: Status Badge & Format Chip
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Surface(
+                shape = RoundedCornerShape(999.dp),
+                color = if (isLandscapeCard) Color.Black.copy(alpha = 0.50f) else MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.45f),
+                border = BorderStroke(
+                  width = 1.dp,
+                  brush = Brush.linearGradient(
+                    colors = listOf(
+                      (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.65f),
+                      Color.White.copy(alpha = 0.25f),
+                      (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.15f),
                     ),
-                    shape = RoundedCornerShape(20.dp),
                   ),
+                ),
+                shadowElevation = 2.dp,
               ) {
-                BentoMediaThumbnail(
-                  video = item.video,
-                  modifier = Modifier.fillMaxSize(),
-                  showPlayOverlay = !isAudio,
-                  highDefinition = true,
+                Row(
+                  modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.5.dp),
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                  Box(
+                    modifier = Modifier
+                      .size(7.dp)
+                      .scale(pulseScale)
+                      .clip(CircleShape)
+                      .background(if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary),
+                  )
+                  Text(
+                    text = if (isAudio) "AUDIO PULSING" else if (progress > 0f) "RESUME PLAYING" else "SPOTLIGHT",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                      fontWeight = FontWeight.Bold,
+                      letterSpacing = 1.sp,
+                    ),
+                    color = if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
+                  )
+                }
+              }
+
+              Surface(
+                shape = RoundedCornerShape(999.dp),
+                color = if (isLandscapeCard) Color.Black.copy(alpha = 0.45f) else MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.40f),
+                border = BorderStroke(
+                  width = 0.8.dp,
+                  color = (if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary).copy(alpha = 0.35f),
+                ),
+              ) {
+                Text(
+                  text = if (isAudio) {
+                    "$originalCodec • $remainingFormatted/$totalFormatted"
+                  } else {
+                    "$originalCodec • ${item.video.durationFormatted}"
+                  },
+                  style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 11.sp,
+                  ),
+                  color = if (isLandscapeCard) Color.White.copy(alpha = 0.90f) else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.90f),
+                  modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
                 )
               }
-            } else {
-              // Media Thumbnail Box (Clean original thumbnail - Portrait mode)
+            }
+
+            // Middle Row: Thumbnail Preview & Metadata
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.spacedBy(12.dp),
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              // Media Thumbnail Box
               Box {
-                val thumbW = if (isAudio) (70f * scale.coerceIn(0.7f, 1.3f)).dp else (108f * scale.coerceIn(0.7f, 1.3f)).dp
-                val thumbH = (66f * scale.coerceIn(0.7f, 1.3f)).dp
+                val thumbW = if (isLandscapeCard) (145f * scale.coerceIn(0.7f, 1.3f)).dp else if (isAudio) (70f * scale.coerceIn(0.7f, 1.3f)).dp else (108f * scale.coerceIn(0.7f, 1.3f)).dp
+                val thumbH = if (isLandscapeCard) (145f * scale.coerceIn(0.7f, 1.3f)).dp else (66f * scale.coerceIn(0.7f, 1.3f)).dp
                 BentoMediaThumbnail(
                   video = item.video,
                   modifier = Modifier
                     .size(width = thumbW, height = thumbH)
-                    .clip(RoundedCornerShape(16.dp)),
+                    .clip(RoundedCornerShape(if (isLandscapeCard) 20.dp else 16.dp)),
                   showPlayOverlay = !isAudio,
                 )
               }
-            }
 
-            // Information & Visualizer
-            Column(
-              modifier = Modifier
-                .weight(1f)
-                .then(if (cardHeight != null) Modifier.fillMaxHeight() else Modifier),
-              verticalArrangement = if (cardHeight != null) Arrangement.SpaceBetween else Arrangement.spacedBy(4.dp),
-            ) {
-              val (artist, title) = if (isCurrentlyPlayingInSession && playbackSessionState.currentItem != null) {
-                val cur = playbackSessionState.currentItem!!
-                val displayTitle = cur.title?.takeIf { it.isNotBlank() }
-                  ?: (if (item.video.title.isNotBlank()) item.video.title else FileTypeUtils.stripExtension(item.video.displayName))
-                val displayArtist = cur.artist?.takeIf { it.isNotBlank() } ?: item.video.artist
-                Pair(displayArtist, displayTitle)
-              } else if (isAudio) {
-                SortUtils.getAudioArtistAndTitle(item.video)
-              } else {
-                Pair("", if (item.video.title.isNotBlank()) item.video.title else FileTypeUtils.stripExtension(item.video.displayName))
-              }
-
-              Text(
-                text = title,
-                style = if (isLandscapeCard) MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold) else MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = if (isLandscapeCard) Color.White else MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-              )
-
-              Text(
-                text = if (isAudio) {
-                  if (artist.isNotBlank() && !artist.equals("Unknown Artist", ignoreCase = true)) {
-                    "$artist • ${item.video.bucketDisplayName.ifBlank { "Lossless Audio" }}"
-                  } else {
-                    item.video.bucketDisplayName.ifBlank { "Lossless Audio" }
-                  }
+              // Information & Visualizer
+              Column(
+                modifier = Modifier
+                  .weight(1f)
+                  .then(if (cardHeight != null) Modifier.fillMaxHeight() else Modifier),
+                verticalArrangement = if (cardHeight != null) Arrangement.SpaceBetween else Arrangement.spacedBy(4.dp),
+              ) {
+                val (artist, title) = if (isCurrentlyPlayingInSession && playbackSessionState.currentItem != null) {
+                  val cur = playbackSessionState.currentItem!!
+                  val displayTitle = cur.title?.takeIf { it.isNotBlank() }
+                    ?: (if (item.video.title.isNotBlank()) item.video.title else FileTypeUtils.stripExtension(item.video.displayName))
+                  val displayArtist = cur.artist?.takeIf { it.isNotBlank() } ?: item.video.artist
+                  Pair(displayArtist, displayTitle)
+                } else if (isAudio) {
+                  SortUtils.getAudioArtistAndTitle(item.video)
                 } else {
-                  "${item.video.sizeFormatted} • ${item.video.bucketDisplayName}"
-                },
-                style = MaterialTheme.typography.bodySmall,
-                color = if (isLandscapeCard) Color.White.copy(alpha = 0.80f) else MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-              )
-
-              if (isAudio) {
-                val isPaused by PlaybackSession.propBoolean["pause"].collectAsState()
-                val isPlaying = isCurrentlyPlayingInSession && (isPaused == false)
-                val targetProgress = if (isCurrentlyPlayingInSession && totalSec > 0L && livePositionSec != null) {
-                  (livePositionSec!!.toFloat() / totalSec.toFloat()).coerceIn(0f, 1f)
-                } else if (progress > 0f) {
-                  progress
-                } else {
-                  0f
+                  Pair("", if (item.video.title.isNotBlank()) item.video.title else FileTypeUtils.stripExtension(item.video.displayName))
                 }
 
-                // Smooth progressive interpolation: eliminates 1-second discretised jumping/ticking clock effect
-                val animatedProgress by animateFloatAsState(
-                  targetValue = targetProgress,
-                  animationSpec = if (isPlaying) tween(durationMillis = 1000, easing = LinearEasing) else spring(),
-                  label = "audioPulsingProgress",
+                Text(
+                  text = title,
+                  style = if (isLandscapeCard) MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold) else MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                  color = if (isLandscapeCard) Color.White else MaterialTheme.colorScheme.onSurface,
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis,
                 )
-                val currentProgress = if (isPlaying) animatedProgress else targetProgress
 
-                if (audioPulsingProgressStyle == app.video.player.preferences.AudioPulsingProgressStyle.WavyVisualizer) {
-                  OneUi9WaveformVisualizer(
-                    modifier = Modifier
-                      .fillMaxWidth()
-                      .height(if (isLandscapeCard) 34.dp else 24.dp)
-                      .padding(top = 2.dp),
-                    wave1Color = wave1Color,
-                    wave2Color = wave2Color,
-                    wave3Color = wave3Color,
-                    isPlaying = isPlaying,
-                    progress = currentProgress,
+                Text(
+                  text = if (isAudio) {
+                    if (artist.isNotBlank() && !artist.equals("Unknown Artist", ignoreCase = true)) {
+                      "$artist • ${item.video.bucketDisplayName.ifBlank { "Lossless Audio" }}"
+                    } else {
+                      item.video.bucketDisplayName.ifBlank { "Lossless Audio" }
+                    }
+                  } else {
+                    "${item.video.sizeFormatted} • ${item.video.bucketDisplayName}"
+                  },
+                  style = MaterialTheme.typography.bodySmall,
+                  color = if (isLandscapeCard) Color.White.copy(alpha = 0.80f) else MaterialTheme.colorScheme.onSurfaceVariant,
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis,
+                )
+
+                if (isAudio) {
+                  val isPaused by PlaybackSession.propBoolean["pause"].collectAsState()
+                  val isPlaying = isCurrentlyPlayingInSession && (isPaused == false)
+                  val targetProgress = if (isCurrentlyPlayingInSession && totalSec > 0L && livePositionSec != null) {
+                    (livePositionSec!!.toFloat() / totalSec.toFloat()).coerceIn(0f, 1f)
+                  } else if (progress > 0f) {
+                    progress
+                  } else {
+                    0f
+                  }
+
+                  val animatedProgress by animateFloatAsState(
+                    targetValue = targetProgress,
+                    animationSpec = if (isPlaying) tween(durationMillis = 1000, easing = LinearEasing) else spring(),
+                    label = "audioPulsingProgress",
                   )
-                } else {
+                  val currentProgress = if (isPlaying) animatedProgress else targetProgress
+
+                  if (audioPulsingProgressStyle == app.video.player.preferences.AudioPulsingProgressStyle.WavyVisualizer) {
+                    OneUi9WaveformVisualizer(
+                      modifier = Modifier
+                        .fillMaxWidth()
+                        .height(if (isLandscapeCard) 34.dp else 24.dp)
+                        .padding(top = 2.dp),
+                      wave1Color = wave1Color,
+                      wave2Color = wave2Color,
+                      wave3Color = wave3Color,
+                      isPlaying = isPlaying,
+                      progress = currentProgress,
+                    )
+                  } else {
+                    Row(
+                      modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 6.dp),
+                      verticalAlignment = Alignment.CenterVertically,
+                      horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                      LinearProgressIndicator(
+                        progress = { currentProgress },
+                        modifier = Modifier
+                          .weight(1f)
+                          .height(4.dp)
+                          .clip(RoundedCornerShape(999.dp)),
+                        color = MaterialTheme.colorScheme.tertiary,
+                        trackColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
+                      )
+                      Text(
+                        text = "${(currentProgress * 100).toInt()}%",
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.tertiary,
+                      )
+                    }
+                  }
+                }
+
+                if (!isAudio && progress > 0f) {
                   Row(
                     modifier = Modifier
                       .fillMaxWidth()
-                      .padding(top = 6.dp),
+                      .padding(top = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                   ) {
                     LinearProgressIndicator(
-                      progress = { currentProgress },
+                      progress = { progress },
                       modifier = Modifier
                         .weight(1f)
                         .height(4.dp)
                         .clip(RoundedCornerShape(999.dp)),
-                      color = MaterialTheme.colorScheme.tertiary,
+                      color = MaterialTheme.colorScheme.primary,
                       trackColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
                     )
                     Text(
-                      text = "${(currentProgress * 100).toInt()}%",
+                      text = "${(progress * 100).toInt()}%",
                       style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                      color = MaterialTheme.colorScheme.tertiary,
+                      color = MaterialTheme.colorScheme.primary,
                     )
                   }
-                }
-              }
-
-              if (!isAudio && progress > 0f) {
-                Row(
-                  modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 4.dp),
-                  verticalAlignment = Alignment.CenterVertically,
-                  horizontalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                  LinearProgressIndicator(
-                    progress = { progress },
-                    modifier = Modifier
-                      .weight(1f)
-                      .height(4.dp)
-                      .clip(RoundedCornerShape(999.dp)),
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
-                  )
-                  Text(
-                    text = "${(progress * 100).toInt()}%",
-                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.primary,
-                  )
                 }
               }
             }
           }
         }
       }
+    }
+  }
+}
+
+/**
+ * Concept 3: Cyberpunk DeX Console (Audio Pulsing Landscape Exclusive)
+ * Information-rich, 3-column audio command stage with live VU meters,
+ * technical telemetry, upcoming queue preview, and touch gestures (NO on-card buttons).
+ */
+@Composable
+private fun LandscapeAudioPulsingConcept3(
+  item: VideoWithPlaybackInfo,
+  isCurrentlyPlayingInSession: Boolean,
+  originalCodec: String,
+  totalSec: Long,
+  totalFormatted: String,
+  remainingSec: Long,
+  remainingFormatted: String,
+  pulseScale: Float,
+  wave1Color: Color,
+  wave2Color: Color,
+  wave3Color: Color,
+  scale: Float = 1.0f,
+  nextTrackTitle: String? = null,
+) {
+  val playbackSessionState by PlaybackSession.state.collectAsState()
+  val isPaused by PlaybackSession.propBoolean["pause"].collectAsState()
+  val livePositionSec by PlaybackSession.propInt["time-pos"].collectAsState()
+  val progress = item.progressPercentage ?: 0f
+
+  val isPlaying = isCurrentlyPlayingInSession && (isPaused == false)
+
+  val (artist, title) = if (isCurrentlyPlayingInSession && playbackSessionState.currentItem != null) {
+    val cur = playbackSessionState.currentItem!!
+    val displayTitle = cur.title?.takeIf { it.isNotBlank() }
+      ?: (if (item.video.title.isNotBlank()) item.video.title else FileTypeUtils.stripExtension(item.video.displayName))
+    val displayArtist = cur.artist?.takeIf { it.isNotBlank() } ?: item.video.artist
+    Pair(displayArtist, displayTitle)
+  } else {
+    SortUtils.getAudioArtistAndTitle(item.video)
+  }
+
+  val targetProgress = if (isCurrentlyPlayingInSession && totalSec > 0L && livePositionSec != null) {
+    (livePositionSec!!.toFloat() / totalSec.toFloat()).coerceIn(0f, 1f)
+  } else if (progress > 0f) {
+    progress
+  } else {
+    0f
+  }
+
+  val animatedProgress by animateFloatAsState(
+    targetValue = targetProgress,
+    animationSpec = if (isPlaying) tween(durationMillis = 1000, easing = LinearEasing) else spring(),
+    label = "audioPulsingConcept3Progress",
+  )
+  val currentProgress = if (isPlaying) animatedProgress else targetProgress
+
+  val elapsedSec = if (isCurrentlyPlayingInSession && livePositionSec != null) {
+    livePositionSec!!.toLong().coerceAtLeast(0L)
+  } else if (progress > 0f && totalSec > 0L) {
+    (progress * totalSec).toLong().coerceAtLeast(0L)
+  } else {
+    0L
+  }
+  val elapsedFormatted = VideoScanUtils.formatDuration(elapsedSec * 1000L)
+
+  val calculatedBitrateKbps = remember(item.video.size, item.video.duration) {
+    if (item.video.duration > 0L && item.video.size > 0L) {
+      val durSec = item.video.duration / 1000.0
+      val bits = item.video.size * 8.0
+      val kbps = (bits / durSec / 1000.0).roundToInt()
+      if (kbps > 0) "${kbps}k" else "Lossless"
+    } else {
+      "Lossless"
+    }
+  }
+
+  // Real-time VU meter spring and bounce physics
+  val vuTransition = rememberInfiniteTransition(label = "vuMeterTransition")
+  val vuLeftAnim by vuTransition.animateFloat(
+    initialValue = 0.22f,
+    targetValue = 0.94f,
+    animationSpec = infiniteRepeatable(
+      animation = tween(durationMillis = 360, easing = FastOutSlowInEasing),
+      repeatMode = RepeatMode.Reverse,
+    ),
+    label = "vuLeftAnim",
+  )
+  val vuRightAnim by vuTransition.animateFloat(
+    initialValue = 0.18f,
+    targetValue = 0.88f,
+    animationSpec = infiniteRepeatable(
+      animation = tween(durationMillis = 440, easing = LinearOutSlowInEasing),
+      repeatMode = RepeatMode.Reverse,
+    ),
+    label = "vuRightAnim",
+  )
+
+  val currentVuLeft by animateFloatAsState(
+    targetValue = if (isPlaying) vuLeftAnim else 0.04f,
+    animationSpec = tween(durationMillis = 180),
+    label = "currentVuLeft",
+  )
+  val currentVuRight by animateFloatAsState(
+    targetValue = if (isPlaying) vuRightAnim else 0.04f,
+    animationSpec = tween(durationMillis = 180),
+    label = "currentVuRight",
+  )
+
+  // Backdrop: Full-bleed blurred thumbnail + Cyberpunk atmospheric gradients
+  BentoMediaThumbnail(
+    video = item.video,
+    modifier = Modifier
+      .fillMaxSize()
+      .scale(1.25f)
+      .blur(25.dp)
+      .alpha(0.38f),
+    showPlayOverlay = false,
+    highDefinition = true,
+  )
+
+  Box(
+    modifier = Modifier
+      .fillMaxSize()
+      .background(
+        Brush.horizontalGradient(
+          colors = listOf(
+            Color.Black.copy(alpha = 0.94f),
+            Color.Black.copy(alpha = 0.80f),
+            Color(0xFF061410).copy(alpha = 0.55f),
+          ),
+        ),
+      ),
+  )
+  Box(
+    modifier = Modifier
+      .fillMaxSize()
+      .background(
+        Brush.verticalGradient(
+          colors = listOf(
+            Color.Black.copy(alpha = 0.55f),
+            Color.Transparent,
+            Color.Black.copy(alpha = 0.88f),
+          ),
+        ),
+      ),
+  )
+
+  BoxWithConstraints(
+    modifier = Modifier
+      .fillMaxSize()
+      .padding(horizontal = 14.dp, vertical = (12f * scale.coerceIn(0.7f, 1.3f)).dp),
+  ) {
+    val showColumn3 = maxWidth >= 460.dp
+
+    Row(
+      modifier = Modifier.fillMaxSize(),
+      horizontalArrangement = Arrangement.spacedBy(14.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      // =========================================================================
+      // COLUMN 1: Artwork & Spec Telemetry
+      // =========================================================================
+      val artSize = if (showColumn3) 124.dp else 105.dp
+      Column(
+        modifier = Modifier
+          .width(artSize)
+          .fillMaxHeight(),
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally,
+      ) {
+        // Squircle Artwork with Specular Glass Border & Pinned Badge
+        Box(
+          modifier = Modifier
+            .size(artSize)
+            .clip(RoundedCornerShape(20.dp))
+            .border(
+              width = 1.dp,
+              brush = Brush.linearGradient(
+                listOf(
+                  Color.White.copy(alpha = 0.40f),
+                  Color.White.copy(alpha = 0.10f),
+                  Color.Transparent,
+                ),
+              ),
+              shape = RoundedCornerShape(20.dp),
+            ),
+        ) {
+          BentoMediaThumbnail(
+            video = item.video,
+            modifier = Modifier.fillMaxSize(),
+            showPlayOverlay = false,
+            highDefinition = true,
+          )
+
+          // Pinned bottom codec badge inside artwork
+          Row(
+            modifier = Modifier
+              .align(Alignment.BottomCenter)
+              .fillMaxWidth()
+              .background(
+                Brush.verticalGradient(
+                  listOf(Color.Transparent, Color.Black.copy(alpha = 0.88f)),
+                ),
+              )
+              .padding(horizontal = 7.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+          ) {
+            Text(
+              text = if (originalCodec in listOf("FLAC", "DSD", "WAV", "AIFF", "ALAC")) "HI-RES" else "STUDIO",
+              style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 7.5.sp,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Black,
+              ),
+              color = Color(0xFFFFD54F),
+            )
+            Text(
+              text = originalCodec,
+              style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 8.sp,
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.ExtraBold,
+              ),
+              color = Color.White,
+            )
+          }
+        }
+
+        // Tech Spec Box below Artwork
+        Surface(
+          shape = RoundedCornerShape(12.dp),
+          color = Color.Black.copy(alpha = 0.70f),
+          border = BorderStroke(0.8.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.35f)),
+          modifier = Modifier.fillMaxWidth(),
+        ) {
+          Column(
+            modifier = Modifier.padding(horizontal = 7.dp, vertical = 4.dp),
+            verticalArrangement = Arrangement.spacedBy(1.dp),
+          ) {
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Text(
+                text = "BITRATE",
+                style = MaterialTheme.typography.labelSmall.copy(
+                  fontSize = 7.5.sp,
+                  fontWeight = FontWeight.Bold,
+                ),
+                color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.85f),
+              )
+              Text(
+                text = calculatedBitrateKbps,
+                style = MaterialTheme.typography.labelSmall.copy(
+                  fontSize = 7.5.sp,
+                  fontFamily = FontFamily.Monospace,
+                  fontWeight = FontWeight.Bold,
+                ),
+                color = Color.White,
+              )
+            }
+            Row(
+              modifier = Modifier.fillMaxWidth(),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Text(
+                text = "CHANNELS",
+                style = MaterialTheme.typography.labelSmall.copy(
+                  fontSize = 7.5.sp,
+                  fontWeight = FontWeight.Bold,
+                ),
+                color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.85f),
+              )
+              Text(
+                text = "2.0 CH",
+                style = MaterialTheme.typography.labelSmall.copy(
+                  fontSize = 7.5.sp,
+                  fontFamily = FontFamily.Monospace,
+                  fontWeight = FontWeight.Bold,
+                ),
+                color = Color.White,
+              )
+            }
+          }
+        }
+      }
+
+      // =========================================================================
+      // COLUMN 2: Command Core (Title, Artist, Waveform, Scrubber)
+      // =========================================================================
+      Column(
+        modifier = Modifier
+          .weight(1f)
+          .fillMaxHeight(),
+        verticalArrangement = Arrangement.SpaceBetween,
+      ) {
+        // Top Header Row
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          // Status capsule
+          Surface(
+            shape = RoundedCornerShape(999.dp),
+            color = Color.Black.copy(alpha = 0.60f),
+            border = BorderStroke(
+              width = 1.dp,
+              brush = Brush.linearGradient(
+                colors = listOf(
+                  MaterialTheme.colorScheme.tertiary.copy(alpha = 0.80f),
+                  Color.White.copy(alpha = 0.35f),
+                  MaterialTheme.colorScheme.tertiary.copy(alpha = 0.20f),
+                ),
+              ),
+            ),
+          ) {
+            Row(
+              modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.5.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(5.dp),
+            ) {
+              Box(
+                modifier = Modifier
+                  .size(7.dp)
+                  .scale(pulseScale)
+                  .clip(CircleShape)
+                  .background(MaterialTheme.colorScheme.tertiary),
+              )
+              Text(
+                text = "AUDIO PULSING • LIVE",
+                style = MaterialTheme.typography.labelSmall.copy(
+                  fontWeight = FontWeight.ExtraBold,
+                  fontSize = 9.sp,
+                  letterSpacing = 0.8.sp,
+                ),
+                color = MaterialTheme.colorScheme.tertiary,
+              )
+            }
+          }
+
+          if (!showColumn3 && !nextTrackTitle.isNullOrBlank()) {
+            // In compact width, show next track pill in top header row
+            Surface(
+              shape = RoundedCornerShape(999.dp),
+              color = Color.Black.copy(alpha = 0.50f),
+              border = BorderStroke(0.8.dp, Color.White.copy(alpha = 0.15f)),
+              modifier = Modifier.widthIn(max = 160.dp),
+            ) {
+              Row(
+                modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.5.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+              ) {
+                Text(
+                  text = "NEXT:",
+                  style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 7.5.sp,
+                    fontWeight = FontWeight.Bold,
+                  ),
+                  color = MaterialTheme.colorScheme.tertiary,
+                )
+                Text(
+                  text = nextTrackTitle,
+                  style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 8.sp,
+                    fontWeight = FontWeight.SemiBold,
+                  ),
+                  color = Color.White.copy(alpha = 0.90f),
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis,
+                )
+              }
+            }
+          } else {
+            // Codec spec pill
+            Surface(
+              shape = RoundedCornerShape(999.dp),
+              color = Color.Black.copy(alpha = 0.50f),
+              border = BorderStroke(0.8.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.35f)),
+            ) {
+              Text(
+                text = if (originalCodec in listOf("FLAC", "DSD", "WAV", "AIFF", "ALAC")) "$originalCodec • 24-BIT LOSSLESS" else "$originalCodec STREAM",
+                style = MaterialTheme.typography.labelSmall.copy(
+                  fontWeight = FontWeight.SemiBold,
+                  fontSize = 9.sp,
+                ),
+                color = Color.White.copy(alpha = 0.90f),
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+              )
+            }
+          }
+        }
+
+        // Title and Artist Block
+        Column(
+          modifier = Modifier.fillMaxWidth(),
+          verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+          Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge.copy(
+              fontWeight = FontWeight.ExtraBold,
+              fontSize = 17.sp,
+            ),
+            color = Color.White,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+          )
+
+          Text(
+            text = if (artist.isNotBlank() && !artist.equals("Unknown Artist", ignoreCase = true)) {
+              "$artist • ${item.video.bucketDisplayName.ifBlank { "Lossless Audio" }}"
+            } else {
+              item.video.bucketDisplayName.ifBlank { "Lossless Audio" }
+            },
+            style = MaterialTheme.typography.bodySmall.copy(
+              fontWeight = FontWeight.SemiBold,
+              fontSize = 11.5.sp,
+            ),
+            color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.90f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+          )
+        }
+
+        // Waveform Visualizer Ribbon
+        Box(
+          modifier = Modifier
+            .fillMaxWidth()
+            .height(36.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color.Black.copy(alpha = 0.55f))
+            .border(0.8.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(12.dp))
+            .padding(horizontal = 6.dp, vertical = 2.dp),
+          contentAlignment = Alignment.Center,
+        ) {
+          OneUi9WaveformVisualizer(
+            modifier = Modifier
+              .fillMaxWidth()
+              .fillMaxHeight(),
+            wave1Color = wave1Color,
+            wave2Color = wave2Color,
+            wave3Color = wave3Color,
+            isPlaying = isPlaying,
+            progress = currentProgress,
+          )
+        }
+
+        // Progress Scrubber Bar Row
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          verticalAlignment = Alignment.CenterVertically,
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+          Text(
+            text = elapsedFormatted,
+            style = MaterialTheme.typography.labelSmall.copy(
+              fontSize = 10.sp,
+              fontFamily = FontFamily.Monospace,
+              fontWeight = FontWeight.Bold,
+            ),
+            color = MaterialTheme.colorScheme.tertiary,
+          )
+
+          Box(
+            modifier = Modifier
+              .weight(1f)
+              .height(4.dp)
+              .clip(RoundedCornerShape(999.dp))
+              .background(Color.White.copy(alpha = 0.15f)),
+          ) {
+            Box(
+              modifier = Modifier
+                .fillMaxWidth(currentProgress.coerceIn(0f, 1f))
+                .fillMaxHeight()
+                .clip(RoundedCornerShape(999.dp))
+                .background(
+                  Brush.horizontalGradient(
+                    listOf(
+                      MaterialTheme.colorScheme.tertiary,
+                      Color(0xFF00E5FF),
+                    ),
+                  ),
+                ),
+            )
+          }
+
+          Text(
+            text = remainingFormatted,
+            style = MaterialTheme.typography.labelSmall.copy(
+              fontSize = 10.sp,
+              fontFamily = FontFamily.Monospace,
+              fontWeight = FontWeight.SemiBold,
+            ),
+            color = Color.White.copy(alpha = 0.70f),
+          )
+        }
+      }
+
+      // =========================================================================
+      // COLUMN 3: Soundstage Telemetry & Gesture Context (NO BUTTONS!)
+      // =========================================================================
+      if (showColumn3) {
+        Column(
+          modifier = Modifier
+            .width(115.dp)
+            .fillMaxHeight(),
+          verticalArrangement = Arrangement.SpaceBetween,
+        ) {
+          // Stereo VU Meters
+          Surface(
+            shape = RoundedCornerShape(14.dp),
+            color = Color.Black.copy(alpha = 0.65f),
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.35f)),
+            modifier = Modifier.fillMaxWidth(),
+          ) {
+            Column(
+              modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+              verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+              Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+              ) {
+                Text(
+                  text = "VU METERS",
+                  style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 8.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 0.8.sp,
+                  ),
+                  color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.90f),
+                )
+                Text(
+                  text = if (isPlaying) "+3 dB" else "-∞ dB",
+                  style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 8.sp,
+                    fontFamily = FontFamily.Monospace,
+                    fontWeight = FontWeight.Bold,
+                  ),
+                  color = if (isPlaying) Color(0xFF00E5FF) else Color.White.copy(alpha = 0.40f),
+                )
+              }
+
+              // Left Channel Bar
+              VuChannelBar(
+                label = "L",
+                level = currentVuLeft,
+                accentColor = MaterialTheme.colorScheme.tertiary,
+              )
+
+              // Right Channel Bar
+              VuChannelBar(
+                label = "R",
+                level = currentVuRight,
+                accentColor = Color(0xFF00E5FF),
+              )
+            }
+          }
+
+          // Upcoming Track Preview Pill
+          Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = Color.Black.copy(alpha = 0.55f),
+            border = BorderStroke(0.8.dp, Color.White.copy(alpha = 0.15f)),
+            modifier = Modifier.fillMaxWidth(),
+          ) {
+            Column(
+              modifier = Modifier.padding(horizontal = 7.dp, vertical = 5.dp),
+              verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+              Text(
+                text = "NEXT UP ❯",
+                style = MaterialTheme.typography.labelSmall.copy(
+                  fontSize = 7.5.sp,
+                  fontWeight = FontWeight.Black,
+                  letterSpacing = 0.6.sp,
+                ),
+                color = MaterialTheme.colorScheme.tertiary,
+              )
+              Text(
+                text = nextTrackTitle ?: "End of Queue",
+                style = MaterialTheme.typography.bodySmall.copy(
+                  fontSize = 9.5.sp,
+                  fontWeight = FontWeight.SemiBold,
+                ),
+                color = Color.White.copy(alpha = 0.90f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+              )
+            }
+          }
+
+          // Gesture Micro-Guide Pill (NO BUTTONS!)
+          Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = Color.Black.copy(alpha = 0.50f),
+            border = BorderStroke(0.8.dp, Color.White.copy(alpha = 0.12f)),
+            modifier = Modifier.fillMaxWidth(),
+          ) {
+            Column(
+              modifier = Modifier.padding(horizontal = 7.dp, vertical = 5.dp),
+              verticalArrangement = Arrangement.spacedBy(2.dp),
+              horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+              Text(
+                text = "Swipe ◀ ▶ Skip",
+                style = MaterialTheme.typography.labelSmall.copy(
+                  fontSize = 8.5.sp,
+                  fontWeight = FontWeight.Bold,
+                ),
+                color = Color.White.copy(alpha = 0.85f),
+              )
+              Text(
+                text = "Tap ⏯ • Hold ⚙",
+                style = MaterialTheme.typography.labelSmall.copy(
+                  fontSize = 8.sp,
+                  fontWeight = FontWeight.Medium,
+                ),
+                color = Color.White.copy(alpha = 0.60f),
+              )
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@Composable
+private fun VuChannelBar(
+  label: String,
+  level: Float,
+  accentColor: Color,
+  modifier: Modifier = Modifier,
+) {
+  Row(
+    modifier = modifier.fillMaxWidth(),
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(4.dp),
+  ) {
+    Text(
+      text = label,
+      style = MaterialTheme.typography.labelSmall.copy(
+        fontSize = 7.5.sp,
+        fontFamily = FontFamily.Monospace,
+        fontWeight = FontWeight.Bold,
+      ),
+      color = Color.White.copy(alpha = 0.60f),
+    )
+    Box(
+      modifier = Modifier
+        .weight(1f)
+        .height(5.dp)
+        .clip(RoundedCornerShape(999.dp))
+        .background(Color.White.copy(alpha = 0.10f)),
+    ) {
+      Box(
+        modifier = Modifier
+          .fillMaxWidth(level.coerceIn(0f, 1f))
+          .fillMaxHeight()
+          .clip(RoundedCornerShape(999.dp))
+          .background(
+            Brush.horizontalGradient(
+              listOf(
+                accentColor.copy(alpha = 0.6f),
+                accentColor,
+                if (level > 0.82f) Color(0xFFFF5252) else accentColor,
+              ),
+            ),
+          ),
+      )
     }
   }
 }
