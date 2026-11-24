@@ -331,8 +331,8 @@ object PreferencesScreen : Screen {
         ),
         verticalArrangement = Arrangement.spacedBy(16.dp),
       ) {
-        // 1. Concept 1: Aurora Hero Profile & Stats Card
-        item(key = "aurora_hero_profile") {
+        // 1. Aurora Hub: Profile & Stats Card
+        item(key = "aurora_hub_hero_profile") {
           AuroraProfileHeroCard(
             profileName = profileName,
             themeBadge = themeBadge,
@@ -340,9 +340,9 @@ object PreferencesScreen : Screen {
           )
         }
 
-        // 2. Concept 1: 2x2 Bento Quick-Look Action Grid
-        item(key = "aurora_bento_quick_grid") {
-          AuroraBentoQuickGrid(
+        // 2. Aurora Hub: 2x2 Quick-Look Action Grid
+        item(key = "aurora_hub_quick_grid") {
+          AuroraHubQuickGrid(
             onAppearanceClick = { onScreenSelected(AppearancePreferencesScreen) },
             onEngineClick = { onScreenSelected(DecoderPreferencesScreen) },
             onControlsClick = { onScreenSelected(PlayerControlsPreferencesScreen) },
@@ -358,9 +358,9 @@ object PreferencesScreen : Screen {
           )
         }
 
-        // 3. Concept 1: Categorized Bento Hubs
+        // 3. Aurora Hub: Categorized Hubs
         items(sections, key = { it.title }) { section ->
-          AuroraGroupedHubBlock(
+          AuroraHubGroupedBlock(
             section = section,
             selectedScreen = selectedScreen,
             onItemClick = { destination -> onScreenSelected(destination.screen) },
@@ -666,10 +666,10 @@ private fun AuroraProfileHeroCard(
 }
 
 /**
- * Concept 1: 2x2 Bento Quick-Look Action Grid
+ * Aurora Hub: 2x2 Quick-Look Action Grid
  */
 @Composable
-private fun AuroraBentoQuickGrid(
+private fun AuroraHubQuickGrid(
   onAppearanceClick: () -> Unit,
   onEngineClick: () -> Unit,
   onControlsClick: () -> Unit,
@@ -689,7 +689,7 @@ private fun AuroraBentoQuickGrid(
       horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
       // Tile 1: Appearance & Theme
-      AuroraBentoTile(
+      AuroraHubTile(
         title = stringResource(R.string.pref_appearance_title),
         subtitle = "Optics & Theme",
         statusBadge = "ACTIVE",
@@ -711,7 +711,7 @@ private fun AuroraBentoQuickGrid(
       )
 
       // Tile 2: Video Engine / Decoder
-      AuroraBentoTile(
+      AuroraHubTile(
         title = stringResource(R.string.pref_decoder),
         subtitle = if (tryHwDecoding) "mpv • HW+ Direct" else "mpv • Software",
         statusBadge = if (tryHwDecoding) "HW+" else "SW",
@@ -728,7 +728,7 @@ private fun AuroraBentoQuickGrid(
       horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
       // Tile 3: Controls & Gestures
-      AuroraBentoTile(
+      AuroraHubTile(
         title = stringResource(R.string.pref_layout_title),
         subtitle = stringResource(R.string.pref_gesture),
         statusBadge = "CUSTOM",
@@ -741,7 +741,7 @@ private fun AuroraBentoQuickGrid(
 
       // Tile 4: Secure Folder Vault (or Media Folders)
       if (!isSecureFolderHidden) {
-        AuroraBentoTile(
+        AuroraHubTile(
           title = stringResource(R.string.secure_folder_settings_title),
           subtitle = "Biometric Vault",
           statusBadge = "VAULT",
@@ -752,7 +752,7 @@ private fun AuroraBentoQuickGrid(
           onClick = onVaultClick,
         )
       } else {
-        AuroraBentoTile(
+        AuroraHubTile(
           title = stringResource(R.string.pref_folders_title),
           subtitle = "Storage Folders",
           statusBadge = "STORAGE",
@@ -768,10 +768,10 @@ private fun AuroraBentoQuickGrid(
 }
 
 /**
- * Concept 1: Individual Bento Action Tile
+ * Aurora Hub: Individual Action Tile
  */
 @Composable
-private fun AuroraBentoTile(
+private fun AuroraHubTile(
   title: String,
   subtitle: String,
   statusBadge: String,
@@ -868,10 +868,10 @@ private fun AuroraBentoTile(
 }
 
 /**
- * Concept 1: Grouped Bento Hub Container
+ * Aurora Hub: Grouped Container
  */
 @Composable
-private fun AuroraGroupedHubBlock(
+private fun AuroraHubGroupedBlock(
   section: SettingsSection,
   selectedScreen: Screen?,
   onItemClick: (SettingsDestination) -> Unit,
