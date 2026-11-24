@@ -127,6 +127,7 @@ fun PlayerSheets(
 
   when (sheetShown) {
     Sheets.None -> {}
+    Sheets.MediaInfo -> app.video.player.ui.mediainfo.PlaybackMediaInfoSheet(onDismissRequest)
     Sheets.BookmarkEditor -> PlaybackBookmarkEditor(viewModel, { onShowSheet(Sheets.Chapters) }, onDismissRequest)
     Sheets.SleepTimer -> {
       val sleepTimerTimeRemaining by viewModel.remainingTime.composeCollectAsState()

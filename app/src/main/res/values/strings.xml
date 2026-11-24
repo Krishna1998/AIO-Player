@@ -207,6 +207,8 @@
   <string name="ui_filter_all">All</string>
   <string name="ui_filter_unwatched">Unwatched</string>
   <string name="ui_filter_started">Started</string>
+  <string name="media_info_playback_snapshot">Showing information the player can read from this stream. Some file details may not be available.</string>
+  <string name="media_info_unavailable">Media info is not available for this source.</string>
   <string name="pref_nav_jellyfin_title">Show Jellyfin tab</string>
   <string name="pref_nav_jellyfin_summary">Show or hide Jellyfin in the bottom navigation bar</string>
   <string name="pref_quick_play_fab_title">Quick Play FAB</string>
