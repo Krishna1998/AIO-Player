@@ -426,7 +426,7 @@ fun PermissionDeniedState(
           horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
           // Column 1: Primary Storage Card (Full height / dominant)
-          AuroraBentoCard(
+          AuraPermissionCard(
             title = stringResource(R.string.ui_file_permission_title),
             description = if (isPlayStoreBuild) {
               if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -466,7 +466,7 @@ fun PermissionDeniedState(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(16.dp),
           ) {
-            AuroraBentoCard(
+            AuraPermissionCard(
               title = stringResource(R.string.onboarding_configuration_card_title),
               description = configurationMessage ?: stringResource(R.string.onboarding_configuration_card_desc),
               isGranted = isConfigured,
@@ -481,7 +481,7 @@ fun PermissionDeniedState(
             )
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-              AuroraBentoCard(
+              AuraPermissionCard(
                 title = stringResource(R.string.ui_notification_permission_title),
                 description = stringResource(R.string.ui_notification_permission_desc),
                 isGranted = isNotificationGranted,
@@ -507,7 +507,7 @@ fun PermissionDeniedState(
             .fillMaxWidth(),
           verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
-          AuroraBentoCard(
+          AuraPermissionCard(
             title = stringResource(R.string.ui_file_permission_title),
             description = if (isPlayStoreBuild) {
               if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -540,7 +540,7 @@ fun PermissionDeniedState(
             modifier = Modifier.tvInitialFocus(primaryFocusRequester),
           )
 
-          AuroraBentoCard(
+          AuraPermissionCard(
             title = stringResource(R.string.onboarding_configuration_card_title),
             description = configurationMessage ?: stringResource(R.string.onboarding_configuration_card_desc),
             isGranted = isConfigured,
@@ -555,7 +555,7 @@ fun PermissionDeniedState(
           )
 
           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            AuroraBentoCard(
+            AuraPermissionCard(
               title = stringResource(R.string.ui_notification_permission_title),
               description = stringResource(R.string.ui_notification_permission_desc),
               isGranted = isNotificationGranted,
@@ -793,7 +793,7 @@ fun PermissionDeniedState(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-private fun AuroraBentoCard(
+private fun AuraPermissionCard(
   title: String,
   description: String,
   isGranted: Boolean,
