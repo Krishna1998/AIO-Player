@@ -878,34 +878,41 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
                     ),
               ) {
                 val hideNavBarLabels by appearancePreferences.hideNavigationBarLabels.collectAsState()
-                  val horizontalMargin by animateDpAsState(
-                    targetValue = if (NavigationBarState.isMiniPlayerDocked) NavigationBarState.floatingBarSpacing
-                      else NavigationBarState.navigationPillMaxMargin - 30.dp * (if (hideNavBarLabels) 0f else NavigationBarState.navLabelVisibility),
-                    animationSpec = if (navStyle == NavigationAnimStyle.None) snap() else tween(300, easing = NavigationBarEasing),
-                    label = "navigation_margin",
-                  )
-                  val centerFraction = animateFloatAsState(
-                    targetValue = when {
-                      isDualPaneFolderSelected && selectedTab == MainTab.HOME -> 0.2f
-                      NavigationBarState.isMiniPlayerDocked -> 0.5f
-                      isMiniPlayerVisible && NavigationBarState.canPlaceMiniPlayerBesideNavigation(maxWidth) -> 0f
-                      else -> 0.5f
-                    },
-                    animationSpec = if (navStyle == NavigationAnimStyle.None) snap() else tween(duration, easing = FastOutSlowInEasing),
-                    label = "pill_alignment",
-                  )
+                val shrinkNavBarOnScroll by appearancePreferences.shrinkNavigationBarOnScroll.collectAsState()
+                LaunchedEffect(shrinkNavBarOnScroll) {
+                  NavigationBarState.allowShrinkOnScroll = shrinkNavBarOnScroll
+                  if (!shrinkNavBarOnScroll) {
+                    NavigationBarState.expandNavLabels()
+                  }
+                }
+                val effectiveNavLabelVisibility = if (shrinkNavBarOnScroll) NavigationBarState.navLabelVisibility else 1f
+                val horizontalMargin by animateDpAsState(
+                  targetValue = if (NavigationBarState.isMiniPlayerDocked) NavigationBarState.floatingBarSpacing
+                    else NavigationBarState.navigationPillMaxMargin - 30.dp * (if (hideNavBarLabels) 0f else effectiveNavLabelVisibility),
+                  animationSpec = if (navStyle == NavigationAnimStyle.None) snap() else tween(300, easing = NavigationBarEasing),
+                  label = "navigation_margin",
+                )
+                val centerFraction = animateFloatAsState(
+                  targetValue = when {
+                    isDualPaneFolderSelected && selectedTab == MainTab.HOME -> 0.2f
+                    NavigationBarState.isMiniPlayerDocked -> 0.5f
+                    isMiniPlayerVisible && NavigationBarState.canPlaceMiniPlayerBesideNavigation(maxWidth) -> 0f
+                    else -> 0.5f
+                  },
+                  animationSpec = if (navStyle == NavigationAnimStyle.None) snap() else tween(duration, easing = FastOutSlowInEasing),
+                  label = "pill_alignment",
+                )
 
-                  val compactIcons = androidx.compose.ui.platform.LocalConfiguration.current.smallestScreenWidthDp >= 600
-                  val labelStyle = if (compactIcons) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelMedium
-                  val labelLineCount = if (density.fontScale > 1f) 2 else 1
-                  val labelHeight = with(density) { labelStyle.lineHeight.toDp() } * labelLineCount
-                  val labelFraction by animateFloatAsState(
-                    targetValue = if (hideNavBarLabels) 0f else NavigationBarState.navLabelVisibility,
-                    animationSpec = if (navStyle == NavigationAnimStyle.None) snap() else tween(300, easing = NavigationBarEasing),
-                    label = "navigation_labels",
-                  )
+                val compactIcons = androidx.compose.ui.platform.LocalConfiguration.current.smallestScreenWidthDp >= 600
+                val labelStyle = if (compactIcons) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelMedium
+                val labelHeight = with(density) { labelStyle.lineHeight.toDp() }.coerceIn(12.dp, 16.dp)
+                val labelFraction by animateFloatAsState(
+                  targetValue = if (hideNavBarLabels) 0f else effectiveNavLabelVisibility,
+                  animationSpec = if (navStyle == NavigationAnimStyle.None) snap() else tween(300, easing = NavigationBarEasing),
+                  label = "navigation_labels",
+                )
 
-                  val searchButtonSize = 48.dp + labelHeight * labelFraction
+                val searchButtonSize = 48.dp + labelHeight * labelFraction
 
                   val navModifier = Modifier
                     .layout { measurable, constraints ->
@@ -1066,15 +1073,16 @@ internal fun ExpressivePillNavigationBar(
     label = "navigation_glow",
   )
   val compactIcons = androidx.compose.ui.platform.LocalConfiguration.current.smallestScreenWidthDp >= 600
-  val iconSize = if (compactIcons) 24.dp else MainNavigationIconSize
+  val iconSize = if (compactIcons) 24.dp else 26.dp
   val labelStyle = if (compactIcons) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelMedium
   val activeLabelStyle =
     if (compactIcons) MaterialTheme.typography.labelSmallEmphasized else MaterialTheme.typography.labelMediumEmphasized
-  val labelLineCount = if (density.fontScale > 1f) 2 else 1
-  val labelHeight = with(density) { labelStyle.lineHeight.toDp() } * labelLineCount
+  val labelHeight = with(density) { labelStyle.lineHeight.toDp() }.coerceIn(12.dp, 16.dp)
   val hideNavBarLabels by appearancePreferences.hideNavigationBarLabels.collectAsState()
+  val shrinkNavBarOnScroll by appearancePreferences.shrinkNavigationBarOnScroll.collectAsState()
+  val effectiveNavLabelVisibility = if (shrinkNavBarOnScroll) NavigationBarState.navLabelVisibility else 1f
   val animatedLabelFraction by animateFloatAsState(
-    targetValue = if (hideNavBarLabels) 0f else NavigationBarState.navLabelVisibility,
+    targetValue = if (hideNavBarLabels) 0f else effectiveNavLabelVisibility,
     animationSpec = if (reducedMotion) snap() else tween(300, easing = NavigationBarEasing),
     label = "navigation_labels",
   )
@@ -1153,21 +1161,30 @@ internal fun ExpressivePillNavigationBar(
               Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxHeight(),
               ) {
-                Box(Modifier.size(iconSize).graphicsLayer { translationY = 2.dp.toPx() * effectiveLabelFraction }) {
-                  MainTabIcon(tab, contentColor, null, iconSize)
-                }
-                Box(Modifier.height(labelHeight * effectiveLabelFraction).fillMaxWidth().clipToBounds().graphicsLayer { alpha = effectiveLabelFraction }) {
-                Text(
-                  text = label,
-                  style = if (active) activeLabelStyle else labelStyle,
-                  color = contentColor,
-                  maxLines = labelLineCount,
-                  softWrap = true,
-                  overflow = TextOverflow.Ellipsis,
-                  textAlign = TextAlign.Center,
-                  modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
-                )
+                MainTabIcon(tab, contentColor, null, iconSize)
+                if (effectiveLabelFraction > 0f) {
+                  Spacer(Modifier.height(2.dp * effectiveLabelFraction))
+                  Box(
+                    modifier = Modifier
+                      .height(labelHeight * effectiveLabelFraction)
+                      .fillMaxWidth()
+                      .clipToBounds()
+                      .graphicsLayer { alpha = effectiveLabelFraction },
+                    contentAlignment = Alignment.Center,
+                  ) {
+                    Text(
+                      text = label,
+                      style = if (active) activeLabelStyle else labelStyle,
+                      color = contentColor,
+                      maxLines = 1,
+                      softWrap = false,
+                      overflow = TextOverflow.Ellipsis,
+                      textAlign = TextAlign.Center,
+                      modifier = Modifier.fillMaxWidth().padding(horizontal = 2.dp),
+                    )
+                  }
                 }
               }
             }

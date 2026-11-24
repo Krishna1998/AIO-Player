@@ -220,6 +220,8 @@ object NavigationBarState {
   var navLabelVisibility: Float by mutableFloatStateOf(1f)
     private set
 
+  var allowShrinkOnScroll: Boolean by mutableStateOf(false)
+
   private var accumulatedScroll = 0f
 
   /** Uptime of the latest content scroll delta; plain field so scrolling never recomposes. */
@@ -234,6 +236,11 @@ object NavigationBarState {
         source: NestedScrollSource,
       ): Offset {
         lastContentScrollUptimeMs = android.os.SystemClock.uptimeMillis()
+        if (!allowShrinkOnScroll) {
+          if (navLabelVisibility != 1f) navLabelVisibility = 1f
+          accumulatedScroll = 0f
+          return Offset.Zero
+        }
         val delta = available.y
         // Reversing direction restarts the run so a small bounce does not toggle the labels.
         if ((delta < 0f && accumulatedScroll > 0f) || (delta > 0f && accumulatedScroll < 0f)) {

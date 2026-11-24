@@ -50,6 +50,7 @@ import app.video.player.domain.thumbnail.ThumbnailRepository
 import app.video.player.preferences.AppearancePreferences
 import app.video.player.preferences.AudioPulsingProgressStyle
 import app.video.player.preferences.DualHorizonHeaderStyle
+import app.video.player.preferences.HeroSpotlightSeekbarStyle
 import app.video.player.preferences.BrowserPreferences
 import app.video.player.preferences.GesturePreferences
 import app.video.player.preferences.MultiChoiceSegmentedButton
@@ -1177,7 +1178,7 @@ object AppearancePreferencesScreen : Screen {
           }
 
           item {
-            val dualHorizonItemCount = 4
+            val dualHorizonItemCount = 5
 
             ExpressivePreferenceGroup {
               val cinematicShowHeroSpotlight by browserPreferences.cinematicShowHeroSpotlight.collectAsState()
@@ -1196,9 +1197,32 @@ object AppearancePreferencesScreen : Screen {
                 groupSize = dualHorizonItemCount,
               )
 
+              val heroSpotlightSeekbarStyle by browserPreferences.heroSpotlightSeekbarStyle.collectAsState()
+              ExpressivePreferenceTile(index = 1, itemCount = dualHorizonItemCount) {
+                ListPreference(
+                  modifier = Modifier.settingsSearchTarget(R.string.pref_hero_spotlight_seekbar_style_title),
+                  value = heroSpotlightSeekbarStyle,
+                  onValueChange = {
+                    if (it != heroSpotlightSeekbarStyle) {
+                      browserPreferences.heroSpotlightSeekbarStyle.set(it)
+                    }
+                  },
+                  values = HeroSpotlightSeekbarStyle.entries,
+                  valueToText = { AnnotatedString(stringResource(it.titleRes)) },
+                  title = { Text(stringResource(R.string.pref_hero_spotlight_seekbar_style_title)) },
+                  summary = {
+                    Text(
+                      stringResource(heroSpotlightSeekbarStyle.titleRes),
+                      color = MaterialTheme.colorScheme.outline,
+                    )
+                  },
+                  enabled = cinematicShowHeroSpotlight,
+                )
+              }
+
               val audioPulsingProgressStyle by browserPreferences.audioPulsingProgressStyle.collectAsState()
               val dualHorizonShowAudioPulsing by browserPreferences.dualHorizonShowAudioPulsing.collectAsState()
-              ExpressivePreferenceTile(index = 1, itemCount = dualHorizonItemCount) {
+              ExpressivePreferenceTile(index = 2, itemCount = dualHorizonItemCount) {
                 ListPreference(
                   modifier = Modifier.settingsSearchTarget(R.string.pref_audio_pulsing_progress_style_title),
                   value = audioPulsingProgressStyle,
@@ -1222,7 +1246,7 @@ object AppearancePreferencesScreen : Screen {
               }
 
               val dualHorizonHeaderStyle by browserPreferences.dualHorizonHeaderStyle.collectAsState()
-              ExpressivePreferenceTile(index = 2, itemCount = dualHorizonItemCount) {
+              ExpressivePreferenceTile(index = 3, itemCount = dualHorizonItemCount) {
                 ListPreference(
                   modifier = Modifier.settingsSearchTarget(R.string.pref_dual_horizon_header_style_title),
                   value = dualHorizonHeaderStyle,
@@ -1256,7 +1280,7 @@ object AppearancePreferencesScreen : Screen {
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
-                groupIndex = 3,
+                groupIndex = 4,
                 groupSize = dualHorizonItemCount,
               )
             }
@@ -1557,7 +1581,7 @@ object AppearancePreferencesScreen : Screen {
                     )
                   },
                   groupIndex = 0,
-                  groupSize = 5,
+                  groupSize = 6,
                 )
                 val quickPlayFabDirect by preferences.quickPlayFabDirect.collectAsState()
                 SwitchPreference(
@@ -1573,7 +1597,7 @@ object AppearancePreferencesScreen : Screen {
                     )
                   },
                   groupIndex = 1,
-                  groupSize = 5,
+                  groupSize = 6,
                 )
                 val navigationBarGlow by preferences.navigationBarGlow.collectAsState()
                 SwitchPreference(
@@ -1583,7 +1607,7 @@ object AppearancePreferencesScreen : Screen {
                   title = { Text(stringResource(R.string.navbar_glow_title)) },
                   summary = { Text(stringResource(R.string.navbar_glow_summary), color = MaterialTheme.colorScheme.outline) },
                   groupIndex = 2,
-                  groupSize = 5,
+                  groupSize = 6,
                 )
                 val hideNavigationBarLabels by preferences.hideNavigationBarLabels.collectAsState()
                 SwitchPreference(
@@ -1593,7 +1617,18 @@ object AppearancePreferencesScreen : Screen {
                   title = { Text(stringResource(R.string.pref_hide_navigation_bar_labels_title)) },
                   summary = { Text(stringResource(R.string.pref_hide_navigation_bar_labels_summary), color = MaterialTheme.colorScheme.outline) },
                   groupIndex = 3,
-                  groupSize = 5,
+                  groupSize = 6,
+                )
+                val shrinkNavigationBarOnScroll by preferences.shrinkNavigationBarOnScroll.collectAsState()
+                SwitchPreference(
+                  modifier = Modifier.settingsSearchTarget(R.string.pref_shrink_navigation_bar_on_scroll_title),
+                  value = shrinkNavigationBarOnScroll,
+                  onValueChange = preferences.shrinkNavigationBarOnScroll::set,
+                  enabled = !hideNavigationBarLabels,
+                  title = { Text(stringResource(R.string.pref_shrink_navigation_bar_on_scroll_title)) },
+                  summary = { Text(stringResource(R.string.pref_shrink_navigation_bar_on_scroll_summary), color = MaterialTheme.colorScheme.outline) },
+                  groupIndex = 4,
+                  groupSize = 6,
                 )
                 val progressiveNavigationBlur by preferences.progressiveNavigationBlur.collectAsState()
                 SwitchPreference(
@@ -1602,8 +1637,8 @@ object AppearancePreferencesScreen : Screen {
                   onValueChange = preferences.progressiveNavigationBlur::set,
                   title = { Text(stringResource(R.string.progressive_navigation_blur_title)) },
                   summary = { Text(stringResource(R.string.progressive_navigation_blur_summary), color = MaterialTheme.colorScheme.outline) },
-                  groupIndex = 4,
-                  groupSize = 5,
+                  groupIndex = 5,
+                  groupSize = 6,
                 )
               }
             }

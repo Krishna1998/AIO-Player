@@ -10,7 +10,9 @@
 package app.video.player.ui.browser.cinematichorizon
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Bitmap
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -120,6 +122,7 @@ import app.video.player.domain.media.model.Video
 import app.video.player.domain.recentlyplayed.repository.RecentlyPlayedRepository
 import android.net.Uri
 import app.video.player.preferences.DualHorizonHeaderStyle
+import app.video.player.preferences.HeroSpotlightSeekbarStyle
 import app.video.player.preferences.BrowserPreferences
 import app.video.player.preferences.MediaLibraryType
 import app.video.player.preferences.preference.collectAsState
@@ -259,6 +262,7 @@ fun DualHorizonHeader(
   val showAudioPulsing by browserPreferences.dualHorizonShowAudioPulsing.collectAsState()
   val showCinematicSpotlight by browserPreferences.cinematicShowHeroSpotlight.collectAsState()
   val cinematicSpotlightScale by browserPreferences.cinematicSpotlightScale.collectAsState()
+  val heroSpotlightSeekbarStyle by browserPreferences.heroSpotlightSeekbarStyle.collectAsState()
   val audioPulsingScale by browserPreferences.dualHorizonAudioPulsingScale.collectAsState()
   val videoRailScale by browserPreferences.dualHorizonVideoRailScale.collectAsState()
   val musicRailScale by browserPreferences.dualHorizonMusicRailScale.collectAsState()
@@ -503,6 +507,7 @@ fun DualHorizonHeader(
     videoRailScale = videoRailScale,
     musicRailScale = musicRailScale,
     dualHorizonHeaderStyle = dualHorizonHeaderStyle,
+    heroSpotlightSeekbarStyle = heroSpotlightSeekbarStyle,
     onPlayMedia = onPlayMedia,
     playAudioInBackground = { targetVideo, pos -> playAudioInBackground(targetVideo, pos) },
     onVideoAction = { actionTargetVideo = it },
@@ -617,6 +622,7 @@ private fun CinematicHorizonContent(
   videoRailScale: Float = 1.0f,
   musicRailScale: Float = 1.0f,
   dualHorizonHeaderStyle: DualHorizonHeaderStyle = DualHorizonHeaderStyle.LiquidCapsule,
+  heroSpotlightSeekbarStyle: HeroSpotlightSeekbarStyle = HeroSpotlightSeekbarStyle.EdgeNeonBeam,
   onPlayMedia: (Video, Double?, List<Video>) -> Unit,
   playAudioInBackground: (Video, Double?) -> Unit,
   onVideoAction: (Video) -> Unit,
@@ -626,6 +632,119 @@ private fun CinematicHorizonContent(
   val livePos = PlaybackSession.propInt["time-pos"].collectAsState().value?.toDouble()
 
   val spotlightItem = heroVideo ?: videoItems.firstOrNull() ?: heroAudio ?: sortedAudioByTitle.firstOrNull()
+  val heroToDisplay = heroAudio ?: (if (videoItems.isEmpty()) heroVideo else null)
+
+  val configuration = LocalConfiguration.current
+  val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+  val isTablet = configuration.smallestScreenWidthDp >= 600
+
+  val landscapeHeroHeight = if (isTablet) (250f * spotlightScale.coerceIn(0.7f, 1.3f)).dp else (236f * spotlightScale.coerceIn(0.7f, 1.3f)).dp
+  val portraitHeroHeight = (290f * spotlightScale.coerceIn(0.7f, 1.3f)).dp
+
+  val hasDualHeroLandscape = isLandscape && showSpotlight && spotlightItem != null && showAudioPulsing && heroToDisplay != null
+
+  @Composable
+  fun RenderAudioPulsingCard(
+    modifier: Modifier = Modifier,
+    cardHeight: androidx.compose.ui.unit.Dp? = null,
+    includeHorizontalPadding: Boolean = true,
+  ) {
+    if (heroToDisplay == null) return
+    val isCurrentlyInSession = remember(currentSessionItem, heroToDisplay.video) {
+      matchesPlaybackItem(heroToDisplay.video, currentSessionItem)
+    }
+    val savedPos = heroToDisplay.timeRemaining?.let { rem ->
+      ((heroToDisplay.video.duration / 1000L) - rem).coerceAtLeast(0L).toDouble()
+    } ?: if ((heroToDisplay.progressPercentage ?: 0f) > 0f && heroToDisplay.video.duration > 0L) {
+      (((heroToDisplay.progressPercentage!! * heroToDisplay.video.duration) / 1000L).toLong()).toDouble()
+    } else 0.0
+
+    val audioResumePos = if (isCurrentlyInSession && livePos != null && livePos > 0.0) {
+      livePos
+    } else {
+      savedPos
+    }
+
+    BentoHeroSpotlightCard(
+      item = heroToDisplay,
+      scale = audioPulsingScale,
+      cardHeight = cardHeight,
+      includeHorizontalPadding = includeHorizontalPadding,
+      modifier = modifier,
+      onClick = {
+        if (heroToDisplay.video.isAudio) {
+          if (isCurrentlyInSession) {
+            val currentPaused = isPaused ?: false
+            PlaybackSession.setPropertyBoolean("pause", !currentPaused)
+          } else {
+            playAudioInBackground(heroToDisplay.video, audioResumePos.takeIf { it > 0.0 })
+          }
+        } else {
+          onPlayMedia(heroToDisplay.video, audioResumePos.takeIf { it > 0.0 }, videoItems.map { it.video })
+        }
+      },
+      onLongClick = {
+        if (heroToDisplay.video.isAudio) {
+          if (PlaybackSession.isInitialized) {
+            val intent = Intent(context, PlayerActivity::class.java).apply {
+              action = MediaPlaybackService.ACTION_OPEN_PLAYER
+              putExtra("is_audio", true)
+              putExtra("internal_launch", true)
+              putExtra("launch_source", "audio_pulsing")
+              flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            try {
+              context.startActivity(intent)
+            } catch (_: Exception) {}
+          } else {
+            onPlayMedia(heroToDisplay.video, audioResumePos.takeIf { it > 0.0 }, sortedAudioByTitle.map { it.video })
+          }
+        } else {
+          onVideoAction(heroToDisplay.video)
+        }
+      },
+      onPrevious = {
+        if (isCurrentlyInSession) {
+          val prev = PlaybackSession.playPrevious()
+          if (prev == null && sortedAudioByTitle.isNotEmpty()) {
+            val currIdx = sortedAudioByTitle.indexOfFirst { matchesPlaybackItem(it.video, currentSessionItem) }
+            if (currIdx >= 0) {
+              val prevIdx = (currIdx - 1 + sortedAudioByTitle.size) % sortedAudioByTitle.size
+              playAudioInBackground(sortedAudioByTitle[prevIdx].video, null)
+            }
+          }
+        } else if (sortedAudioByTitle.isNotEmpty()) {
+          val currIdx = sortedAudioByTitle.indexOfFirst { it.video.path == heroToDisplay.video.path }
+          val prevIdx = if (currIdx >= 0) (currIdx - 1 + sortedAudioByTitle.size) % sortedAudioByTitle.size else 0
+          playAudioInBackground(sortedAudioByTitle[prevIdx].video, null)
+        }
+      },
+      onPlayPause = {
+        if (isCurrentlyInSession) {
+          val currentPaused = isPaused ?: false
+          PlaybackSession.setPropertyBoolean("pause", !currentPaused)
+        } else {
+          playAudioInBackground(heroToDisplay.video, audioResumePos.takeIf { it > 0.0 })
+        }
+      },
+      onNext = {
+        if (isCurrentlyInSession) {
+          val next = PlaybackSession.playNext()
+          if (next == null && sortedAudioByTitle.isNotEmpty()) {
+            val currIdx = sortedAudioByTitle.indexOfFirst { matchesPlaybackItem(it.video, currentSessionItem) }
+            if (currIdx >= 0) {
+              val nextIdx = (currIdx + 1) % sortedAudioByTitle.size
+              playAudioInBackground(sortedAudioByTitle[nextIdx].video, null)
+            }
+          }
+        } else if (sortedAudioByTitle.isNotEmpty()) {
+          val currIdx = sortedAudioByTitle.indexOfFirst { it.video.path == heroToDisplay.video.path }
+          val nextIdx = if (currIdx >= 0) (currIdx + 1) % sortedAudioByTitle.size else 0
+          playAudioInBackground(sortedAudioByTitle[nextIdx].video, null)
+        }
+      },
+    )
+  }
 
   Column(
     modifier = modifier
@@ -633,8 +752,49 @@ private fun CinematicHorizonContent(
       .padding(bottom = 16.dp),
     verticalArrangement = Arrangement.spacedBy(16.dp),
   ) {
-    // 0. Panoramic Spotlight Hero Box
-    if (showSpotlight && spotlightItem != null) {
+    // 0. Panoramic Spotlight Hero Box / Landscape Dual Hero Single Row
+    if (hasDualHeroLandscape) {
+      val video = spotlightItem!!.video
+      val isSessionPlaying = remember(currentSessionItem, video) {
+        matchesPlaybackItem(video, currentSessionItem)
+      }
+      val resumePos = if (isSessionPlaying && livePos != null && livePos > 0.0) {
+        livePos
+      } else {
+        spotlightItem.timeRemaining?.let { rem ->
+          ((video.duration / 1000L) - rem).coerceAtLeast(0L).toDouble()
+        } ?: if ((spotlightItem.progressPercentage ?: 0f) > 0f && video.duration > 0L) {
+          (((spotlightItem.progressPercentage!! * video.duration) / 1000L).toLong()).toDouble()
+        } else 0.0
+      }
+
+      Row(
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+      ) {
+        // Left: Hero Spotlight Card
+        HeroSpotlightBox(
+          spotlightItem = spotlightItem,
+          resumePos = resumePos,
+          heroSpotlightSeekbarStyle = heroSpotlightSeekbarStyle,
+          onPlayMedia = onPlayMedia,
+          onVideoAction = onVideoAction,
+          videoItems = videoItems,
+          cardHeight = landscapeHeroHeight,
+          modifier = Modifier.weight(1f),
+        )
+
+        // Right: Audio Pulsing Hero Spotlight Card
+        RenderAudioPulsingCard(
+          modifier = Modifier.weight(1f),
+          cardHeight = landscapeHeroHeight,
+          includeHorizontalPadding = false,
+        )
+      }
+    } else if (showSpotlight && spotlightItem != null) {
       val video = spotlightItem.video
       val isSessionPlaying = remember(currentSessionItem, video) {
         matchesPlaybackItem(video, currentSessionItem)
@@ -649,169 +809,25 @@ private fun CinematicHorizonContent(
         } else 0.0
       }
 
-      val heroHeight = (280f * spotlightScale.coerceIn(0.7f, 1.3f)).dp
       Box(
-        modifier = Modifier
-          .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center,
       ) {
-        Box(
+        HeroSpotlightBox(
+          spotlightItem = spotlightItem,
+          resumePos = resumePos,
+          heroSpotlightSeekbarStyle = heroSpotlightSeekbarStyle,
+          onPlayMedia = onPlayMedia,
+          onVideoAction = onVideoAction,
+          videoItems = videoItems,
+          cardHeight = portraitHeroHeight,
           modifier = Modifier
             .fillMaxWidth()
             .widthIn(max = 800.dp)
-            .padding(horizontal = 16.dp)
-            .height(heroHeight)
-            .clip(RoundedCornerShape(28.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-            .border(
-              1.dp,
-              Brush.linearGradient(
-                listOf(
-                  MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
-                  MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f),
-                  Color.Transparent,
-                ),
-              ),
-              RoundedCornerShape(28.dp),
-            ),
-        ) {
-          // Backdrop Media Thumbnail (High definition for hero spotlight banner)
-          BentoMediaThumbnail(
-            video = video,
-            modifier = Modifier.fillMaxSize(),
-            showPlayOverlay = false,
-            highDefinition = true,
-          )
-
-        // Gradient Shade Overlays
-        Box(
-          modifier = Modifier
-            .fillMaxSize()
-            .background(
-              Brush.verticalGradient(
-                colors = listOf(
-                  Color.Black.copy(alpha = 0.25f),
-                  Color.Black.copy(alpha = 0.4f),
-                  Color.Black.copy(alpha = 0.92f),
-                ),
-              ),
-            ),
+            .padding(horizontal = 16.dp),
         )
-
-        // Top Glass Tag
-        Row(
-          modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-          horizontalArrangement = Arrangement.SpaceBetween,
-          verticalAlignment = Alignment.CenterVertically,
-        ) {
-          Surface(
-            shape = CircleShape,
-            color = Color.Black.copy(alpha = 0.5f),
-            border = BorderStroke(1.dp, Color.White.copy(alpha = 0.2f)),
-          ) {
-            Text(
-              text = if (video.isAudio) "SONIC HORIZON" else "CONTINUE WATCHING",
-              style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.ExtraBold,
-                letterSpacing = 1.2.sp,
-              ),
-              color = Color.White,
-              modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-            )
-          }
-
-          if (video.durationFormatted.isNotBlank()) {
-            Surface(
-              shape = CircleShape,
-              color = Color.Black.copy(alpha = 0.45f),
-              border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)),
-            ) {
-              Text(
-                text = video.durationFormatted,
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                color = Color.White.copy(alpha = 0.9f),
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-              )
-            }
-          }
-        }
-
-        // Bottom Hero Info & Action Bar
-        Column(
-          modifier = Modifier
-            .align(Alignment.BottomStart)
-            .fillMaxWidth()
-            .padding(16.dp),
-          verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-          Text(
-            text = if (video.title.isNotBlank()) video.title else FileTypeUtils.stripExtension(video.displayName),
-            style = MaterialTheme.typography.titleLarge.copy(
-              fontWeight = FontWeight.ExtraBold,
-              fontSize = 20.sp,
-            ),
-            color = Color.White,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-          )
-
-          val progress = spotlightItem.progressPercentage
-          if (progress != null && progress > 0f) {
-            Box(
-              modifier = Modifier
-                .fillMaxWidth(0.55f)
-                .height(4.dp)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.2f)),
-            ) {
-              Box(
-                modifier = Modifier
-                  .fillMaxWidth(progress.coerceIn(0f, 1f))
-                  .fillMaxHeight()
-                  .background(MaterialTheme.colorScheme.primary),
-              )
-            }
-          }
-
-          Row(
-            modifier = Modifier.padding(top = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-          ) {
-            Button(
-              onClick = {
-                if (video.isAudio) {
-                  playAudioInBackground(video, resumePos.takeIf { it > 0.0 })
-                } else {
-                  onPlayMedia(video, resumePos.takeIf { it > 0.0 }, videoItems.map { it.video })
-                }
-              },
-              shape = CircleShape,
-              colors = ButtonDefaults.buttonColors(
-                containerColor = Color.White,
-                contentColor = Color.Black,
-              ),
-              contentPadding = PaddingValues(horizontal = 18.dp, vertical = 8.dp),
-            ) {
-              Text("▶ Resume", fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
-            }
-
-            OutlinedButton(
-              onClick = { onVideoAction(video) },
-              shape = CircleShape,
-              border = BorderStroke(1.dp, Color.White.copy(alpha = 0.35f)),
-              colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
-              contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
-            ) {
-              Text("Options", fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
-            }
-          }
-        }
       }
     }
-  }
 
     // Reorderable sections identical to BentoFusion
     val defaults = listOf("VIDEO", "PULSING", "MUSIC")
@@ -848,100 +864,9 @@ private fun CinematicHorizonContent(
           }
         }
         "PULSING" -> {
-          // Audio Pulsing Hero Spotlight Card with exact same gestures & live controls
-          val heroToDisplay = heroAudio ?: (if (videoItems.isEmpty()) heroVideo else null)
-          if (showAudioPulsing && heroToDisplay != null) {
-            val isCurrentlyInSession = remember(currentSessionItem, heroToDisplay.video) {
-              matchesPlaybackItem(heroToDisplay.video, currentSessionItem)
-            }
-            val savedPos = heroToDisplay.timeRemaining?.let { rem ->
-              ((heroToDisplay.video.duration / 1000L) - rem).coerceAtLeast(0L).toDouble()
-            } ?: if ((heroToDisplay.progressPercentage ?: 0f) > 0f && heroToDisplay.video.duration > 0L) {
-              (((heroToDisplay.progressPercentage!! * heroToDisplay.video.duration) / 1000L).toLong()).toDouble()
-            } else 0.0
-
-            val resumePos = if (isCurrentlyInSession && livePos != null && livePos > 0.0) {
-              livePos
-            } else {
-              savedPos
-            }
-
-            BentoHeroSpotlightCard(
-              item = heroToDisplay,
-              scale = audioPulsingScale,
-              onClick = {
-                  if (heroToDisplay.video.isAudio) {
-                    if (isCurrentlyInSession) {
-                      val currentPaused = isPaused ?: false
-                      PlaybackSession.setPropertyBoolean("pause", !currentPaused)
-                    } else {
-                      playAudioInBackground(heroToDisplay.video, resumePos.takeIf { it > 0.0 })
-                    }
-                  } else {
-                    onPlayMedia(heroToDisplay.video, resumePos.takeIf { it > 0.0 }, videoItems.map { it.video })
-                  }
-                },
-                onLongClick = {
-                  if (heroToDisplay.video.isAudio) {
-                    if (PlaybackSession.isInitialized) {
-                      val intent = Intent(context, PlayerActivity::class.java).apply {
-                        action = MediaPlaybackService.ACTION_OPEN_PLAYER
-                        putExtra("is_audio", true)
-                        putExtra("internal_launch", true)
-                        putExtra("launch_source", "audio_pulsing")
-                        flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                      }
-                      try {
-                        context.startActivity(intent)
-                      } catch (_: Exception) {}
-                    } else {
-                      onPlayMedia(heroToDisplay.video, resumePos.takeIf { it > 0.0 }, sortedAudioByTitle.map { it.video })
-                    }
-                  } else {
-                    onVideoAction(heroToDisplay.video)
-                  }
-                },
-                onPrevious = {
-                  if (isCurrentlyInSession) {
-                    val prev = PlaybackSession.playPrevious()
-                    if (prev == null && sortedAudioByTitle.isNotEmpty()) {
-                      val currIdx = sortedAudioByTitle.indexOfFirst { matchesPlaybackItem(it.video, currentSessionItem) }
-                      if (currIdx >= 0) {
-                        val prevIdx = (currIdx - 1 + sortedAudioByTitle.size) % sortedAudioByTitle.size
-                        playAudioInBackground(sortedAudioByTitle[prevIdx].video, null)
-                      }
-                    }
-                  } else if (sortedAudioByTitle.isNotEmpty()) {
-                    val currIdx = sortedAudioByTitle.indexOfFirst { it.video.path == heroToDisplay.video.path }
-                    val prevIdx = if (currIdx >= 0) (currIdx - 1 + sortedAudioByTitle.size) % sortedAudioByTitle.size else 0
-                    playAudioInBackground(sortedAudioByTitle[prevIdx].video, null)
-                  }
-                },
-                onPlayPause = {
-                  if (isCurrentlyInSession) {
-                    val currentPaused = isPaused ?: false
-                    PlaybackSession.setPropertyBoolean("pause", !currentPaused)
-                  } else {
-                    playAudioInBackground(heroToDisplay.video, resumePos.takeIf { it > 0.0 })
-                  }
-                },
-                onNext = {
-                  if (isCurrentlyInSession) {
-                    val next = PlaybackSession.playNext()
-                    if (next == null && sortedAudioByTitle.isNotEmpty()) {
-                      val currIdx = sortedAudioByTitle.indexOfFirst { matchesPlaybackItem(it.video, currentSessionItem) }
-                      if (currIdx >= 0) {
-                        val nextIdx = (currIdx + 1) % sortedAudioByTitle.size
-                        playAudioInBackground(sortedAudioByTitle[nextIdx].video, null)
-                      }
-                    }
-                  } else if (sortedAudioByTitle.isNotEmpty()) {
-                    val currIdx = sortedAudioByTitle.indexOfFirst { it.video.path == heroToDisplay.video.path }
-                    val nextIdx = if (currIdx >= 0) (currIdx + 1) % sortedAudioByTitle.size else 0
-                    playAudioInBackground(sortedAudioByTitle[nextIdx].video, null)
-                  }
-                },
-              )
+          // Audio Pulsing Hero Spotlight Card (skipped in landscape if already shown in dual hero row)
+          if (!hasDualHeroLandscape && showAudioPulsing && heroToDisplay != null) {
+            RenderAudioPulsingCard()
           }
         }
         "MUSIC" -> {
@@ -1833,6 +1758,362 @@ private enum class BentoCardGesture {
   Cancelled,
 }
 
+@Composable
+private fun HeroSpotlightBox(
+  spotlightItem: VideoWithPlaybackInfo,
+  resumePos: Double,
+  heroSpotlightSeekbarStyle: HeroSpotlightSeekbarStyle,
+  onPlayMedia: (Video, Double?, List<Video>) -> Unit,
+  onVideoAction: (Video) -> Unit,
+  videoItems: List<VideoWithPlaybackInfo>,
+  cardHeight: androidx.compose.ui.unit.Dp,
+  modifier: Modifier = Modifier,
+) {
+  val video = spotlightItem.video
+  Box(
+    modifier = modifier
+      .height(cardHeight)
+      .clip(RoundedCornerShape(28.dp))
+      .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+      .border(
+        1.dp,
+        Brush.linearGradient(
+          listOf(
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+            MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f),
+            Color.Transparent,
+          ),
+        ),
+        RoundedCornerShape(28.dp),
+      ),
+  ) {
+    // Backdrop Media Thumbnail (High definition for hero spotlight banner)
+    BentoMediaThumbnail(
+      video = video,
+      modifier = Modifier.fillMaxSize(),
+      showPlayOverlay = false,
+      highDefinition = true,
+    )
+
+    // Gradient Shade Overlays
+    Box(
+      modifier = Modifier
+        .fillMaxSize()
+        .background(
+          Brush.verticalGradient(
+            colors = listOf(
+              Color.Black.copy(alpha = 0.25f),
+              Color.Black.copy(alpha = 0.4f),
+              Color.Black.copy(alpha = 0.92f),
+            ),
+          ),
+        ),
+    )
+
+    // Top Glass Tag
+    Row(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(16.dp),
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      Surface(
+        shape = CircleShape,
+        color = Color.Black.copy(alpha = 0.5f),
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.2f)),
+      ) {
+        Text(
+          text = if (video.isAudio) "SONIC HORIZON" else "CONTINUE WATCHING",
+          style = MaterialTheme.typography.labelSmall.copy(
+            fontWeight = FontWeight.ExtraBold,
+            letterSpacing = 1.2.sp,
+          ),
+          color = Color.White,
+          modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+        )
+      }
+
+      if (video.durationFormatted.isNotBlank()) {
+        Surface(
+          shape = CircleShape,
+          color = Color.Black.copy(alpha = 0.45f),
+          border = BorderStroke(1.dp, Color.White.copy(alpha = 0.15f)),
+        ) {
+          Text(
+            text = video.durationFormatted,
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+            color = Color.White.copy(alpha = 0.9f),
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+          )
+        }
+      }
+    }
+
+    // Progress telemetry calculations for seekbar below buttons
+    val progress = spotlightItem.progressPercentage?.coerceIn(0f, 1f) ?: 0f
+    val durationMs = video.duration.coerceAtLeast(0L)
+    val elapsedMs = (progress * durationMs).toLong()
+    val remainingMs = spotlightItem.timeRemaining?.let { it * 1000L } ?: (durationMs - elapsedMs).coerceAtLeast(0L)
+    val elapsedFormatted = VideoScanUtils.formatDuration(elapsedMs)
+    val totalFormatted = video.durationFormatted.ifBlank { VideoScanUtils.formatDuration(durationMs) }
+    val remainingFormatted = VideoScanUtils.formatDuration(remainingMs)
+    val progressPercent = (progress * 100f).roundToInt()
+
+    // Bottom Hero Info & Action Bar
+    Column(
+      modifier = Modifier
+        .align(Alignment.BottomStart)
+        .fillMaxWidth()
+        .padding(horizontal = 16.dp, vertical = if (heroSpotlightSeekbarStyle == HeroSpotlightSeekbarStyle.EdgeNeonBeam) 18.dp else 14.dp),
+      verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+      Text(
+        text = if (video.title.isNotBlank()) video.title else FileTypeUtils.stripExtension(video.displayName),
+        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+        color = Color.White,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+      )
+
+      // Primary Action Buttons (Resume & Options)
+      Row(
+        modifier = Modifier.padding(top = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+      ) {
+        Button(
+          onClick = { onPlayMedia(video, resumePos.takeIf { it > 0.0 }, videoItems.map { it.video }) },
+          shape = CircleShape,
+          colors = ButtonDefaults.buttonColors(
+            containerColor = Color.White,
+            contentColor = Color.Black,
+          ),
+          contentPadding = PaddingValues(horizontal = 18.dp, vertical = 8.dp),
+        ) {
+          Text("▶ Resume", fontWeight = FontWeight.ExtraBold, fontSize = 13.sp)
+        }
+
+        OutlinedButton(
+          onClick = { onVideoAction(video) },
+          shape = CircleShape,
+          border = BorderStroke(1.dp, Color.White.copy(alpha = 0.35f)),
+          colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
+          contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
+        ) {
+          Text("Options", fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+        }
+      }
+
+      // Seekbar Placed Below Resume / Options Buttons
+      if (progress > 0f) {
+        when (heroSpotlightSeekbarStyle) {
+          HeroSpotlightSeekbarStyle.EdgeNeonBeam -> {
+            // Subtle telemetry row directly below buttons
+            Row(
+              modifier = Modifier.padding(top = 2.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+              Text(
+                text = "Watched $progressPercent%",
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                color = Color(0xFF00E5FF),
+              )
+              Text(
+                text = "•",
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White.copy(alpha = 0.4f),
+              )
+              Text(
+                text = "$elapsedFormatted / $totalFormatted",
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
+                color = Color.White.copy(alpha = 0.85f),
+              )
+              Text(
+                text = "•",
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White.copy(alpha = 0.4f),
+              )
+              Text(
+                text = "$remainingFormatted left",
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                color = Color.White.copy(alpha = 0.7f),
+              )
+            }
+          }
+
+          HeroSpotlightSeekbarStyle.LiquidGlowCapsule -> {
+            Column(
+              modifier = Modifier
+                .fillMaxWidth(0.92f)
+                .padding(top = 4.dp),
+              verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+              Box(
+                modifier = Modifier
+                  .fillMaxWidth()
+                  .height(7.dp)
+                  .clip(CircleShape)
+                  .background(Color.White.copy(alpha = 0.18f)),
+              ) {
+                Box(
+                  modifier = Modifier
+                    .fillMaxWidth(progress)
+                    .fillMaxHeight()
+                    .background(
+                      Brush.horizontalGradient(
+                        listOf(
+                          MaterialTheme.colorScheme.primary,
+                          Color(0xFF00E5FF),
+                        ),
+                      ),
+                    ),
+                ) {
+                  val beaconPulse = rememberInfiniteTransition(label = "beacon")
+                  val beaconScale by beaconPulse.animateFloat(
+                    initialValue = 0.9f,
+                    targetValue = 1.35f,
+                    animationSpec = infiniteRepeatable(
+                      animation = tween(1200, easing = FastOutSlowInEasing),
+                      repeatMode = RepeatMode.Reverse,
+                    ),
+                    label = "beaconScale",
+                  )
+                  Box(
+                    modifier = Modifier
+                      .align(Alignment.CenterEnd)
+                      .size(11.dp)
+                      .scale(beaconScale)
+                      .background(Color.White, CircleShape)
+                      .border(1.5.dp, MaterialTheme.colorScheme.primary, CircleShape),
+                  )
+                }
+              }
+              Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+              ) {
+                Text(
+                  text = "$progressPercent% • $elapsedFormatted",
+                  style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                  color = Color(0xFF00E5FF),
+                )
+                Text(
+                  text = if (remainingFormatted.isNotBlank() && remainingMs > 0L) "-$remainingFormatted left" else totalFormatted,
+                  style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                  color = Color.White.copy(alpha = 0.75f),
+                )
+              }
+            }
+          }
+
+          HeroSpotlightSeekbarStyle.TimestampPill -> {
+            Surface(
+              modifier = Modifier.padding(top = 4.dp),
+              shape = CircleShape,
+              color = Color.Black.copy(alpha = 0.55f),
+              border = BorderStroke(1.dp, Color.White.copy(alpha = 0.2f)),
+            ) {
+              Row(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+              ) {
+                Box(
+                  modifier = Modifier
+                    .size(16.dp)
+                    .background(MaterialTheme.colorScheme.primary, CircleShape),
+                  contentAlignment = Alignment.Center,
+                ) {
+                  Text(
+                    text = "▶",
+                    fontSize = 8.sp,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                  )
+                }
+                Text(
+                  text = elapsedFormatted,
+                  style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                  color = Color.White,
+                )
+                Box(
+                  modifier = Modifier
+                    .width(80.dp)
+                    .height(4.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.2f)),
+                ) {
+                  Box(
+                    modifier = Modifier
+                      .fillMaxWidth(progress)
+                      .fillMaxHeight()
+                      .background(
+                        Brush.horizontalGradient(
+                          listOf(
+                            MaterialTheme.colorScheme.primary,
+                            Color(0xFF00E5FF),
+                          ),
+                        ),
+                      ),
+                  )
+                }
+                Text(
+                  text = "$progressPercent%",
+                  style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.ExtraBold),
+                  color = Color(0xFF00E5FF),
+                )
+                if (remainingFormatted.isNotBlank() && remainingMs > 0L) {
+                  Text(
+                    text = "-$remainingFormatted",
+                    style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Medium),
+                    color = Color.White.copy(alpha = 0.65f),
+                  )
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // Full-bleed Edge Neon Beam at the bottom perimeter of the card (Default)
+    if (progress > 0f && heroSpotlightSeekbarStyle == HeroSpotlightSeekbarStyle.EdgeNeonBeam) {
+      Box(
+        modifier = Modifier
+          .align(Alignment.BottomStart)
+          .fillMaxWidth()
+          .height(5.dp)
+          .background(Color.White.copy(alpha = 0.12f)),
+      ) {
+        Box(
+          modifier = Modifier
+            .fillMaxWidth(progress)
+            .fillMaxHeight()
+            .background(
+              Brush.horizontalGradient(
+                listOf(
+                  Color(0xFF7053FF),
+                  MaterialTheme.colorScheme.primary,
+                  Color(0xFF00E5FF),
+                ),
+              ),
+            ),
+        ) {
+          Box(
+            modifier = Modifier
+              .align(Alignment.CenterEnd)
+              .size(7.dp)
+              .background(Color.White, CircleShape),
+          )
+        }
+      }
+    }
+  }
+}
+
 /**
  * Hero Spotlight Card displaying active/resuming video or pulsing audio track
  * with dynamic visualizer waves, specular highlights, and touch gestures.
@@ -1847,6 +2128,8 @@ private fun BentoHeroSpotlightCard(
   onNext: () -> Unit = {},
   scale: Float = 1.0f,
   modifier: Modifier = Modifier,
+  cardHeight: androidx.compose.ui.unit.Dp? = null,
+  includeHorizontalPadding: Boolean = true,
 ) {
   val appearancePreferences = koinInject<AppearancePreferences>()
   val browserPreferences = koinInject<BrowserPreferences>()
@@ -2023,7 +2306,7 @@ private fun BentoHeroSpotlightCard(
   Box(
     modifier = modifier
       .fillMaxWidth()
-      .padding(horizontal = 16.dp),
+      .then(if (includeHorizontalPadding) Modifier.padding(horizontal = 16.dp) else Modifier),
     contentAlignment = Alignment.Center,
   ) {
     // Gesture Hint Icons (revealed behind card while swiping horizontally)
@@ -2074,6 +2357,7 @@ private fun BentoHeroSpotlightCard(
     Card(
       modifier = Modifier
         .fillMaxWidth()
+        .then(if (cardHeight != null) Modifier.height(cardHeight) else Modifier)
         .offset { IntOffset(swipeOffset.value.roundToInt(), 0) }
         .clip(RoundedCornerShape(24.dp))
         .then(gestureModifier),
@@ -2093,6 +2377,7 @@ private fun BentoHeroSpotlightCard(
       Box(
         modifier = Modifier
           .fillMaxWidth()
+          .then(if (cardHeight != null) Modifier.fillMaxHeight() else Modifier)
           .background(
             Brush.linearGradient(
               colors = listOf(
@@ -2106,11 +2391,12 @@ private fun BentoHeroSpotlightCard(
         Column(
           modifier = Modifier
             .fillMaxWidth()
+            .then(if (cardHeight != null) Modifier.fillMaxHeight() else Modifier)
             .padding(
               horizontal = 14.dp,
               vertical = (12f * scale.coerceIn(0.7f, 1.3f)).dp,
             ),
-          verticalArrangement = Arrangement.spacedBy((7f * scale.coerceIn(0.7f, 1.3f)).dp),
+          verticalArrangement = if (cardHeight != null) Arrangement.SpaceBetween else Arrangement.spacedBy((7f * scale.coerceIn(0.7f, 1.3f)).dp),
         ) {
           // Top Header Row: Status Badge & Format Chip
           Row(
@@ -2392,9 +2678,8 @@ fun OneUi9WaveformVisualizer(
     val availableLift = (baselineY - 1.dp.toPx()).coerceAtLeast(0f) * animatedAmpScale
     val step = 2.dp.toPx().coerceAtLeast(1f)
     val clampedProgress = progress.coerceIn(0f, 1f)
-    val waveActiveWidth = (width * clampedProgress).coerceIn(0f, width)
-
-    if (waveActiveWidth <= minWaveActiveWidth || availableLift <= 0.5f) return@Canvas
+    if (clampedProgress <= 0f && !isPlaying) return@Canvas
+    val waveActiveWidth = (width * (if (isPlaying) clampedProgress.coerceAtLeast(0.01f) else clampedProgress)).coerceIn(minWaveActiveWidth, width)
 
     val taperInset = 12.dp.toPx().coerceAtMost(waveActiveWidth / 4f)
 
@@ -2415,45 +2700,49 @@ fun OneUi9WaveformVisualizer(
       glowWidth: Float = 0f,
       hasSpecularHighlight: Boolean = false,
     ) {
-      if (lift <= 0.5f) return
-
       filledPath.reset()
       contourPath.reset()
 
-      fun ribbonY(x: Float): Float {
-        val edgeIn = if (taperInset > 0f) smoothstep(x / taperInset) else 1f
-        val edgeOut = if (taperInset > 0f) smoothstep((waveActiveWidth - x) / taperInset) else 1f
-        val envelope = edgeIn * edgeOut
-        val undulation = 0.50f + 0.50f * sin((x / wavelength) * twoPi - phaseOffset)
-        return baselineY - lift * undulation * envelope
+      if (lift <= 0.5f) {
+        // Flat wave line across the elapsed progress at baseline (when music is paused/stopped)
+        contourPath.moveTo(0f, baselineY)
+        contourPath.lineTo(waveActiveWidth, baselineY)
+      } else {
+        fun ribbonY(x: Float): Float {
+          val edgeIn = if (taperInset > 0f) smoothstep(x / taperInset) else 1f
+          val edgeOut = if (taperInset > 0f) smoothstep((waveActiveWidth - x) / taperInset) else 1f
+          val envelope = edgeIn * edgeOut
+          val undulation = 0.50f + 0.50f * sin((x / wavelength) * twoPi - phaseOffset)
+          return baselineY - lift * undulation * envelope
+        }
+
+        val startY = ribbonY(0f)
+        filledPath.moveTo(0f, baselineY)
+        filledPath.lineTo(0f, startY)
+        contourPath.moveTo(0f, startY)
+
+        var x = 0f
+        while (x < waveActiveWidth) {
+          x = min(x + step, waveActiveWidth)
+          val y = ribbonY(x)
+          filledPath.lineTo(x, y)
+          contourPath.lineTo(x, y)
+        }
+        filledPath.lineTo(waveActiveWidth, baselineY)
+        filledPath.close()
+
+        // 1. One UI 9 Frosted Glass Gradient Body Fill (curtain down to baseline)
+        drawPath(
+          path = filledPath,
+          brush = Brush.verticalGradient(
+            colors = listOf(fillTopColor, fillBottomColor),
+            startY = baselineY - lift,
+            endY = baselineY,
+          ),
+        )
       }
 
-      val startY = ribbonY(0f)
-      filledPath.moveTo(0f, baselineY)
-      filledPath.lineTo(0f, startY)
-      contourPath.moveTo(0f, startY)
-
-      var x = 0f
-      while (x < waveActiveWidth) {
-        x = min(x + step, waveActiveWidth)
-        val y = ribbonY(x)
-        filledPath.lineTo(x, y)
-        contourPath.lineTo(x, y)
-      }
-      filledPath.lineTo(waveActiveWidth, baselineY)
-      filledPath.close()
-
-      // 1. One UI 9 Frosted Glass Gradient Body Fill (curtain down to baseline)
-      drawPath(
-        path = filledPath,
-        brush = Brush.verticalGradient(
-          colors = listOf(fillTopColor, fillBottomColor),
-          startY = baselineY - lift,
-          endY = baselineY,
-        ),
-      )
-
-      // 2. Diffused Luminous Glow Halo along wave crests
+      // 2. Diffused Luminous Glow Halo along wave crests / flat wave
       if (glowColor != null && glowWidth > 0f) {
         drawPath(
           path = contourPath,
@@ -2466,7 +2755,7 @@ fun OneUi9WaveformVisualizer(
         )
       }
 
-      // 3. Crisp Luminous Crest Contour Stroke
+      // 3. Crisp Luminous Crest / Flat Wave Contour Stroke
       drawPath(
         path = contourPath,
         color = strokeColor,
