@@ -446,7 +446,7 @@ object MediaInfoOps {
 
   data class Report(
     val data: MediaInfoData,
-    val text: String,
+    val rawText: String,
   )
 
   suspend fun getMediaInfoReport(
@@ -455,10 +455,30 @@ object MediaInfoOps {
     fileName: String,
   ): Result<Report> =
     getMediaInfo(context, uri, fileName).map { data ->
-      Report(data = data, text = formatAsText(data))
+      Report(data = data, rawText = formatPlatformMediaInfo(data, fileName))
     }
 
-  fun buildStructuredReport(info: MediaInfoData): String = formatAsText(info)
+  /**
+   * Build a [Report] from already-probed [MediaInfoData], optionally enriched with chapter
+   * entries sourced from the player's native track list rather than the file on disk.
+   */
+  fun formatReport(
+    data: MediaInfoData,
+    fileName: String,
+    chapterEntries: List<Pair<String, String>> = emptyList(),
+  ): Report {
+    val text = buildString {
+      append(formatPlatformMediaInfo(data, fileName))
+      if (chapterEntries.isNotEmpty()) {
+        appendLine()
+        appendLine("Menu")
+        chapterEntries.forEach { (time, title) -> appendLine("$time : $title") }
+      }
+    }
+    return Report(data = data, rawText = text)
+  }
+
+  fun buildStructuredReport(info: MediaInfoData): String = formatPlatformMediaInfo(info, info.general.completeName.substringAfterLast('/'))
 
   /**
    * Rotation only needs the Android retriever; do not open native MediaInfo for it.
