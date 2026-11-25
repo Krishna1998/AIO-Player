@@ -340,7 +340,7 @@ data class MovieDetailsScreen(
               if (mediaInfoBadges.isNotEmpty()) {
                 app.video.player.ui.player.controls.components.MediaFormatBadges(
                   badges = mediaInfoBadges,
-                  logoHeight = 16.dp,
+                  logoHeight = 24.dp,
                   foreground = Color.White,
                   background = MaterialTheme.colorScheme.surfaceContainerHigh,
                   modifier = Modifier.padding(top = 8.dp),
