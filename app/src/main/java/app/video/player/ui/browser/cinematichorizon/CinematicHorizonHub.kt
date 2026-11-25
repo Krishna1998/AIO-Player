@@ -2045,49 +2045,11 @@ private fun HeroSpotlightBox(
       }
 
       // Smart Media Badges Row
-      if (qualityBadge != null || extensionBadge != null || runtimeFormatted.isNotBlank()) {
+      if (video.hasEmbeddedSubtitles || runtimeFormatted.isNotBlank()) {
         Row(
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-          if (qualityBadge != null) {
-            Surface(
-              shape = RoundedCornerShape(5.dp),
-              color = Color(0xFF00E5FF).copy(alpha = 0.16f),
-              border = BorderStroke(0.8.dp, Color(0xFF00E5FF).copy(alpha = 0.45f)),
-            ) {
-              Text(
-                text = qualityBadge,
-                style = MaterialTheme.typography.labelSmall.copy(
-                  fontWeight = FontWeight.ExtraBold,
-                  fontSize = 9.sp,
-                  letterSpacing = 0.6.sp,
-                ),
-                color = Color(0xFF00E5FF),
-                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-              )
-            }
-          }
-
-          if (extensionBadge != null) {
-            Surface(
-              shape = RoundedCornerShape(5.dp),
-              color = Color(0xFF7C4DFF).copy(alpha = 0.18f),
-              border = BorderStroke(0.8.dp, Color(0xFF7C4DFF).copy(alpha = 0.45f)),
-            ) {
-              Text(
-                text = extensionBadge,
-                style = MaterialTheme.typography.labelSmall.copy(
-                  fontWeight = FontWeight.ExtraBold,
-                  fontSize = 9.sp,
-                  letterSpacing = 0.6.sp,
-                ),
-                color = Color(0xFFB388FF),
-                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-              )
-            }
-          }
-
           if (video.hasEmbeddedSubtitles) {
             Surface(
               shape = RoundedCornerShape(5.dp),

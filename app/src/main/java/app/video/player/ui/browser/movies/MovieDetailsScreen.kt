@@ -321,12 +321,26 @@ data class MovieDetailsScreen(
                 }
               }
 
-              val formatBadges = remember(currentVideo) {
-                app.video.player.ui.player.videoToFormatBadges(currentVideo)
+              var mediaInfoBadges by remember(currentVideo.path) {
+                mutableStateOf(app.video.player.ui.player.videoToFormatBadges(currentVideo))
               }
-              if (formatBadges.isNotEmpty()) {
+              LaunchedEffect(currentVideo.path) {
+                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                  app.video.player.utils.media.MediaInfoOps
+                    .getMediaInfoReport(context, currentVideo.uri, currentVideo.displayName)
+                    .onSuccess { report ->
+                      val overview = app.video.player.ui.mediainfo.run {
+                        report.mediaInfo.overviewBadges(currentVideo.displayName)
+                      }
+                      if (overview.isNotEmpty()) {
+                        mediaInfoBadges = overview
+                      }
+                    }
+                }
+              }
+              if (mediaInfoBadges.isNotEmpty()) {
                 app.video.player.ui.player.controls.components.MediaFormatBadges(
-                  badges = formatBadges,
+                  badges = mediaInfoBadges,
                   logoHeight = 16.dp,
                   foreground = Color.White,
                   background = MaterialTheme.colorScheme.surfaceContainerHigh,
