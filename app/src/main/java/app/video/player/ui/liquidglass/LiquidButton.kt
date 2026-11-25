@@ -73,6 +73,7 @@ fun LiquidButton(
   spacing: Dp = 8.dp,
   onLongClickLabel: String? = null,
   backgroundAlpha: Float = 1f,
+  shape: androidx.compose.ui.graphics.Shape = Capsule(),
   content: @Composable RowScope.() -> Unit,
 ) {
   val glassSettings = rememberLiquidGlassSettings()
@@ -122,7 +123,7 @@ fun LiquidButton(
     if (backdrop != null) {
       Modifier.drawBackdrop(
         backdrop = backdrop,
-        shape = { Capsule() },
+        shape = { shape },
         effects = {
           liquidGlassEffects(
             glassSettings,
@@ -173,11 +174,11 @@ fun LiquidButton(
       )
       Modifier
         .graphicsLayer(pressTransform)
-        .outsideShadow(Capsule(), radius = 6.dp)
-        .clip(Capsule())
-        .background(fill, Capsule())
+        .outsideShadow(shape, radius = 6.dp)
+        .clip(shape)
+        .background(fill, shape)
         .then(
-          if (glassSettings.highlightWidth > 0f) Modifier.border(1.dp * glassSettings.highlightWidth, rim, Capsule())
+          if (glassSettings.highlightWidth > 0f) Modifier.border(1.dp * glassSettings.highlightWidth, rim, shape)
           else Modifier,
         )
     }

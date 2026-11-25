@@ -194,6 +194,7 @@ fun AdaptiveControlsContainer(
         horizontalPadding = horizontalPadding ?: 8.dp,
         backdrop = backdrop,
         backgroundAlpha = glassLayerAlpha,
+        shape = buttonShape,
         content = content,
       )
     }
