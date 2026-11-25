@@ -1,8 +1,6 @@
 package app.video.player.ui.mediainfo
 
 import app.video.player.ui.player.PlaybackSession
-import org.json.JSONArray
-import org.json.JSONObject
 import java.io.File
 import java.util.Locale
 
@@ -20,39 +18,58 @@ object MpvMediaInfoParser {
     val bitRateBps = PlaybackSession.getPropertyString("video-bitrate")?.toLongOrNull()
       ?: calculateAverageBitrate(fileSizeBytes, durationSec)
 
-    val trackListJson = PlaybackSession.getPropertyNode("track-list")?.toJson() ?: "[]"
-    val videoParamsJson = PlaybackSession.getPropertyNode("video-params")?.toJson() ?: "{}"
-    val audioParamsJson = PlaybackSession.getPropertyNode("audio-params")?.toJson() ?: "{}"
-    val metadataJson = PlaybackSession.getPropertyNode("metadata")?.toJson() ?: "{}"
+    val videoParams = readVideoParams()
+    val audioParams = readAudioParams()
 
-    val videoParams = runCatching { JSONObject(videoParamsJson) }.getOrDefault(JSONObject())
-    val audioParams = runCatching { JSONObject(audioParamsJson) }.getOrDefault(JSONObject())
-    val trackArray = runCatching { JSONArray(trackListJson) }.getOrDefault(JSONArray())
-
+    val trackCount = PlaybackSession.getPropertyInt("track-list/count") ?: 0
     val videoTracks = mutableListOf<TrackDetail>()
     val audioTracks = mutableListOf<TrackDetail>()
     val subtitleTracks = mutableListOf<TrackDetail>()
 
-    var activeVideoObj: JSONObject? = null
-    var activeAudioObj: JSONObject? = null
+    var activeVideoTrack: TrackData? = null
+    var activeAudioTrack: TrackData? = null
 
-    for (i in 0 until trackArray.length()) {
-      val track = trackArray.optJSONObject(i) ?: continue
-      val type = track.optString("type")
-      val id = track.optInt("id", i + 1)
-      val title = track.optString("title", "")
-      val lang = formatLanguageCode(track.optString("lang", "und"))
-      val codec = track.optString("codec", "unknown").uppercase()
-      val isDefault = track.optBoolean("default", false)
-      val isSelected = track.optBoolean("selected", false)
+    for (i in 0 until trackCount) {
+      val type = PlaybackSession.getPropertyString("track-list/$i/type") ?: continue
+      val id = PlaybackSession.getPropertyInt("track-list/$i/id") ?: (i + 1)
+      val title = PlaybackSession.getPropertyString("track-list/$i/title")
+        ?: PlaybackSession.getPropertyString("track-list/$i/metadata/by-key/title").orEmpty()
+      val rawLang = PlaybackSession.getPropertyString("track-list/$i/lang")
+        ?: PlaybackSession.getPropertyString("track-list/$i/metadata/by-key/language")
+        ?: "und"
+      val lang = formatLanguageCode(rawLang)
+      val rawCodec = PlaybackSession.getPropertyString("track-list/$i/codec") ?: "unknown"
+      val codec = rawCodec.uppercase()
+      val isDefault = PlaybackSession.getPropertyBoolean("track-list/$i/default") ?: false
+      val isSelected = PlaybackSession.getPropertyBoolean("track-list/$i/selected") ?: false
+
+      val demuxW = PlaybackSession.getPropertyInt("track-list/$i/demux-w") ?: 0
+      val demuxH = PlaybackSession.getPropertyInt("track-list/$i/demux-h") ?: 0
+      val demuxFps = PlaybackSession.getPropertyDouble("track-list/$i/demux-fps") ?: 0.0
+      val demuxChannels = PlaybackSession.getPropertyString("track-list/$i/demux-channels").orEmpty()
+      val demuxSampleRate = PlaybackSession.getPropertyInt("track-list/$i/demux-samplerate") ?: 0
+
+      val trackData = TrackData(
+        id = id,
+        type = type,
+        title = title,
+        lang = lang,
+        codec = rawCodec,
+        isDefault = isDefault,
+        isSelected = isSelected,
+        demuxW = demuxW,
+        demuxH = demuxH,
+        demuxFps = demuxFps,
+        demuxChannels = demuxChannels,
+        demuxSampleRate = demuxSampleRate,
+      )
 
       when (type) {
         "video" -> {
-          if (isSelected || activeVideoObj == null) activeVideoObj = track
-          val w = track.optInt("demux-w", videoParams.optInt("w", 0))
-          val h = track.optInt("demux-h", videoParams.optInt("h", 0))
-          val fps = track.optDouble("demux-fps", 0.0)
-          val fpsText = if (fps > 0) String.format(Locale.US, " \u2022 %.3f fps", fps) else ""
+          if (isSelected || activeVideoTrack == null) activeVideoTrack = trackData
+          val w = if (demuxW > 0) demuxW else videoParams.width
+          val h = if (demuxH > 0) demuxH else videoParams.height
+          val fpsText = if (demuxFps > 0) String.format(Locale.US, " \u2022 %.3f fps", demuxFps) else ""
           val resText = if (w > 0 && h > 0) " \u2022 ${w}x$h" else ""
 
           videoTracks.add(
@@ -68,9 +85,9 @@ object MpvMediaInfoParser {
         }
 
         "audio" -> {
-          if (isSelected || activeAudioObj == null) activeAudioObj = track
-          val channels = track.optString("audio-channels", audioParams.optString("channels", ""))
-          val sampleRate = track.optInt("demux-samplerate", audioParams.optInt("samplerate", 0))
+          if (isSelected || activeAudioTrack == null) activeAudioTrack = trackData
+          val channels = demuxChannels.ifBlank { audioParams.channels }
+          val sampleRate = if (demuxSampleRate > 0) demuxSampleRate else audioParams.sampleRate
           val srText = if (sampleRate > 0) " \u2022 ${sampleRate / 1000} kHz" else ""
           val chText = if (channels.isNotBlank()) " \u2022 $channels" else ""
 
@@ -105,12 +122,12 @@ object MpvMediaInfoParser {
       fileName = fileName,
       videoParams = videoParams,
       audioParams = audioParams,
-      activeVideoTrack = activeVideoObj,
-      activeAudioTrack = activeAudioObj,
+      activeVideoTrack = activeVideoTrack,
+      activeAudioTrack = activeAudioTrack,
       subtitleTracks = subtitleTracks,
     )
 
-    val embeddedMetadata = parseEmbeddedMetadata(metadataJson)
+    val embeddedMetadata = readEmbeddedMetadata()
 
     return MediaInfoUiState(
       title = mediaTitle,
@@ -127,12 +144,69 @@ object MpvMediaInfoParser {
     )
   }
 
+  private data class VideoParamsData(
+    val width: Int = 0,
+    val height: Int = 0,
+    val pixelFormat: String = "",
+    val primaries: String = "",
+    val gamma: String = "",
+    val sigPeak: Double = 0.0,
+    val dolbyVisionProfile: Int = -1,
+  )
+
+  private data class AudioParamsData(
+    val channels: String = "",
+    val sampleRate: Int = 0,
+  )
+
+  private data class TrackData(
+    val id: Int,
+    val type: String,
+    val title: String,
+    val lang: String,
+    val codec: String,
+    val isDefault: Boolean,
+    val isSelected: Boolean,
+    val demuxW: Int,
+    val demuxH: Int,
+    val demuxFps: Double,
+    val demuxChannels: String,
+    val demuxSampleRate: Int,
+  )
+
+  private fun readVideoParams(): VideoParamsData {
+    val width = PlaybackSession.getPropertyInt("video-params/w") ?: 0
+    val height = PlaybackSession.getPropertyInt("video-params/h") ?: 0
+    val pixelFormat = PlaybackSession.getPropertyString("video-params/pixelformat").orEmpty()
+    val primaries = PlaybackSession.getPropertyString("video-params/primaries").orEmpty()
+    val gamma = PlaybackSession.getPropertyString("video-params/gamma").orEmpty()
+    val sigPeak = PlaybackSession.getPropertyDouble("video-params/sig-peak") ?: 0.0
+    val dvProfile = PlaybackSession.getPropertyInt("video-params/dv-profile") ?: -1
+
+    return VideoParamsData(
+      width = width,
+      height = height,
+      pixelFormat = pixelFormat,
+      primaries = primaries,
+      gamma = gamma,
+      sigPeak = sigPeak,
+      dolbyVisionProfile = dvProfile,
+    )
+  }
+
+  private fun readAudioParams(): AudioParamsData {
+    val channels = PlaybackSession.getPropertyString("audio-params/hr-channels")
+      ?: PlaybackSession.getPropertyString("audio-params/channels").orEmpty()
+    val sampleRate = PlaybackSession.getPropertyInt("audio-params/samplerate") ?: 0
+    return AudioParamsData(channels = channels, sampleRate = sampleRate)
+  }
+
   private fun buildFormatBadges(
     fileName: String,
-    videoParams: JSONObject,
-    audioParams: JSONObject,
-    activeVideoTrack: JSONObject?,
-    activeAudioTrack: JSONObject?,
+    videoParams: VideoParamsData,
+    audioParams: AudioParamsData,
+    activeVideoTrack: TrackData?,
+    activeAudioTrack: TrackData?,
     subtitleTracks: List<TrackDetail>,
   ): List<MediaBadge> {
     val badges = mutableListOf<MediaBadge>()
@@ -145,28 +219,28 @@ object MpvMediaInfoParser {
       badges.add(MediaBadge(sourceTag, BadgeCategory.SOURCE))
     }
 
-    val width = videoParams.optInt("w", activeVideoTrack?.optInt("demux-w", 0) ?: 0)
-    val height = videoParams.optInt("h", activeVideoTrack?.optInt("demux-h", 0) ?: 0)
+    val width = if (videoParams.width > 0) videoParams.width else (activeVideoTrack?.demuxW ?: 0)
+    val height = if (videoParams.height > 0) videoParams.height else (activeVideoTrack?.demuxH ?: 0)
     detectResolutionLabel(width, height)?.let { res ->
       badges.add(MediaBadge(res, BadgeCategory.RESOLUTION))
     }
 
-    val rawVideoCodec = activeVideoTrack?.optString("codec", "")?.lowercase() ?: ""
+    val rawVideoCodec = activeVideoTrack?.codec?.lowercase().orEmpty()
     mapVideoCodecLabel(rawVideoCodec)?.let { codecLabel ->
       badges.add(MediaBadge(codecLabel, BadgeCategory.VIDEO_CODEC))
     }
 
-    val pixelFormat = videoParams.optString("pixelformat", "")
+    val pixelFormat = videoParams.pixelFormat
     if (pixelFormat.contains("10") || pixelFormat.contains("p010")) {
       badges.add(MediaBadge("10-BIT", BadgeCategory.VIDEO_CODEC))
     } else if (pixelFormat.contains("12")) {
       badges.add(MediaBadge("12-BIT", BadgeCategory.VIDEO_CODEC))
     }
 
-    val primaries = videoParams.optString("primaries", "")
-    val gamma = videoParams.optString("gamma", "")
-    val dolbyVisionProfile = videoParams.optInt("dv-profile", -1)
-    val hdrPeak = videoParams.optDouble("sig-peak", 0.0)
+    val primaries = videoParams.primaries
+    val gamma = videoParams.gamma
+    val dolbyVisionProfile = videoParams.dolbyVisionProfile
+    val hdrPeak = videoParams.sigPeak
 
     when {
       dolbyVisionProfile >= 0 || fileName.contains("DV", ignoreCase = true) ||
@@ -185,9 +259,9 @@ object MpvMediaInfoParser {
       }
     }
 
-    val rawAudioCodec = activeAudioTrack?.optString("codec", "")?.lowercase() ?: ""
-    val audioTitle = activeAudioTrack?.optString("title", "") ?: ""
-    val channels = activeAudioTrack?.optString("audio-channels", audioParams.optString("channels", "")) ?: ""
+    val rawAudioCodec = activeAudioTrack?.codec?.lowercase().orEmpty()
+    val audioTitle = activeAudioTrack?.title.orEmpty()
+    val channels = activeAudioTrack?.demuxChannels?.ifBlank { audioParams.channels } ?: audioParams.channels
 
     detectAudioBadge(rawAudioCodec, audioTitle, fileName)?.let { audioLabel ->
       badges.add(MediaBadge(audioLabel, BadgeCategory.AUDIO))
@@ -276,8 +350,7 @@ object MpvMediaInfoParser {
     else -> null
   }
 
-  private fun parseEmbeddedMetadata(metadataJson: String): Map<String, String> {
-    val obj = runCatching { JSONObject(metadataJson) }.getOrDefault(JSONObject())
+  private fun readEmbeddedMetadata(): Map<String, String> {
     val map = linkedMapOf<String, String>()
     val allowedKeys = listOf(
       "title" to "Title",
@@ -289,9 +362,10 @@ object MpvMediaInfoParser {
       "track" to "Track",
       "encoder" to "Encoder",
     )
-    for ((jsonKey, displayLabel) in allowedKeys) {
-      val value = obj.optString(jsonKey).ifBlank { obj.optString(jsonKey.uppercase()) }
-      if (value.isNotBlank()) {
+    for ((key, displayLabel) in allowedKeys) {
+      val value = PlaybackSession.getPropertyString("metadata/by-key/$key")
+        ?: PlaybackSession.getPropertyString("metadata/by-key/${key.uppercase()}")
+      if (!value.isNullOrBlank()) {
         map[displayLabel] = value
       }
     }
@@ -336,4 +410,3 @@ object MpvMediaInfoParser {
     else "${bps / 1000} kbps"
   }
 }
-

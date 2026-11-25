@@ -62,6 +62,16 @@ fun FormatBadgeChip(
         Color(0xFFFFE0B2),
         Color(0xFFFFA726).copy(alpha = 0.45f),
       )
+      BadgeCategory.VIDEO_CODEC -> Triple(
+        Color(0xFF311B92).copy(alpha = 0.22f),
+        Color(0xFFD1C4E9),
+        Color(0xFF7E57C2).copy(alpha = 0.5f),
+      )
+      BadgeCategory.SOURCE -> Triple(
+        Color(0xFF004D40).copy(alpha = 0.22f),
+        Color(0xFFB2DFDB),
+        Color(0xFF26A69A).copy(alpha = 0.5f),
+      )
       else -> Triple(
         MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f),
         MaterialTheme.colorScheme.onSecondaryContainer,
