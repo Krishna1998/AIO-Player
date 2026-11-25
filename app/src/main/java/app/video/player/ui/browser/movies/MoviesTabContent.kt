@@ -23,6 +23,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -57,6 +61,9 @@ import app.video.player.domain.media.model.Video
 import app.video.player.domain.movies.MovieClassifier
 import app.video.player.domain.movies.MovieMetadata
 import app.video.player.domain.movies.MovieMetadataRepository
+import app.video.player.preferences.BrowserPreferences
+import app.video.player.preferences.MediaLayoutMode
+import app.video.player.preferences.preference.collectAsState
 import app.video.player.presentation.components.RemoteImage
 import app.video.player.ui.browser.cards.SelectionIndicator
 import app.video.player.ui.browser.cards.animatedSelectionColor
@@ -78,8 +85,12 @@ fun MoviesTabContent(
   videosWithInfo: List<VideoWithPlaybackInfo>,
   onOpenMovieDetails: (Video) -> Unit,
   modifier: Modifier = Modifier,
+  onPlayMedia: ((Video) -> Unit)? = null,
   selectionManager: SelectionManager<Video, Long>? = null,
+  mediaLayoutMode: MediaLayoutMode? = null,
 ) {
+  val browserPreferences = koinInject<BrowserPreferences>()
+  val layoutMode = mediaLayoutMode ?: browserPreferences.mediaLayoutMode.collectAsState().value
   var selectedFilterIndex by rememberSaveable { mutableIntStateOf(0) }
   val movieMetadataRepo = koinInject<MovieMetadataRepository>()
   val metadataRevision by movieMetadataRepo.metadataRevision.collectAsState()
@@ -155,7 +166,7 @@ fun MoviesTabContent(
       modifier = Modifier.padding(horizontal = 18.dp, vertical = 2.dp),
     )
 
-    // Movie Posters Grid (Portrait 2:3 aspect ratio) or Empty State
+    // Movie Posters Grid / List or Empty State
     if (filteredMovies.isEmpty()) {
       Box(
         modifier = Modifier.fillMaxSize(),
@@ -166,6 +177,41 @@ fun MoviesTabContent(
           title = stringResource(R.string.movies_empty_title),
           message = stringResource(R.string.movies_empty_message),
         )
+      }
+    } else if (layoutMode == MediaLayoutMode.LIST) {
+      LazyColumn(
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxSize(),
+      ) {
+        items(
+          items = filteredMovies,
+          key = { it.video.path },
+        ) { item ->
+          val isSelected = selectionManager?.isSelected(item.video) == true
+          MovieListItemCard(
+            item = item,
+            movieMetadataRepo = movieMetadataRepo,
+            isSelected = isSelected,
+            onClick = {
+              if (selectionManager?.isInSelectionMode == true) {
+                selectionManager.toggleFromUser(item.video)
+              } else {
+                onOpenMovieDetails(item.video)
+              }
+            },
+            onPlayClick = {
+              if (selectionManager?.isInSelectionMode == true) {
+                selectionManager.toggleFromUser(item.video)
+              } else if (onPlayMedia != null) {
+                onPlayMedia(item.video)
+              } else {
+                onOpenMovieDetails(item.video)
+              }
+            },
+            onLongClick = { selectionManager?.handleLongClick(item.video) },
+          )
+        }
       }
     } else {
       LazyVerticalGrid(
@@ -366,4 +412,200 @@ private fun MoviePosterCard(
     }
   }
 }
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun MovieListItemCard(
+  item: VideoWithPlaybackInfo,
+  movieMetadataRepo: MovieMetadataRepository,
+  isSelected: Boolean,
+  onClick: () -> Unit,
+  onPlayClick: () -> Unit,
+  onLongClick: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  val video = item.video
+  var metadata by remember(video.path) {
+    mutableStateOf(movieMetadataRepo.getMemoryCachedMetadata(video))
+  }
+
+  LaunchedEffect(video.path) {
+    if (metadata == null) {
+      metadata = movieMetadataRepo.getOrFetchMetadata(video)
+    }
+  }
+
+  val parsedInfo = remember(video.displayName, video.title) {
+    MediaInfoParser.parse(video.displayName.ifBlank { video.title })
+  }
+  val episodeBadge = remember(parsedInfo) {
+    when {
+      parsedInfo.season != null && parsedInfo.episode != null ->
+        "S${parsedInfo.season.toString().padStart(2, '0')}E${parsedInfo.episode.toString().padStart(2, '0')}"
+      parsedInfo.episode != null ->
+        "EP ${parsedInfo.episode.toString().padStart(2, '0')}"
+      else -> null
+    }
+  }
+
+  val displayTitle = metadata?.title?.takeIf { it.isNotBlank() } ?: video.displayName
+  val displayYear = metadata?.releaseYear ?: ""
+  val displayDuration = metadata?.durationFormatted?.takeIf { it.isNotBlank() } ?: video.durationFormatted
+  val synopsis = metadata?.synopsis
+  val rating = metadata?.voteAverage
+  val selectionColor = animatedSelectionColor(isSelected)
+
+  Surface(
+    modifier = modifier
+      .fillMaxWidth()
+      .clip(RoundedCornerShape(12.dp))
+      .combinedClickable(
+        onClick = onClick,
+        onLongClick = onLongClick,
+      ),
+    shape = RoundedCornerShape(12.dp),
+    color = selectionColor,
+    border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
+  ) {
+    Row(
+      modifier = Modifier
+        .fillMaxWidth()
+        .padding(8.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      // Poster image on left with 2:3 aspect ratio
+      Box(
+        modifier = Modifier
+          .width(64.dp)
+          .aspectRatio(2f / 3f)
+          .clip(RoundedCornerShape(8.dp))
+          .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+      ) {
+        val posterUrl = metadata?.posterUrl ?: metadata?.backdropUrl
+        if (!posterUrl.isNullOrBlank()) {
+          RemoteImage(
+            url = posterUrl,
+            contentDescription = displayTitle,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(),
+          )
+        } else {
+          Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+          ) {
+            Icon(
+              imageVector = Icons.RoundedFilled.Movie,
+              contentDescription = null,
+              modifier = Modifier.size(24.dp),
+              tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+            )
+          }
+        }
+
+        // Selection check indicator
+        if (isSelected) {
+          SelectionIndicator(
+            selected = true,
+            modifier = Modifier
+              .align(Alignment.TopEnd)
+              .padding(4.dp),
+          )
+        }
+
+        // Episode badge
+        if (episodeBadge != null) {
+          Surface(
+            shape = RoundedCornerShape(4.dp),
+            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.9f),
+            modifier = Modifier
+              .align(Alignment.TopStart)
+              .padding(4.dp),
+          ) {
+            Text(
+              text = episodeBadge,
+              style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Bold,
+              ),
+              color = MaterialTheme.colorScheme.onSecondaryContainer,
+              modifier = Modifier.padding(horizontal = 4.dp, vertical = 1.dp),
+            )
+          }
+        }
+      }
+
+      Spacer(modifier = Modifier.width(12.dp))
+
+      // Movie Information Column
+      Column(
+        modifier = Modifier.weight(1f),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+      ) {
+        Text(
+          text = displayTitle,
+          style = MaterialTheme.typography.titleSmall.copy(
+            fontWeight = FontWeight.Bold,
+          ),
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+          color = MaterialTheme.colorScheme.onSurface,
+        )
+
+        Row(
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          if (displayYear.isNotBlank()) {
+            Text(
+              text = displayYear,
+              style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.SemiBold,
+              ),
+              color = MaterialTheme.colorScheme.primary,
+            )
+          }
+          if (displayDuration.isNotBlank()) {
+            Text(
+              text = displayDuration,
+              style = MaterialTheme.typography.labelSmall,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
+          if (rating != null && rating > 0.0) {
+            Row(
+              horizontalArrangement = Arrangement.spacedBy(2.dp),
+              verticalAlignment = Alignment.CenterVertically,
+            ) {
+              Icon(
+                imageVector = Icons.RoundedFilled.Star,
+                contentDescription = null,
+                modifier = Modifier.size(12.dp),
+                tint = Color(0xFFFFB800),
+              )
+              Text(
+                text = String.format(java.util.Locale.US, "%.1f", rating),
+                style = MaterialTheme.typography.labelSmall.copy(
+                  fontWeight = FontWeight.Bold,
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+              )
+            }
+          }
+        }
+
+        if (!synopsis.isNullOrBlank()) {
+          Text(
+            text = synopsis,
+            style = MaterialTheme.typography.bodySmall,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+          )
+        }
+      }
+    }
+  }
+}
+
 

@@ -1227,7 +1227,11 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                   onOpenMovieDetails = { video ->
                     backstack.navigateTo(MovieDetailsScreen(video.path))
                   },
+                  onPlayMedia = { video ->
+                    playFromMediaLibrary(video)
+                  },
                   selectionManager = selectionManager,
+                  mediaLayoutMode = mediaLayoutMode,
                   modifier = Modifier.fillMaxSize(),
                 )
               } else if (pageType == MediaLibraryTabItem.Video && !isSearching) {
@@ -1772,6 +1776,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
         )
       } else {
         val isDualHorizon = currentTab == MediaLibraryTabItem.All && !isSearching
+        val isMoviesTab = currentTab == MediaLibraryTabItem.Movies
         VideoSortDialog(
           isOpen = sortDialogOpen.value,
           onDismiss = { sortDialogOpen.value = false },
@@ -1780,7 +1785,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
           onSortTypeChange = { browserPreferences.videoSortType.set(it) },
           onSortOrderChange = { browserPreferences.videoSortOrder.set(it) },
           isFolderView = false,
-          enableViewModeOptions = !forceAudio && !isDualHorizon,
+          enableViewModeOptions = !forceAudio && !isDualHorizon && !isMoviesTab,
           enableLayoutModeOptions = !isDualHorizon,
           enableFieldOptions = !isDualHorizon,
           isAudio = currentTab == MediaLibraryTabItem.Audio,
