@@ -1716,7 +1716,7 @@ internal object MediaInfoDetails {
               style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
             )
             Text(
-              text = "${lines.size} lines  â€¢  ${sectionCount} sections",
+              text = "${lines.size} lines  •  ${sectionCount} sections",
               style = MaterialTheme.typography.labelMedium,
               color = colors.onPrimaryContainer.copy(alpha = 0.76f),
             )
