@@ -67,6 +67,8 @@ fun TopLeftPlayerControlsLandscape(
     val clickEvent = LocalPlayerButtonsClickEvent.current
     val enableLiquidGlass = liquidGlassActive()
     val titleHeight = playerTitleHeight(45.dp, MaterialTheme.typography.titleMedium.lineHeight)
+    val playerPreferences = org.koin.compose.koinInject<app.video.player.preferences.PlayerPreferences>()
+    val showFormatBadges by playerPreferences.showFormatBadges.collectAsState()
 
     Column(
       modifier = Modifier.fillMaxWidth(),
@@ -84,6 +86,7 @@ fun TopLeftPlayerControlsLandscape(
 
         if (!hideTitle) {
           Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.layout { measurable, constraints ->
               if (mediaTitle.isNullOrBlank() || constraints.maxWidth < 80.dp.roundToPx()) {
                 layout(0, 0) {}
@@ -176,7 +179,12 @@ fun TopLeftPlayerControlsLandscape(
                 }
               }
             }
+            if (showFormatBadges) {
+              app.video.player.ui.player.controls.components.PlaybackFormatBadgeRow(logoHeight = 16.dp)
+            }
           }
+        } else if (showFormatBadges) {
+          app.video.player.ui.player.controls.components.PlaybackFormatBadgeRow(logoHeight = 16.dp)
         }
       }
 
