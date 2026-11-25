@@ -283,6 +283,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   val isAnyDualHorizonSectionEnabled =
     cinematicShowHeroSpotlight || dualHorizonShowVideoRail || dualHorizonShowAudioPulsing || dualHorizonShowMusicRail
   val savedMediaType by browserPreferences.mediaLibraryType.collectAsState()
+  val savedActiveTab by browserPreferences.mediaLibraryActiveTab.collectAsState()
   val mediaType = if (forceAudio) MediaLibraryType.Audio else if (includeAudioBrowser || browserPreferences.folderViewMode.get() == app.video.player.preferences.FolderViewMode.DualHorizon) savedMediaType else MediaLibraryType.Video
   val musicCoverArtSize by browserPreferences.musicCoverArtSize.collectAsState()
   val enabledMusicTabs by audioPreferences.enabledMusicTabs.collectAsState()
@@ -363,7 +364,12 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
     }
   }
   val initialPageIndex = remember(mediaLibraryTabs) {
-    val target = MediaLibraryTabItem.fromLibraryType(savedMediaType)
+    val activeTab = MediaLibraryTabItem.entries.firstOrNull { it.name == savedActiveTab }
+    val target = if (activeTab != null && activeTab in mediaLibraryTabs) {
+      activeTab
+    } else {
+      MediaLibraryTabItem.fromLibraryType(savedMediaType)
+    }
     val idx = mediaLibraryTabs.indexOf(target)
     if (idx >= 0) idx else 0
   }
@@ -383,6 +389,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
         browserPreferences.includeAudioBrowser.set(true)
       }
       browserPreferences.mediaLibraryType.set(MediaLibraryType.All)
+      browserPreferences.mediaLibraryActiveTab.set(MediaLibraryTabItem.All.name)
       val targetIndex = mediaLibraryTabs.indexOf(MediaLibraryTabItem.All)
       if (targetIndex >= 0 && pagerState.currentPage != targetIndex) {
         navigateTab(targetIndex)
@@ -395,6 +402,9 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
       .collect { (page, isScrolling) ->
         if (!isScrolling && !forceAudio) {
           mediaLibraryTabs.getOrNull(page)?.let { targetTab ->
+            if (savedActiveTab != targetTab.name) {
+              browserPreferences.mediaLibraryActiveTab.set(targetTab.name)
+            }
             val targetType = targetTab.toLibraryType()
             if (mediaType != targetType && targetTab != MediaLibraryTabItem.Movies) {
               if (!includeAudioBrowser && (targetType == MediaLibraryType.Audio || targetType == MediaLibraryType.All)) {
@@ -410,7 +420,11 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
 
   LaunchedEffect(mediaType, mediaLibraryTabs) {
     if (!forceAudio) {
-      val targetTab = MediaLibraryTabItem.fromLibraryType(mediaType)
+      val keepMoviesTab =
+        savedActiveTab == MediaLibraryTabItem.Movies.name &&
+          mediaType == MediaLibraryType.Video &&
+          MediaLibraryTabItem.Movies in mediaLibraryTabs
+      val targetTab = if (keepMoviesTab) MediaLibraryTabItem.Movies else MediaLibraryTabItem.fromLibraryType(mediaType)
       val targetIndex = mediaLibraryTabs.indexOf(targetTab).coerceAtLeast(0)
       if (pagerState.currentPage != targetIndex && !pagerState.isScrollInProgress) {
         navigateTab(targetIndex)
