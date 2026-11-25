@@ -6549,8 +6549,11 @@ private suspend fun restorePlaybackPosition(state: PlaybackStateEntity?, loadGen
       pendingPipExitResolution = false
       wasInPipMode = true
       handledPipDismissal = false
-      if (isCurrentOrientationLandscape() || (player.getVideoOutAspect() ?: 0.0) > 1.0) {
-        pipPreservedLandscape = true
+      val videoAspect = player.getVideoOutAspect()
+      pipPreservedLandscape = if (videoAspect != null && videoAspect > 0.0) {
+        videoAspect > 1.0
+      } else {
+        isCurrentOrientationLandscape()
       }
       // Keep activity's existing screen orientation intact while in PiP so aspect ratio doesn't distort
       ensurePipPlaybackNotification()
@@ -6621,8 +6624,11 @@ private suspend fun restorePlaybackPosition(state: PlaybackStateEntity?, loadGen
     if (viewModel.isAudioOnly.value || isCurrentMediaKnownAudio() || !isReady || isFinishing || isDestroyed) {
       return false
     }
-    if (isCurrentOrientationLandscape() || (player.getVideoOutAspect() ?: 0.0) > 1.0) {
-      pipPreservedLandscape = true
+    val videoAspect = player.getVideoOutAspect()
+    pipPreservedLandscape = if (videoAspect != null && videoAspect > 0.0) {
+      videoAspect > 1.0
+    } else {
+      isCurrentOrientationLandscape()
     }
     binding.root.animate().cancel()
     binding.controls.animate().cancel()
@@ -6717,7 +6723,12 @@ private suspend fun restorePlaybackPosition(state: PlaybackStateEntity?, loadGen
     }
 
     if (isInPictureInPictureMode) {
-      val isLandscape = pipPreservedLandscape || ((sourceAspect ?: player.getVideoOutAspect()) ?: 0.0) > 1.0
+      val videoAspect = sourceAspect ?: player.getVideoOutAspect()
+      val isLandscape = if (videoAspect != null && videoAspect > 0.0) {
+        videoAspect > 1.0
+      } else {
+        pipPreservedLandscape
+      }
       val target = if (isLandscape) {
         ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
       } else {

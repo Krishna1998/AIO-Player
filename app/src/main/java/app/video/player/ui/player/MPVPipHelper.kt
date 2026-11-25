@@ -180,13 +180,10 @@ class MPVPipHelper(
       ?: (width.toDouble() / height.toDouble())
     val rotation = (PlaybackSession.getPropertyInt("video-params/rotate") ?: 0).mod(360)
     val displayedAspect = if (rotation == 90 || rotation == 270) 1.0 / baseAspect else baseAspect
-    if (!displayedAspect.isFinite() || displayedAspect !in 0.5..2.39) {
-      return if (activity.isInPictureInPictureMode) lastAspectRatio else null
-    }
-
-    // Android accepts integer Rational only; retaining 1/10000 aspect precision avoids
-    // passing distorted ratios to PiP for anamorphic or rotated content.
-    val rational = Rational((displayedAspect * 10_000).toInt().coerceAtLeast(1), 10_000)
+    // Android accepts integer Rational only, clamped to the valid system PiP range [0.41841..2.39] (~ 1:2.39 to 2.39:1).
+    // Coercing rather than dropping lets extreme portrait (e.g. 9:19.5 or 9:21) or ultra-wide videos enter PiP safely.
+    val clampedAspect = displayedAspect.coerceIn(0.41841, 2.39)
+    val rational = Rational((clampedAspect * 10_000).toInt().coerceAtLeast(1), 10_000)
     lastAspectRatio = rational
     return rational
   }
