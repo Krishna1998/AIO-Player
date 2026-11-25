@@ -3469,13 +3469,15 @@ private fun SpotlightGesturesInfoDialog(
       tonalElevation = 6.dp,
       modifier = Modifier
         .fillMaxWidth()
-        .padding(horizontal = 16.dp),
+        .widthIn(max = 420.dp)
+        .padding(horizontal = 20.dp, vertical = 24.dp),
     ) {
       Column(
         modifier = Modifier
           .fillMaxWidth()
-          .padding(22.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+          .verticalScroll(rememberScrollState())
+          .padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
       ) {
         // Dialog Title Row
         Row(
