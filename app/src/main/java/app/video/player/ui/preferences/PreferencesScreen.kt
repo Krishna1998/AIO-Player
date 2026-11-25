@@ -573,43 +573,6 @@ private fun AuroraProfileHeroCard(
           overflow = TextOverflow.Ellipsis,
         )
 
-        Row(
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-          Surface(
-            shape = RoundedCornerShape(999.dp),
-            color = colorScheme.primary.copy(alpha = 0.15f),
-            border = BorderStroke(0.8.dp, colorScheme.primary.copy(alpha = 0.40f)),
-          ) {
-            Text(
-              text = themeBadge,
-              style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.Bold,
-                fontSize = 10.sp,
-              ),
-              color = colorScheme.primary,
-              modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp),
-            )
-          }
-
-          Surface(
-            shape = RoundedCornerShape(999.dp),
-            color = colorScheme.tertiary.copy(alpha = 0.15f),
-            border = BorderStroke(0.8.dp, colorScheme.tertiary.copy(alpha = 0.40f)),
-          ) {
-            Text(
-              text = "PRO",
-              style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 10.sp,
-              ),
-              color = colorScheme.tertiary,
-              modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-            )
-          }
-        }
-
         Text(
           text = stringResource(R.string.profile_edit),
           style = MaterialTheme.typography.bodySmall.copy(
