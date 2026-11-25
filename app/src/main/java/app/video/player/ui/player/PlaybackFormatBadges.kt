@@ -757,19 +757,7 @@ internal fun videoToFormatBadges(video: app.video.player.domain.media.model.Vide
     vCodec.isNotBlank() -> add(PlaybackFormatBadge(video.videoCodec.uppercase(Locale.ROOT)))
   }
 
-  val aCodec = video.audioCodec.lowercase(Locale.ROOT)
-  when {
-    "truehd" in aCodec -> add(PlaybackFormatBadge("TrueHD", "audio/truehd.svg"))
-    "eac3" in aCodec || "e-ac-3" in aCodec || "dd+" in aCodec -> add(PlaybackFormatBadge("DD+", "audio/eac3.svg"))
-    "ac3" in aCodec || "ac-3" in aCodec -> add(PlaybackFormatBadge("AC3", "audio/ac3.svg"))
-    "dts" in aCodec -> add(PlaybackFormatBadge("DTS", "audio/dts.svg"))
-    "aac" in aCodec -> add(PlaybackFormatBadge("AAC", "audio/aac.svg"))
-    "flac" in aCodec -> add(PlaybackFormatBadge("FLAC", "audio/flac.svg"))
-    "opus" in aCodec -> add(PlaybackFormatBadge("Opus", "audio/opus.svg"))
-    aCodec.isNotBlank() -> add(PlaybackFormatBadge(video.audioCodec.uppercase(Locale.ROOT)))
-  }
-
-  if (video.hasEmbeddedSubtitles || video.subtitleCount > 0) {
+  if (video.hasEmbeddedSubtitles) {
     add(PlaybackFormatBadge("SUB", "subtitles/srt.svg"))
   }
 }

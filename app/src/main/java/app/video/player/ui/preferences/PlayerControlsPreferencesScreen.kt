@@ -449,6 +449,7 @@ object PlayerControlsPreferencesScreen : Screen {
                 PreferenceDivider()
               }
 
+              val playerPreferences = koinInject<app.video.player.preferences.PlayerPreferences>()
               val showFormatBadges by playerPreferences.showFormatBadges.collectAsState()
               SwitchPreference(
                 value = showFormatBadges,
