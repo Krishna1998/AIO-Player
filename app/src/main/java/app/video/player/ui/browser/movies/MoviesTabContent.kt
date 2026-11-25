@@ -692,7 +692,6 @@ private fun MovieListItemCard(
         }
       }
     }
-    }
   }
 }
 
