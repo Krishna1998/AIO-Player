@@ -18,6 +18,8 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -71,6 +73,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import app.video.player.R
 import app.video.player.domain.media.model.Video
+import app.video.player.domain.movies.MovieClassifier
 import app.video.player.domain.movies.MovieMetadata
 import app.video.player.domain.movies.MovieMetadataRepository
 import app.video.player.preferences.BrowserPreferences
@@ -236,9 +239,14 @@ data class MovieDetailsScreen(
                 .padding(bottom = 36.dp),
               verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
-              // Metadata Badges Row: [ Year ] [ Duration ] [ Resolution ]
+              // Metadata Badges Row: [ Year ] [ Duration ] [ Resolution ] [ Movie toggle ]
+              val isClassifiedAsMovie = remember(currentVideo, currentMeta) {
+                MovieClassifier.isActualMovie(currentVideo, currentMeta)
+              }
               Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                  .fillMaxWidth()
+                  .horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
               ) {
@@ -256,6 +264,59 @@ data class MovieDetailsScreen(
                 val resolution = currentMeta?.resolution?.takeIf { it.isNotBlank() }
                 if (resolution != null) {
                   MovieMetaBadge(text = resolution)
+                }
+
+                Surface(
+                  shape = RoundedCornerShape(8.dp),
+                  color = if (isClassifiedAsMovie) {
+                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.85f)
+                  } else {
+                    MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.8f)
+                  },
+                  modifier = Modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable {
+                      val nextState = !isClassifiedAsMovie
+                      coroutineScope.launch {
+                        movieMetadataRepo.setMovieOverride(currentVideo, nextState)
+                        metadata = movieMetadataRepo.getCachedMetadata(currentVideo)
+                        val msg = if (nextState) {
+                          context.getString(R.string.movie_details_marked_toast)
+                        } else {
+                          context.getString(R.string.movie_details_unmarked_toast)
+                        }
+                        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show()
+                      }
+                    },
+                ) {
+                  Row(
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                  ) {
+                    Icon(
+                      imageVector = Icons.RoundedFilled.Movie,
+                      contentDescription = null,
+                      modifier = Modifier.size(14.dp),
+                      tint = if (isClassifiedAsMovie) {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                      } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                      },
+                    )
+                    Text(
+                      text = stringResource(
+                        if (isClassifiedAsMovie) R.string.movie_details_in_movies
+                        else R.string.movie_details_mark_as_movie,
+                      ),
+                      style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                      color = if (isClassifiedAsMovie) {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                      } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                      },
+                    )
+                  }
                 }
               }
 

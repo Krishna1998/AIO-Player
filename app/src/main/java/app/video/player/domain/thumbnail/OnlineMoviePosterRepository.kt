@@ -15,6 +15,7 @@ import android.graphics.BitmapFactory
 import android.util.Log
 import android.util.LruCache
 import app.video.player.domain.media.model.Video
+import app.video.player.domain.movies.MovieClassifier
 import app.video.player.network.awaitResponse
 import app.video.player.preferences.BrowserPreferences
 import app.video.player.utils.media.MediaInfoParser
@@ -111,6 +112,7 @@ class OnlineMoviePosterRepository(
     File(posterDir, "t_${sha256(title.lowercase().trim() + "_" + (year ?: "").trim())}.jpg")
 
   fun hasCachedPoster(video: Video): Boolean {
+    if (!MovieClassifier.shouldFetchOnlinePoster(video)) return false
     val path = video.path.ifBlank { video.uri.toString() }
     val fileByPath = posterFileForPath(path)
     if (fileByPath.isFile && fileByPath.length() > 500) return true
@@ -154,7 +156,7 @@ class OnlineMoviePosterRepository(
     widthPx: Int = 0,
     heightPx: Int = 0,
   ): Bitmap? {
-    if (video.isAudio) return null
+    if (video.isAudio || !MovieClassifier.shouldFetchOnlinePoster(video)) return null
     val pathKey = video.path.ifBlank { video.uri.toString() }
     memoryCache.get(pathKey)?.let {
       if (!it.isRecycled) return it
@@ -186,7 +188,9 @@ class OnlineMoviePosterRepository(
     heightPx: Int = 0,
     timeoutMs: Long = POSTER_FETCH_TIMEOUT_MS,
   ): Bitmap? = withContext(Dispatchers.IO) {
-    if (video.isAudio || !browserPreferences.autoFetchOnlinePosters.get()) return@withContext null
+    if (video.isAudio || !browserPreferences.autoFetchOnlinePosters.get() || !MovieClassifier.shouldFetchOnlinePoster(video)) {
+      return@withContext null
+    }
     getCachedPosterBitmap(video, widthPx, heightPx)?.let { return@withContext it }
 
     val parsed = MediaInfoParser.parse(video.displayName.ifBlank { video.title })
@@ -223,7 +227,7 @@ class OnlineMoviePosterRepository(
     video: Video,
     onCompleted: (Bitmap) -> Unit = {},
   ) {
-    if (video.isAudio || !browserPreferences.autoFetchOnlinePosters.get()) return
+    if (video.isAudio || !browserPreferences.autoFetchOnlinePosters.get() || !MovieClassifier.shouldFetchOnlinePoster(video)) return
     if (hasCachedPoster(video)) return
     val parsed = MediaInfoParser.parse(video.displayName.ifBlank { video.title })
     val cleanTitle = parsed.title.trim().ifBlank {

@@ -15,7 +15,14 @@ import app.video.player.domain.media.model.Video
 import app.video.player.repository.wyzie.WyzieSearchRepository
 import app.video.player.utils.media.MediaInfoParser
 import app.video.player.utils.storage.VideoScanUtils
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
@@ -37,6 +44,8 @@ data class MovieMetadata(
   val backdropUrl: String? = null,
   val voteAverage: Double? = null,
   val tmdbId: Int? = null,
+  val sourcePath: String? = null,
+  val isMovieOverride: Boolean? = null,
 )
 
 class MovieMetadataRepository(
@@ -48,8 +57,35 @@ class MovieMetadataRepository(
     encodeDefaults = true
   },
 ) {
+  private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
   private val cacheDir = File(context.filesDir, "movie_metadata").apply { mkdirs() }
   private val memoryCache = ConcurrentHashMap<String, MovieMetadata>()
+  private val _metadataRevision = MutableStateFlow(0)
+  val metadataRevision: StateFlow<Int> = _metadataRevision.asStateFlow()
+
+  init {
+    scope.launch {
+      preloadCachedMetadata()
+    }
+  }
+
+  private fun preloadCachedMetadata() {
+    val files = cacheDir.listFiles { f -> f.isFile && f.name.endsWith(".json") } ?: return
+    var loadedAny = false
+    for (file in files) {
+      runCatching {
+        val meta = json.decodeFromString<MovieMetadata>(file.readText())
+        val key = meta.sourcePath
+        if (!key.isNullOrBlank()) {
+          memoryCache.putIfAbsent(key, meta)
+          loadedAny = true
+        }
+      }
+    }
+    if (loadedAny) {
+      _metadataRevision.update { it + 1 }
+    }
+  }
 
   companion object {
     private const val TAG = "MovieMetadataRepo"
@@ -63,6 +99,12 @@ class MovieMetadataRepository(
   private fun cacheFileForPath(path: String): File =
     File(cacheDir, "m_${sha256(path)}.json")
 
+  /** Fast main-thread-safe lookup without disk I/O. */
+  fun getMemoryCachedMetadata(video: Video): MovieMetadata? {
+    val pathKey = video.path.ifBlank { video.uri.toString() }
+    return memoryCache[pathKey]
+  }
+
   fun getCachedMetadata(video: Video): MovieMetadata? {
     val pathKey = video.path.ifBlank { video.uri.toString() }
     memoryCache[pathKey]?.let { return it }
@@ -71,8 +113,9 @@ class MovieMetadataRepository(
     if (file.isFile && file.length() > 0) {
       runCatching {
         val meta = json.decodeFromString<MovieMetadata>(file.readText())
-        memoryCache[pathKey] = meta
-        return meta
+        val enriched = if (meta.sourcePath.isNullOrBlank()) meta.copy(sourcePath = pathKey) else meta
+        memoryCache[pathKey] = enriched
+        return enriched
       }
     }
     return null
@@ -81,8 +124,9 @@ class MovieMetadataRepository(
   suspend fun getOrFetchMetadata(video: Video, forceRefresh: Boolean = false): MovieMetadata =
     withContext(Dispatchers.IO) {
       val pathKey = video.path.ifBlank { video.uri.toString() }
-      if (!forceRefresh) {
-        getCachedMetadata(video)?.let { return@withContext it }
+      val existing = getCachedMetadata(video)
+      if (!forceRefresh && existing != null) {
+        return@withContext existing
       }
 
       val parsed = MediaInfoParser.parse(video.displayName.ifBlank { video.title })
@@ -116,6 +160,8 @@ class MovieMetadataRepository(
         releaseYear = year,
         durationFormatted = durationFormatted,
         resolution = resolution,
+        sourcePath = pathKey,
+        isMovieOverride = existing?.isMovieOverride,
       )
 
       try {
@@ -141,16 +187,36 @@ class MovieMetadataRepository(
       runCatching {
         cacheFileForPath(pathKey).writeText(json.encodeToString(movieMeta))
       }
+      _metadataRevision.update { it + 1 }
 
       movieMeta
     }
 
   suspend fun saveCustomMetadata(video: Video, updated: MovieMetadata) = withContext(Dispatchers.IO) {
     val pathKey = video.path.ifBlank { video.uri.toString() }
+    val enriched = if (updated.sourcePath.isNullOrBlank()) updated.copy(sourcePath = pathKey) else updated
+    memoryCache[pathKey] = enriched
+    runCatching {
+      cacheFileForPath(pathKey).writeText(json.encodeToString(enriched))
+    }
+    _metadataRevision.update { it + 1 }
+  }
+
+  suspend fun setMovieOverride(video: Video, isMovie: Boolean) = withContext(Dispatchers.IO) {
+    val pathKey = video.path.ifBlank { video.uri.toString() }
+    val base = getCachedMetadata(video) ?: MovieMetadata(
+      title = MediaInfoParser.parse(video.displayName.ifBlank { video.title }).title.ifBlank {
+        video.displayName.substringBeforeLast('.').ifBlank { video.title }
+      },
+      durationFormatted = video.durationFormatted,
+      sourcePath = pathKey,
+    )
+    val updated = base.copy(sourcePath = pathKey, isMovieOverride = isMovie)
     memoryCache[pathKey] = updated
     runCatching {
       cacheFileForPath(pathKey).writeText(json.encodeToString(updated))
     }
+    _metadataRevision.update { it + 1 }
   }
 
   private fun formatImageUrl(path: String?, isBackdrop: Boolean): String? {

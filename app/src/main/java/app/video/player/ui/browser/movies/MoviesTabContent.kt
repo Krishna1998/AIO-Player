@@ -32,6 +32,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -51,9 +52,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.video.player.R
 import app.video.player.domain.media.model.Video
+import app.video.player.domain.movies.MovieClassifier
 import app.video.player.domain.movies.MovieMetadata
 import app.video.player.domain.movies.MovieMetadataRepository
 import app.video.player.presentation.components.RemoteImage
+import app.video.player.ui.browser.states.EmptyState
 import app.video.player.ui.browser.videolist.VideoWithPlaybackInfo
 import app.video.player.ui.icons.Icon
 import app.video.player.ui.icons.Icons
@@ -72,9 +75,12 @@ fun MoviesTabContent(
 ) {
   var selectedFilterIndex by rememberSaveable { mutableIntStateOf(0) }
   val movieMetadataRepo = koinInject<MovieMetadataRepository>()
+  val metadataRevision by movieMetadataRepo.metadataRevision.collectAsState()
 
-  val movieCandidates = remember(videosWithInfo) {
-    videosWithInfo.filter { !it.video.isAudio }
+  val movieCandidates = remember(videosWithInfo, metadataRevision) {
+    videosWithInfo.filter {
+      MovieClassifier.isActualMovie(it.video, movieMetadataRepo.getMemoryCachedMetadata(it.video))
+    }
   }
 
   val filteredMovies = remember(movieCandidates, selectedFilterIndex) {
@@ -142,23 +148,36 @@ fun MoviesTabContent(
       modifier = Modifier.padding(horizontal = 18.dp, vertical = 2.dp),
     )
 
-    // Movie Posters Grid (Portrait 2:3 aspect ratio)
-    LazyVerticalGrid(
-      columns = GridCells.Adaptive(minSize = 105.dp),
-      contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
-      horizontalArrangement = Arrangement.spacedBy(10.dp),
-      verticalArrangement = Arrangement.spacedBy(14.dp),
-      modifier = Modifier.fillMaxSize(),
-    ) {
-      items(
-        items = filteredMovies,
-        key = { it.video.path },
-      ) { item ->
-        MoviePosterCard(
-          item = item,
-          movieMetadataRepo = movieMetadataRepo,
-          onClick = { onOpenMovieDetails(item.video) },
+    // Movie Posters Grid (Portrait 2:3 aspect ratio) or Empty State
+    if (filteredMovies.isEmpty()) {
+      Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+      ) {
+        EmptyState(
+          icon = Icons.RoundedFilled.Movie,
+          title = stringResource(R.string.movies_empty_title),
+          message = stringResource(R.string.movies_empty_message),
         )
+      }
+    } else {
+      LazyVerticalGrid(
+        columns = GridCells.Adaptive(minSize = 105.dp),
+        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
+        modifier = Modifier.fillMaxSize(),
+      ) {
+        items(
+          items = filteredMovies,
+          key = { it.video.path },
+        ) { item ->
+          MoviePosterCard(
+            item = item,
+            movieMetadataRepo = movieMetadataRepo,
+            onClick = { onOpenMovieDetails(item.video) },
+          )
+        }
       }
     }
   }
@@ -173,7 +192,7 @@ private fun MoviePosterCard(
 ) {
   val video = item.video
   var metadata by remember(video.path) {
-    mutableStateOf(movieMetadataRepo.getCachedMetadata(video))
+    mutableStateOf(movieMetadataRepo.getMemoryCachedMetadata(video))
   }
 
   LaunchedEffect(video.path) {

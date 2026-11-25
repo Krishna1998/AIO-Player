@@ -148,6 +148,8 @@ import app.video.player.ui.utils.LocalBackStack
 import app.video.player.ui.utils.navigateTo
 import app.video.player.ui.tv.focusableWhen
 import app.video.player.utils.history.RecentlyPlayedOps
+import app.video.player.domain.movies.MovieClassifier
+import app.video.player.domain.movies.MovieMetadataRepository
 import app.video.player.ui.browser.movies.MoviesTabContent
 import app.video.player.ui.browser.movies.MovieDetailsScreen
 import app.video.player.ui.browser.components.BrowserBottomBarAction
@@ -315,6 +317,11 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   }
   val libraryShowMoviesTab by browserPreferences.libraryShowMoviesTab.collectAsState()
   val openMovieDetailsOnTap by browserPreferences.openMovieDetailsOnTap.collectAsState()
+  val movieMetadataRepo = koinInject<MovieMetadataRepository>()
+  val movieMetadataRevision by movieMetadataRepo.metadataRevision.collectAsState()
+  val isActualMovie: (Video) -> Boolean = remember(movieMetadataRepo, movieMetadataRevision) {
+    { video -> MovieClassifier.isActualMovie(video, movieMetadataRepo.getMemoryCachedMetadata(video)) }
+  }
   val mediaLibrarySubTabsOrder by browserPreferences.mediaLibrarySubTabsOrder.collectAsState()
   val mediaLibraryTabs = remember(forceAudio, libraryShowMusicTab, libraryShowMoviesTab, isAnyDualHorizonSectionEnabled, mediaLibrarySubTabsOrder) {
     if (forceAudio) {
@@ -414,10 +421,10 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   val focusRequester = remember { FocusRequester() }
 
   val currentVideosWithInfo =
-    remember(sortedVideosWithInfo, currentTab, isSearching, searchQuery, videoSortType, videoSortOrder) {
+    remember(sortedVideosWithInfo, currentTab, isSearching, searchQuery, videoSortType, videoSortOrder, movieMetadataRevision) {
       val base = if (isSearching) sortedVideosWithInfo else when (currentTab) {
         MediaLibraryTabItem.All -> sortedVideosWithInfo
-        MediaLibraryTabItem.Movies -> sortedVideosWithInfo.filter { !it.video.isAudio }
+        MediaLibraryTabItem.Movies -> sortedVideosWithInfo.filter { isActualMovie(it.video) }
         MediaLibraryTabItem.Video -> sortedVideosWithInfo.filter { !it.video.isAudio }
         MediaLibraryTabItem.Audio -> {
           when (videoSortType) {
@@ -1001,7 +1008,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                 val isSelected = currentTab == type
                 val count = when (type) {
                   MediaLibraryTabItem.All -> sortedVideosWithInfo.size
-                  MediaLibraryTabItem.Movies -> sortedVideosWithInfo.count { !it.video.isAudio }
+                  MediaLibraryTabItem.Movies -> sortedVideosWithInfo.count { isActualMovie(it.video) }
                   MediaLibraryTabItem.Video -> sortedVideosWithInfo.count { !it.video.isAudio }
                   MediaLibraryTabItem.Audio -> sortedVideosWithInfo.count { it.video.isAudio }
                 }
@@ -1138,10 +1145,10 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
               userScrollEnabled = !selectionManager.isInSelectionMode,
             ) { page ->
               val pageType = mediaLibraryTabs.getOrNull(page) ?: MediaLibraryTabItem.All
-              val pageVideosWithInfo = remember(sortedVideosWithInfo, pageType, isSearching, searchQuery, videoSortType, videoSortOrder) {
+              val pageVideosWithInfo = remember(sortedVideosWithInfo, pageType, isSearching, searchQuery, videoSortType, videoSortOrder, movieMetadataRevision) {
                 val base = if (isSearching) sortedVideosWithInfo else when (pageType) {
                   MediaLibraryTabItem.All -> sortedVideosWithInfo
-                  MediaLibraryTabItem.Movies -> sortedVideosWithInfo.filter { !it.video.isAudio }
+                  MediaLibraryTabItem.Movies -> sortedVideosWithInfo.filter { isActualMovie(it.video) }
                   MediaLibraryTabItem.Video -> sortedVideosWithInfo.filter { !it.video.isAudio }
                   MediaLibraryTabItem.Audio -> {
                     when (videoSortType) {
@@ -1264,7 +1271,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                         onVideoClick = { video ->
                           if (selectionManager.isInSelectionMode) {
                             selectionManager.toggleFromUser(video)
-                          } else if (openMovieDetailsOnTap && !video.isAudio) {
+                          } else if (openMovieDetailsOnTap && isActualMovie(video)) {
                             backstack.navigateTo(MovieDetailsScreen(video.path))
                           } else {
                             playFromMediaLibrary(video)
@@ -1558,7 +1565,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                   onVideoClick = { video ->
                     if (selectionManager.isInSelectionMode) {
                       selectionManager.toggleFromUser(video)
-                    } else if (openMovieDetailsOnTap && !video.isAudio) {
+                    } else if (openMovieDetailsOnTap && isActualMovie(video)) {
                       backstack.navigateTo(MovieDetailsScreen(video.path))
                     } else {
                       playFromMediaLibrary(video)
@@ -1579,7 +1586,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                         videosWithInfo = pageVideosWithInfo,
                         recentlyPlayedFilePath = recentlyPlayedFilePath,
                         onPlayMedia = { video, startPos, customQueue ->
-                          if (openMovieDetailsOnTap && !video.isAudio && startPos == null) {
+                          if (openMovieDetailsOnTap && isActualMovie(video) && startPos == null) {
                             backstack.navigateTo(MovieDetailsScreen(video.path))
                           } else {
                             playFromMediaLibrary(video, startPos, customQueue)

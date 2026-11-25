@@ -204,6 +204,12 @@
   <string name="movie_details_edit_title">Edit Movie Details</string>
   <string name="movie_details_edit_synopsis">Overview / Synopsis</string>
   <string name="movie_details_save">Save</string>
+  <string name="movies_empty_title">No movies detected</string>
+  <string name="movies_empty_message">Full-length movies are automatically detected by duration, filename, or movie folders. Normal clips and recordings stay in Videos.</string>
+  <string name="movie_details_in_movies">In Movies</string>
+  <string name="movie_details_mark_as_movie">Add to Movies</string>
+  <string name="movie_details_marked_toast">Added to Movies library</string>
+  <string name="movie_details_unmarked_toast">Moved to normal videos</string>
   <string name="ui_filter_all">All</string>
   <string name="ui_filter_unwatched">Unwatched</string>
   <string name="ui_filter_started">Started</string>
