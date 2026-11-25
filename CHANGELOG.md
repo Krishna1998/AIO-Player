@@ -2,6 +2,29 @@
 
 These notes are written in plain English and focus on what changed for real use.
 
+## 1.0.7
+
+### 🎨 UI, Format Badges & Polish
+- **SVG Media Format Badges:**
+  - Added crisp SVG format badges (resolution, video codec, audio codec, subtitles) to **Continue Watching**, **Movie Details**, and the **Video Player** controls overlay.
+  - Added a **Show format badges** on/off toggle in **Preferences → Player Layout**.
+- **Preferences & Wallpaper Redesign:**
+  - Updated Preferences icons to a unified frosted glass style, aligned Quick Access tiles, and removed duplicate entries and profile badges.
+  - Polished the **Wallpaper** preset cards with portrait proportions, gradient label scrims, and pill value badges.
+- **Spotlight Gestures Guide:**
+  - Improved portrait dialog layout and simplified the guide to show once on initial launch.
+
+### 🎬 Movies & Library Improvements
+- **Pull-to-Refresh & Direct Play:**
+  - Enabled pull-to-refresh in the **Movies** tab and wired **Open movie details on tap** so turning it off starts playback directly.
+- **Sort & View Options Cleanup:**
+  - Streamlined Sort & View options for **All Media**, **Movies**, and **Music** tabs.
+- **Logging & Diagnostics:**
+  - Added **Verbose logging** and **Dump logs** options in **Advanced** settings.
+  - Updated MediaInfoLib report attribution to **HorizonPlayer**.
+- **Smaller APK Download:**
+  - Enabled native library compression (`useLegacyPackaging = true`) to significantly reduce APK download size.
+
 ## 1.0.6
 
 ### 📱 Portrait Picture-in-Picture & Player Orientation Fixes
