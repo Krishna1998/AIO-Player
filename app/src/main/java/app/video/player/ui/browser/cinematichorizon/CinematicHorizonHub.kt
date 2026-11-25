@@ -2032,8 +2032,23 @@ private fun HeroSpotlightBox(
         ),
       verticalArrangement = Arrangement.spacedBy(5.dp),
     ) {
-      val formatBadges = remember(video) {
-        if (video.isAudio) emptyList() else app.video.player.ui.player.videoToFormatBadges(video)
+      val context = LocalContext.current
+      var formatBadges by remember(video.path) {
+        mutableStateOf(if (video.isAudio) emptyList() else app.video.player.ui.player.videoToFormatBadges(video))
+      }
+      if (!video.isAudio) {
+        LaunchedEffect(video.path) {
+          kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            app.video.player.utils.media.MediaInfoOps
+              .getMediaInfoReport(context, video.uri, video.displayName)
+              .onSuccess { report ->
+                val overview = app.video.player.ui.player.overviewBadges(report.data, video.displayName)
+                if (overview.isNotEmpty()) {
+                  formatBadges = overview
+                }
+              }
+          }
+        }
       }
       if (formatBadges.isNotEmpty()) {
         app.video.player.ui.player.controls.components.MediaFormatBadges(
