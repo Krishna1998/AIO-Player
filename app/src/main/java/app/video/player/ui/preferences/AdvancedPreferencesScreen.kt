@@ -848,6 +848,60 @@ object AdvancedPreferencesScreen : Screen {
               }
             }
           }
+
+          item {
+            PreferenceSectionHeader(
+              title = stringResource(R.string.pref_advanced_section_logging),
+            )
+          }
+
+          item {
+            val activity = LocalActivity.current
+            @Suppress("DEPRECATION")
+            val clipboard = androidx.compose.ui.platform.LocalClipboardManager.current
+            val verboseLogging by preferences.verboseLogging.collectAsState()
+
+            ExpressivePreferenceGroup {
+              ExpressivePreferenceItem {
+                SwitchPreference(
+                  value = verboseLogging,
+                  onValueChange = preferences.verboseLogging::set,
+                  title = { Text(stringResource(R.string.pref_advanced_verbose_logging_title)) },
+                  summary = {
+                    Text(
+                      stringResource(R.string.pref_advanced_verbose_logging_summary),
+                      color = MaterialTheme.colorScheme.outline,
+                    )
+                  },
+                )
+              }
+
+              ExpressivePreferenceItem {
+                Preference(
+                  title = { Text(stringResource(R.string.pref_advanced_dump_logs_title)) },
+                  summary = {
+                    Text(
+                      stringResource(R.string.pref_advanced_dump_logs_summary),
+                      color = MaterialTheme.colorScheme.outline,
+                    )
+                  },
+                  onClick = {
+                    scope.launch(Dispatchers.IO) {
+                      val deviceInfo = app.video.player.presentation.crash.CrashActivity.collectDeviceInfo()
+                      val logcat = app.video.player.presentation.crash.CrashActivity.collectLogcat()
+                      val combined = app.video.player.presentation.crash.CrashActivity.concatLogs(deviceInfo, null, logcat)
+                      withContext(Dispatchers.Main) {
+                        clipboard.setText(androidx.compose.ui.text.AnnotatedString(combined))
+                      }
+                      activity?.let {
+                        app.video.player.presentation.crash.CrashActivity.shareLogs(deviceInfo, null, logcat, it)
+                      }
+                    }
+                  },
+                )
+              }
+            }
+          }
         }
       }
     }
