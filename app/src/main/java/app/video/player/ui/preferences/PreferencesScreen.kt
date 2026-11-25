@@ -764,7 +764,7 @@ private fun AuroraHubTile(
             Icon(
               imageVector = icon,
               contentDescription = null,
-              modifier = Modifier.size(24.dp),
+              modifier = Modifier.size(28.dp),
               tint = colorScheme.onSurface,
             )
           }
@@ -907,7 +907,7 @@ private fun AuroraDestinationRow(
         Icon(
           imageVector = destination.icon,
           contentDescription = null,
-          modifier = Modifier.size(20.dp),
+          modifier = Modifier.size(26.dp),
           tint = MaterialTheme.colorScheme.onSurface,
         )
       }
