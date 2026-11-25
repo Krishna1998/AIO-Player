@@ -10,7 +10,7 @@
 package app.video.player.ui.browser.cinematichorizon
 
 import android.content.Intent
-import app.video.player.ui.player.overviewBadges
+import app.video.player.ui.mediainfo.overviewBadges
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import androidx.compose.ui.platform.LocalConfiguration

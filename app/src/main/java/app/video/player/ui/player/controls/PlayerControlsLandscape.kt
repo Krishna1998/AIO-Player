@@ -52,7 +52,7 @@ import app.video.player.ui.player.controls.components.LocalBorderlessPlayerContr
 import app.video.player.ui.player.controls.components.playerButtonBorderColor
 import app.video.player.ui.player.controls.components.playerButtonContainerColor
 import app.video.player.ui.player.controls.components.playerButtonContentColor
-import app.video.player.preferences.collectAsState
+import app.video.player.preferences.preference.collectAsState
 import app.video.player.ui.theme.spacing
 
 @Composable
