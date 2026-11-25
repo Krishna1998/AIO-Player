@@ -49,7 +49,7 @@ object MovieClassifier {
 
   // Unambiguous non-feature trailers/samples/screen recordings/study lectures even when title & year are present
   private val HARD_NON_MOVIE_KEYWORDS_REGEX = Regex(
-    """\b(?:trailer|teaser|sneak[\s._-]?peek|featurette|behind[\s._-]?the[\s._-]?scenes|making[\s._-]?of|deleted[\s._-]?scenes?|gag[\s._-]?reel|bloopers?|sample|promo|screen[\s._-]?recording|screenrecord|screenrecorder|screencast|whatsapp[\s._-]?status|lecture|lec[\s._-]?\d+|syllabus|revision|ncert|upsc|jee|neet|ssc|pyq|mcq|coaching|tuition|study[\s._-]?material|by[\s._-]+[\w\s]+[\s._-]+(?:sir|mam|madam))\b""",
+    """(?<![a-zA-Z0-9])(?:trailer|teaser|sneak[\s._-]?peek|featurette|behind[\s._-]?the[\s._-]?scenes|making[\s._-]?of|deleted[\s._-]?scenes?|gag[\s._-]?reel|bloopers?|sample|promo|screen[\s._-]?recording|screenrecord|screenrecorder|screencast|whatsapp[\s._-]?status|lecture|lec[\s._-]?\d+|syllabus|revision|ncert|upsc|jee|neet|ssc|pyq|mcq|coaching|tuition|study[\s._-]?material|by[\s._-]+[\w\s]+[\s._-]+(?:sir|mam|madam)|ancient[\s._-]?history|modern[\s._-]?history|medieval[\s._-]?history|profit[\s._&-]*loss|simple[\s._-]?interest|compound[\s._-]?interest|percentage|installment|vikramjeet|class[\s._-]?\d+|batch|foundation|prelims|mains|polity|geography|reasoning|arithmetic|mensuration|trigonometry|algebra|number[\s._-]?system|chapter[\s._-]?\d+)(?![a-zA-Z0-9])""",
     RegexOption.IGNORE_CASE,
   )
 
