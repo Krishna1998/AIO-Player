@@ -449,6 +449,15 @@ object PlayerControlsPreferencesScreen : Screen {
                 PreferenceDivider()
               }
 
+              val showFormatBadges by playerPreferences.showFormatBadges.collectAsState()
+              SwitchPreference(
+                value = showFormatBadges,
+                onValueChange = { playerPreferences.showFormatBadges.set(it) },
+                title = { Text("Show format badges") },
+                summary = { Text("Display resolution, codec, and audio SVG badges in player controls") },
+              )
+              PreferenceDivider()
+
               DevicePreference(R.string.pref_hide_player_buttons_background_title) {
                 SwitchPreference(
                   groupIndex = 0,

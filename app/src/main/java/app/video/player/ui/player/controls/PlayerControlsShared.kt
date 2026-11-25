@@ -166,11 +166,19 @@ fun RenderPlayerButton(
 
     PlayerButton.VIDEO_TITLE -> {
       val appearancePreferences = koinInject<AppearancePreferences>()
+      val playerPreferences = koinInject<app.video.player.preferences.PlayerPreferences>()
       val hideVideoTitle by appearancePreferences.hideVideoTitle.collectAsState()
-      if (hideVideoTitle) return@PlayerButtonContentTheme
+      val showFormatBadges by playerPreferences.showFormatBadges.collectAsState()
+      if (hideVideoTitle) {
+        if (showFormatBadges) {
+          app.video.player.ui.player.controls.components.PlaybackFormatBadgeRow(logoHeight = 16.dp)
+        }
+        return@PlayerButtonContentTheme
+      }
       val playlistModeEnabled = viewModel.hasPlaylistSupport()
       val titleHeight = playerTitleHeight(buttonSize, MaterialTheme.typography.bodyMedium.lineHeight)
 
+      Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
       if (enableLiquidGlass) {
         LiquidPillButton(
           onClick = {
@@ -266,6 +274,10 @@ fun RenderPlayerButton(
             }
           }
         }
+      }
+      if (showFormatBadges) {
+        app.video.player.ui.player.controls.components.PlaybackFormatBadgeRow(logoHeight = 16.dp)
+      }
       }
     }
 

@@ -53,6 +53,7 @@ enum class PlayerClockFormat(
 class PlayerPreferences(
   preferenceStore: PreferenceStore,
 ) {
+  val showFormatBadges = preferenceStore.getBoolean("show_format_badges", true)
   val orientation = preferenceStore.getEnum("player_orientation", PlayerOrientation.Video)
   val resumePlaybackMode = preferenceStore.getEnum("resume_playback_mode", ResumePlaybackMode.Always)
   val minimumResumeDurationSeconds = preferenceStore.getInt("resume_minimum_video_duration_seconds", 100)
