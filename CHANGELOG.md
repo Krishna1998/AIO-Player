@@ -11,6 +11,10 @@ These notes are written in plain English and focus on what changed for real use.
   - PiP window aspect ratios are now properly clamped within Android's valid system PiP range (`0.41841..2.39`), allowing tall portrait videos (such as 9:16, 9:19.5, or 9:21) to enter PiP smoothly without squishing or orientation distortion.
 
 ### 🎬 Dedicated Movies Hub & Rich Media Metadata
+- **High-Definition Movie Posters & Thumbnails:**
+  - Upgraded TMDb online poster queries from `w500` to high-resolution `w780` and backdrops to `w1280`.
+  - Expanded `RemoteImage` decoding threshold up to 2048px so posters remain razor-sharp when scaling cards with the Poster Size slider without pixelation or blur.
+  - Added high-resolution local video thumbnail fallback (`360dp` high-DPI bounds via `ThumbnailRepository`) for movies without online artwork, replacing placeholder icons with crystal-clear frame previews.
 - **Smart Movie & Series Detection:**
   - Added dedicated Movies view and smart `MovieClassifier` that automatically categorizes feature films, series, and anime while hiding recognized items from generic video folders.
   - Excluded lecture/study keywords and added support for user-configurable `movieExcludedFolders`.
