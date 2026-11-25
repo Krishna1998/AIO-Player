@@ -15,6 +15,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -383,13 +385,6 @@ object PreferencesScreen : Screen {
         tint = colorScheme.primary,
         items = listOf(
           SettingsDestination(
-            title = stringResource(R.string.pref_appearance_title),
-            summary = stringResource(R.string.pref_appearance_summary),
-            icon = Icons.RoundedFilled.Palette,
-            screen = AppearancePreferencesScreen,
-            gradient = listOf(Color(0xFF00E5FF), Color(0xFF0091EA)),
-          ),
-          SettingsDestination(
             title = stringResource(R.string.pref_appearance_category_liquid_glass),
             summary = listOf(
               stringResource(R.string.pref_liquid_glass_optics),
@@ -685,7 +680,9 @@ private fun AuroraHubQuickGrid(
     verticalArrangement = Arrangement.spacedBy(10.dp),
   ) {
     Row(
-      modifier = Modifier.fillMaxWidth(),
+      modifier = Modifier
+        .fillMaxWidth()
+        .height(IntrinsicSize.Max),
       horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
       // Tile 1: Appearance & Theme
@@ -696,7 +693,9 @@ private fun AuroraHubQuickGrid(
         badgeColor = colorScheme.primary,
         icon = Icons.RoundedFilled.Palette,
         iconGradient = listOf(Color(0xFF00E5FF), Color(0xFF0091EA)),
-        modifier = Modifier.weight(1f),
+        modifier = Modifier
+          .weight(1f)
+          .fillMaxHeight(),
         onClick = onAppearanceClick,
         bottomContent = {
           Row(
@@ -718,13 +717,17 @@ private fun AuroraHubQuickGrid(
         badgeColor = Color(0xFF00E676),
         icon = Icons.RoundedFilled.DeveloperBoard,
         iconGradient = listOf(Color(0xFF00E676), Color(0xFF00B0FF)),
-        modifier = Modifier.weight(1f),
+        modifier = Modifier
+          .weight(1f)
+          .fillMaxHeight(),
         onClick = onEngineClick,
       )
     }
 
     Row(
-      modifier = Modifier.fillMaxWidth(),
+      modifier = Modifier
+        .fillMaxWidth()
+        .height(IntrinsicSize.Max),
       horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
       // Tile 3: Controls & Gestures
@@ -735,7 +738,9 @@ private fun AuroraHubQuickGrid(
         badgeColor = Color(0xFFFF4081),
         icon = Icons.RoundedFilled.GridView,
         iconGradient = listOf(Color(0xFFFF4081), Color(0xFFC51162)),
-        modifier = Modifier.weight(1f),
+        modifier = Modifier
+          .weight(1f)
+          .fillMaxHeight(),
         onClick = onControlsClick,
       )
 
@@ -748,7 +753,9 @@ private fun AuroraHubQuickGrid(
           badgeColor = Color(0xFFFFB300),
           icon = Icons.RoundedFilled.Lock,
           iconGradient = listOf(Color(0xFFFFB300), Color(0xFFFF6D00)),
-          modifier = Modifier.weight(1f),
+          modifier = Modifier
+            .weight(1f)
+            .fillMaxHeight(),
           onClick = onVaultClick,
         )
       } else {
@@ -759,7 +766,9 @@ private fun AuroraHubQuickGrid(
           badgeColor = Color(0xFF2979FF),
           icon = Icons.RoundedFilled.Folder,
           iconGradient = listOf(Color(0xFF2979FF), Color(0xFF1565C0)),
-          modifier = Modifier.weight(1f),
+          modifier = Modifier
+            .weight(1f)
+            .fillMaxHeight(),
           onClick = onVaultClick,
         )
       }
@@ -807,15 +816,15 @@ private fun AuroraHubTile(
       ) {
         Box(
           modifier = Modifier
-            .size(34.dp)
-            .clip(RoundedCornerShape(10.dp))
+            .size(42.dp)
+            .clip(RoundedCornerShape(12.dp))
             .background(Brush.linearGradient(iconGradient)),
           contentAlignment = Alignment.Center,
         ) {
           Icon(
             imageVector = icon,
             contentDescription = null,
-            modifier = Modifier.size(18.dp),
+            modifier = Modifier.size(24.dp),
             tint = Color.White,
           )
         }
