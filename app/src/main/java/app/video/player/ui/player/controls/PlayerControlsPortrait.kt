@@ -72,6 +72,8 @@ fun TopPlayerControlsPortrait(
     val playlistModeEnabled = viewModel.hasPlaylistSupport()
     val clickEvent = LocalPlayerButtonsClickEvent.current
     val titleHeight = playerTitleHeight(45.dp, MaterialTheme.typography.titleMedium.lineHeight)
+    val playerPreferences = koinInject<app.video.player.preferences.PlayerPreferences>()
+    val showFormatBadges by playerPreferences.showFormatBadges.collectAsState()
 
     Column(
       modifier =
@@ -168,6 +170,17 @@ fun TopPlayerControlsPortrait(
             }
           }
         }
+      }
+      if (!hideTitle && showFormatBadges) {
+        app.video.player.ui.player.controls.components.PlaybackFormatBadgeRow(
+          modifier = Modifier.padding(start = 14.dp, top = 4.dp),
+          logoHeight = 16.dp,
+        )
+      } else if (hideTitle && showFormatBadges) {
+        app.video.player.ui.player.controls.components.PlaybackFormatBadgeRow(
+          modifier = Modifier.padding(start = 14.dp, top = 4.dp),
+          logoHeight = 16.dp,
+        )
       }
 
       val syncplayManager = org.koin.compose.koinInject<app.video.player.domain.syncplay.SyncplayManager>()
