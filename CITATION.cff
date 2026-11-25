@@ -3,7 +3,7 @@ message: "If you use Horizon Player, please cite it using the metadata below."
 type: software
 title: "Horizon Player"
 abstract: "A modern, ultra-lightweight Android video and music player powered by libmpv and Jetpack Compose."
-version: 1.0.5
+version: 1.0.6
 authors:
   - name: "Krishna"
     alias: "Krishna1998"

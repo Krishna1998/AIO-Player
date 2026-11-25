@@ -2,6 +2,48 @@
 
 These notes are written in plain English and focus on what changed for real use.
 
+## 1.0.6
+
+### 📱 Portrait Picture-in-Picture & Player Orientation Fixes
+- **True Portrait PiP Support:**
+  - Resolved an issue where vertical / portrait videos would switch to a landscape PiP window.
+  - Video aspect ratio is now respected when entering PiP mode (`videoAspect <= 1.0` maintains portrait sensor orientation).
+  - PiP window aspect ratios are now properly clamped within Android's valid system PiP range (`0.41841..2.39`), allowing tall portrait videos (such as 9:16, 9:19.5, or 9:21) to enter PiP smoothly without squishing or orientation distortion.
+
+### 🎬 Dedicated Movies Hub & Rich Media Metadata
+- **Smart Movie & Series Detection:**
+  - Added dedicated Movies view and smart `MovieClassifier` that automatically categorizes feature films, series, and anime while hiding recognized items from generic video folders.
+  - Excluded lecture/study keywords and added support for user-configurable `movieExcludedFolders`.
+- **Rich Movie Details Screen:**
+  - Movie Details sheet featuring poster artwork, synopsis, cast/crew info, runtime, audio/subtitle tracks, and direct play actions.
+  - Added adjustable Poster Size slider and flexible List / Grid view options.
+  - Filter-specific empty state guidance for *Unwatched* and *Started* movies.
+
+### 📊 MediaInfo & Format Badges
+- **Comprehensive Media Format Badges:**
+  - Integrated `mediainfo-lib` and media format SVG badges ported from mpvRx.
+  - MediaInfo bottom sheet displaying detailed container, video, audio codec, and subtitle format badges.
+  - Added color-coded badges to Player title pill and media cards.
+
+### 🎨 UI & Preferences Modernization
+- **Aurora Bento Hub for Settings & Onboarding:**
+  - Redesigned Preferences and Permission / Onboarding pages with the modern Aurora Bento Hub layout.
+  - Applied Unified Frosted Glass icon styling across settings categories and quick-access tiles.
+  - Cleaned up redundant appearance, decoder, and folder settings entries.
+- **Spotlight Gestures Guide & HUD Polish:**
+  - Gestures guide popup now shows once on first launch with optimized portrait width and scrolling.
+  - Simplified labels to *Video* and *Music*.
+  - Continued Watching cards now feature premier cinema titles with smart media badges and depth shadows.
+- **Advanced Logging & Diagnostics:**
+  - Added a dedicated Logging section (Verbose logging, Dump logs, and built-in debug log viewer) in Advanced Settings.
+
+### ⚡ Performance & Core Upgrades
+- **mpvlib Core Update:**
+  - Updated `mpvlib` to `1.1.8.9` for improved stability and decoding performance.
+  - Fixed erratic video seeking and backward-seeking drift by configuring `demuxer-lavf-linearize-timestamps` to `auto`.
+- **APK Compression & Size Optimization:**
+  - Enabled native library compression in APK packaging to significantly reduce download size.
+
 ## 1.0.5
 
 ### 🔤 Montserrat Default Typography
