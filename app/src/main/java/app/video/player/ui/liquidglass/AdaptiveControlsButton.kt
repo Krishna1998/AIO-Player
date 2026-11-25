@@ -159,7 +159,9 @@ fun AdaptiveControlsContainer(
   val contentTint =
     if (enabled) resolvedTint else resolvedTint.copy(alpha = resolvedTint.alpha * PlayerButtonAlpha.DISABLED_CONTENT)
   val renderLiquidGlass = liquidGlassEnabled && useGlass && !borderless
-  val buttonShape = if (horizontalPadding != null && horizontalPadding > 0.dp) Capsule() else CircleShape
+  val buttonShape =
+    if (horizontalPadding != null && horizontalPadding > 0.dp) Capsule()
+    else androidx.compose.foundation.shape.RoundedCornerShape(30)
   // Above the default level the glass tint thickens toward opaque; below it the whole glass fades.
   val glassLayerAlpha =
     (backgroundLevel / PlayerButtonAlpha.DEFAULT_BACKGROUND_LEVEL).coerceIn(0f, 1f)
