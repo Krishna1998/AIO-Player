@@ -47,9 +47,9 @@ object MovieClassifier {
 
   private val WHATSAPP_FILE_REGEX = Regex("""^whatsapp[\s._-]video\b""", RegexOption.IGNORE_CASE)
 
-  // Unambiguous non-feature trailers/samples/screen recordings even when title & year are present
+  // Unambiguous non-feature trailers/samples/screen recordings/study lectures even when title & year are present
   private val HARD_NON_MOVIE_KEYWORDS_REGEX = Regex(
-    """\b(?:trailer|teaser|sneak[\s._-]?peek|featurette|behind[\s._-]?the[\s._-]?scenes|making[\s._-]?of|deleted[\s._-]?scenes?|gag[\s._-]?reel|bloopers?|sample|promo|screen[\s._-]?recording|screenrecord|screenrecorder|screencast|whatsapp[\s._-]?status)\b""",
+    """\b(?:trailer|teaser|sneak[\s._-]?peek|featurette|behind[\s._-]?the[\s._-]?scenes|making[\s._-]?of|deleted[\s._-]?scenes?|gag[\s._-]?reel|bloopers?|sample|promo|screen[\s._-]?recording|screenrecord|screenrecorder|screencast|whatsapp[\s._-]?status|lecture|lec[\s._-]?\d+|syllabus|revision|ncert|upsc|jee|neet|ssc|pyq|mcq|coaching|tuition|study[\s._-]?material|by[\s._-]+[\w\s]+[\s._-]+(?:sir|mam|madam))\b""",
     RegexOption.IGNORE_CASE,
   )
 
@@ -118,6 +118,20 @@ object MovieClassifier {
     "recordings",
     "record",
     "messenger",
+    "study",
+    "studies",
+    "lectures",
+    "lecture",
+    "classes",
+    "courses",
+    "upsc",
+    "jee",
+    "neet",
+    "ssc",
+    "coaching",
+    "tuition",
+    "notes",
+    "ncert",
     "facebook",
     "twitter",
     "reddit",

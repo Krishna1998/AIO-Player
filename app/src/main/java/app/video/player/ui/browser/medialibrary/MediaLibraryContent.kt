@@ -317,11 +317,16 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   }
   val libraryShowMoviesTab by browserPreferences.libraryShowMoviesTab.collectAsState()
   val hideMoviesInVideoFolders by browserPreferences.hideMoviesInVideoFolders.collectAsState()
+  val movieExcludedFolders by browserPreferences.movieExcludedFolders.collectAsState()
   val openMovieDetailsOnTap by browserPreferences.openMovieDetailsOnTap.collectAsState()
   val movieMetadataRepo = koinInject<MovieMetadataRepository>()
   val movieMetadataRevision by movieMetadataRepo.metadataRevision.collectAsState()
-  val isActualMovie: (Video) -> Boolean = remember(movieMetadataRepo, movieMetadataRevision) {
-    { video -> MovieClassifier.isActualMovie(video, movieMetadataRepo.getMemoryCachedMetadata(video)) }
+  val isActualMovie: (Video) -> Boolean = remember(movieMetadataRepo, movieMetadataRevision, movieExcludedFolders) {
+    { video ->
+      val parentPath = java.io.File(video.path).parent.orEmpty()
+      parentPath !in movieExcludedFolders &&
+        MovieClassifier.isActualMovie(video, movieMetadataRepo.getMemoryCachedMetadata(video))
+    }
   }
   val nonMovieFolderCounts: Map<String, Int>? = remember(
     videos,

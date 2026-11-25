@@ -95,9 +95,13 @@ fun MoviesTabContent(
   val movieMetadataRepo = koinInject<MovieMetadataRepository>()
   val metadataRevision by movieMetadataRepo.metadataRevision.collectAsState()
 
-  val movieCandidates = remember(videosWithInfo, metadataRevision) {
+  val movieExcludedFolders by browserPreferences.movieExcludedFolders.collectAsState()
+
+  val movieCandidates = remember(videosWithInfo, metadataRevision, movieExcludedFolders) {
     videosWithInfo.filter {
-      MovieClassifier.isActualMovie(it.video, movieMetadataRepo.getMemoryCachedMetadata(it.video))
+      val parentPath = java.io.File(it.video.path).parent.orEmpty()
+      parentPath !in movieExcludedFolders &&
+        MovieClassifier.isActualMovie(it.video, movieMetadataRepo.getMemoryCachedMetadata(it.video))
     }
   }
 

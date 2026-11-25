@@ -218,6 +218,7 @@ class BrowserPreferences(
   val libraryShowMoviesTab = preferenceStore.getBoolean("library_show_movies_tab", true)
   val openMovieDetailsOnTap = preferenceStore.getBoolean("open_movie_details_on_tap", true)
   val hideMoviesInVideoFolders = preferenceStore.getBoolean("hide_movies_in_video_folders", true)
+  val movieExcludedFolders = preferenceStore.getStringSet("movie_excluded_folders", emptySet())
   val mediaLibrarySubTabsOrder = preferenceStore.getObject(
     key = "media_library_sub_tabs_order",
     defaultValue = listOf("ALL", "MOVIES", "VIDEO", "AUDIO"),
