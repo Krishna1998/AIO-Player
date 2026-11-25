@@ -2061,7 +2061,7 @@ private fun HeroSpotlightBox(
       }
 
       // Smart Media Badges Row
-      if (video.hasEmbeddedSubtitles || runtimeFormatted.isNotBlank()) {
+      if (video.hasEmbeddedSubtitles) {
         Row(
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -2083,17 +2083,6 @@ private fun HeroSpotlightBox(
                 modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
               )
             }
-          }
-
-          if (runtimeFormatted.isNotBlank()) {
-            Text(
-              text = "• $runtimeFormatted",
-              style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 11.sp,
-              ),
-              color = Color.White.copy(alpha = 0.70f),
-            )
           }
         }
       }
