@@ -10,6 +10,7 @@
 package app.video.player.ui.browser.cinematichorizon
 
 import android.content.Intent
+import app.video.player.ui.player.overviewBadges
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import androidx.compose.ui.platform.LocalConfiguration
@@ -2042,7 +2043,7 @@ private fun HeroSpotlightBox(
             app.video.player.utils.media.MediaInfoOps
               .getMediaInfoReport(context, video.uri, video.displayName)
               .onSuccess { report ->
-                val overview = app.video.player.ui.player.overviewBadges(report.data, video.displayName)
+                val overview = report.data.overviewBadges(video.displayName)
                 if (overview.isNotEmpty()) {
                   formatBadges = overview
                 }
