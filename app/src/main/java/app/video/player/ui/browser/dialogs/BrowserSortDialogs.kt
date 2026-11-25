@@ -788,11 +788,13 @@ fun VideoSortDialog(
   availableWidthDp: Int? = null,
   fixedLayoutMode: MediaLayoutMode? = null,
   isAudio: Boolean = false,
+  isMoviesTab: Boolean = false,
   onMetadataFieldEnabled: (() -> Unit)? = null,
 ) {
   val browserPreferences = koinInject<BrowserPreferences>()
   val appearancePreferences = koinInject<AppearancePreferences>()
   val musicCoverArtSize by browserPreferences.musicCoverArtSize.collectAsState()
+  val moviePosterSize by browserPreferences.moviePosterSize.collectAsState()
   val includeAudioBrowser by browserPreferences.includeAudioBrowser.collectAsState()
   val showThumbnails by browserPreferences.showVideoThumbnails.collectAsState()
   val showSizeChip by browserPreferences.showSizeChip.collectAsState()
@@ -1233,6 +1235,14 @@ fun VideoSortDialog(
     videoGridColumnSelector =
       if (!enableLayoutModeOptions) {
         null
+      } else if (isMoviesTab && activeLayoutMode == MediaLayoutMode.GRID) {
+        GridColumnSelector(
+          label = "Poster Size",
+          currentValue = moviePosterSize.coerceIn(100, 220),
+          onValueChange = { browserPreferences.moviePosterSize.set(it) },
+          valueRange = 100f..220f,
+          steps = 5,
+        )
       } else if (isAudio && activeLayoutMode == MediaLayoutMode.LIST) {
         coverArtSizeSelector(musicCoverArtSize) { browserPreferences.musicCoverArtSize.set(it) }
       } else if (!enableManualGridOptions) {
@@ -1273,6 +1283,7 @@ fun FileSystemSortDialog(
   val appearancePreferences = koinInject<AppearancePreferences>()
   val includeAudioBrowser by browserPreferences.includeAudioBrowser.collectAsState()
   val musicCoverArtSize by browserPreferences.musicCoverArtSize.collectAsState()
+  val moviePosterSize by browserPreferences.moviePosterSize.collectAsState()
   val folderViewMode by browserPreferences.folderViewMode.collectAsState()
   val folderSortType by browserPreferences.folderSortType.collectAsState()
   val folderSortOrder by browserPreferences.folderSortOrder.collectAsState()
@@ -1861,6 +1872,7 @@ fun MusicSortDialog(
 ) {
   val browserPreferences = koinInject<BrowserPreferences>()
   val musicCoverArtSize by browserPreferences.musicCoverArtSize.collectAsState()
+  val moviePosterSize by browserPreferences.moviePosterSize.collectAsState()
   val musicGridCoverArtSize by browserPreferences.musicGridCoverArtSize.collectAsState()
   val effectiveSortField = sortField.takeIf { it in availableFields } ?: availableFields.firstOrNull() ?: sortField
   val fieldLabel = { field: MusicSortField ->

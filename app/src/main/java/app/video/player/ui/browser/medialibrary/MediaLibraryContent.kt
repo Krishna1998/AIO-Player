@@ -1797,6 +1797,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
           enableManualGridOptions = !isMoviesTab,
           enableFieldOptions = !isAllMediaTab && !isMoviesTab,
           isAudio = isAudioTab,
+          isMoviesTab = isMoviesTab,
           onMetadataFieldEnabled = viewModel::refresh,
         )
       }

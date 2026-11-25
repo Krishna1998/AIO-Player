@@ -91,6 +91,7 @@ fun MoviesTabContent(
 ) {
   val browserPreferences = koinInject<BrowserPreferences>()
   val layoutMode = mediaLayoutMode ?: browserPreferences.mediaLayoutMode.collectAsState().value
+  val moviePosterSize by browserPreferences.moviePosterSize.collectAsState()
   var selectedFilterIndex by rememberSaveable { mutableIntStateOf(0) }
   val movieMetadataRepo = koinInject<MovieMetadataRepository>()
   val metadataRevision by movieMetadataRepo.metadataRevision.collectAsState()
@@ -224,7 +225,7 @@ fun MoviesTabContent(
       }
     } else {
       LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 105.dp),
+        columns = GridCells.Adaptive(minSize = moviePosterSize.dp),
         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
