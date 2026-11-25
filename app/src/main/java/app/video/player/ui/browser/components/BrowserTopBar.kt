@@ -552,8 +552,8 @@ private fun NormalTopBar(
                 ),
             )
           } else {
-            androidx.compose.material3.Icon(
-              imageVector = androidx.compose.material.icons.Icons.Outlined.Settings,
+            Icon(
+              imageVector = Icons.RoundedFilled.Settings,
               contentDescription =
                 androidx.compose.ui.res
                   .stringResource(app.video.player.R.string.ui_settings),
