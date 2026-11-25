@@ -6,8 +6,11 @@ These notes are written in plain English and focus on what changed for real use.
 
 ### 🎨 UI, Format Badges & Polish
 - **SVG Media Format Badges:**
-  - Added crisp SVG format badges (resolution, video codec, audio codec, subtitles) to **Continue Watching**, **Movie Details**, and the **Video Player** controls overlay.
-  - Added a **Show format badges** on/off toggle in **Preferences → Player Layout**.
+  - Added crisp SVG format badges (resolution, video codec, audio codec, subtitles, and a bold **MP4** badge) to **Continue Watching**, **Movie Details** (larger `24dp` icons), and both **Landscape** and **Portrait** **Video Player** controls.
+  - Added a **Show format badges** on/off toggle in **Preferences → Player Layout** and removed the redundant runtime text above the Continue Watching title.
+- **Squircle Player Controls & Preferences Icons:**
+  - Updated video player control buttons from circular to a modern squircle (`RoundedCornerShape(30)`) design.
+  - Increased icon sizes in **Preferences** (`28dp` on bento cards, `26dp` on list rows).
 - **Preferences & Wallpaper Redesign:**
   - Updated Preferences icons to a unified frosted glass style, aligned Quick Access tiles, and removed duplicate entries and profile badges.
   - Polished the **Wallpaper** preset cards with portrait proportions, gradient label scrims, and pill value badges.
@@ -15,8 +18,9 @@ These notes are written in plain English and focus on what changed for real use.
   - Improved portrait dialog layout and simplified the guide to show once on initial launch.
 
 ### 🎬 Movies & Library Improvements
-- **Pull-to-Refresh & Direct Play:**
+- **Pull-to-Refresh, Lecture Filtering & Direct Play:**
   - Enabled pull-to-refresh in the **Movies** tab and wired **Open movie details on tap** so turning it off starts playback directly.
+  - Improved `MovieClassifier` to exclude underscore-separated lecture, class, and study videos from the **Movies** tab.
 - **Sort & View Options Cleanup:**
   - Streamlined Sort & View options for **All Media**, **Movies**, and **Music** tabs.
 - **Logging & Diagnostics:**
