@@ -127,7 +127,19 @@ fun PlayerSheets(
 
   when (sheetShown) {
     Sheets.None -> {}
-    Sheets.MediaInfo -> app.video.player.ui.mediainfo.PlaybackMediaInfoSheet(onDismissRequest)
+    Sheets.MediaInfo -> {
+      val sessionState by app.video.player.ui.player.PlaybackSession.state.composeCollectAsState()
+      val filePath = sessionState.currentItem?.let { item ->
+        item.originalUri.takeIf(String::isNotBlank) ?: item.playableUri
+      }.orEmpty()
+      val mediaInfoState = remember(sessionState.generation, filePath) {
+        app.video.player.ui.mediainfo.MpvMediaInfoParser.extractFromActivePlayer(filePath)
+      }
+      app.video.player.ui.mediainfo.MediaInfoBottomSheet(
+        state = mediaInfoState,
+        onDismiss = onDismissRequest,
+      )
+    }
     Sheets.BookmarkEditor -> PlaybackBookmarkEditor(viewModel, { onShowSheet(Sheets.Chapters) }, onDismissRequest)
     Sheets.SleepTimer -> {
       val sleepTimerTimeRemaining by viewModel.remainingTime.composeCollectAsState()
