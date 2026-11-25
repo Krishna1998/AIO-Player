@@ -225,11 +225,11 @@ class MovieMetadataRepository(
     return when {
       trimmed.startsWith("http://", ignoreCase = true) || trimmed.startsWith("https://", ignoreCase = true) -> trimmed
       trimmed.startsWith("/") -> {
-        val size = if (isBackdrop) "w1280" else "w500"
+        val size = if (isBackdrop) "w1280" else "w780"
         "https://image.tmdb.org/t/p/$size$trimmed"
       }
       else -> {
-        val size = if (isBackdrop) "w1280" else "w500"
+        val size = if (isBackdrop) "w1280" else "w780"
         "https://image.tmdb.org/t/p/$size/$trimmed"
       }
     }

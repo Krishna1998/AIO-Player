@@ -342,13 +342,15 @@ class OnlineMoviePosterRepository(
 
   private fun formatTmdbPosterUrl(poster: String): String = when {
     poster.startsWith("https://image.tmdb.org/t/p/w185/") ->
-      poster.replace("/w185/", "/w500/")
+      poster.replace("/w185/", "/w780/")
+    poster.startsWith("https://image.tmdb.org/t/p/w500/") ->
+      poster.replace("/w500/", "/w780/")
     poster.startsWith("http://", ignoreCase = true) || poster.startsWith("https://", ignoreCase = true) ->
       poster
     poster.startsWith("/") ->
-      "https://image.tmdb.org/t/p/w500$poster"
+      "https://image.tmdb.org/t/p/w780$poster"
     else ->
-      "https://image.tmdb.org/t/p/w500/$poster"
+      "https://image.tmdb.org/t/p/w780/$poster"
   }
 
   private suspend fun resolveFromTvMaze(title: String): String? = runCatching {

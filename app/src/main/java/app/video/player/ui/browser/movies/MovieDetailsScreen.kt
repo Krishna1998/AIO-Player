@@ -196,6 +196,7 @@ data class MovieDetailsScreen(
                   url = backdropUrl,
                   contentDescription = currentMeta?.title ?: currentVideo.displayName,
                   contentScale = ContentScale.Crop,
+                  maxDimensionPx = 2048,
                   modifier = Modifier.fillMaxSize(),
                 )
               } else {

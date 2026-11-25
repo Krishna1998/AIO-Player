@@ -95,11 +95,11 @@ fun RemoteImage(
 }
 
 internal object RemoteImageLoader {
-  private const val MAX_IMAGE_DIMENSION = 1024
+  private const val MAX_IMAGE_DIMENSION = 2048
   private const val CACHE_DIRECTORY = "remote_images"
   private const val FAILURE_RETRY_MS = 30_000L
   private const val MAX_DISK_CACHE_BYTES = 128L * 1024L * 1024L
-  private val dimensionTiers = intArrayOf(128, 256, 512, MAX_IMAGE_DIMENSION)
+  private val dimensionTiers = intArrayOf(128, 256, 512, 1024, MAX_IMAGE_DIMENSION)
   private data class ImageKey(val url: String, val dimension: Int)
   private val loaderScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
   private val inFlight = ConcurrentHashMap<ImageKey, Deferred<Bitmap?>>()

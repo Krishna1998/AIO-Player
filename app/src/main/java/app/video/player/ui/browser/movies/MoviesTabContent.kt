@@ -9,8 +9,10 @@
 
 package app.video.player.ui.browser.movies
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -49,7 +51,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -61,6 +65,7 @@ import app.video.player.domain.media.model.Video
 import app.video.player.domain.movies.MovieClassifier
 import app.video.player.domain.movies.MovieMetadata
 import app.video.player.domain.movies.MovieMetadataRepository
+import app.video.player.domain.thumbnail.ThumbnailRepository
 import app.video.player.preferences.BrowserPreferences
 import app.video.player.preferences.MediaLayoutMode
 import app.video.player.preferences.preference.collectAsState
@@ -73,6 +78,8 @@ import app.video.player.ui.browser.videolist.VideoWithPlaybackInfo
 import app.video.player.ui.icons.Icon
 import app.video.player.ui.icons.Icons
 import app.video.player.utils.media.MediaInfoParser
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
 
 /**
@@ -299,6 +306,25 @@ private fun MoviePosterCard(
   val displayDuration = metadata?.durationFormatted?.takeIf { it.isNotBlank() } ?: video.durationFormatted
   val selectionColor = animatedSelectionColor(isSelected)
 
+  val thumbnailRepository = koinInject<ThumbnailRepository>()
+  val density = LocalDensity.current
+  val fallbackWidthPx = remember(density) { with(density) { 360.dp.roundToPx() } }
+  val fallbackHeightPx = remember(fallbackWidthPx) { (fallbackWidthPx * 1.5f).toInt() }
+  var fallbackThumbnail by remember(video.path) {
+    mutableStateOf<Bitmap?>(thumbnailRepository.peekThumbnailFromMemory(video, fallbackWidthPx, fallbackHeightPx))
+  }
+  LaunchedEffect(video.path, metadata?.posterUrl, metadata?.backdropUrl) {
+    val hasOnlineArt = !metadata?.posterUrl.isNullOrBlank() || !metadata?.backdropUrl.isNullOrBlank()
+    if (!hasOnlineArt && fallbackThumbnail == null) {
+      val loaded = withContext(Dispatchers.IO) {
+        thumbnailRepository.getThumbnail(video, fallbackWidthPx, fallbackHeightPx)
+      }
+      if (loaded != null) {
+        fallbackThumbnail = loaded
+      }
+    }
+  }
+
   Surface(
     modifier = modifier
       .fillMaxWidth()
@@ -329,6 +355,14 @@ private fun MoviePosterCard(
         if (!posterUrl.isNullOrBlank()) {
           RemoteImage(
             url = posterUrl,
+            contentDescription = displayTitle,
+            contentScale = ContentScale.Crop,
+            maxDimensionPx = 2048,
+            modifier = Modifier.fillMaxSize(),
+          )
+        } else if (fallbackThumbnail != null) {
+          Image(
+            bitmap = fallbackThumbnail!!.asImageBitmap(),
             contentDescription = displayTitle,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize(),
@@ -470,6 +504,25 @@ private fun MovieListItemCard(
   val rating = metadata?.voteAverage
   val selectionColor = animatedSelectionColor(isSelected)
 
+  val thumbnailRepository = koinInject<ThumbnailRepository>()
+  val density = LocalDensity.current
+  val fallbackWidthPx = remember(density) { with(density) { 160.dp.roundToPx() } }
+  val fallbackHeightPx = remember(fallbackWidthPx) { (fallbackWidthPx * 1.5f).toInt() }
+  var fallbackThumbnail by remember(video.path) {
+    mutableStateOf<Bitmap?>(thumbnailRepository.peekThumbnailFromMemory(video, fallbackWidthPx, fallbackHeightPx))
+  }
+  LaunchedEffect(video.path, metadata?.posterUrl, metadata?.backdropUrl) {
+    val hasOnlineArt = !metadata?.posterUrl.isNullOrBlank() || !metadata?.backdropUrl.isNullOrBlank()
+    if (!hasOnlineArt && fallbackThumbnail == null) {
+      val loaded = withContext(Dispatchers.IO) {
+        thumbnailRepository.getThumbnail(video, fallbackWidthPx, fallbackHeightPx)
+      }
+      if (loaded != null) {
+        fallbackThumbnail = loaded
+      }
+    }
+  }
+
   Surface(
     modifier = modifier
       .fillMaxWidth()
@@ -500,6 +553,14 @@ private fun MovieListItemCard(
         if (!posterUrl.isNullOrBlank()) {
           RemoteImage(
             url = posterUrl,
+            contentDescription = displayTitle,
+            contentScale = ContentScale.Crop,
+            maxDimensionPx = 1024,
+            modifier = Modifier.fillMaxSize(),
+          )
+        } else if (fallbackThumbnail != null) {
+          Image(
+            bitmap = fallbackThumbnail!!.asImageBitmap(),
             contentDescription = displayTitle,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize(),
