@@ -168,14 +168,19 @@ fun MoviesTabContent(
 
     // Movie Posters Grid / List or Empty State
     if (filteredMovies.isEmpty()) {
+      val (emptyTitleRes, emptyMessageRes) = when (selectedFilterIndex) {
+        1 -> R.string.movies_unwatched_empty_title to R.string.movies_unwatched_empty_message
+        2 -> R.string.movies_started_empty_title to R.string.movies_started_empty_message
+        else -> R.string.movies_empty_title to R.string.movies_empty_message
+      }
       Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
       ) {
         EmptyState(
           icon = Icons.RoundedFilled.Movie,
-          title = stringResource(R.string.movies_empty_title),
-          message = stringResource(R.string.movies_empty_message),
+          title = stringResource(emptyTitleRes),
+          message = stringResource(emptyMessageRes),
         )
       }
     } else if (layoutMode == MediaLayoutMode.LIST) {

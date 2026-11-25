@@ -208,6 +208,10 @@
   <string name="movie_details_save">Save</string>
   <string name="movies_empty_title">No movies, series, or anime detected</string>
   <string name="movies_empty_message">Movies, web series, and anime are automatically detected and moved here from Videos. Normal clips and recordings stay in Videos.</string>
+  <string name="movies_unwatched_empty_title">No unwatched movies, series, or anime</string>
+  <string name="movies_unwatched_empty_message">All your detected movies, series, and anime have already been watched or started.</string>
+  <string name="movies_started_empty_title">No movies, series, or anime started</string>
+  <string name="movies_started_empty_message">Start watching a movie, series, or anime and it will appear here to continue.</string>
   <string name="movie_details_in_movies">In Movies</string>
   <string name="movie_details_mark_as_movie">Add to Movies</string>
   <string name="movie_details_marked_toast">Added to Movies library</string>
