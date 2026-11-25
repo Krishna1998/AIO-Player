@@ -92,6 +92,7 @@ fun MoviesTabContent(
   val browserPreferences = koinInject<BrowserPreferences>()
   val layoutMode = mediaLayoutMode ?: browserPreferences.mediaLayoutMode.collectAsState().value
   val moviePosterSize by browserPreferences.moviePosterSize.collectAsState()
+  val openMovieDetailsOnTap by browserPreferences.openMovieDetailsOnTap.collectAsState()
   var selectedFilterIndex by rememberSaveable { mutableIntStateOf(0) }
   val movieMetadataRepo = koinInject<MovieMetadataRepository>()
   val metadataRevision by movieMetadataRepo.metadataRevision.collectAsState()
@@ -206,8 +207,10 @@ fun MoviesTabContent(
             onClick = {
               if (selectionManager?.isInSelectionMode == true) {
                 selectionManager.toggleFromUser(item.video)
-              } else {
+              } else if (openMovieDetailsOnTap || onPlayMedia == null) {
                 onOpenMovieDetails(item.video)
+              } else {
+                onPlayMedia(item.video)
               }
             },
             onPlayClick = {
@@ -243,8 +246,10 @@ fun MoviesTabContent(
             onClick = {
               if (selectionManager?.isInSelectionMode == true) {
                 selectionManager.toggleFromUser(item.video)
-              } else {
+              } else if (openMovieDetailsOnTap || onPlayMedia == null) {
                 onOpenMovieDetails(item.video)
+              } else {
+                onPlayMedia(item.video)
               }
             },
             onLongClick = { selectionManager?.handleLongClick(item.video) },
