@@ -16,20 +16,22 @@ import java.util.Locale
 
 enum class VideoCategory {
   MOVIE,
-  TV_EPISODE,
+  WEB_SERIES,
+  ANIME,
   NORMAL_VIDEO,
   AUDIO,
 }
 
 /**
- * Automatically distinguishes actual feature-length movies from normal videos
+ * Automatically distinguishes actual movies, web series, and anime from normal videos
  * (camera clips, WhatsApp/Telegram forwards, screen recordings, reels/shorts,
- * trailers, tutorials/lectures, and TV episodes) using duration, orientation,
- * folder semantics, filename parsing, release tags, and persisted user/TMDB metadata.
+ * trailers, tutorials/lectures) using duration, orientation, folder semantics,
+ * filename parsing, release tags, and persisted user/TMDB metadata.
  */
 object MovieClassifier {
   private const val MIN_MOVIE_DURATION_MS = 40L * 60L * 1000L // 40 minutes
   private const val FEATURE_DURATION_MS = 60L * 60L * 1000L // 60 minutes
+  private const val MIN_EPISODE_DURATION_MS = 5L * 60L * 1000L // 5 minutes (excludes 1-2m OPs/EDs/previews)
 
   private val classificationCache = LruCache<String, VideoCategory>(1024)
 
@@ -45,7 +47,7 @@ object MovieClassifier {
 
   private val WHATSAPP_FILE_REGEX = Regex("""^whatsapp[\s._-]video\b""", RegexOption.IGNORE_CASE)
 
-  // Unambiguous non-feature trailers/samples/screen recordings even when movie title & year are present
+  // Unambiguous non-feature trailers/samples/screen recordings even when title & year are present
   private val HARD_NON_MOVIE_KEYWORDS_REGEX = Regex(
     """\b(?:trailer|teaser|sneak[\s._-]?peek|featurette|behind[\s._-]?the[\s._-]?scenes|making[\s._-]?of|deleted[\s._-]?scenes?|gag[\s._-]?reel|bloopers?|sample|promo|screen[\s._-]?recording|screenrecord|screenrecorder|screencast|whatsapp[\s._-]?status)\b""",
     RegexOption.IGNORE_CASE,
@@ -57,9 +59,25 @@ object MovieClassifier {
     RegexOption.IGNORE_CASE,
   )
 
-  // Strong movie release, source, codec, or distribution markers
+  // Strong release, source, codec, or distribution markers
   private val MOVIE_RELEASE_TAGS_REGEX = Regex(
     """\b(?:1080p|720p|2160p|4k|uhd|bluray|blu-ray|bdrip|brrip|web-dl|webdl|webrip|hdrip|dvdrip|dvdscr|hdcam|hdts|remux|imax|x264|x265|h\.?264|h\.?265|hevc|av1|10bit|hdr10\+?|hdr|dolby|atmos|dts|aac|ac3|eac3|truehd|yts|yify|rarbg|psa|esub|esubs|dual[\s._-]?audio|multi[\s._-]?audio|extended|unrated|directors?[\s._-]?cut|remastered|theatrical|dubbed)\b""",
+    RegexOption.IGNORE_CASE,
+  )
+
+  // Anime release groups & tags
+  private val ANIME_RELEASE_REGEX = Regex(
+    """(?:\[(?:SubsPlease|HorribleSubs|Erai-raws|ASW|Judas|EMBER|Yameii|GHOSTS|ToonsHub|MTBB|Kaleido|Golumpa|Kametsu|Anime[\s._-]?Time|DKB|LostYears)\b|\b(?:anime|ova|ona|oad|subbed|engsub)\b)""",
+    RegexOption.IGNORE_CASE,
+  )
+
+  private val ANIME_FOLDER_REGEX = Regex(
+    """\b(?:anime|anime[\s._-]?series|anime[\s._-]?movies?)\b""",
+    RegexOption.IGNORE_CASE,
+  )
+
+  private val SERIES_FOLDER_REGEX = Regex(
+    """\b(?:web[\s._-]?series|tv[\s._-]?shows?|tv[\s._-]?series|series|k-?drama|c-?drama|j-?drama|seasons?)\b""",
     RegexOption.IGNORE_CASE,
   )
 
@@ -140,16 +158,24 @@ object MovieClassifier {
     "english movies",
     "anime movies",
     "feature films",
+    "web series",
+    "series",
+    "tv shows",
+    "anime",
   )
 
+  /**
+   * Returns true if the item belongs in the dedicated Movies tab
+   * (actual movies, web series, and anime).
+   */
   fun isActualMovie(video: Video, cachedMetadata: MovieMetadata? = null): Boolean =
-    classify(video, cachedMetadata) == VideoCategory.MOVIE
-
-  fun shouldFetchOnlinePoster(video: Video, cachedMetadata: MovieMetadata? = null): Boolean =
     when (classify(video, cachedMetadata)) {
-      VideoCategory.MOVIE, VideoCategory.TV_EPISODE -> true
+      VideoCategory.MOVIE, VideoCategory.WEB_SERIES, VideoCategory.ANIME -> true
       VideoCategory.NORMAL_VIDEO, VideoCategory.AUDIO -> false
     }
+
+  fun shouldFetchOnlinePoster(video: Video, cachedMetadata: MovieMetadata? = null): Boolean =
+    isActualMovie(video, cachedMetadata)
 
   fun classify(video: Video, cachedMetadata: MovieMetadata? = null): VideoCategory {
     if (video.isAudio) return VideoCategory.AUDIO
@@ -178,19 +204,11 @@ object MovieClassifier {
     val fileName = video.displayName.ifBlank { video.title }.trim()
     val parsed = MediaInfoParser.parse(fileName)
 
-    // 1. TV series / episode detection
-    if (parsed.type.equals("tv", ignoreCase = true) || parsed.season != null || parsed.episode != null) {
-      return VideoCategory.TV_EPISODE
-    }
-
     val immediateFolder = video.bucketDisplayName.trim().ifBlank {
       video.path.replace('\\', '/').substringBeforeLast('/', "").substringAfterLast('/')
     }
-    if (immediateFolder.isNotBlank() && TV_FOLDER_REGEX.matches(immediateFolder)) {
-      return VideoCategory.TV_EPISODE
-    }
 
-    // 2. Orientation check (portrait or 1:1 square videos are phone clips / reels / shorts, never movies)
+    // 1. Orientation check (portrait or 1:1 square videos are phone clips / reels / shorts)
     val swapAxes = video.rotation == 90 || video.rotation == 270
     val effectiveWidth = if (swapAxes) video.height else video.width
     val effectiveHeight = if (swapAxes) video.width else video.height
@@ -198,7 +216,7 @@ object MovieClassifier {
       return VideoCategory.NORMAL_VIDEO
     }
 
-    // 3. Hard non-movie filename / folder disqualifiers
+    // 2. Hard non-movie filename / folder disqualifiers
     if (PERSONAL_FILE_PREFIX_REGEX.containsMatchIn(fileName) ||
       TIMESTAMP_ONLY_PREFIX_REGEX.containsMatchIn(fileName) ||
       WHATSAPP_FILE_REGEX.containsMatchIn(fileName) ||
@@ -211,25 +229,47 @@ object MovieClassifier {
       return VideoCategory.NORMAL_VIDEO
     }
 
-    // 4. Duration gate: real feature movies are at least 40 minutes long
+    // 3. Title sanity check
+    val cleanTitle = parsed.title.trim()
+    if (cleanTitle.count { it.isLetter() } < 2 || HEX_HASH_REGEX.matches(cleanTitle)) {
+      return VideoCategory.NORMAL_VIDEO
+    }
+
+    // 4. Web Series & Anime detection (episodes are typically 18-65 min, so check before 40m movie floor)
+    val isTvParsed = parsed.type.equals("tv", ignoreCase = true) || parsed.season != null || parsed.episode != null
+    val isAnimeSignal =
+      ANIME_RELEASE_REGEX.containsMatchIn(fileName) ||
+        ANIME_FOLDER_REGEX.containsMatchIn(immediateFolder) ||
+        ANIME_FOLDER_REGEX.containsMatchIn(video.path)
+    val isSeriesFolderSignal =
+      (immediateFolder.isNotBlank() && TV_FOLDER_REGEX.matches(immediateFolder)) ||
+        SERIES_FOLDER_REGEX.containsMatchIn(immediateFolder) ||
+        SERIES_FOLDER_REGEX.containsMatchIn(video.path)
+
+    if (isTvParsed || isAnimeSignal || isSeriesFolderSignal) {
+      val hasValidEpisodeDuration = video.duration == 0L || video.duration >= MIN_EPISODE_DURATION_MS
+      val hasEpisodeOrSeriesEvidence = isTvParsed || isAnimeSignal || isSeriesFolderSignal
+      if (hasValidEpisodeDuration && hasEpisodeOrSeriesEvidence) {
+        // Avoid matching short YouTube clips that merely sit in a generic folder without episode tags
+        if (isTvParsed || ANIME_RELEASE_REGEX.containsMatchIn(fileName) || video.duration >= 15L * 60L * 1000L) {
+          return if (isAnimeSignal) VideoCategory.ANIME else VideoCategory.WEB_SERIES
+        }
+      }
+    }
+
+    // 5. Duration gate for standalone movies: feature films are at least 40 minutes long
     if (video.duration in 1L until MIN_MOVIE_DURATION_MS) {
       return VideoCategory.NORMAL_VIDEO
     }
 
-    // 5. Soft non-movie content keywords unless strong cinema release metadata (year + release tags) exists
+    // 6. Soft non-movie content keywords unless strong cinema release metadata (year + release tags) exists
     val hasYear = !parsed.year.isNullOrBlank()
     val hasReleaseTags = MOVIE_RELEASE_TAGS_REGEX.containsMatchIn(fileName)
     if (SOFT_NON_MOVIE_KEYWORDS_REGEX.containsMatchIn(fileName) && !(hasYear && hasReleaseTags)) {
       return VideoCategory.NORMAL_VIDEO
     }
 
-    // 6. Title sanity check
-    val cleanTitle = parsed.title.trim()
-    if (cleanTitle.count { it.isLetter() } < 2 || HEX_HASH_REGEX.matches(cleanTitle)) {
-      return VideoCategory.NORMAL_VIDEO
-    }
-
-    // 7. Weighted positive classification
+    // 7. Weighted positive movie classification
     var score = 0
     if (hasYear) score += 2
     if (hasReleaseTags) score += 2
@@ -254,7 +294,6 @@ object MovieClassifier {
   private fun hasNormalVideoAncestorFolder(path: String): Boolean {
     if (path.isBlank()) return false
     val segments = path.replace('\\', '/').split('/')
-    // Ignore the filename at the end
     val dirCount = (segments.size - 1).coerceAtLeast(0)
     for (i in 0 until dirCount) {
       if (isNormalVideoFolder(segments[i])) return true
@@ -272,4 +311,3 @@ object MovieClassifier {
     return false
   }
 }
-

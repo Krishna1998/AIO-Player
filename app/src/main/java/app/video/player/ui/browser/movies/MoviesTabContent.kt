@@ -9,8 +9,10 @@
 
 package app.video.player.ui.browser.movies
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,10 +58,14 @@ import app.video.player.domain.movies.MovieClassifier
 import app.video.player.domain.movies.MovieMetadata
 import app.video.player.domain.movies.MovieMetadataRepository
 import app.video.player.presentation.components.RemoteImage
+import app.video.player.ui.browser.cards.SelectionIndicator
+import app.video.player.ui.browser.cards.animatedSelectionColor
+import app.video.player.ui.browser.selection.SelectionManager
 import app.video.player.ui.browser.states.EmptyState
 import app.video.player.ui.browser.videolist.VideoWithPlaybackInfo
 import app.video.player.ui.icons.Icon
 import app.video.player.ui.icons.Icons
+import app.video.player.utils.media.MediaInfoParser
 import org.koin.compose.koinInject
 
 /**
@@ -72,6 +78,7 @@ fun MoviesTabContent(
   videosWithInfo: List<VideoWithPlaybackInfo>,
   onOpenMovieDetails: (Video) -> Unit,
   modifier: Modifier = Modifier,
+  selectionManager: SelectionManager<Video, Long>? = null,
 ) {
   var selectedFilterIndex by rememberSaveable { mutableIntStateOf(0) }
   val movieMetadataRepo = koinInject<MovieMetadataRepository>()
@@ -172,10 +179,19 @@ fun MoviesTabContent(
           items = filteredMovies,
           key = { it.video.path },
         ) { item ->
+          val isSelected = selectionManager?.isSelected(item.video) == true
           MoviePosterCard(
             item = item,
             movieMetadataRepo = movieMetadataRepo,
-            onClick = { onOpenMovieDetails(item.video) },
+            isSelected = isSelected,
+            onClick = {
+              if (selectionManager?.isInSelectionMode == true) {
+                selectionManager.toggleFromUser(item.video)
+              } else {
+                onOpenMovieDetails(item.video)
+              }
+            },
+            onLongClick = { selectionManager?.handleLongClick(item.video) },
           )
         }
       }
@@ -183,11 +199,14 @@ fun MoviesTabContent(
   }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun MoviePosterCard(
   item: VideoWithPlaybackInfo,
   movieMetadataRepo: MovieMetadataRepository,
+  isSelected: Boolean,
   onClick: () -> Unit,
+  onLongClick: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   val video = item.video
@@ -201,92 +220,149 @@ private fun MoviePosterCard(
     }
   }
 
+  val parsedInfo = remember(video.displayName, video.title) {
+    MediaInfoParser.parse(video.displayName.ifBlank { video.title })
+  }
+  val episodeBadge = remember(parsedInfo) {
+    when {
+      parsedInfo.season != null && parsedInfo.episode != null ->
+        "S${parsedInfo.season.toString().padStart(2, '0')}E${parsedInfo.episode.toString().padStart(2, '0')}"
+      parsedInfo.episode != null ->
+        "EP ${parsedInfo.episode.toString().padStart(2, '0')}"
+      else -> null
+    }
+  }
+
   val displayTitle = metadata?.title?.takeIf { it.isNotBlank() } ?: video.displayName
   val displayYear = metadata?.releaseYear ?: ""
   val displayDuration = metadata?.durationFormatted?.takeIf { it.isNotBlank() } ?: video.durationFormatted
+  val selectionColor = animatedSelectionColor(isSelected)
 
-  Column(
+  Surface(
     modifier = modifier
       .fillMaxWidth()
       .clip(RoundedCornerShape(12.dp))
-      .clickable(onClick = onClick),
-    verticalArrangement = Arrangement.spacedBy(4.dp),
+      .combinedClickable(
+        onClick = onClick,
+        onLongClick = onLongClick,
+      ),
+    shape = RoundedCornerShape(12.dp),
+    color = selectionColor,
+    border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
   ) {
-    // Poster Artwork Box with 2:3 Aspect Ratio
-    Box(
+    Column(
       modifier = Modifier
         .fillMaxWidth()
-        .aspectRatio(2f / 3f)
-        .clip(RoundedCornerShape(12.dp))
-        .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+        .padding(if (isSelected) 4.dp else 0.dp),
+      verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-      val posterUrl = metadata?.posterUrl ?: metadata?.backdropUrl
-      if (!posterUrl.isNullOrBlank()) {
-        RemoteImage(
-          url = posterUrl,
-          contentDescription = displayTitle,
-          contentScale = ContentScale.Crop,
-          modifier = Modifier.fillMaxSize(),
-        )
-      } else {
-        Box(
-          modifier = Modifier.fillMaxSize(),
-          contentAlignment = Alignment.Center,
-        ) {
-          Icon(
-            imageVector = Icons.RoundedFilled.Movie,
-            contentDescription = null,
-            modifier = Modifier.size(36.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+      // Poster Artwork Box with 2:3 Aspect Ratio
+      Box(
+        modifier = Modifier
+          .fillMaxWidth()
+          .aspectRatio(2f / 3f)
+          .clip(RoundedCornerShape(12.dp))
+          .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+      ) {
+        val posterUrl = metadata?.posterUrl ?: metadata?.backdropUrl
+        if (!posterUrl.isNullOrBlank()) {
+          RemoteImage(
+            url = posterUrl,
+            contentDescription = displayTitle,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(),
           )
+        } else {
+          Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+          ) {
+            Icon(
+              imageVector = Icons.RoundedFilled.Movie,
+              contentDescription = null,
+              modifier = Modifier.size(36.dp),
+              tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+            )
+          }
+        }
+
+        // Episode / Series badge (top-start)
+        if (episodeBadge != null) {
+          Surface(
+            shape = RoundedCornerShape(4.dp),
+            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.9f),
+            modifier = Modifier
+              .align(Alignment.TopStart)
+              .padding(6.dp),
+          ) {
+            Text(
+              text = episodeBadge,
+              style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+              ),
+              color = MaterialTheme.colorScheme.onSecondaryContainer,
+              modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
+            )
+          }
+        }
+
+        // Selection check indicator (top-end)
+        if (isSelected) {
+          SelectionIndicator(
+            selected = true,
+            modifier = Modifier
+              .align(Alignment.TopEnd)
+              .padding(6.dp),
+          )
+        }
+
+        // Duration Tag at the bottom of the poster
+        if (displayDuration.isNotBlank()) {
+          Surface(
+            shape = RoundedCornerShape(4.dp),
+            color = Color.Black.copy(alpha = 0.75f),
+            modifier = Modifier
+              .align(Alignment.BottomStart)
+              .padding(6.dp),
+          ) {
+            Text(
+              text = displayDuration,
+              style = MaterialTheme.typography.labelSmall.copy(
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold,
+              ),
+              color = Color.White,
+              modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
+            )
+          }
         }
       }
 
-      // Duration Tag at the bottom of the poster
-      if (displayDuration.isNotBlank()) {
-        Surface(
-          shape = RoundedCornerShape(4.dp),
-          color = Color.Black.copy(alpha = 0.75f),
-          modifier = Modifier
-            .align(Alignment.BottomStart)
-            .padding(6.dp),
-        ) {
-          Text(
-            text = displayDuration,
-            style = MaterialTheme.typography.labelSmall.copy(
-              fontSize = 10.sp,
-              fontWeight = FontWeight.Bold,
-            ),
-            color = Color.White,
-            modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
-          )
-        }
-      }
-    }
-
-    // Title below poster
-    Text(
-      text = displayTitle,
-      style = MaterialTheme.typography.bodySmall.copy(
-        fontWeight = FontWeight.Bold,
-        fontSize = 12.sp,
-      ),
-      maxLines = 1,
-      overflow = TextOverflow.Ellipsis,
-      color = MaterialTheme.colorScheme.onSurface,
-      modifier = Modifier.padding(horizontal = 2.dp),
-    )
-
-    // Year below title
-    if (displayYear.isNotBlank()) {
+      // Title below poster
       Text(
-        text = displayYear,
-        style = MaterialTheme.typography.labelSmall.copy(
-          fontSize = 11.sp,
+        text = displayTitle,
+        style = MaterialTheme.typography.bodySmall.copy(
+          fontWeight = FontWeight.Bold,
+          fontSize = 12.sp,
         ),
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        color = MaterialTheme.colorScheme.onSurface,
         modifier = Modifier.padding(horizontal = 2.dp),
       )
+
+      // Year below title
+      if (displayYear.isNotBlank()) {
+        Text(
+          text = displayYear,
+          style = MaterialTheme.typography.labelSmall.copy(
+            fontSize = 11.sp,
+          ),
+          color = MaterialTheme.colorScheme.onSurfaceVariant,
+          modifier = Modifier.padding(horizontal = 2.dp),
+        )
+      }
     }
   }
 }

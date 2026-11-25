@@ -421,11 +421,11 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   val focusRequester = remember { FocusRequester() }
 
   val currentVideosWithInfo =
-    remember(sortedVideosWithInfo, currentTab, isSearching, searchQuery, videoSortType, videoSortOrder, movieMetadataRevision) {
+    remember(sortedVideosWithInfo, currentTab, isSearching, searchQuery, videoSortType, videoSortOrder, movieMetadataRevision, libraryShowMoviesTab) {
       val base = if (isSearching) sortedVideosWithInfo else when (currentTab) {
         MediaLibraryTabItem.All -> sortedVideosWithInfo
         MediaLibraryTabItem.Movies -> sortedVideosWithInfo.filter { isActualMovie(it.video) }
-        MediaLibraryTabItem.Video -> sortedVideosWithInfo.filter { !it.video.isAudio }
+        MediaLibraryTabItem.Video -> sortedVideosWithInfo.filter { !it.video.isAudio && (!libraryShowMoviesTab || !isActualMovie(it.video)) }
         MediaLibraryTabItem.Audio -> {
           when (videoSortType) {
             app.video.player.preferences.VideoSortType.Title -> {
@@ -997,9 +997,17 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                 .padding(padding),
           ) {
           if (!forceAudio) {
+            val tabRowScrollState = rememberScrollState()
+            LaunchedEffect(pagerState.currentPage, mediaLibraryTabs.size) {
+              if (tabRowScrollState.maxValue > 0 && mediaLibraryTabs.size > 1) {
+                val target = (tabRowScrollState.maxValue * pagerState.currentPage) / (mediaLibraryTabs.size - 1)
+                tabRowScrollState.animateScrollTo(target)
+              }
+            }
             Row(
               modifier = Modifier
                 .fillMaxWidth()
+                .horizontalScroll(tabRowScrollState)
                 .padding(horizontal = 14.dp, vertical = 6.dp),
               horizontalArrangement = Arrangement.spacedBy(8.dp),
               verticalAlignment = Alignment.CenterVertically,
@@ -1009,7 +1017,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                 val count = when (type) {
                   MediaLibraryTabItem.All -> sortedVideosWithInfo.size
                   MediaLibraryTabItem.Movies -> sortedVideosWithInfo.count { isActualMovie(it.video) }
-                  MediaLibraryTabItem.Video -> sortedVideosWithInfo.count { !it.video.isAudio }
+                  MediaLibraryTabItem.Video -> sortedVideosWithInfo.count { !it.video.isAudio && (!libraryShowMoviesTab || !isActualMovie(it.video)) }
                   MediaLibraryTabItem.Audio -> sortedVideosWithInfo.count { it.video.isAudio }
                 }
                 val label = when (type) {
@@ -1077,7 +1085,6 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                   shadowElevation = if (isSelected) 4.dp else 0.dp,
                   tonalElevation = if (isSelected) 6.dp else 0.dp,
                   modifier = Modifier
-                    .weight(1f)
                     .graphicsLayer {
                       scaleX = bounceScale
                       scaleY = bounceScale
@@ -1085,8 +1092,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                 ) {
                   Row(
                     modifier = Modifier
-                      .fillMaxWidth()
-                      .padding(vertical = 9.dp, horizontal = 4.dp),
+                      .padding(vertical = 9.dp, horizontal = 14.dp),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
                   ) {
@@ -1145,11 +1151,11 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
               userScrollEnabled = !selectionManager.isInSelectionMode,
             ) { page ->
               val pageType = mediaLibraryTabs.getOrNull(page) ?: MediaLibraryTabItem.All
-              val pageVideosWithInfo = remember(sortedVideosWithInfo, pageType, isSearching, searchQuery, videoSortType, videoSortOrder, movieMetadataRevision) {
+              val pageVideosWithInfo = remember(sortedVideosWithInfo, pageType, isSearching, searchQuery, videoSortType, videoSortOrder, movieMetadataRevision, libraryShowMoviesTab) {
                 val base = if (isSearching) sortedVideosWithInfo else when (pageType) {
                   MediaLibraryTabItem.All -> sortedVideosWithInfo
                   MediaLibraryTabItem.Movies -> sortedVideosWithInfo.filter { isActualMovie(it.video) }
-                  MediaLibraryTabItem.Video -> sortedVideosWithInfo.filter { !it.video.isAudio }
+                  MediaLibraryTabItem.Video -> sortedVideosWithInfo.filter { !it.video.isAudio && (!libraryShowMoviesTab || !isActualMovie(it.video)) }
                   MediaLibraryTabItem.Audio -> {
                     when (videoSortType) {
                       app.video.player.preferences.VideoSortType.Title -> {
@@ -1205,6 +1211,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                   onOpenMovieDetails = { video ->
                     backstack.navigateTo(MovieDetailsScreen(video.path))
                   },
+                  selectionManager = selectionManager,
                   modifier = Modifier.fillMaxSize(),
                 )
               } else if (pageType == MediaLibraryTabItem.Video && !isSearching) {
