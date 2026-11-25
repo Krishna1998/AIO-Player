@@ -56,7 +56,7 @@ object AppShapeScale {
   val extraLargeIncreased = RoundedCornerShape(32.dp)
   val extraExtraLarge = RoundedCornerShape(48.dp)
   val full = RoundedCornerShape(50)
-  val squircle: Shape = SquircleShape()
+  val squircle: Shape = RoundedCornerShape(24)
 
   /** Asymmetric shapes — larger corners on the start side create visual flow. */
   val expressiveStart =
