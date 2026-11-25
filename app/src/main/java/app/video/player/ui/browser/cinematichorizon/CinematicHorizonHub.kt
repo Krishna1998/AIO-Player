@@ -3558,7 +3558,7 @@ private fun SpotlightGesturesInfoDialog(
                 color = MaterialTheme.colorScheme.primary,
               )
               Text(
-                text = "VIDEO SPOTLIGHT",
+                text = "Video",
                 style = MaterialTheme.typography.labelSmall.copy(
                   fontSize = 8.sp,
                   fontWeight = FontWeight.SemiBold,
@@ -3608,7 +3608,7 @@ private fun SpotlightGesturesInfoDialog(
                 color = MaterialTheme.colorScheme.tertiary,
               )
               Text(
-                text = "LOSSLESS MUSIC",
+                text = "Music",
                 style = MaterialTheme.typography.labelSmall.copy(
                   fontSize = 8.sp,
                   fontWeight = FontWeight.SemiBold,
