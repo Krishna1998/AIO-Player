@@ -413,13 +413,6 @@ object PreferencesScreen : Screen {
             gradient = listOf(Color(0xFF00E5FF), Color(0xFF00B0FF)),
           ),
           SettingsDestination(
-            title = stringResource(if (television) R.string.pref_section_display_controls else R.string.pref_layout_title),
-            summary = stringResource(if (television) R.string.pref_persistent_status_summary else R.string.pref_layout_summary),
-            icon = Icons.RoundedFilled.GridView,
-            screen = PlayerControlsPreferencesScreen,
-            gradient = listOf(Color(0xFFFF4081), Color(0xFFC51162)),
-          ),
-          SettingsDestination(
             title = stringResource(R.string.pref_gesture),
             summary = stringResource(R.string.pref_gesture_summary),
             icon = Icons.RoundedFilled.Gesture,
@@ -439,13 +432,6 @@ object PreferencesScreen : Screen {
         title = stringResource(R.string.pref_section_engine_codecs),
         tint = colorScheme.tertiary,
         items = listOf(
-          SettingsDestination(
-            title = stringResource(R.string.pref_decoder),
-            summary = stringResource(R.string.pref_decoder_summary),
-            icon = Icons.RoundedFilled.DeveloperBoard,
-            screen = DecoderPreferencesScreen,
-            gradient = listOf(Color(0xFF00E676), Color(0xFF00B0FF)),
-          ),
           SettingsDestination(
             title = stringResource(R.string.pref_audio),
             summary = stringResource(R.string.pref_audio_summary),
@@ -473,15 +459,6 @@ object PreferencesScreen : Screen {
             screen = FoldersPreferencesScreen,
             gradient = listOf(Color(0xFF2979FF), Color(0xFF1565C0)),
           ),
-          if (!isSecureFolderEntryHidden) {
-            SettingsDestination(
-              title = stringResource(R.string.secure_folder_settings_title),
-              summary = stringResource(R.string.secure_folder_settings_summary),
-              icon = Icons.RoundedFilled.Lock,
-              screen = SecureFolderSettingsScreen,
-              gradient = listOf(Color(0xFFFFD600), Color(0xFFFF9100)),
-            )
-          } else null,
           SettingsDestination(
             title = stringResource(R.string.pref_advanced),
             summary = listOf(
