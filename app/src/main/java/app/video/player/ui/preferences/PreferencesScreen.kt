@@ -739,8 +739,8 @@ private fun AuroraHubTile(
       .clip(RoundedCornerShape(20.dp))
       .clickable(onClick = onClick),
     shape = RoundedCornerShape(20.dp),
-    color = colorScheme.surfaceContainerHigh.copy(alpha = 0.65f),
-    border = BorderStroke(1.dp, Color.White.copy(alpha = 0.08f)),
+    color = colorScheme.surfaceContainerHigh.copy(alpha = 0.55f),
+    border = BorderStroke(0.8.dp, Color.White.copy(alpha = 0.10f)),
     tonalElevation = 1.dp,
   ) {
     Column(
