@@ -737,3 +737,39 @@ private val TEN_BIT_FORMATS = setOf("rgb30", "bgr30", "x2rgb10le", "x2bgr10le", 
 private val PLANAR_EIGHT_BIT = Regex("""(?:yuva?\d{3}p|yuvj\d{3}p|gbrap?|gray8|gray)""")
 private val LISTED_BIT_DEPTH =
   Regex("""^(?:(?:yuva?\d{3}p|gbrap?|gray|xyz|p[024])0?)(9|10|12|14|16)(?:le|be)?$""")
+
+internal fun videoToFormatBadges(video: app.video.player.domain.media.model.Video): List<PlaybackFormatBadge> = buildList {
+  val res = video.resolution.lowercase(Locale.ROOT)
+  when {
+    "2160" in res || "4k" in res -> add(PlaybackFormatBadge("4K", "resolution/4k.svg"))
+    "1080" in res -> add(PlaybackFormatBadge("1080p", "resolution/1080p.svg"))
+    "720" in res -> add(PlaybackFormatBadge("720p", "resolution/720p.svg"))
+    "480" in res -> add(PlaybackFormatBadge("480p", "resolution/480p.svg"))
+    res.isNotBlank() -> add(PlaybackFormatBadge(video.resolution))
+  }
+
+  val vCodec = video.videoCodec.lowercase(Locale.ROOT)
+  when {
+    "hevc" in vCodec || "265" in vCodec -> add(PlaybackFormatBadge("HEVC", "codecs/hevc.svg"))
+    "264" in vCodec || "avc" in vCodec -> add(PlaybackFormatBadge("H.264", "codecs/h264.svg"))
+    "av1" in vCodec -> add(PlaybackFormatBadge("AV1", "codecs/av1.svg"))
+    "vp9" in vCodec -> add(PlaybackFormatBadge("VP9", "codecs/vp9.svg"))
+    vCodec.isNotBlank() -> add(PlaybackFormatBadge(video.videoCodec.uppercase(Locale.ROOT)))
+  }
+
+  val aCodec = video.audioCodec.lowercase(Locale.ROOT)
+  when {
+    "truehd" in aCodec -> add(PlaybackFormatBadge("TrueHD", "audio/truehd.svg"))
+    "eac3" in aCodec || "e-ac-3" in aCodec || "dd+" in aCodec -> add(PlaybackFormatBadge("DD+", "audio/eac3.svg"))
+    "ac3" in aCodec || "ac-3" in aCodec -> add(PlaybackFormatBadge("AC3", "audio/ac3.svg"))
+    "dts" in aCodec -> add(PlaybackFormatBadge("DTS", "audio/dts.svg"))
+    "aac" in aCodec -> add(PlaybackFormatBadge("AAC", "audio/aac.svg"))
+    "flac" in aCodec -> add(PlaybackFormatBadge("FLAC", "audio/flac.svg"))
+    "opus" in aCodec -> add(PlaybackFormatBadge("Opus", "audio/opus.svg"))
+    aCodec.isNotBlank() -> add(PlaybackFormatBadge(video.audioCodec.uppercase(Locale.ROOT)))
+  }
+
+  if (video.hasEmbeddedSubtitles || video.subtitleCount > 0) {
+    add(PlaybackFormatBadge("SUB", "subtitles/srt.svg"))
+  }
+}

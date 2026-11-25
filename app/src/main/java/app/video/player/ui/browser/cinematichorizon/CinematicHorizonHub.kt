@@ -2032,6 +2032,18 @@ private fun HeroSpotlightBox(
         ),
       verticalArrangement = Arrangement.spacedBy(5.dp),
     ) {
+      val formatBadges = remember(video) {
+        if (video.isAudio) emptyList() else app.video.player.ui.player.videoToFormatBadges(video)
+      }
+      if (formatBadges.isNotEmpty()) {
+        app.video.player.ui.player.controls.components.MediaFormatBadges(
+          badges = formatBadges,
+          logoHeight = 14.dp,
+          foreground = Color.White,
+          background = Color.Black.copy(alpha = 0.6f),
+        )
+      }
+
       // Smart Media Badges Row
       if (qualityBadge != null || extensionBadge != null || runtimeFormatted.isNotBlank()) {
         Row(

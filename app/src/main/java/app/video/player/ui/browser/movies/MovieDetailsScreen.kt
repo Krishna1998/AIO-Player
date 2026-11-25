@@ -321,6 +321,19 @@ data class MovieDetailsScreen(
                 }
               }
 
+              val formatBadges = remember(currentVideo) {
+                app.video.player.ui.player.videoToFormatBadges(currentVideo)
+              }
+              if (formatBadges.isNotEmpty()) {
+                app.video.player.ui.player.controls.components.MediaFormatBadges(
+                  badges = formatBadges,
+                  logoHeight = 16.dp,
+                  foreground = Color.White,
+                  background = MaterialTheme.colorScheme.surfaceContainerHigh,
+                  modifier = Modifier.padding(top = 8.dp),
+                )
+              }
+
               // Movie Title
               Text(
                 text = currentMeta?.title?.takeIf { it.isNotBlank() } ?: currentVideo.displayName,
