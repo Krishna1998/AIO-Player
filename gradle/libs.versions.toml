@@ -57,9 +57,11 @@ sonner = "0.4.0"
 kyant = "2.0.1"
 kyant-shapes = "1.2.1"
 androidsvg = "1.4"
+mediainfo = "1.0.2"
 
 [libraries]
 androidsvg = { module = "com.caverock:androidsvg-aar", version.ref = "androidsvg" }
+mediainfo-lib = { module = "io.github.marlboro-advance:mediainfo-android", version.ref = "mediainfo" }
 androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "profileinstaller" }
 androidx-benchmark-macro-junit4 = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "benchmark" }
 androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxTestRunner" }
