@@ -552,13 +552,13 @@ private fun NormalTopBar(
                 ),
             )
           } else {
-            Icon(
-              Icons.RoundedFilled.Settings,
+            androidx.compose.material3.Icon(
+              imageVector = androidx.compose.material.icons.Icons.Outlined.Settings,
               contentDescription =
                 androidx.compose.ui.res
                   .stringResource(app.video.player.R.string.ui_settings),
-              modifier = Modifier.size(24.dp),
-              tint = MaterialTheme.colorScheme.secondary.onWallpaper(),
+              modifier = Modifier.size(23.dp),
+              tint = MaterialTheme.colorScheme.onSurface.onWallpaper(),
             )
           }
         }

@@ -791,19 +791,20 @@ private fun AuroraHubTile(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
       ) {
-        Box(
-          modifier = Modifier
-            .size(42.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(Brush.linearGradient(iconGradient)),
-          contentAlignment = Alignment.Center,
+        Surface(
+          modifier = Modifier.size(42.dp),
+          shape = RoundedCornerShape(12.dp),
+          color = Color.White.copy(alpha = 0.08f),
+          border = BorderStroke(1.dp, Color.White.copy(alpha = 0.14f)),
         ) {
-          Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(24.dp),
-            tint = Color.White,
-          )
+          Box(contentAlignment = Alignment.Center) {
+            Icon(
+              imageVector = icon,
+              contentDescription = null,
+              modifier = Modifier.size(24.dp),
+              tint = colorScheme.onSurface,
+            )
+          }
         }
 
         Surface(
@@ -933,19 +934,20 @@ private fun AuroraDestinationRow(
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.spacedBy(14.dp),
   ) {
-    Box(
-      modifier = Modifier
-        .size(38.dp)
-        .clip(RoundedCornerShape(12.dp))
-        .background(Brush.linearGradient(destination.gradient)),
-      contentAlignment = Alignment.Center,
+    Surface(
+      modifier = Modifier.size(38.dp),
+      shape = RoundedCornerShape(12.dp),
+      color = Color.White.copy(alpha = 0.08f),
+      border = BorderStroke(1.dp, Color.White.copy(alpha = 0.14f)),
     ) {
-      Icon(
-        imageVector = destination.icon,
-        contentDescription = null,
-        modifier = Modifier.size(20.dp),
-        tint = Color.White,
-      )
+      Box(contentAlignment = Alignment.Center) {
+        Icon(
+          imageVector = destination.icon,
+          contentDescription = null,
+          modifier = Modifier.size(20.dp),
+          tint = MaterialTheme.colorScheme.onSurface,
+        )
+      }
     }
 
     Column(
