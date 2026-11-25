@@ -61,7 +61,7 @@ internal fun MediaInfoOps.AudioStreamInfo.formatBadges(): List<PlaybackFormatBad
     part == "A_DTS" || name.startsWith("dts") -> "dts"
     name.startsWith("aac") || name == "audio/mp4a-latm" -> "aac"
     name == "mpeg audio" && (formatProfile.contains("Layer 3", true) || part == "A_MPEG/L3") -> "mp3"
-    name in setOf("monkey's audio", "monkeyâ€™s audio") -> "ape"
+    name in setOf("monkey's audio", "monkey\u2019s audio") -> "ape"
     name in setOf("musepack sv7", "musepack sv8") -> "mpc8"
     name == "pcm" -> "pcm"
     name.startsWith("audio/") -> name.removePrefix("audio/")

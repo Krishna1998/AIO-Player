@@ -127,6 +127,7 @@ object MediaInfoOps {
     val defaultStream: String = "",
     val forcedStream: String = "",
     val hdrFormat: String = "",
+    val hdrFormatCommercial: String = "",
     val maxCLL: String = "",
     val maxFALL: String = "",
   )
@@ -136,6 +137,9 @@ object MediaInfoOps {
     val id: String = "",
     val format: String = "",
     val formatInfo: String = "",
+    val formatProfile: String = "",
+    val commercialFormat: String = "",
+    val additionalFeatures: String = "",
     val codecId: String = "",
     val duration: String = "",
     val bitRate: String = "",
@@ -143,6 +147,7 @@ object MediaInfoOps {
     val channelLayout: String = "",
     val samplingRate: String = "",
     val frameRate: String = "",
+    val bitDepth: String = "",
     val compressionMode: String = "",
     val delay: String = "",
     val streamSize: String = "",
@@ -168,6 +173,7 @@ object MediaInfoOps {
     val language: String = "",
     val defaultStream: String = "",
     val forcedStream: String = "",
+    val hearingImpaired: Boolean = false,
   )
 
   /**

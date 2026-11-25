@@ -2,6 +2,10 @@
 
 package app.video.player.ui.player.controls.components
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas as AndroidCanvas
+import android.util.LruCache
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -13,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -22,12 +27,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -37,18 +46,18 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.video.player.R
-import app.video.player.preferences.AppearancePreferences
-import app.video.player.preferences.preference.collectAsState
-import coil3.compose.rememberAsyncImagePainter
 import app.video.player.ui.liquidglass.liquidGlassActive
 import app.video.player.ui.player.BadgeArtwork
 import app.video.player.ui.player.PlaybackFormatBadge
-import app.video.player.ui.player.controls.PlayerButtonAlpha
 import app.video.player.ui.player.observePlaybackFormatBadges
-import org.koin.compose.koinInject
+import com.caverock.androidsvg.SVG
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.roundToInt
 
 private val BadgeRailShape = RoundedCornerShape(12.dp)
 private val BrandBackingShape = RoundedCornerShape(5.dp)
+private val BadgeSvgBitmapCache = LruCache<String, ImageBitmap>(64)
+private val MissingBadgeAssets = ConcurrentHashMap.newKeySet<String>()
 
 @Composable
 internal fun PlaybackFormatBadgeRow(
@@ -128,7 +137,7 @@ private fun FormatBadge(
   val tintArgb = if (darkBackground) badge.darkTintArgb else badge.lightTintArgb
   val badgeForeground = tintArgb?.let(::Color) ?: foreground
   val path = badge.asset
-  val painter = if (path == null) null else rememberAsyncImagePainter(model = "file:///android_asset/media_format_logos/$path")
+  val painter = if (path == null) null else rememberAssetSvgPainter("media_format_logos/$path", logoHeight)
   Box(modifier.heightIn(min = logoHeight + 4.dp), contentAlignment = Alignment.Center) {
     if (painter == null) {
       val shadow = if (inkEdge.isSpecified) {
@@ -143,7 +152,10 @@ private fun FormatBadge(
         modifier = Modifier.clearAndSetSemantics { contentDescription = description },
       )
     } else {
-      val aspect = painter.intrinsicSize.width / painter.intrinsicSize.height
+      val intrinsic = painter.intrinsicSize
+      val aspect = if (intrinsic.height > 0f && intrinsic.width.isFinite() && intrinsic.height.isFinite()) {
+        (intrinsic.width / intrinsic.height).coerceIn(0.2f, 12f)
+      } else 1f
       val artwork = badge.artwork
       val contrast = when (artwork) {
         BadgeArtwork.OnDark -> Color(0xFF25262B).takeUnless { darkBackground }
@@ -169,9 +181,49 @@ private fun FormatBadge(
   }
 }
 
+@Composable
+private fun rememberAssetSvgPainter(assetPath: String, targetHeight: Dp): Painter? {
+  val context = LocalContext.current
+  val density = LocalDensity.current
+  val heightPx = (with(density) { targetHeight.toPx() } * 2f).roundToInt().coerceIn(24, 192)
+  val bitmap = remember(assetPath, heightPx) { loadAssetSvgBitmap(context, assetPath, heightPx) }
+  return remember(bitmap) { bitmap?.let(::BitmapPainter) }
+}
+
+private fun loadAssetSvgBitmap(context: Context, assetPath: String, heightPx: Int): ImageBitmap? {
+  if (assetPath in MissingBadgeAssets) return null
+  val cacheKey = "$assetPath@$heightPx"
+  synchronized(BadgeSvgBitmapCache) { BadgeSvgBitmapCache.get(cacheKey) }?.let { return it }
+  val rendered = runCatching {
+    val svg = SVG.getFromAsset(context.assets, assetPath)
+    val viewBox = svg.documentViewBox
+    val rawWidth = svg.documentWidth.takeIf { it > 0f } ?: viewBox?.width()?.takeIf { it > 0f } ?: 1f
+    val rawHeight = svg.documentHeight.takeIf { it > 0f } ?: viewBox?.height()?.takeIf { it > 0f } ?: 1f
+    if (viewBox == null && rawWidth > 0f && rawHeight > 0f) {
+      svg.setDocumentViewBox(0f, 0f, rawWidth, rawHeight)
+    }
+    val aspect = (rawWidth / rawHeight).coerceIn(0.2f, 12f)
+    val widthPx = (heightPx * aspect).roundToInt().coerceAtLeast(1)
+    svg.setDocumentWidth(widthPx.toFloat())
+    svg.setDocumentHeight(heightPx.toFloat())
+    Bitmap.createBitmap(widthPx, heightPx, Bitmap.Config.ARGB_8888).also { bitmap ->
+      svg.renderToCanvas(AndroidCanvas(bitmap))
+    }.asImageBitmap()
+  }.getOrNull()
+  if (rendered == null) {
+    MissingBadgeAssets.add(assetPath)
+  } else {
+    synchronized(BadgeSvgBitmapCache) { BadgeSvgBitmapCache.put(cacheKey, rendered) }
+  }
+  return rendered
+}
+
 // Keep monochrome artwork readable over video without adding an opaque plate at low opacity.
 private fun Modifier.logoInkEdge(painter: Painter, color: Color): Modifier = drawWithCache {
   val intrinsic = painter.intrinsicSize
+  if (intrinsic.width <= 0f || intrinsic.height <= 0f || !intrinsic.width.isFinite() || !intrinsic.height.isFinite()) {
+    return@drawWithCache onDrawWithContent { drawContent() }
+  }
   val scale = minOf(size.width / intrinsic.width, size.height / intrinsic.height)
   val fitted = intrinsic * scale
   val left = (size.width - fitted.width) / 2f

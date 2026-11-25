@@ -76,7 +76,7 @@ internal fun PlayerTitlePill(
           )
           if (playlistInfo != null) {
             Text(
-              text = " â€¢ $playlistInfo",
+              text = " \u2022 $playlistInfo",
               maxLines = 1,
               style = MaterialTheme.typography.bodyMedium,
               color = foreground.copy(alpha = 0.75f),
