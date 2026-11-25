@@ -76,6 +76,7 @@ import app.video.player.domain.media.model.Video
 import app.video.player.domain.movies.MovieClassifier
 import app.video.player.domain.movies.MovieMetadata
 import app.video.player.domain.movies.MovieMetadataRepository
+import app.video.player.ui.mediainfo.overviewBadges
 import app.video.player.preferences.BrowserPreferences
 import app.video.player.presentation.Screen
 import app.video.player.presentation.components.RemoteImage
@@ -329,9 +330,7 @@ data class MovieDetailsScreen(
                   app.video.player.utils.media.MediaInfoOps
                     .getMediaInfoReport(context, currentVideo.uri, currentVideo.displayName)
                     .onSuccess { report ->
-                      val overview = app.video.player.ui.mediainfo.run {
-                        report.mediaInfo.overviewBadges(currentVideo.displayName)
-                      }
+                      val overview = report.data.overviewBadges(currentVideo.displayName)
                       if (overview.isNotEmpty()) {
                         mediaInfoBadges = overview
                       }
