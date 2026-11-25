@@ -1332,22 +1332,6 @@ object AppearancePreferencesScreen : Screen {
                 groupIndex = 7,
                 groupSize = dualHorizonItemCount,
               )
-
-              val spotlightGesturesShowEveryTime by browserPreferences.spotlightGesturesShowEveryTime.collectAsState()
-              SwitchPreference(
-                modifier = Modifier.settingsSearchTarget(R.string.pref_spotlight_gestures_show_every_time_title),
-                value = spotlightGesturesShowEveryTime,
-                onValueChange = { browserPreferences.spotlightGesturesShowEveryTime.set(it) },
-                title = { Text(stringResource(R.string.pref_spotlight_gestures_show_every_time_title)) },
-                summary = {
-                  Text(
-                    text = stringResource(R.string.pref_spotlight_gestures_show_every_time_summary),
-                    color = MaterialTheme.colorScheme.outline,
-                  )
-                },
-                groupIndex = 8,
-                groupSize = dualHorizonItemCount,
-              )
             }
           }
 

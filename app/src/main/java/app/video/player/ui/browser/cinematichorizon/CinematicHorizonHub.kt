@@ -658,10 +658,9 @@ private fun CinematicHorizonContent(
 
   var showGestureInfoPopup by rememberSaveable { mutableStateOf(false) }
 
-  // Automatically show the gestures hint guide ONE TIME on initial launch,
-  // or every time if user checked "Show every time (don't remember)".
-  LaunchedEffect(spotlightGesturesHintSeen, spotlightGesturesShowEveryTime) {
-    if (!spotlightGesturesHintSeen || spotlightGesturesShowEveryTime) {
+  // Automatically show the gestures hint guide ONE TIME on initial launch.
+  LaunchedEffect(spotlightGesturesHintSeen) {
+    if (!spotlightGesturesHintSeen) {
       showGestureInfoPopup = true
     }
   }
@@ -3637,54 +3636,6 @@ private fun SpotlightGesturesInfoDialog(
               description = "Open full music player & queue screen",
               accentColor = MaterialTheme.colorScheme.tertiary,
             )
-          }
-        }
-
-        // Checkbox Option: Show every time (Don't remember)
-        Surface(
-          shape = RoundedCornerShape(14.dp),
-          color = MaterialTheme.colorScheme.surfaceContainerLowest,
-          border = BorderStroke(
-            0.8.dp,
-            if (showEveryTime) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
-          ),
-          modifier = Modifier
-            .fillMaxWidth()
-            .clickable { showEveryTime = !showEveryTime },
-        ) {
-          Row(
-            modifier = Modifier
-              .fillMaxWidth()
-              .padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-          ) {
-            Checkbox(
-              checked = showEveryTime,
-              onCheckedChange = { showEveryTime = it },
-              colors = CheckboxDefaults.colors(
-                checkedColor = MaterialTheme.colorScheme.primary,
-                uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                checkmarkColor = MaterialTheme.colorScheme.onPrimary,
-              ),
-              modifier = Modifier.size(24.dp),
-            )
-            Column(modifier = Modifier.weight(1f)) {
-              Text(
-                text = stringResource(R.string.spotlight_gestures_show_every_time_checkbox_title),
-                style = MaterialTheme.typography.bodyMedium.copy(
-                  fontWeight = FontWeight.Bold,
-                  fontSize = 13.sp,
-                ),
-                color = MaterialTheme.colorScheme.onSurface,
-              )
-              Text(
-                text = stringResource(R.string.spotlight_gestures_show_every_time_checkbox_desc),
-                style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-              )
-            }
           }
         }
 
