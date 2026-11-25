@@ -11,7 +11,19 @@ package app.video.player.ui.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Shapes
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import kotlin.math.PI
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.pow
+import kotlin.math.sign
+import kotlin.math.sin
 
 /**
  * VideoPlayer expressive shape scale following Material 3 Expressive guidelines.
@@ -44,6 +56,7 @@ object AppShapeScale {
   val extraLargeIncreased = RoundedCornerShape(32.dp)
   val extraExtraLarge = RoundedCornerShape(48.dp)
   val full = RoundedCornerShape(50)
+  val squircle: Shape = SquircleShape()
 
   /** Asymmetric shapes — larger corners on the start side create visual flow. */
   val expressiveStart =
@@ -56,4 +69,35 @@ object AppShapeScale {
   /** Asymmetric shapes — larger corners on top, grounded at bottom. */
   val expressiveTop =
     RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp, bottomStart = 12.dp, bottomEnd = 12.dp)
+}
+
+/**
+ * Smooth superellipse (squircle) shape for icon containers and buttons.
+ * [n] controls the squareness (2f = ellipse, 4f = classic squircle).
+ */
+class SquircleShape(
+  private val n: Float = 3.2f,
+) : Shape {
+  override fun createOutline(
+    size: Size,
+    layoutDirection: LayoutDirection,
+    density: Density,
+  ): Outline {
+    val path = Path()
+    val a = size.width / 2f
+    val b = size.height / 2f
+    if (a <= 0f || b <= 0f) return Outline.Generic(path)
+    val exponent = 2f / n
+    val steps = 72
+    for (i in 0..steps) {
+      val theta = (2.0 * PI * i / steps).toFloat()
+      val cosT = cos(theta)
+      val sinT = sin(theta)
+      val x = a + a * sign(cosT) * abs(cosT).pow(exponent)
+      val y = b + b * sign(sinT) * abs(sinT).pow(exponent)
+      if (i == 0) path.moveTo(x, y) else path.lineTo(x, y)
+    }
+    path.close()
+    return Outline.Generic(path)
+  }
 }

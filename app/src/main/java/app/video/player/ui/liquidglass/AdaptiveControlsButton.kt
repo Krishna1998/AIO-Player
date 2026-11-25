@@ -163,7 +163,7 @@ fun AdaptiveControlsContainer(
     if (horizontalPadding != null && horizontalPadding > 0.dp) {
       androidx.compose.foundation.shape.RoundedCornerShape(14.dp)
     } else {
-      androidx.compose.foundation.shape.RoundedCornerShape(22)
+      app.video.player.ui.theme.AppShapeScale.squircle
     }
   // Above the default level the glass tint thickens toward opaque; below it the whole glass fades.
   val glassLayerAlpha =
