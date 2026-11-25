@@ -782,6 +782,7 @@ fun VideoSortDialog(
   isFolderView: Boolean = true,
   enableViewModeOptions: Boolean = true,
   enableLayoutModeOptions: Boolean = true,
+  enableManualGridOptions: Boolean = true,
   enableFieldOptions: Boolean = true,
   pickerMode: Boolean = false,
   availableWidthDp: Int? = null,
@@ -1182,56 +1183,60 @@ fun VideoSortDialog(
         }
       },
     manualGridToggle =
-      VisibilityToggle(
-        label = "Manual Grid",
-        checked = manualGridColumnsEnabled,
-        onCheckedChange = { enabled ->
-          if (enabled) {
-            if (isDualPane) {
-              if (isLandscape) {
-                browserPreferences.folderGridColumnsDualPaneLandscape.set(dynamicFolderColumns)
-                browserPreferences.videoGridColumnsDualPaneLandscape.set(dynamicVideoColumns)
-                browserPreferences.musicGridColumnsDualPaneLandscape.set(dynamicMusicColumns)
+      if (enableManualGridOptions)
+        VisibilityToggle(
+          label = "Manual Grid",
+          checked = manualGridColumnsEnabled,
+          onCheckedChange = { enabled ->
+            if (enabled) {
+              if (isDualPane) {
+                if (isLandscape) {
+                  browserPreferences.folderGridColumnsDualPaneLandscape.set(dynamicFolderColumns)
+                  browserPreferences.videoGridColumnsDualPaneLandscape.set(dynamicVideoColumns)
+                  browserPreferences.musicGridColumnsDualPaneLandscape.set(dynamicMusicColumns)
+                } else {
+                  browserPreferences.folderGridColumnsDualPanePortrait.set(dynamicFolderColumns)
+                  browserPreferences.videoGridColumnsDualPanePortrait.set(dynamicVideoColumns)
+                  browserPreferences.musicGridColumnsDualPanePortrait.set(dynamicMusicColumns)
+                }
               } else {
-                browserPreferences.folderGridColumnsDualPanePortrait.set(dynamicFolderColumns)
-                browserPreferences.videoGridColumnsDualPanePortrait.set(dynamicVideoColumns)
-                browserPreferences.musicGridColumnsDualPanePortrait.set(dynamicMusicColumns)
+                if (isLandscape) {
+                  browserPreferences.folderGridColumnsLandscape.set(dynamicFolderColumns)
+                  browserPreferences.videoGridColumnsLandscape.set(dynamicVideoColumns)
+                  browserPreferences.musicGridColumnsLandscape.set(dynamicMusicColumns)
+                } else {
+                  browserPreferences.folderGridColumnsPortrait.set(dynamicFolderColumns)
+                  browserPreferences.videoGridColumnsPortrait.set(dynamicVideoColumns)
+                  browserPreferences.musicGridColumnsPortrait.set(dynamicMusicColumns)
+                }
               }
             } else {
-              if (isLandscape) {
-                browserPreferences.folderGridColumnsLandscape.set(dynamicFolderColumns)
-                browserPreferences.videoGridColumnsLandscape.set(dynamicVideoColumns)
-                browserPreferences.musicGridColumnsLandscape.set(dynamicMusicColumns)
-              } else {
-                browserPreferences.folderGridColumnsPortrait.set(dynamicFolderColumns)
-                browserPreferences.videoGridColumnsPortrait.set(dynamicVideoColumns)
-                browserPreferences.musicGridColumnsPortrait.set(dynamicMusicColumns)
-              }
+              browserPreferences.folderGridColumnsPortrait.set(0)
+              browserPreferences.folderGridColumnsLandscape.set(0)
+              browserPreferences.videoGridColumnsPortrait.set(0)
+              browserPreferences.videoGridColumnsLandscape.set(0)
+              browserPreferences.musicGridColumnsPortrait.set(0)
+              browserPreferences.musicGridColumnsLandscape.set(0)
+              browserPreferences.folderGridColumnsDualPanePortrait.set(0)
+              browserPreferences.folderGridColumnsDualPaneLandscape.set(0)
+              browserPreferences.videoGridColumnsDualPanePortrait.set(0)
+              browserPreferences.videoGridColumnsDualPaneLandscape.set(0)
+              browserPreferences.musicGridColumnsDualPanePortrait.set(0)
+              browserPreferences.musicGridColumnsDualPaneLandscape.set(0)
             }
-          } else {
-            browserPreferences.folderGridColumnsPortrait.set(0)
-            browserPreferences.folderGridColumnsLandscape.set(0)
-            browserPreferences.videoGridColumnsPortrait.set(0)
-            browserPreferences.videoGridColumnsLandscape.set(0)
-            browserPreferences.musicGridColumnsPortrait.set(0)
-            browserPreferences.musicGridColumnsLandscape.set(0)
-            browserPreferences.folderGridColumnsDualPanePortrait.set(0)
-            browserPreferences.folderGridColumnsDualPaneLandscape.set(0)
-            browserPreferences.videoGridColumnsDualPanePortrait.set(0)
-            browserPreferences.videoGridColumnsDualPaneLandscape.set(0)
-            browserPreferences.musicGridColumnsDualPanePortrait.set(0)
-            browserPreferences.musicGridColumnsDualPaneLandscape.set(0)
-          }
-          browserPreferences.manualGridColumnsEnabled.set(enabled)
-        },
-        enabled = !pickerMode || activeLayoutMode == MediaLayoutMode.GRID,
-      ),
-    folderGridColumnSelector = if (enableLayoutModeOptions) folderGridColumnSelector.takeUnless { pickerMode } else null,
+            browserPreferences.manualGridColumnsEnabled.set(enabled)
+          },
+          enabled = !pickerMode || activeLayoutMode == MediaLayoutMode.GRID,
+        )
+      else null,
+    folderGridColumnSelector = if (enableLayoutModeOptions && enableManualGridOptions) folderGridColumnSelector.takeUnless { pickerMode } else null,
     videoGridColumnSelector =
       if (!enableLayoutModeOptions) {
         null
       } else if (isAudio && activeLayoutMode == MediaLayoutMode.LIST) {
         coverArtSizeSelector(musicCoverArtSize) { browserPreferences.musicCoverArtSize.set(it) }
+      } else if (!enableManualGridOptions) {
+        null
       } else {
         videoGridColumnSelector
       },

@@ -1775,7 +1775,8 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
           isAudio = true,
         )
       } else {
-        val isDualHorizon = currentTab == MediaLibraryTabItem.All && !isSearching
+        val isAllMediaTab = currentTab == MediaLibraryTabItem.All
+        val isDualHorizon = isAllMediaTab && !isSearching
         val isMoviesTab = currentTab == MediaLibraryTabItem.Movies
         VideoSortDialog(
           isOpen = sortDialogOpen.value,
@@ -1785,9 +1786,10 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
           onSortTypeChange = { browserPreferences.videoSortType.set(it) },
           onSortOrderChange = { browserPreferences.videoSortOrder.set(it) },
           isFolderView = false,
-          enableViewModeOptions = !forceAudio && !isDualHorizon && !isMoviesTab,
-          enableLayoutModeOptions = !isDualHorizon,
-          enableFieldOptions = !isDualHorizon,
+          enableViewModeOptions = !forceAudio && !isAllMediaTab && !isMoviesTab,
+          enableLayoutModeOptions = !isAllMediaTab,
+          enableManualGridOptions = !isMoviesTab,
+          enableFieldOptions = !isAllMediaTab && !isMoviesTab,
           isAudio = currentTab == MediaLibraryTabItem.Audio,
           onMetadataFieldEnabled = viewModel::refresh,
         )

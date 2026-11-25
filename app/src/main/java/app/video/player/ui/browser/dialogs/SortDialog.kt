@@ -182,10 +182,10 @@ fun SortDialog(
             }
           }
 
-          if (layoutModeSelector != null) {
+          if (layoutModeSelector != null && enableLayoutModeOptions) {
             HorizontalDivider(modifier = Modifier.padding(top = 10.dp))
             DialogSectionTitle(
-              text = layoutModeSelector.label + if (!enableLayoutModeOptions) " (Disabled in Library)" else "",
+              text = layoutModeSelector.label,
             )
             // A page with three layouts owns its own selection, so the third option decides whether
             // the middle one is the one showing; with only two the flag still describes both.
@@ -317,7 +317,7 @@ fun SortDialog(
             ToggleChipRow(mediaTypeToggles)
           }
 
-          if (visibilityToggles.isNotEmpty()) {
+          if (visibilityToggles.isNotEmpty() && enableFieldOptions) {
             HorizontalDivider(modifier = Modifier.padding(top = 10.dp, bottom = 4.dp))
             Column(
               modifier =
@@ -332,7 +332,7 @@ fun SortDialog(
                   Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(8.dp))
-                    .clickable(enabled = enableFieldOptions) { isFieldsExpanded = !isFieldsExpanded }
+                    .clickable { isFieldsExpanded = !isFieldsExpanded }
                     .padding(vertical = 8.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
@@ -340,10 +340,9 @@ fun SortDialog(
                 Text(
                   text =
                     androidx.compose.ui.res
-                      .stringResource(app.video.player.R.string.ui_fields) +
-                      if (!enableFieldOptions) " (Disabled in Library)" else "",
+                      .stringResource(app.video.player.R.string.ui_fields),
                   style = MaterialTheme.typography.titleSmall,
-                  color = if (enableFieldOptions) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                  color = MaterialTheme.colorScheme.onSurface,
                 )
                 Icon(
                   imageVector = if (isFieldsExpanded) Icons.RoundedFilled.KeyboardArrowUp else Icons.RoundedFilled.KeyboardArrowDown,
@@ -355,14 +354,12 @@ fun SortDialog(
                         app.video.player.R.string.generic_expand
                       },
                     ),
-                  tint = if (enableFieldOptions) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
+                  tint = MaterialTheme.colorScheme.onSurfaceVariant,
                   modifier = Modifier.size(20.dp),
                 )
               }
               if (isFieldsExpanded) {
-                FieldToggleChipRow(
-                  if (enableFieldOptions) visibilityToggles else visibilityToggles.map { it.copy(enabled = false) }
-                )
+                FieldToggleChipRow(visibilityToggles)
               }
             }
           }
