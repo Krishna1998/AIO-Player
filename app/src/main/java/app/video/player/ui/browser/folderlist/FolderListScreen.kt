@@ -197,6 +197,7 @@ object FolderListScreen : Screen {
     videoOnly: Boolean = false,
     embedded: Boolean = false,
     searchQuery: String = "",
+    folderCountsOverride: Map<String, Int>? = null,
   ) {
     val context = LocalContext.current
     val isTelevision = app.video.player.utils.device.DeviceFormFactor.isTelevision(context)
@@ -309,13 +310,13 @@ object FolderListScreen : Screen {
 
     // Rebuilds when folders change so incrementally discovered hidden folders become searchable;
     // chained on the previous job because buildIndex resets the shared index maps.
-    LaunchedEffect(effectiveIsSearching, videoFolders, audioOnly) {
+    LaunchedEffect(effectiveIsSearching, filteredFolders, audioOnly) {
       if (audioOnly || !effectiveIsSearching) return@LaunchedEffect
       val previous = searchIndexJob
       searchIndexJob =
         coroutineScope.launch {
           previous?.join()
-          buildSearchIndex(context, videoFolders, audioOnly)
+          buildSearchIndex(context, filteredFolders, audioOnly)
         }
     }
 
@@ -395,7 +396,21 @@ object FolderListScreen : Screen {
         pinned + unpinned
       }
 
-    val filteredFolders = sortedFolders
+    val filteredFolders =
+      remember(sortedFolders, folderCountsOverride) {
+        if (folderCountsOverride != null) {
+          sortedFolders.mapNotNull { folder ->
+            val count = folderCountsOverride[folder.bucketId]
+            if (count != null && count > 0) {
+              folder.copy(videoCount = count)
+            } else {
+              null
+            }
+          }
+        } else {
+          sortedFolders
+        }
+      }
 
     suspend fun deleteFolders(folders: List<VideoFolder>): FolderDeletionResult {
       if (BuildConfig.SCOPED_STORAGE_ONLY) {
@@ -489,7 +504,7 @@ object FolderListScreen : Screen {
     // Selection manager
     val selectionManager =
       rememberSelectionManager(
-        items = sortedFolders,
+        items = filteredFolders,
         getId = { it.bucketId },
         onDeleteItems = { folders, _ ->
           val selectedFolder = clearSelectedFolderForDeletion(folders)

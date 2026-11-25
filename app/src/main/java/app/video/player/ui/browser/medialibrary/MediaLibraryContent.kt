@@ -316,11 +316,27 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
     audioVideosWithInfo.filter { favoriteAudioPaths.contains(it.video.path) }
   }
   val libraryShowMoviesTab by browserPreferences.libraryShowMoviesTab.collectAsState()
+  val hideMoviesInVideoFolders by browserPreferences.hideMoviesInVideoFolders.collectAsState()
   val openMovieDetailsOnTap by browserPreferences.openMovieDetailsOnTap.collectAsState()
   val movieMetadataRepo = koinInject<MovieMetadataRepository>()
   val movieMetadataRevision by movieMetadataRepo.metadataRevision.collectAsState()
   val isActualMovie: (Video) -> Boolean = remember(movieMetadataRepo, movieMetadataRevision) {
     { video -> MovieClassifier.isActualMovie(video, movieMetadataRepo.getMemoryCachedMetadata(video)) }
+  }
+  val nonMovieFolderCounts: Map<String, Int>? = remember(
+    videos,
+    hideMoviesInVideoFolders,
+    libraryShowMoviesTab,
+    movieMetadataRevision,
+  ) {
+    if (hideMoviesInVideoFolders && libraryShowMoviesTab) {
+      videos.asSequence()
+        .filter { !it.isAudio && !isActualMovie(it) }
+        .groupingBy { it.bucketId }
+        .eachCount()
+    } else {
+      null
+    }
   }
   val mediaLibrarySubTabsOrder by browserPreferences.mediaLibrarySubTabsOrder.collectAsState()
   val mediaLibraryTabs = remember(forceAudio, libraryShowMusicTab, libraryShowMoviesTab, isAnyDualHorizonSectionEnabled, mediaLibrarySubTabsOrder) {
@@ -1263,6 +1279,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                         videoOnly = true,
                         embedded = true,
                         searchQuery = searchQuery,
+                        folderCountsOverride = nonMovieFolderCounts,
                       )
                     } else {
                       VideoListContent(

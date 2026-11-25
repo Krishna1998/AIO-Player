@@ -69,6 +69,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import app.video.player.R
 import app.video.player.database.repository.SecureFolderRepository
 import app.video.player.domain.media.model.Video
+import app.video.player.domain.movies.MovieClassifier
+import app.video.player.domain.movies.MovieMetadataRepository
 import app.video.player.domain.archive.ZipArchiveMedia
 import app.video.player.domain.thumbnail.ThumbnailRepository
 import app.video.player.preferences.AppearancePreferences
@@ -186,9 +188,24 @@ data class VideoListScreen(
     val musicCoverArtSize by browserPreferences.musicCoverArtSize.collectAsState()
     val foldersPreferences = koinInject<app.video.player.preferences.FoldersPreferences>()
     val pinnedVideoPaths by foldersPreferences.pinnedVideos.collectAsState()
+    val movieMetadataRepo = koinInject<MovieMetadataRepository>()
+    val libraryShowMoviesTab by browserPreferences.libraryShowMoviesTab.collectAsState()
+    val hideMoviesInVideoFolders by browserPreferences.hideMoviesInVideoFolders.collectAsState()
+    val movieMetadataRevision by movieMetadataRepo.metadataRevision.collectAsState()
+    val isActualMovie: (Video) -> Boolean = remember(movieMetadataRepo, movieMetadataRevision) {
+      { video -> MovieClassifier.isActualMovie(video, movieMetadataRepo.getMemoryCachedMetadata(video)) }
+    }
+    val candidateVideos =
+      remember(videos, isAudio, libraryShowMoviesTab, hideMoviesInVideoFolders, isActualMovie) {
+        if (!isAudio && libraryShowMoviesTab && hideMoviesInVideoFolders) {
+          videos.filterNot(isActualMovie)
+        } else {
+          videos
+        }
+      }
     val sortedVideos =
-      remember(videos, videoSortType, videoSortOrder, pinnedVideoPaths, archiveFolder) {
-        val sorted = SortUtils.sortVideos(videos, videoSortType, videoSortOrder)
+      remember(candidateVideos, videoSortType, videoSortOrder, pinnedVideoPaths, archiveFolder) {
+        val sorted = SortUtils.sortVideos(candidateVideos, videoSortType, videoSortOrder)
         if (archiveFolder || pinnedVideoPaths.isEmpty()) {
           sorted
         } else {
@@ -913,7 +930,7 @@ internal fun VideoListContent(
       )
     }
 
-    videosWithInfo.isEmpty() && !isLoading && videosWereDeletedOrMoved -> {
+    videosWithInfo.isEmpty() && !isLoading -> {
       Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,

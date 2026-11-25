@@ -188,6 +188,8 @@
   <string name="pref_library_show_music_tab_summary">Display the Music sub-tab in the Media Library header</string>
   <string name="pref_library_show_movies_tab_title">Show Movies Tab in Library</string>
   <string name="pref_library_show_movies_tab_summary">Display the dedicated Movies sub-tab with movie posters, synopsis, and filters</string>
+  <string name="pref_hide_movies_in_video_folders_title">Hide Movies &amp; Series in Video Folders</string>
+  <string name="pref_hide_movies_in_video_folders_summary">Hide recognized movies, web series, and anime from video folders so they only appear in the Movies tab</string>
   <string name="pref_open_movie_details_on_tap_title">Open Movie Details on tap</string>
   <string name="pref_open_movie_details_on_tap_summary">Show backdrop, synopsis, and details screen before playing movies</string>
   <string name="ui_movies">Movies</string>

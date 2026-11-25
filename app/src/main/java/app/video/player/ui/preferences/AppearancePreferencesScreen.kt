@@ -1178,7 +1178,7 @@ object AppearancePreferencesScreen : Screen {
           }
 
           item {
-            val dualHorizonItemCount = 8
+            val dualHorizonItemCount = 9
 
             ExpressivePreferenceGroup {
               val cinematicShowHeroSpotlight by browserPreferences.cinematicShowHeroSpotlight.collectAsState()
@@ -1300,6 +1300,23 @@ object AppearancePreferencesScreen : Screen {
                 groupSize = dualHorizonItemCount,
               )
 
+              val hideMoviesInVideoFolders by browserPreferences.hideMoviesInVideoFolders.collectAsState()
+              SwitchPreference(
+                modifier = Modifier.settingsSearchTarget(R.string.pref_hide_movies_in_video_folders_title),
+                value = hideMoviesInVideoFolders,
+                onValueChange = { browserPreferences.hideMoviesInVideoFolders.set(it) },
+                title = { Text(stringResource(R.string.pref_hide_movies_in_video_folders_title)) },
+                summary = {
+                  Text(
+                    text = stringResource(R.string.pref_hide_movies_in_video_folders_summary),
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+                enabled = libraryShowMoviesTab,
+                groupIndex = 6,
+                groupSize = dualHorizonItemCount,
+              )
+
               val openMovieDetailsOnTap by browserPreferences.openMovieDetailsOnTap.collectAsState()
               SwitchPreference(
                 modifier = Modifier.settingsSearchTarget(R.string.pref_open_movie_details_on_tap_title),
@@ -1312,7 +1329,7 @@ object AppearancePreferencesScreen : Screen {
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
-                groupIndex = 6,
+                groupIndex = 7,
                 groupSize = dualHorizonItemCount,
               )
 
@@ -1328,7 +1345,7 @@ object AppearancePreferencesScreen : Screen {
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
-                groupIndex = 7,
+                groupIndex = 8,
                 groupSize = dualHorizonItemCount,
               )
             }
