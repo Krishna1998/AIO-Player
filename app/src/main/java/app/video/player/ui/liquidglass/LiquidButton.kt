@@ -73,7 +73,7 @@ fun LiquidButton(
   spacing: Dp = 8.dp,
   onLongClickLabel: String? = null,
   backgroundAlpha: Float = 1f,
-  shape: androidx.compose.ui.graphics.Shape = Capsule(),
+  shape: androidx.compose.ui.graphics.Shape = androidx.compose.foundation.shape.RoundedCornerShape(30),
   content: @Composable RowScope.() -> Unit,
 ) {
   val glassSettings = rememberLiquidGlassSettings()
