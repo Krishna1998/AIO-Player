@@ -310,13 +310,13 @@ object FolderListScreen : Screen {
 
     // Rebuilds when folders change so incrementally discovered hidden folders become searchable;
     // chained on the previous job because buildIndex resets the shared index maps.
-    LaunchedEffect(effectiveIsSearching, filteredFolders, audioOnly) {
+    LaunchedEffect(effectiveIsSearching, videoFolders, audioOnly) {
       if (audioOnly || !effectiveIsSearching) return@LaunchedEffect
       val previous = searchIndexJob
       searchIndexJob =
         coroutineScope.launch {
           previous?.join()
-          buildSearchIndex(context, filteredFolders, audioOnly)
+          buildSearchIndex(context, videoFolders, audioOnly)
         }
     }
 
