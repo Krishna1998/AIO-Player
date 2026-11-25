@@ -1229,6 +1229,8 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
               } else if (pageType == MediaLibraryTabItem.Movies && !isSearching) {
                 MoviesTabContent(
                   videosWithInfo = pageVideosWithInfo,
+                  isRefreshing = isRefreshing,
+                  onRefresh = { viewModel.refresh() },
                   onOpenMovieDetails = { video ->
                     backstack.navigateTo(MovieDetailsScreen(video.path))
                   },

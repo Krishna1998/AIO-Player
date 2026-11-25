@@ -39,6 +39,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -66,6 +67,7 @@ import app.video.player.domain.movies.MovieClassifier
 import app.video.player.domain.movies.MovieMetadata
 import app.video.player.domain.movies.MovieMetadataRepository
 import app.video.player.domain.thumbnail.ThumbnailRepository
+import app.video.player.presentation.components.pullrefresh.PullRefreshBox
 import app.video.player.preferences.BrowserPreferences
 import app.video.player.preferences.MediaLayoutMode
 import app.video.player.preferences.preference.collectAsState
@@ -95,6 +97,8 @@ fun MoviesTabContent(
   onPlayMedia: ((Video) -> Unit)? = null,
   selectionManager: SelectionManager<Video, Long>? = null,
   mediaLayoutMode: MediaLayoutMode? = null,
+  isRefreshing: MutableState<Boolean>? = null,
+  onRefresh: (() -> Unit)? = null,
 ) {
   val browserPreferences = koinInject<BrowserPreferences>()
   val layoutMode = mediaLayoutMode ?: browserPreferences.mediaLayoutMode.collectAsState().value
@@ -179,8 +183,14 @@ fun MoviesTabContent(
       modifier = Modifier.padding(horizontal = 18.dp, vertical = 2.dp),
     )
 
-    // Movie Posters Grid / List or Empty State
-    if (filteredMovies.isEmpty()) {
+    val refreshState = isRefreshing ?: remember { mutableStateOf(false) }
+    PullRefreshBox(
+      isRefreshing = refreshState,
+      onRefresh = { onRefresh?.invoke() },
+      modifier = Modifier.fillMaxSize(),
+    ) {
+      // Movie Posters Grid / List or Empty State
+      if (filteredMovies.isEmpty()) {
       val (emptyTitleRes, emptyMessageRes) = when (selectedFilterIndex) {
         1 -> R.string.movies_unwatched_empty_title to R.string.movies_unwatched_empty_message
         2 -> R.string.movies_started_empty_title to R.string.movies_started_empty_message
@@ -263,6 +273,7 @@ fun MoviesTabContent(
           )
         }
       }
+    }
     }
   }
 }
@@ -680,6 +691,7 @@ private fun MovieListItemCard(
           )
         }
       }
+    }
     }
   }
 }
