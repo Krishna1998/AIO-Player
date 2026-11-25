@@ -185,7 +185,7 @@ android {
       excludes += "META-INF/*.md"
     }
     jniLibs {
-      useLegacyPackaging = false
+      useLegacyPackaging = true
       pickFirsts += "**/libc++_shared.so"
     }
   }
