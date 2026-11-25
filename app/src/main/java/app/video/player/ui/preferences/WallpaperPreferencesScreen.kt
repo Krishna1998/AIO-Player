@@ -53,6 +53,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.video.player.R
@@ -175,7 +176,7 @@ object WallpaperPreferencesScreen : Screen {
 
                   Surface(
                     modifier = Modifier
-                      .size(width = 110.dp, height = 110.dp)
+                      .size(width = 104.dp, height = 136.dp)
                       .clip(RoundedCornerShape(18.dp))
                       .clickable {
                         val target = if (preset == WallpaperPreset.None) "" else "preset:${preset.id}"
@@ -187,8 +188,8 @@ object WallpaperPreferencesScreen : Screen {
                     shape = RoundedCornerShape(18.dp),
                     color = MaterialTheme.colorScheme.surfaceContainerHigh,
                     border = BorderStroke(
-                      2.dp,
-                      if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                      if (isSelected) 2.dp else 1.dp,
+                      if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
                     ),
                   ) {
                     Box(modifier = Modifier.fillMaxSize()) {
@@ -209,18 +210,43 @@ object WallpaperPreferencesScreen : Screen {
                         }
                       }
 
-                      Surface(
+                      if (isSelected) {
+                        Surface(
+                          modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(8.dp)
+                            .size(22.dp),
+                          shape = CircleShape,
+                          color = MaterialTheme.colorScheme.primary,
+                        ) {
+                          Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                              imageVector = Icons.RoundedFilled.Check,
+                              contentDescription = null,
+                              tint = MaterialTheme.colorScheme.onPrimary,
+                              modifier = Modifier.size(14.dp),
+                            )
+                          }
+                        }
+                      }
+
+                      Box(
                         modifier = Modifier
                           .align(Alignment.BottomCenter)
-                          .fillMaxWidth(),
-                        color = Color.Black.copy(alpha = 0.65f),
+                          .fillMaxWidth()
+                          .background(
+                            Brush.verticalGradient(
+                              colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.78f)),
+                            ),
+                          ),
                       ) {
                         Text(
                           text = preset.displayName,
-                          style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                          style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                           color = Color.White,
                           maxLines = 1,
-                          modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
+                          overflow = TextOverflow.Ellipsis,
+                          modifier = Modifier.padding(horizontal = 8.dp, vertical = 7.dp),
                         )
                       }
                     }
@@ -232,14 +258,14 @@ object WallpaperPreferencesScreen : Screen {
                   val isCustomActive = wallpaperUri.isNotBlank() && !wallpaperUri.startsWith("preset:")
                   Surface(
                     modifier = Modifier
-                      .size(width = 110.dp, height = 110.dp)
+                      .size(width = 104.dp, height = 136.dp)
                       .clip(RoundedCornerShape(18.dp))
                       .clickable { imagePicker.launch("image/*") },
                     shape = RoundedCornerShape(18.dp),
                     color = MaterialTheme.colorScheme.surfaceContainerHigh,
                     border = BorderStroke(
-                      2.dp,
-                      if (isCustomActive) MaterialTheme.colorScheme.primary else Color.Transparent,
+                      if (isCustomActive) 2.dp else 1.dp,
+                      if (isCustomActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f),
                     ),
                   ) {
                     Box(
@@ -248,12 +274,14 @@ object WallpaperPreferencesScreen : Screen {
                     ) {
                       Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
                       ) {
-                        Text("📁", fontSize = 22.sp)
+                        Text("📁", fontSize = 24.sp)
                         Text(
                           text = stringResource(R.string.wallpaper_preset_custom),
-                          style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                          style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                          maxLines = 1,
+                          overflow = TextOverflow.Ellipsis,
                         )
                       }
                     }
@@ -290,11 +318,17 @@ object WallpaperPreferencesScreen : Screen {
                       text = stringResource(R.string.pref_appearance_custom_wallpaper_blur),
                       style = MaterialTheme.typography.titleMedium,
                     )
-                    Text(
-                      text = "${wallpaperBlur.roundToInt()} dp",
-                      style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                      color = MaterialTheme.colorScheme.primary,
-                    )
+                    Surface(
+                      shape = RoundedCornerShape(8.dp),
+                      color = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
+                    ) {
+                      Text(
+                        text = "${wallpaperBlur.roundToInt()} dp",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                      )
+                    }
                   }
                   AppSlider(
                     value = wallpaperBlur,
@@ -317,11 +351,17 @@ object WallpaperPreferencesScreen : Screen {
                       text = "Wallpaper brightness / opacity",
                       style = MaterialTheme.typography.titleMedium,
                     )
-                    Text(
-                      text = "${(wallpaperAlpha * 100).roundToInt()}%",
-                      style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                      color = MaterialTheme.colorScheme.primary,
-                    )
+                    Surface(
+                      shape = RoundedCornerShape(8.dp),
+                      color = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
+                    ) {
+                      Text(
+                        text = "${(wallpaperAlpha * 100).roundToInt()}%",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                      )
+                    }
                   }
                   AppSlider(
                     value = wallpaperAlpha,
