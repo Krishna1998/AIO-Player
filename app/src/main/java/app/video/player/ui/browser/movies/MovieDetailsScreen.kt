@@ -138,7 +138,10 @@ data class MovieDetailsScreen(
             listOf(resolved),
             browserPreferences.watchedThreshold.get(),
           )
-          val savedPos = playbackStateRepo.getVideoDataByTitle(resolved.displayName)?.lastPosition ?: 0
+          val savedData = playbackStateRepo.getVideoDataByTitle(resolved.displayName)
+            ?: playbackStateRepo.getVideoDataByTitle(resolved.title)
+            ?: playbackStateRepo.getVideoDataByTitle(File(resolved.path).name)
+          val savedPos = savedData?.lastPosition ?: 0
           lastPositionSec = savedPos
           hasStarted = savedPos > 0
           val seriesInfo = app.video.player.domain.movies.MovieClassifier.extractSeriesEpisodeInfo(resolved)
