@@ -11,7 +11,7 @@
   <style>
     :root {
       --bg: #040408;
-      --bg-elevated: rgba(14, 14, 24, 0.72);
+      --bg-elevated: rgba(14, 14, 24, 0.76);
       --glass: rgba(255, 255, 255, 0.035);
       --glass-strong: rgba(255, 255, 255, 0.065);
       --border: rgba(255, 255, 255, 0.09);
@@ -117,7 +117,7 @@
       z-index: 50;
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
-      background: rgba(4, 4, 8, 0.72);
+      background: rgba(4, 4, 8, 0.76);
       border-bottom: 1px solid var(--border);
     }
     .nav-inner {
@@ -238,11 +238,11 @@
 
     /* Hero */
     .hero {
-      padding: 72px 0 64px;
+      padding: 68px 0 64px;
     }
     .hero-grid {
       display: grid;
-      grid-template-columns: 1.05fr 1.15fr;
+      grid-template-columns: 1fr 1.15fr;
       gap: 44px;
       align-items: center;
     }
@@ -272,7 +272,7 @@
     }
     .hero h1 {
       font-family: var(--font-display);
-      font-size: clamp(2.4rem, 4.8vw, 3.9rem);
+      font-size: clamp(2.35rem, 4.6vw, 3.85rem);
       line-height: 1.08;
       letter-spacing: -0.03em;
       margin-bottom: 18px;
@@ -285,7 +285,7 @@
     }
     .hero p {
       color: var(--muted);
-      font-size: 1.05rem;
+      font-size: 1.04rem;
       max-width: 540px;
       margin-bottom: 28px;
     }
@@ -314,63 +314,77 @@
       color: var(--muted);
     }
 
-    /* 3D Adaptive Device Hero Showcase */
+    /* ============================================================
+       ZERO-CROP, PIXEL-ALIGNED DEVICE FRAMES (Hero, Tablet, Gallery)
+       Outer radius = Inner radius + Bezel padding (concentric)
+       ============================================================ */
     .hero-devices {
       position: relative;
-      min-height: 410px;
+      padding: 12px 24px 28px 0;
       display: flex;
       align-items: center;
       justify-content: center;
       perspective: 1400px;
     }
     .hero-tablet {
-      width: 92%;
-      max-width: 540px;
-      border-radius: 22px;
-      padding: 10px;
-      background: linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.03));
+      width: 100%;
+      max-width: 560px;
+      padding: 8px;
+      border-radius: 20px; /* 12px inner + 8px padding */
+      background: linear-gradient(145deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04));
       border: 1px solid rgba(255,255,255,0.18);
-      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.78), 0 0 40px var(--glow);
-      transform: rotateY(-10deg) rotateX(4deg);
-      transition: transform 0.45s ease, box-shadow 0.45s ease;
+      box-shadow: 0 28px 65px rgba(0, 0, 0, 0.8), 0 0 38px var(--glow);
+      transform: rotateY(-8deg) rotateX(3deg);
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
       cursor: pointer;
     }
     .hero-tablet:hover {
-      transform: rotateY(-4deg) rotateX(2deg) translateY(-4px);
+      transform: rotateY(-2deg) rotateX(1deg) translateY(-4px);
+    }
+    .hero-tablet .screen-box {
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+      border: 1px solid rgba(255,255,255,0.08);
+      line-height: 0;
     }
     .hero-tablet img {
       width: 100%;
+      height: auto;
       display: block;
-      border-radius: 14px;
-      aspect-ratio: 16 / 10;
-      object-fit: cover;
-      background: #0a0a12;
+      object-fit: contain;
     }
+
     .hero-phone {
       position: absolute;
-      right: -8px;
-      bottom: -20px;
-      width: 168px;
-      border-radius: 26px;
-      padding: 7px;
-      background: linear-gradient(160deg, rgba(255,255,255,0.2), rgba(255,255,255,0.04));
+      right: 0;
+      bottom: 0;
+      width: 158px;
+      padding: 6px;
+      border-radius: 22px; /* 16px inner + 6px padding */
+      background: linear-gradient(160deg, rgba(255,255,255,0.22), rgba(255,255,255,0.05));
       border: 1px solid rgba(255,255,255,0.22);
-      box-shadow: 0 24px 55px rgba(0, 0, 0, 0.85), 0 0 28px var(--glow);
-      transform: rotateY(10deg) rotateZ(2deg);
+      box-shadow: 0 24px 55px rgba(0, 0, 0, 0.88), 0 0 28px var(--glow);
+      transform: rotateY(8deg) rotateZ(2deg);
       transition: transform 0.4s ease;
       cursor: pointer;
       z-index: 4;
     }
     .hero-phone:hover {
-      transform: rotateY(2deg) rotateZ(0deg) translateY(-6px) scale(1.03);
+      transform: rotateY(0deg) rotateZ(0deg) translateY(-6px) scale(1.03);
+    }
+    .hero-phone .screen-box {
+      border-radius: 16px;
+      overflow: hidden;
+      background: #000;
+      border: 1px solid rgba(255,255,255,0.08);
+      line-height: 0;
     }
     .hero-phone img {
       width: 100%;
+      height: auto;
       display: block;
-      border-radius: 20px;
-      aspect-ratio: 9 / 19.5;
-      object-fit: cover;
-      background: #0a0a12;
+      object-fit: contain;
     }
 
     /* Section Headings */
@@ -450,27 +464,29 @@
     }
 
     .tablet-stage {
-      max-width: 960px;
+      max-width: 980px;
       margin: 0 auto;
-      padding: 14px;
-      border-radius: 28px;
-      background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03));
+      padding: 12px;
+      border-radius: 24px; /* 12px inner + 12px padding */
+      background: linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.03));
       border: 1px solid rgba(255,255,255,0.16);
-      box-shadow: 0 32px 80px rgba(0, 0, 0, 0.8), 0 0 50px rgba(var(--accent-rgb), 0.16);
+      box-shadow: 0 32px 80px rgba(0, 0, 0, 0.82), 0 0 50px rgba(var(--accent-rgb), 0.16);
     }
     .tablet-screen-wrap {
       position: relative;
-      border-radius: 18px;
+      border-radius: 12px;
       overflow: hidden;
-      background: #06060c;
+      background: #000;
+      border: 1px solid rgba(255,255,255,0.1);
+      line-height: 0;
       cursor: zoom-in;
     }
     .tablet-screen-wrap img {
       width: 100%;
+      height: auto;
       display: block;
-      aspect-ratio: 16 / 10;
-      object-fit: cover;
-      transition: opacity 0.28s ease;
+      object-fit: contain;
+      transition: opacity 0.25s ease;
     }
     .tablet-caption-bar {
       display: flex;
@@ -487,6 +503,7 @@
     .tablet-caption-bar p {
       color: var(--muted);
       font-size: 0.88rem;
+      max-width: 720px;
     }
 
     /* 15-Screen Gallery */
@@ -505,47 +522,53 @@
     }
     .gallery-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      grid-auto-flow: dense;
       gap: 20px;
+      align-items: start;
     }
     .screen-card {
       padding: 14px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 14px;
       cursor: pointer;
     }
     .screen-card.tablet-card {
       grid-column: span 2;
     }
-    @media (max-width: 720px) {
+    @media (max-width: 760px) {
       .screen-card.tablet-card { grid-column: span 1; }
     }
     .device-frame {
-      border-radius: 16px;
-      padding: 6px;
+      width: 100%;
+      padding: 8px;
+      border-radius: 18px; /* 10px inner + 8px padding */
       background: linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.03));
-      border: 1px solid rgba(255,255,255,0.14);
-      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.15);
     }
     .device-frame.phone-frame {
-      max-width: 210px;
+      max-width: 230px;
       margin: 0 auto;
-      border-radius: 22px;
+      padding: 7px;
+      border-radius: 23px; /* 16px inner + 7px padding */
     }
-    .device-frame img {
+    .device-screen {
       width: 100%;
-      display: block;
-      border-radius: 12px;
-      object-fit: cover;
-      background: #080810;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #000;
+      border: 1px solid rgba(255,255,255,0.08);
+      line-height: 0;
     }
-    .device-frame.phone-frame img {
-      aspect-ratio: 9 / 19.5;
+    .device-frame.phone-frame .device-screen {
       border-radius: 16px;
     }
-    .device-frame.tablet-frame img {
-      aspect-ratio: 16 / 10;
+    .device-screen img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
     }
     .screen-meta {
       display: flex;
@@ -556,7 +579,7 @@
     .screen-meta h4 {
       font-family: var(--font-display);
       font-size: 0.98rem;
-      margin-bottom: 2px;
+      margin-bottom: 3px;
     }
     .screen-meta p {
       color: var(--muted);
@@ -706,9 +729,7 @@
       gap: 16px;
       margin-bottom: 34px;
     }
-    .telemetry-card {
-      padding: 20px;
-    }
+    .telemetry-card { padding: 20px; }
     .telemetry-label {
       font-family: var(--font-mono);
       font-size: 0.72rem;
@@ -731,7 +752,8 @@
     @media (max-width: 900px) {
       .hero-grid { grid-template-columns: 1fr; }
       .bento-grid { grid-template-columns: 1fr; }
-      .hero-phone { width: 132px; right: 4px; bottom: -14px; }
+      .hero-devices { padding: 8px 12px 24px 0; }
+      .hero-phone { width: 124px; }
     }
     .bento-card { padding: 24px; }
     .bento-icon {
@@ -829,12 +851,12 @@
     }
     footer a { color: var(--accent); text-decoration: none; }
 
-    /* Adaptive Lightbox */
+    /* Adaptive Lightbox (Zero Crop) */
     .lightbox {
       position: fixed;
       inset: 0;
       z-index: 100;
-      background: rgba(4, 4, 8, 0.92);
+      background: rgba(4, 4, 8, 0.94);
       backdrop-filter: blur(18px);
       display: none;
       align-items: center;
@@ -851,16 +873,25 @@
       align-items: center;
       gap: 14px;
     }
-    .lightbox-img {
-      max-height: 78vh;
-      max-width: 92vw;
+    .lightbox-frame {
+      padding: 6px;
       border-radius: 18px;
+      background: linear-gradient(145deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04));
       border: 1px solid rgba(255,255,255,0.2);
-      box-shadow: 0 24px 70px rgba(0,0,0,0.85), 0 0 40px var(--glow);
+      box-shadow: 0 24px 70px rgba(0,0,0,0.88), 0 0 40px var(--glow);
+      line-height: 0;
     }
-    .lightbox-caption {
-      text-align: center;
+    .lightbox-img {
+      max-height: 76vh;
+      max-width: 88vw;
+      width: auto;
+      height: auto;
+      display: block;
+      object-fit: contain;
+      border-radius: 12px;
+      background: #000;
     }
+    .lightbox-caption { text-align: center; }
     .lightbox-caption h4 { font-family: var(--font-display); font-size: 1.1rem; }
     .lightbox-caption p { color: var(--muted); font-size: 0.88rem; }
     .lb-btn {
@@ -870,7 +901,7 @@
       width: 46px; height: 46px;
       border-radius: 50%;
       border: 1px solid var(--border);
-      background: rgba(16, 16, 26, 0.85);
+      background: rgba(16, 16, 26, 0.88);
       color: #fff;
       font-size: 1.3rem;
       cursor: pointer;
@@ -883,7 +914,7 @@
       width: 42px; height: 42px;
       border-radius: 50%;
       border: 1px solid var(--border);
-      background: rgba(16, 16, 26, 0.85);
+      background: rgba(16, 16, 26, 0.88);
       color: #fff;
       font-size: 1.2rem;
       cursor: pointer;
@@ -961,10 +992,14 @@
 
       <div class="hero-devices">
         <div class="hero-tablet" onclick="openLightboxBySrc('34396.png')" title="Click to zoom Tablet Home Hub">
-          <img src="34396.png" alt="Horizon Player Tablet Home Hub with Continue Watching and Live Audio Pulsing" />
+          <div class="screen-box">
+            <img src="34396.png" alt="Horizon Player Tablet Home Hub with Continue Watching and Live Audio Pulsing" />
+          </div>
         </div>
         <div class="hero-phone" onclick="openLightboxBySrc('34377.jpg')" title="Click to zoom Phone Now Playing UI">
-          <img src="34377.jpg" alt="Horizon Player Phone FLAC Lossless Now Playing" />
+          <div class="screen-box">
+            <img src="34377.jpg" alt="Horizon Player Phone FLAC Lossless Now Playing" />
+          </div>
         </div>
       </div>
     </div>
@@ -1191,7 +1226,9 @@
     <button class="lb-close" id="lb-close" aria-label="Close">&times;</button>
     <button class="lb-btn lb-prev" id="lb-prev" aria-label="Previous">&#8249;</button>
     <div class="lightbox-inner">
-      <img class="lightbox-img" id="lb-img" src="" alt="" />
+      <div class="lightbox-frame">
+        <img class="lightbox-img" id="lb-img" src="" alt="" />
+      </div>
       <div class="lightbox-caption">
         <h4 id="lb-title"></h4>
         <p id="lb-desc"></p>
@@ -1201,7 +1238,9 @@
   </div>
 
   <script>
-    // Data: All 15 Real App Screenshots
+    // =========================================================================
+    // SCREENSHOTS CONFIGURATION (Change paths here, e.g. 'screenshots/...')
+    // =========================================================================
     const SCREENS = [
       // Tablet UI (9)
       { src: '34396.png', device: 'tablet', cat: 'hub', tabLabel: 'Home Hub', title: 'Tablet Home Media Hub', desc: 'Continue Watching with H.265 10-bit & Dolby Digital+ 5.1 badges paired with live Audio Pulsing VU meters, Movies/Videos, and Music shelves.' },
@@ -1321,7 +1360,9 @@
         card.className = 'glass-card screen-card' + (s.device === 'tablet' ? ' tablet-card' : '');
         card.innerHTML = `
           <div class="device-frame ${s.device === 'tablet' ? 'tablet-frame' : 'phone-frame'}">
-            <img src="${s.src}" alt="${s.title}" loading="lazy" />
+            <div class="device-screen">
+              <img src="${s.src}" alt="${s.title}" loading="lazy" />
+            </div>
           </div>
           <div class="screen-meta">
             <div>
