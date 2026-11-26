@@ -703,6 +703,8 @@ fun AudioPlayerControls(
   val audioFiltersConfigOwned = isMpvOptionOwnedByConfig("af")
   val paused by PlaybackSession.propBoolean["pause"].collectAsState()
   val duration by PlaybackSession.propInt["duration"].collectAsState()
+  val audioCodecName by PlaybackSession.propString["audio-codec-name"].collectAsState()
+  val audioSampleRate by PlaybackSession.propInt["audio-params/samplerate"].collectAsState()
   val preciseDuration by viewModel.preciseDuration.collectAsState()
   val playbackState by PlaybackSession.state.collectAsStateWithLifecycle()
   val queueState by PlaybackSession.queue.collectAsStateWithLifecycle()
@@ -1429,6 +1431,52 @@ fun AudioPlayerControls(
           verticalAlignment = Alignment.CenterVertically,
           horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
+          val codecUpper = audioCodecName?.trim()?.uppercase().orEmpty()
+          if (codecUpper.isNotEmpty()) {
+            val sampleRate = audioSampleRate ?: 0
+            val isLosslessCodec = codecUpper in setOf("FLAC", "ALAC", "WAVPACK", "APE", "DSD") || codecUpper.startsWith("PCM")
+            val isSurroundCodec = codecUpper in setOf("AC3", "EAC3", "DTS", "TRUEHD", "MLP")
+            val isHiRes = sampleRate >= 88200 || (isLosslessCodec && sampleRate > 48000)
+            val badgeRes = when {
+              isHiRes -> R.drawable.ic_badge_hires_audio
+              isLosslessCodec -> R.drawable.ic_badge_lossless
+              isSurroundCodec -> R.drawable.ic_badge_dolby
+              else -> R.drawable.ic_badge_audio_format
+            }
+            val badgeLabel = when {
+              isHiRes -> "HI-RES"
+              isLosslessCodec -> if (codecUpper.startsWith("PCM")) "LOSSLESS" else codecUpper
+              codecUpper == "EAC3" -> "DD+"
+              codecUpper == "AC3" -> "DOLBY"
+              else -> codecUpper
+            }
+            Row(
+              modifier =
+                Modifier
+                  .audioGlassSurface(
+                    shape = CircleShape,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f),
+                    highlightAlpha = 0.24f,
+                    elevation = 2.dp,
+                  )
+                  .clickable { onOpenSheet(Sheets.AudioProperties) }
+                  .padding(horizontal = 8.dp, vertical = 4.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+              androidx.compose.foundation.Image(
+                painter = androidx.compose.ui.res.painterResource(badgeRes),
+                contentDescription = badgeLabel,
+                modifier = Modifier.size(16.dp),
+              )
+              Text(
+                text = badgeLabel,
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+              )
+            }
+          }
           ReactiveIconButton(
             onClick = { onOpenSheet(Sheets.AudioProperties) },
             modifier =
