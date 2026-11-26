@@ -1355,33 +1355,35 @@ fun AudioPlayerControls(
     @OptIn(ExperimentalFoundationApi::class)
     val headerBar = @Composable {
       Box(modifier = Modifier.fillMaxWidth()) {
-        ReactiveIconButton(
-          onClick = {
-            if (isLyricsFullscreen) {
-              isLyricsFullscreen = false
-            } else if (showInPlaceLyrics) {
-              showInPlaceLyrics = false
-            } else {
-              onBackPress()
-            }
-          },
-          modifier =
-            Modifier
-              .align(Alignment.CenterStart)
-              .audioGlassSurface(
-                shape = CircleShape,
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f),
-                highlightAlpha = 0.28f,
-                elevation = 3.dp,
-              )
-              .size(42.dp * audioButtonScale),
-        ) {
-          Icon(
-            imageVector = if (showInPlaceLyrics || isLyricsFullscreen) Icons.RoundedFilled.ArrowBack else Icons.RoundedFilled.ExpandMore,
-            contentDescription = stringResource(if (showInPlaceLyrics || isLyricsFullscreen) R.string.back else R.string.ui_close),
-            tint = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.size((if (showInPlaceLyrics || isLyricsFullscreen) 24.dp else 28.dp) * audioButtonScale),
-          )
+        if (!isTabletLandscape || showInPlaceLyrics || isLyricsFullscreen) {
+          ReactiveIconButton(
+            onClick = {
+              if (isLyricsFullscreen) {
+                isLyricsFullscreen = false
+              } else if (showInPlaceLyrics) {
+                showInPlaceLyrics = false
+              } else {
+                onBackPress()
+              }
+            },
+            modifier =
+              Modifier
+                .align(Alignment.CenterStart)
+                .audioGlassSurface(
+                  shape = CircleShape,
+                  containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f),
+                  highlightAlpha = 0.28f,
+                  elevation = 3.dp,
+                )
+                .size(42.dp * audioButtonScale),
+          ) {
+            Icon(
+              imageVector = if (showInPlaceLyrics || isLyricsFullscreen) Icons.RoundedFilled.ArrowBack else Icons.RoundedFilled.ExpandMore,
+              contentDescription = stringResource(if (showInPlaceLyrics || isLyricsFullscreen) R.string.back else R.string.ui_close),
+              tint = MaterialTheme.colorScheme.onSurface,
+              modifier = Modifier.size((if (showInPlaceLyrics || isLyricsFullscreen) 24.dp else 28.dp) * audioButtonScale),
+            )
+          }
         }
 
         val playlistInfo = viewModel.getPlaylistInfo()
@@ -2842,57 +2844,63 @@ fun AudioPlayerControls(
           ) {
             playbackModeButtons()
             speedButton()
-            if (!isAudiobook) ReactiveIconButton(
-              onClick = { onOpenSheet(Sheets.SleepTimer) },
-              modifier =
-                Modifier
-                  .then(
-                    if (activeSleepTimerSeconds > 0) {
-                      Modifier
-                    } else {
-                      Modifier.weight(1f)
-                    },
-                  )
-                  .height(44.dp * audioButtonScale)
-                  .audioGlassSurface(
-                    shape = RoundedCornerShape(14.dp),
-                    containerColor =
-                      if (activeSleepTimerSeconds > 0) {
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.70f)
-                      } else {
-                        MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
-                      },
-                    highlightAlpha = 0.35f,
-                    elevation = 6.dp,
-                  ),
-            ) {
+            if (!isAudiobook) {
               if (activeSleepTimerSeconds > 0) {
-                Row(
-                  verticalAlignment = Alignment.CenterVertically,
-                  horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
-                  modifier = Modifier.padding(horizontal = 10.dp),
+                Surface(
+                  onClick = { onOpenSheet(Sheets.SleepTimer) },
+                  shape = RoundedCornerShape(14.dp),
+                  color = Color.Transparent,
+                  modifier =
+                    Modifier
+                      .height(44.dp * audioButtonScale)
+                      .audioGlassSurface(
+                        shape = RoundedCornerShape(14.dp),
+                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.70f),
+                        highlightAlpha = 0.35f,
+                        elevation = 6.dp,
+                      ),
+                ) {
+                  Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+                    modifier = Modifier.padding(horizontal = 10.dp),
+                  ) {
+                    Icon(
+                      imageVector = Icons.RoundedFilled.Timer,
+                      contentDescription = "Sleep Timer",
+                      tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                      modifier = Modifier.size(18.dp * audioButtonScale),
+                    )
+                    Text(
+                      text = DateUtils.formatElapsedTime(activeSleepTimerSeconds.toLong()),
+                      style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold).withTabularDigits(),
+                      color = MaterialTheme.colorScheme.onPrimaryContainer,
+                      maxLines = 1,
+                      softWrap = false,
+                    )
+                  }
+                }
+              } else {
+                ReactiveIconButton(
+                  onClick = { onOpenSheet(Sheets.SleepTimer) },
+                  modifier =
+                    Modifier
+                      .weight(1f)
+                      .height(44.dp * audioButtonScale)
+                      .audioGlassSurface(
+                        shape = RoundedCornerShape(14.dp),
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f),
+                        highlightAlpha = 0.35f,
+                        elevation = 6.dp,
+                      ),
                 ) {
                   Icon(
                     imageVector = Icons.RoundedFilled.Timer,
                     contentDescription = "Sleep Timer",
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.size(18.dp * audioButtonScale),
-                  )
-                  Text(
-                    text = DateUtils.formatElapsedTime(activeSleepTimerSeconds.toLong()),
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold).withTabularDigits(),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    maxLines = 1,
-                    softWrap = false,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(24.dp * audioButtonScale),
                   )
                 }
-              } else {
-                Icon(
-                  imageVector = Icons.RoundedFilled.Timer,
-                  contentDescription = "Sleep Timer",
-                  tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                  modifier = Modifier.size(24.dp * audioButtonScale),
-                )
               }
             }
           }
@@ -3010,7 +3018,8 @@ fun AudioPlayerControls(
         }
       }
     } else if (isTabletLandscape) {
-      Row(
+      Box(modifier = Modifier.fillMaxSize()) {
+        Row(
         modifier = Modifier.fillMaxSize(),
         horizontalArrangement = Arrangement.spacedBy(20.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -3069,6 +3078,28 @@ fun AudioPlayerControls(
             playlist = filteredPlaylist,
             selectedTab = tabletDualPaneTab,
             onTabSelected = { tabletDualPaneTab = it },
+          )
+        }
+        }
+        ReactiveIconButton(
+          onClick = { onBackPress() },
+          modifier =
+            Modifier
+              .align(Alignment.BottomEnd)
+              .padding(16.dp)
+              .audioGlassSurface(
+                shape = CircleShape,
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f),
+                highlightAlpha = 0.35f,
+                elevation = 6.dp,
+              )
+              .size(48.dp * audioButtonScale),
+        ) {
+          Icon(
+            imageVector = Icons.RoundedFilled.ExpandMore,
+            contentDescription = stringResource(R.string.ui_close),
+            tint = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.size(28.dp * audioButtonScale),
           )
         }
       }
