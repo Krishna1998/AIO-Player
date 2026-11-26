@@ -1,320 +1,320 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- One system splash per launcher icon pair: the icon's background behind its logo. Android 13+ applies the
-         one for the chosen icon through LauncherIconManager; older versions keep Theme.videoplayer.Splash. -->
-    <style name="Theme.videoplayer.Splash.BlackSolid">
+         one for the chosen icon through LauncherIconManager; older versions keep Theme.horizonplayer.Splash. -->
+    <style name="Theme.horizonplayer.Splash.BlackSolid">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_solid_purple_animated</item>
         <item name="windowSplashScreenBackground">@color/splash_background</item>
     </style>
-    <style name="Theme.videoplayer.Splash.BlackGradient">
+    <style name="Theme.horizonplayer.Splash.BlackGradient">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_purple_animated</item>
         <item name="windowSplashScreenBackground">@color/splash_background</item>
     </style>
-    <style name="Theme.videoplayer.Splash.BlackWhite">
+    <style name="Theme.horizonplayer.Splash.BlackWhite">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_white_animated</item>
         <item name="windowSplashScreenBackground">@color/splash_background</item>
     </style>
-    <style name="Theme.videoplayer.Splash.BlackStealthShutterV">
+    <style name="Theme.horizonplayer.Splash.BlackStealthShutterV">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_stealth_shutter_v_animated</item>
         <item name="windowSplashScreenBackground">@color/splash_background</item>
     </style>
-    <style name="Theme.videoplayer.Splash.BlackKiloHertzMonolith">
+    <style name="Theme.horizonplayer.Splash.BlackKiloHertzMonolith">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_kilo_hertz_monolith_animated</item>
         <item name="windowSplashScreenBackground">@color/splash_background</item>
     </style>
-    <style name="Theme.videoplayer.Splash.BlackQuantumAperture">
+    <style name="Theme.horizonplayer.Splash.BlackQuantumAperture">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_quantum_aperture_animated</item>
         <item name="windowSplashScreenBackground">@color/splash_background</item>
     </style>
-    <style name="Theme.videoplayer.Splash.BlackLiquidAcousticDroplet">
+    <style name="Theme.horizonplayer.Splash.BlackLiquidAcousticDroplet">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_liquid_acoustic_droplet_animated</item>
         <item name="windowSplashScreenBackground">@color/splash_background</item>
     </style>
-    <style name="Theme.videoplayer.Splash.BlackHorizonAeroBlades">
+    <style name="Theme.horizonplayer.Splash.BlackHorizonAeroBlades">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_horizon_aero_blades_animated</item>
         <item name="windowSplashScreenBackground">@color/splash_background</item>
     </style>
-    <style name="Theme.videoplayer.Splash.BlackAuraApertureCyan">
+    <style name="Theme.horizonplayer.Splash.BlackAuraApertureCyan">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_aura_aperture_cyan_animated</item>
         <item name="windowSplashScreenBackground">@color/splash_background</item>
     </style>
-    <style name="Theme.videoplayer.Splash.BlackEclipseHaloCyan">
+    <style name="Theme.horizonplayer.Splash.BlackEclipseHaloCyan">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_eclipse_halo_cyan_animated</item>
         <item name="windowSplashScreenBackground">@color/splash_background</item>
     </style>
-    <style name="Theme.videoplayer.Splash.BlackEclipseHaloLime">
+    <style name="Theme.horizonplayer.Splash.BlackEclipseHaloLime">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_eclipse_halo_lime_animated</item>
         <item name="windowSplashScreenBackground">@color/splash_background</item>
     </style>
-    <style name="Theme.videoplayer.Splash.BlackSupersonicSplitArrow">
+    <style name="Theme.horizonplayer.Splash.BlackSupersonicSplitArrow">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_supersonic_split_arrow_animated</item>
         <item name="windowSplashScreenBackground">@color/splash_background</item>
     </style>
-    <style name="Theme.videoplayer.Splash.BlackSupersonicSplitArrowLime">
+    <style name="Theme.horizonplayer.Splash.BlackSupersonicSplitArrowLime">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_supersonic_split_arrow_lime_animated</item>
         <item name="windowSplashScreenBackground">@color/splash_background</item>
     </style>
-    <style name="Theme.videoplayer.Splash.BlackPulseRotaryDialLime">
+    <style name="Theme.horizonplayer.Splash.BlackPulseRotaryDialLime">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_pulse_rotary_dial_lime_animated</item>
         <item name="windowSplashScreenBackground">@color/splash_background</item>
     </style>
-    <style name="Theme.videoplayer.Splash.BlackPulseRotaryDialCrimson">
+    <style name="Theme.horizonplayer.Splash.BlackPulseRotaryDialCrimson">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_pulse_rotary_dial_crimson_animated</item>
         <item name="windowSplashScreenBackground">@color/splash_background</item>
     </style>
-    <style name="Theme.videoplayer.Splash.BlackContinuousLigatureVMLime">
+    <style name="Theme.horizonplayer.Splash.BlackContinuousLigatureVMLime">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_continuous_ligature_vm_lime_animated</item>
         <item name="windowSplashScreenBackground">@color/splash_background</item>
     </style>
-    <style name="Theme.videoplayer.Splash.BlackQuantumApertureLime">
+    <style name="Theme.horizonplayer.Splash.BlackQuantumApertureLime">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_quantum_aperture_lime_animated</item>
         <item name="windowSplashScreenBackground">@color/splash_background</item>
     </style>
-    <style name="Theme.videoplayer.Splash.VelvetVoidQuantumApertureWhite">
+    <style name="Theme.horizonplayer.Splash.VelvetVoidQuantumApertureWhite">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_quantum_aperture_white_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_velvet_void</item>
     </style>
-    <style name="Theme.videoplayer.Splash.VelvetVoidQuantumApertureViolet">
+    <style name="Theme.horizonplayer.Splash.VelvetVoidQuantumApertureViolet">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_quantum_aperture_violet_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_velvet_void</item>
     </style>
-    <style name="Theme.videoplayer.Splash.BlackContinuousLigatureVMViolet">
+    <style name="Theme.horizonplayer.Splash.BlackContinuousLigatureVMViolet">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_continuous_ligature_vm_violet_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_black</item>
     </style>
-    <style name="Theme.videoplayer.Splash.VelvetVoidAuraApertureViolet">
+    <style name="Theme.horizonplayer.Splash.VelvetVoidAuraApertureViolet">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_aura_aperture_violet_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_velvet_void</item>
     </style>
-    <style name="Theme.videoplayer.Splash.VelvetVoidSupersonicSplitArrowViolet">
+    <style name="Theme.horizonplayer.Splash.VelvetVoidSupersonicSplitArrowViolet">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_supersonic_split_arrow_violet_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_velvet_void</item>
     </style>
-    <style name="Theme.videoplayer.Splash.WhiteSolid">
+    <style name="Theme.horizonplayer.Splash.WhiteSolid">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_solid_purple_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_white</item>
     </style>
-    <style name="Theme.videoplayer.Splash.WhiteGradient">
+    <style name="Theme.horizonplayer.Splash.WhiteGradient">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_purple_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_white</item>
     </style>
-    <style name="Theme.videoplayer.Splash.WhiteBlack">
+    <style name="Theme.horizonplayer.Splash.WhiteBlack">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_black_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_white</item>
     </style>
-    <style name="Theme.videoplayer.Splash.CharcoalSolid">
+    <style name="Theme.horizonplayer.Splash.CharcoalSolid">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_solid_purple_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_charcoal</item>
     </style>
-    <style name="Theme.videoplayer.Splash.CharcoalGradient">
+    <style name="Theme.horizonplayer.Splash.CharcoalGradient">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_purple_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_charcoal</item>
     </style>
-    <style name="Theme.videoplayer.Splash.CharcoalWhite">
+    <style name="Theme.horizonplayer.Splash.CharcoalWhite">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_white_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_charcoal</item>
     </style>
-    <style name="Theme.videoplayer.Splash.IndigoSolid">
+    <style name="Theme.horizonplayer.Splash.IndigoSolid">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_solid_purple_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_indigo</item>
     </style>
-    <style name="Theme.videoplayer.Splash.IndigoWhite">
+    <style name="Theme.horizonplayer.Splash.IndigoWhite">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_white_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_indigo</item>
     </style>
-    <style name="Theme.videoplayer.Splash.VioletSolid">
+    <style name="Theme.horizonplayer.Splash.VioletSolid">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_solid_purple_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_violet</item>
     </style>
-    <style name="Theme.videoplayer.Splash.VioletWhite">
+    <style name="Theme.horizonplayer.Splash.VioletWhite">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_white_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_violet</item>
     </style>
-    <style name="Theme.videoplayer.Splash.LagoonWhite">
+    <style name="Theme.horizonplayer.Splash.LagoonWhite">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_white_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_lagoon</item>
     </style>
-    <style name="Theme.videoplayer.Splash.LagoonBlack">
+    <style name="Theme.horizonplayer.Splash.LagoonBlack">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_black_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_lagoon</item>
     </style>
-    <style name="Theme.videoplayer.Splash.AzureSolid">
+    <style name="Theme.horizonplayer.Splash.AzureSolid">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_solid_purple_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_azure</item>
     </style>
-    <style name="Theme.videoplayer.Splash.AzureGradient">
+    <style name="Theme.horizonplayer.Splash.AzureGradient">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_purple_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_azure</item>
     </style>
-    <style name="Theme.videoplayer.Splash.AzureBlack">
+    <style name="Theme.horizonplayer.Splash.AzureBlack">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_black_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_azure</item>
     </style>
-    <style name="Theme.videoplayer.Splash.LilacSolid">
+    <style name="Theme.horizonplayer.Splash.LilacSolid">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_solid_purple_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_lilac</item>
     </style>
-    <style name="Theme.videoplayer.Splash.LilacGradient">
+    <style name="Theme.horizonplayer.Splash.LilacGradient">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_purple_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_lilac</item>
     </style>
-    <style name="Theme.videoplayer.Splash.LilacBlack">
+    <style name="Theme.horizonplayer.Splash.LilacBlack">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_black_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_lilac</item>
     </style>
-    <style name="Theme.videoplayer.Splash.MintSolid">
+    <style name="Theme.horizonplayer.Splash.MintSolid">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_solid_purple_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_mint</item>
     </style>
-    <style name="Theme.videoplayer.Splash.MintGradient">
+    <style name="Theme.horizonplayer.Splash.MintGradient">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_purple_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_mint</item>
     </style>
-    <style name="Theme.videoplayer.Splash.MintBlack">
+    <style name="Theme.horizonplayer.Splash.MintBlack">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_black_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_mint</item>
     </style>
-    <style name="Theme.videoplayer.Splash.EmberWhite">
+    <style name="Theme.horizonplayer.Splash.EmberWhite">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_white_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_ember</item>
     </style>
-    <style name="Theme.videoplayer.Splash.EmberBlack">
+    <style name="Theme.horizonplayer.Splash.EmberBlack">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_black_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_ember</item>
     </style>
-    <style name="Theme.videoplayer.Splash.BlackClassic">
+    <style name="Theme.horizonplayer.Splash.BlackClassic">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_classic_inset</item>
         <item name="windowSplashScreenBackground">@color/splash_background</item>
     </style>
-    <style name="Theme.videoplayer.Splash.WhiteClassic">
+    <style name="Theme.horizonplayer.Splash.WhiteClassic">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_classic_inset</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_white</item>
     </style>
-    <style name="Theme.videoplayer.Splash.CharcoalClassic">
+    <style name="Theme.horizonplayer.Splash.CharcoalClassic">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_classic_inset</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_charcoal</item>
     </style>
-    <style name="Theme.videoplayer.Splash.IndigoClassic">
+    <style name="Theme.horizonplayer.Splash.IndigoClassic">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_classic_inset</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_indigo</item>
     </style>
-    <style name="Theme.videoplayer.Splash.VioletClassic">
+    <style name="Theme.horizonplayer.Splash.VioletClassic">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_classic_inset</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_violet</item>
     </style>
-    <style name="Theme.videoplayer.Splash.AzureClassic">
+    <style name="Theme.horizonplayer.Splash.AzureClassic">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_classic_inset</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_azure</item>
     </style>
-    <style name="Theme.videoplayer.Splash.LilacClassic">
+    <style name="Theme.horizonplayer.Splash.LilacClassic">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_classic_inset</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_lilac</item>
     </style>
-    <style name="Theme.videoplayer.Splash.MintClassic">
+    <style name="Theme.horizonplayer.Splash.MintClassic">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_classic_inset</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_mint</item>
     </style>
-    <style name="Theme.videoplayer.Splash.CrimsonWhite">
+    <style name="Theme.horizonplayer.Splash.CrimsonWhite">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_white_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_crimson</item>
     </style>
-    <style name="Theme.videoplayer.Splash.CrimsonBlack">
+    <style name="Theme.horizonplayer.Splash.CrimsonBlack">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_black_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_crimson</item>
     </style>
-    <style name="Theme.videoplayer.Splash.RoseWhite">
+    <style name="Theme.horizonplayer.Splash.RoseWhite">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_white_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_rose</item>
     </style>
-    <style name="Theme.videoplayer.Splash.RoseBlack">
+    <style name="Theme.horizonplayer.Splash.RoseBlack">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_black_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_rose</item>
     </style>
-    <style name="Theme.videoplayer.Splash.PeachWhite">
+    <style name="Theme.horizonplayer.Splash.PeachWhite">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_white_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_peach</item>
     </style>
-    <style name="Theme.videoplayer.Splash.PeachBlack">
+    <style name="Theme.horizonplayer.Splash.PeachBlack">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_black_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_peach</item>
     </style>
-    <style name="Theme.videoplayer.Splash.AmberWhite">
+    <style name="Theme.horizonplayer.Splash.AmberWhite">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_white_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_amber</item>
     </style>
-    <style name="Theme.videoplayer.Splash.AmberBlack">
+    <style name="Theme.horizonplayer.Splash.AmberBlack">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_black_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_amber</item>
     </style>
-    <style name="Theme.videoplayer.Splash.LemonWhite">
+    <style name="Theme.horizonplayer.Splash.LemonWhite">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_white_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_lemon</item>
     </style>
-    <style name="Theme.videoplayer.Splash.LemonBlack">
+    <style name="Theme.horizonplayer.Splash.LemonBlack">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_black_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_lemon</item>
     </style>
-    <style name="Theme.videoplayer.Splash.LimeWhite">
+    <style name="Theme.horizonplayer.Splash.LimeWhite">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_white_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_lime</item>
     </style>
-    <style name="Theme.videoplayer.Splash.LimeBlack">
+    <style name="Theme.horizonplayer.Splash.LimeBlack">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_black_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_lime</item>
     </style>
-    <style name="Theme.videoplayer.Splash.ForestWhite">
+    <style name="Theme.horizonplayer.Splash.ForestWhite">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_white_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_forest</item>
     </style>
-    <style name="Theme.videoplayer.Splash.ForestBlack">
+    <style name="Theme.horizonplayer.Splash.ForestBlack">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_black_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_forest</item>
     </style>
-    <style name="Theme.videoplayer.Splash.TealWhite">
+    <style name="Theme.horizonplayer.Splash.TealWhite">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_white_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_teal</item>
     </style>
-    <style name="Theme.videoplayer.Splash.TealBlack">
+    <style name="Theme.horizonplayer.Splash.TealBlack">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_black_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_teal</item>
     </style>
-    <style name="Theme.videoplayer.Splash.SkyWhite">
+    <style name="Theme.horizonplayer.Splash.SkyWhite">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_white_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_sky</item>
     </style>
-    <style name="Theme.videoplayer.Splash.SkyBlack">
+    <style name="Theme.horizonplayer.Splash.SkyBlack">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_black_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_sky</item>
     </style>
-    <style name="Theme.videoplayer.Splash.CobaltWhite">
+    <style name="Theme.horizonplayer.Splash.CobaltWhite">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_white_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_cobalt</item>
     </style>
-    <style name="Theme.videoplayer.Splash.CobaltBlack">
+    <style name="Theme.horizonplayer.Splash.CobaltBlack">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_black_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_cobalt</item>
     </style>
-    <style name="Theme.videoplayer.Splash.PlumWhite">
+    <style name="Theme.horizonplayer.Splash.PlumWhite">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_white_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_plum</item>
     </style>
-    <style name="Theme.videoplayer.Splash.PlumBlack">
+    <style name="Theme.horizonplayer.Splash.PlumBlack">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_black_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_plum</item>
     </style>
-    <style name="Theme.videoplayer.Splash.CocoaWhite">
+    <style name="Theme.horizonplayer.Splash.CocoaWhite">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_white_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_cocoa</item>
     </style>
-    <style name="Theme.videoplayer.Splash.CocoaBlack">
+    <style name="Theme.horizonplayer.Splash.CocoaBlack">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_black_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_cocoa</item>
     </style>
-    <style name="Theme.videoplayer.Splash.WallpaperWhite">
+    <style name="Theme.horizonplayer.Splash.WallpaperWhite">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_white_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_wallpaper</item>
     </style>
-    <style name="Theme.videoplayer.Splash.WallpaperBlack">
+    <style name="Theme.horizonplayer.Splash.WallpaperBlack">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_black_animated</item>
         <item name="windowSplashScreenBackground">@color/icon_bg_wallpaper</item>
     </style>

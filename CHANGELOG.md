@@ -96,7 +96,7 @@ These notes are written in plain English and focus on what changed for real use.
 
 ### 🛡️ OTA Resiliency & Compatibility
 - **Backward-Compatible Asset Publishing:**
-  - CI release workflows now publish both `HorizonPlayer-*` and legacy `VideoPlayer-*` APK assets to guarantee seamless OTA discovery for older client builds (v1.0.3 and earlier).
+  - CI release workflows now publish both `HorizonPlayer-*` and legacy `HorizonPlayer-*` APK assets to guarantee seamless OTA discovery for older client builds (v1.0.3 and earlier).
 
 ## 1.0.4
 

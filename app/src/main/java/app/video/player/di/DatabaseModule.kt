@@ -16,7 +16,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import app.video.player.data.network.XtreamClient
 import app.video.player.data.network.credentials.AndroidNetworkCredentialKey
 import app.video.player.data.network.credentials.NetworkCredentialCipher
-import app.video.player.database.VideoPlayerDatabase
+import app.video.player.database.HorizonPlayerDatabase
 import app.video.player.database.repository.NetworkStreamEntryRepository
 import app.video.player.database.repository.PlaybackStateRepositoryImpl
 import app.video.player.database.repository.PlaylistRepository
@@ -1000,10 +1000,10 @@ val DatabaseModule =
       }
     }
 
-    single<VideoPlayerDatabase> {
+    single<HorizonPlayerDatabase> {
       val context = androidContext()
       Room
-        .databaseBuilder(context, VideoPlayerDatabase::class.java, "videoplayer.db")
+        .databaseBuilder(context, HorizonPlayerDatabase::class.java, "horizonplayer.db")
         .setJournalMode(RoomDatabase.JournalMode.WRITE_AHEAD_LOGGING)
         .addMigrations(
           MIGRATION_1_2,
@@ -1043,35 +1043,35 @@ val DatabaseModule =
     singleOf(::PlaybackStateRepositoryImpl).bind(PlaybackStateRepository::class)
 
     single<RecentlyPlayedRepository> {
-      RecentlyPlayedRepositoryImpl(get<VideoPlayerDatabase>().recentlyPlayedDao())
+      RecentlyPlayedRepositoryImpl(get<HorizonPlayerDatabase>().recentlyPlayedDao())
     }
 
     single { ThumbnailRepository(androidContext()) }
     single { NetworkImageRepository(context = androidContext(), networkRepository = get()) }
     single { WatchStatsRepository(androidContext()) }
 
-    single { get<VideoPlayerDatabase>().audiobookDao() }
-    single { get<VideoPlayerDatabase>().playbackBookmarkDao() }
-    single { get<VideoPlayerDatabase>().frameCaptureDao() }
-    single { get<VideoPlayerDatabase>().snapshotFolderDao() }
+    single { get<HorizonPlayerDatabase>().audiobookDao() }
+    single { get<HorizonPlayerDatabase>().playbackBookmarkDao() }
+    single { get<HorizonPlayerDatabase>().frameCaptureDao() }
+    single { get<HorizonPlayerDatabase>().snapshotFolderDao() }
 
     singleOf(::FrameCaptureRepositoryImpl).bind(FrameCaptureRepository::class)
 
     single {
       app.video.player.database.repository.VideoMetadataCacheRepository(
         context = androidContext(),
-        dao = get<VideoPlayerDatabase>().videoMetadataDao(),
+        dao = get<HorizonPlayerDatabase>().videoMetadataDao(),
       )
     }
 
     // MediaFileRepository is a singleton object - no DI needed
 
     single {
-      get<VideoPlayerDatabase>().networkConnectionDao()
+      get<HorizonPlayerDatabase>().networkConnectionDao()
     }
 
     single {
-      get<VideoPlayerDatabase>().networkStreamEntryDao()
+      get<HorizonPlayerDatabase>().networkStreamEntryDao()
     }
 
     single {
@@ -1098,7 +1098,7 @@ val DatabaseModule =
 
     single {
       PlaylistRepository(
-        playlistDao = get<VideoPlayerDatabase>().playlistDao(),
+        playlistDao = get<HorizonPlayerDatabase>().playlistDao(),
         httpClient = get(),
         applicationContext = androidContext(),
         ytdlPreferences = get(),
@@ -1108,17 +1108,17 @@ val DatabaseModule =
     }
 
     single {
-      get<VideoPlayerDatabase>().secureMediaDao()
+      get<HorizonPlayerDatabase>().secureMediaDao()
     }
 
     single {
       app.video.player.database.repository.SecureFolderRepository(
-        dao = get<VideoPlayerDatabase>().secureMediaDao(),
+        dao = get<HorizonPlayerDatabase>().secureMediaDao(),
       )
     }
 
     single {
-      get<VideoPlayerDatabase>().jellyfinServerDao()
+      get<HorizonPlayerDatabase>().jellyfinServerDao()
     }
 
     single {
@@ -1136,7 +1136,7 @@ val DatabaseModule =
     }
 
     single {
-      get<VideoPlayerDatabase>().navidromeServerDao()
+      get<HorizonPlayerDatabase>().navidromeServerDao()
     }
 
     single {
@@ -1154,7 +1154,7 @@ val DatabaseModule =
     }
 
     single {
-      get<VideoPlayerDatabase>().audiobookshelfServerDao()
+      get<HorizonPlayerDatabase>().audiobookshelfServerDao()
     }
 
     single {

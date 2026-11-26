@@ -33,7 +33,7 @@ import java.io.IOException
 
 internal const val AUTHENTICATED_SOURCE_METADATA_KEY = "subtitleHubAuthenticatedSource"
 
-internal class VideoPlayerSubtitleHubApiSources(
+internal class HorizonPlayerSubtitleHubApiSources(
   private val client: OkHttpClient,
   private val json: Json,
   private val preferences: SubtitlesPreferences,
@@ -51,17 +51,17 @@ internal class VideoPlayerSubtitleHubApiSources(
     selectedLanguages: Set<String>?,
   ): List<OnlineSubtitle> =
     when (source) {
-      VideoPlayerSubtitleHubSources.BETASERIES_KEY -> searchBetaSeries(request, selectedLanguages)
-      VideoPlayerSubtitleHubSources.JIMAKU_KEY -> searchJimaku(request, selectedLanguages)
-      VideoPlayerSubtitleHubSources.SUBDL_KEY -> searchSubDl(request, selectedLanguages)
-      VideoPlayerSubtitleHubSources.SUBSOURCE_KEY -> searchSubSource(request, selectedLanguages)
-      VideoPlayerSubtitleHubSources.SUBS_RO_KEY -> searchSubsRo(request, selectedLanguages)
-      VideoPlayerSubtitleHubSources.SUBX_KEY -> searchSubX(request, selectedLanguages)
+      HorizonPlayerSubtitleHubSources.BETASERIES_KEY -> searchBetaSeries(request, selectedLanguages)
+      HorizonPlayerSubtitleHubSources.JIMAKU_KEY -> searchJimaku(request, selectedLanguages)
+      HorizonPlayerSubtitleHubSources.SUBDL_KEY -> searchSubDl(request, selectedLanguages)
+      HorizonPlayerSubtitleHubSources.SUBSOURCE_KEY -> searchSubSource(request, selectedLanguages)
+      HorizonPlayerSubtitleHubSources.SUBS_RO_KEY -> searchSubsRo(request, selectedLanguages)
+      HorizonPlayerSubtitleHubSources.SUBX_KEY -> searchSubX(request, selectedLanguages)
       else -> emptyList()
     }
 
   fun requireApiKey(source: String) {
-    if (source in VideoPlayerSubtitleHubSources.AUTHENTICATED_SOURCES) {
+    if (source in HorizonPlayerSubtitleHubSources.AUTHENTICATED_SOURCES) {
       apiKey(source)
     }
   }
@@ -71,19 +71,19 @@ internal class VideoPlayerSubtitleHubApiSources(
     builder: Request.Builder,
   ) {
     when (val source = subtitle.metadata[AUTHENTICATED_SOURCE_METADATA_KEY]) {
-      VideoPlayerSubtitleHubSources.JIMAKU_KEY -> {
+      HorizonPlayerSubtitleHubSources.JIMAKU_KEY -> {
         requireProviderHost(subtitle.url, "Jimaku", "jimaku.cc")
         builder.header("Authorization", apiKey(source))
       }
-      VideoPlayerSubtitleHubSources.SUBSOURCE_KEY -> {
+      HorizonPlayerSubtitleHubSources.SUBSOURCE_KEY -> {
         requireProviderHost(subtitle.url, "SubSource", "api.subsource.net")
         builder.header("X-API-Key", apiKey(source))
       }
-      VideoPlayerSubtitleHubSources.SUBS_RO_KEY -> {
+      HorizonPlayerSubtitleHubSources.SUBS_RO_KEY -> {
         requireProviderHost(subtitle.url, "Subs.ro", "subs.ro")
         builder.header("X-Subs-Api-Key", apiKey(source))
       }
-      VideoPlayerSubtitleHubSources.SUBX_KEY -> {
+      HorizonPlayerSubtitleHubSources.SUBX_KEY -> {
         requireProviderHost(subtitle.url, "SubX", "subx-api.duckdns.org")
         builder.header("Authorization", "Bearer ${apiKey(source)}")
       }
@@ -92,8 +92,8 @@ internal class VideoPlayerSubtitleHubApiSources(
 
   fun clientForDownload(subtitle: OnlineSubtitle): OkHttpClient =
     when (subtitle.metadata[AUTHENTICATED_SOURCE_METADATA_KEY]) {
-      VideoPlayerSubtitleHubSources.SUBSOURCE_KEY,
-      VideoPlayerSubtitleHubSources.SUBS_RO_KEY,
+      HorizonPlayerSubtitleHubSources.SUBSOURCE_KEY,
+      HorizonPlayerSubtitleHubSources.SUBS_RO_KEY,
       -> noRedirectClient
       else -> client
     }
@@ -108,7 +108,7 @@ internal class VideoPlayerSubtitleHubApiSources(
       listOf("en", "fr").filter { languageMatches(it, selectedLanguages) }
     if (languages.isEmpty()) return emptyList()
 
-    val apiKey = apiKey(VideoPlayerSubtitleHubSources.BETASERIES_KEY)
+    val apiKey = apiKey(HorizonPlayerSubtitleHubSources.BETASERIES_KEY)
     val showSearchUrl =
       apiUrl(BETASERIES_API_BASE_URL, "shows/search") {
         addQueryParameter("key", apiKey)
@@ -168,8 +168,8 @@ internal class VideoPlayerSubtitleHubApiSources(
       val release = row.string("file").orEmpty()
       val fileName = downloadUrl.toHttpUrlOrNull()?.pathSegments?.lastOrNull()?.takeIf(String::isNotBlank)
       OnlineSubtitle(
-        provider = SubtitleProvider.VIDEOPLAYER_SUBTITLE_HUB,
-        id = "${VideoPlayerSubtitleHubSources.BETASERIES_KEY}:$subtitleId:$languageCode",
+        provider = SubtitleProvider.HORIZONPLAYER_SUBTITLE_HUB,
+        id = "${HorizonPlayerSubtitleHubSources.BETASERIES_KEY}:$subtitleId:$languageCode",
         url = downloadUrl,
         fileName = fileName,
         release = release.takeIf(String::isNotBlank),
@@ -179,7 +179,7 @@ internal class VideoPlayerSubtitleHubApiSources(
         language = languageCode,
         source = "BetaSeries",
         format = displayFormat(fileName ?: downloadUrl),
-        metadata = authenticatedMetadata(VideoPlayerSubtitleHubSources.BETASERIES_KEY),
+        metadata = authenticatedMetadata(HorizonPlayerSubtitleHubSources.BETASERIES_KEY),
       )
     }.distinctBy { it.url.lowercase() }
   }
@@ -189,7 +189,7 @@ internal class VideoPlayerSubtitleHubApiSources(
     selectedLanguages: Set<String>?,
   ): List<OnlineSubtitle> {
     if (!languageMatches("ja", selectedLanguages)) return emptyList()
-    val apiKey = apiKey(VideoPlayerSubtitleHubSources.JIMAKU_KEY)
+    val apiKey = apiKey(HorizonPlayerSubtitleHubSources.JIMAKU_KEY)
     val searchParams =
       if (request.tmdbId != null) {
         mapOf("tmdb_id" to "${if (request.isEpisode) "tv" else "movie"}:${request.tmdbId}")
@@ -237,8 +237,8 @@ internal class VideoPlayerSubtitleHubApiSources(
           ?.let { absoluteUrl(JIMAKU_API_BASE_URL, it) }
           ?: return@mapNotNull null
       OnlineSubtitle(
-        provider = SubtitleProvider.VIDEOPLAYER_SUBTITLE_HUB,
-        id = "${VideoPlayerSubtitleHubSources.JIMAKU_KEY}:$entryId:${downloadUrl.hashCode()}",
+        provider = SubtitleProvider.HORIZONPLAYER_SUBTITLE_HUB,
+        id = "${HorizonPlayerSubtitleHubSources.JIMAKU_KEY}:$entryId:${downloadUrl.hashCode()}",
         url = downloadUrl,
         fileName = fileName,
         release = fileName,
@@ -250,7 +250,7 @@ internal class VideoPlayerSubtitleHubApiSources(
         format = displayFormat(fileName),
         metadata =
           authenticatedMetadata(
-            VideoPlayerSubtitleHubSources.JIMAKU_KEY,
+            HorizonPlayerSubtitleHubSources.JIMAKU_KEY,
             buildMap {
               request.season?.let { put("season", it.toString()) }
               request.episode?.let { put("episode", it.toString()) }
@@ -264,7 +264,7 @@ internal class VideoPlayerSubtitleHubApiSources(
     request: OnlineSubtitleSearchRequest,
     selectedLanguages: Set<String>?,
   ): List<OnlineSubtitle> {
-    val apiKey = apiKey(VideoPlayerSubtitleHubSources.SUBDL_KEY)
+    val apiKey = apiKey(HorizonPlayerSubtitleHubSources.SUBDL_KEY)
     val subDlLanguages = selectedLanguages?.mapNotNull(::toSubDlLanguage)?.distinct().orEmpty()
     if (selectedLanguages != null && subDlLanguages.isEmpty()) return emptyList()
     val url =
@@ -337,8 +337,8 @@ internal class VideoPlayerSubtitleHubApiSources(
     val itemEpisode = child?.int("episode") ?: item.int("episode")
     if (request.episode != null && itemEpisode != null && itemEpisode != request.episode) return null
     return OnlineSubtitle(
-      provider = SubtitleProvider.VIDEOPLAYER_SUBTITLE_HUB,
-      id = "${VideoPlayerSubtitleHubSources.SUBDL_KEY}:$subtitleId",
+      provider = SubtitleProvider.HORIZONPLAYER_SUBTITLE_HUB,
+      id = "${HorizonPlayerSubtitleHubSources.SUBDL_KEY}:$subtitleId",
       url = downloadUrl,
       fileName = fileName,
       release = release,
@@ -351,7 +351,7 @@ internal class VideoPlayerSubtitleHubApiSources(
       isHearingImpaired = child?.bool("hi") ?: item.bool("hi") ?: false,
       metadata =
         authenticatedMetadata(
-          VideoPlayerSubtitleHubSources.SUBDL_KEY,
+          HorizonPlayerSubtitleHubSources.SUBDL_KEY,
           buildMap {
             request.season?.let { put("season", it.toString()) }
             itemEpisode?.let { put("episode", it.toString()) }
@@ -368,7 +368,7 @@ internal class VideoPlayerSubtitleHubApiSources(
     request: OnlineSubtitleSearchRequest,
     selectedLanguages: Set<String>?,
   ): List<OnlineSubtitle> {
-    val apiKey = apiKey(VideoPlayerSubtitleHubSources.SUBSOURCE_KEY)
+    val apiKey = apiKey(HorizonPlayerSubtitleHubSources.SUBSOURCE_KEY)
     val movieUrl =
       apiUrl(SUBSOURCE_API_BASE_URL, "api/v1/movies/search") {
         addQueryParameter("searchType", "text")
@@ -424,8 +424,8 @@ internal class VideoPlayerSubtitleHubApiSources(
           val releases = subtitle.array("releaseInfo")?.mapNotNull { it.stringValue() }.orEmpty()
           val release = releases.joinToString(" • ")
           OnlineSubtitle(
-            provider = SubtitleProvider.VIDEOPLAYER_SUBTITLE_HUB,
-            id = "${VideoPlayerSubtitleHubSources.SUBSOURCE_KEY}:$subtitleId",
+            provider = SubtitleProvider.HORIZONPLAYER_SUBTITLE_HUB,
+            id = "${HorizonPlayerSubtitleHubSources.SUBSOURCE_KEY}:$subtitleId",
             url = absoluteUrl(SUBSOURCE_API_BASE_URL, "api/v1/subtitles/$subtitleId/download"),
             release = release.takeIf(String::isNotBlank),
             media = movie.title,
@@ -438,7 +438,7 @@ internal class VideoPlayerSubtitleHubApiSources(
             isHearingImpaired = subtitle.bool("hearingImpaired") == true,
             metadata =
               authenticatedMetadata(
-                VideoPlayerSubtitleHubSources.SUBSOURCE_KEY,
+                HorizonPlayerSubtitleHubSources.SUBSOURCE_KEY,
                 buildMap {
                   request.season?.let { put("season", it.toString()) }
                   request.episode?.let { put("episode", it.toString()) }
@@ -454,7 +454,7 @@ internal class VideoPlayerSubtitleHubApiSources(
     selectedLanguages: Set<String>?,
   ): List<OnlineSubtitle> {
     val imdbId = request.imdbId?.trim()?.takeIf(String::isNotBlank) ?: return emptyList()
-    val apiKey = apiKey(VideoPlayerSubtitleHubSources.SUBS_RO_KEY)
+    val apiKey = apiKey(HorizonPlayerSubtitleHubSources.SUBS_RO_KEY)
     val languageCodes =
       mapOf("ro" to "ro", "en" to "en").filterKeys { languageMatches(it, selectedLanguages) }
     return languageCodes.flatMap { (apiLanguage, languageCode) ->
@@ -474,8 +474,8 @@ internal class VideoPlayerSubtitleHubApiSources(
               ?: "subtitle/$subtitleId/download"
           val release = item.string("description")?.takeIf(String::isNotBlank) ?: title
           OnlineSubtitle(
-            provider = SubtitleProvider.VIDEOPLAYER_SUBTITLE_HUB,
-            id = "${VideoPlayerSubtitleHubSources.SUBS_RO_KEY}:$subtitleId:$languageCode",
+            provider = SubtitleProvider.HORIZONPLAYER_SUBTITLE_HUB,
+            id = "${HorizonPlayerSubtitleHubSources.SUBS_RO_KEY}:$subtitleId:$languageCode",
             url = absoluteUrl(SUBS_RO_API_BASE_URL, downloadUrl),
             release = release,
             media = request.query,
@@ -486,7 +486,7 @@ internal class VideoPlayerSubtitleHubApiSources(
             format = displayFormat(downloadUrl, "zip"),
             metadata =
               authenticatedMetadata(
-                VideoPlayerSubtitleHubSources.SUBS_RO_KEY,
+                HorizonPlayerSubtitleHubSources.SUBS_RO_KEY,
                 buildMap {
                   request.season?.let { put("season", it.toString()) }
                   request.episode?.let { put("episode", it.toString()) }
@@ -502,7 +502,7 @@ internal class VideoPlayerSubtitleHubApiSources(
     selectedLanguages: Set<String>?,
   ): List<OnlineSubtitle> {
     if (!languageMatches("es", selectedLanguages)) return emptyList()
-    val apiKey = apiKey(VideoPlayerSubtitleHubSources.SUBX_KEY)
+    val apiKey = apiKey(HorizonPlayerSubtitleHubSources.SUBX_KEY)
     val queries =
       if (request.isEpisode && request.season != null && request.episode != null) {
         listOf(
@@ -544,8 +544,8 @@ internal class VideoPlayerSubtitleHubApiSources(
           val title = item.string("title").orEmpty()
           val release = listOf(title, description).filter(String::isNotBlank).joinToString(" | ")
           OnlineSubtitle(
-            provider = SubtitleProvider.VIDEOPLAYER_SUBTITLE_HUB,
-            id = "${VideoPlayerSubtitleHubSources.SUBX_KEY}:$subtitleId:$variant",
+            provider = SubtitleProvider.HORIZONPLAYER_SUBTITLE_HUB,
+            id = "${HorizonPlayerSubtitleHubSources.SUBX_KEY}:$subtitleId:$variant",
             url = absoluteUrl(SUBX_API_BASE_URL, downloadUrl),
             fileName = "subx.$subtitleId.es.zip",
             release = release.takeIf(String::isNotBlank),
@@ -558,7 +558,7 @@ internal class VideoPlayerSubtitleHubApiSources(
             downloadCount = item.int("downloads"),
             metadata =
               authenticatedMetadata(
-                VideoPlayerSubtitleHubSources.SUBX_KEY,
+                HorizonPlayerSubtitleHubSources.SUBX_KEY,
                 buildMap {
                   itemSeason?.let { put("season", it.toString()) }
                   request.episode?.let { put("episode", it.toString()) }
@@ -619,16 +619,16 @@ internal class VideoPlayerSubtitleHubApiSources(
   private fun apiKey(source: String): String {
     val key =
       when (source) {
-        VideoPlayerSubtitleHubSources.BETASERIES_KEY -> preferences.betaSeriesApiKey.get()
-        VideoPlayerSubtitleHubSources.JIMAKU_KEY -> preferences.jimakuApiKey.get()
-        VideoPlayerSubtitleHubSources.SUBDL_KEY -> preferences.subDlApiKey.get()
-        VideoPlayerSubtitleHubSources.SUBSOURCE_KEY -> preferences.subSourceApiKey.get()
-        VideoPlayerSubtitleHubSources.SUBS_RO_KEY -> preferences.subsRoApiKey.get()
-        VideoPlayerSubtitleHubSources.SUBX_KEY -> preferences.subXApiKey.get()
+        HorizonPlayerSubtitleHubSources.BETASERIES_KEY -> preferences.betaSeriesApiKey.get()
+        HorizonPlayerSubtitleHubSources.JIMAKU_KEY -> preferences.jimakuApiKey.get()
+        HorizonPlayerSubtitleHubSources.SUBDL_KEY -> preferences.subDlApiKey.get()
+        HorizonPlayerSubtitleHubSources.SUBSOURCE_KEY -> preferences.subSourceApiKey.get()
+        HorizonPlayerSubtitleHubSources.SUBS_RO_KEY -> preferences.subsRoApiKey.get()
+        HorizonPlayerSubtitleHubSources.SUBX_KEY -> preferences.subXApiKey.get()
         else -> ""
       }.trim()
     return key.takeIf(String::isNotBlank)
-      ?: throw IllegalStateException("${VideoPlayerSubtitleHubSources.ALL[source] ?: source} API key is required")
+      ?: throw IllegalStateException("${HorizonPlayerSubtitleHubSources.ALL[source] ?: source} API key is required")
   }
 
   private fun requireProviderHost(
@@ -765,7 +765,7 @@ internal class VideoPlayerSubtitleHubApiSources(
   )
 
   private companion object {
-    const val USER_AGENT = "VideoPlayer/1.0 (Android; SubtitleHub)"
+    const val USER_AGENT = "HorizonPlayer/1.0 (Android; SubtitleHub)"
     const val BETASERIES_API_BASE_URL = "https://api.betaseries.com/"
     const val JIMAKU_API_BASE_URL = "https://jimaku.cc/api/"
     const val SUBDL_API_URL = "https://api.subdl.com/api/v1/subtitles"

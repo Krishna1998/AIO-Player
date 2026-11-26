@@ -105,7 +105,7 @@ data class Release(
 
 internal fun isPlayerApkName(name: String, ciPrefix: String = ""): Boolean {
   val lower = name.lowercase()
-  val prefixes = listOf("horizonplayer", "v&mplayer", "v.mplayer", "vmplayer", "videoplayer")
+  val prefixes = listOf("horizonplayer", "v&mplayer", "v.mplayer", "vmplayer", "horizonplayer")
   return prefixes.any { prefix ->
     lower.startsWith("$prefix$ciPrefix", ignoreCase = true) ||
       (ciPrefix.isEmpty() && lower.startsWith("$prefix-", ignoreCase = true))
@@ -161,7 +161,7 @@ internal const val APK_VARIANT_PLAYSTORE = "playstore"
 /** ABI splits published matching the Android ABI names. */
 internal val APK_ABIS = listOf("arm64-v8a")
 
-/** Matches a dash-separated token in an asset name such as `VideoPlayer-preview-r1969-arm64-v8a.apk`. */
+/** Matches a dash-separated token in an asset name such as `HorizonPlayer-preview-r1969-arm64-v8a.apk`. */
 internal fun String.hasApkAssetToken(token: String): Boolean =
   Regex(
     pattern = "(?:^|-)${Regex.escape(token)}(?:-|\\.apk$)",

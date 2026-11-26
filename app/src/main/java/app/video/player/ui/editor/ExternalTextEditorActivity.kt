@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: AGPL-3.0-or-later
  *
- * Android's Open-with entry point for VideoPlayer-specific configs and text scripts.
+ * Android's Open-with entry point for HorizonPlayer-specific configs and text scripts.
  * It intentionally does not route documents through PlayerActivity or execute imported code.
  */
 package app.video.player.ui.editor
@@ -50,7 +50,7 @@ import app.video.player.ui.icons.Icon
 import app.video.player.ui.icons.Icons
 import app.video.player.preferences.AdvancedPreferences
 import app.video.player.ui.player.MpvConfigCache
-import app.video.player.ui.theme.VideoPlayerTheme
+import app.video.player.ui.theme.HorizonPlayerTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -84,7 +84,7 @@ class ExternalTextEditorActivity : AppCompatActivity() {
     val canWrite = (sourceIntent.flags and Intent.FLAG_GRANT_WRITE_URI_PERMISSION) != 0 ||
       source.scheme == "file"
     setContent {
-      VideoPlayerTheme {
+      HorizonPlayerTheme {
         ExternalTextEditorScreen(
           uri = source,
           fileName = fileName,
@@ -219,8 +219,8 @@ private fun ExternalTextEditorScreen(
   if (showImport) {
     AlertDialog(
       onDismissRequest = { showImport = false },
-      title = { Text("Import $fileName into VideoPlayer?") },
-      text = { Text("This replaces the currently active $fileName configuration inside VideoPlayer.") },
+      title = { Text("Import $fileName into HorizonPlayer?") },
+      text = { Text("This replaces the currently active $fileName configuration inside HorizonPlayer.") },
       confirmButton = {
         TextButton(onClick = {
           showImport = false

@@ -122,7 +122,7 @@ internal object EmbeddedArtworkResolver {
               connectTimeout = 8000
               readTimeout = 8000
               instanceFollowRedirects = true
-              setRequestProperty("User-Agent", "Mozilla/5.0 (Android) VideoPlayer")
+              setRequestProperty("User-Agent", "Mozilla/5.0 (Android) HorizonPlayer")
               if (!token.isNullOrBlank()) {
                 setRequestProperty("Authorization", "Bearer $token")
               }

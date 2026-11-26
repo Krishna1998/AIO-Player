@@ -9,7 +9,7 @@
 
 package app.video.player.database.repository
 
-import app.video.player.database.VideoPlayerDatabase
+import app.video.player.database.HorizonPlayerDatabase
 import app.video.player.database.entities.PlaybackStateEntity
 import app.video.player.domain.playbackstate.repository.PlaybackStateRepository
 import kotlinx.coroutines.sync.Mutex
@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 
 class PlaybackStateRepositoryImpl(
-  private val database: VideoPlayerDatabase,
+  private val database: HorizonPlayerDatabase,
 ) : PlaybackStateRepository {
   // Library screens can ask for the complete playback-state set several times while navigating or
   // refreshing. Keep one process-local snapshot after the first unavoidable Room load and maintain

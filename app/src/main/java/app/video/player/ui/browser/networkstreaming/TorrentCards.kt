@@ -544,7 +544,7 @@ fun TorrentResumeCard(
         }
       }
 
-      // Bottom-end file size badge (VideoPlayer style)
+      // Bottom-end file size badge (HorizonPlayer style)
       if (entry.fileSize > 0L) {
         Box(
           modifier =

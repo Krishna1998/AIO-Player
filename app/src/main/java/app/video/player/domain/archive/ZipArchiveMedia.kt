@@ -43,7 +43,7 @@ import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 
 object ZipArchiveMedia {
-  private const val BROWSER_SCHEME = "videoplayer-zip"
+  private const val BROWSER_SCHEME = "horizonplayer-zip"
   private const val BROWSER_AUTHORITY = "local"
   private const val PLAYBACK_SCHEME = "archive"
   private const val MAX_ENTRIES = 100_000

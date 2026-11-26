@@ -18,7 +18,7 @@ import me.zhanghai.compose.preference.preferenceTheme
 /**
  * Shared visual contract for every preference-backed settings screen.
  *
- * Preference storage remains owned by ComposePreference; this wrapper only supplies VideoPlayer's
+ * Preference storage remains owned by ComposePreference; this wrapper only supplies HorizonPlayer's
  * expressive density, hierarchy and semantic colors so individual screens cannot silently drift
  * back to the library defaults.
  */

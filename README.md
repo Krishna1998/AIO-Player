@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="app/src/main/assets/branding/videoplayer_icon.svg" width="120" height="120" alt="Horizon Player" /><br>
+<img src="app/src/main/assets/branding/horizonplayer_icon.svg" width="120" height="120" alt="Horizon Player" /><br>
 
 # Horizon Player
 

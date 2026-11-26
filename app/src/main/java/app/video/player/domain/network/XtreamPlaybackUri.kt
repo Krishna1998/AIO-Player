@@ -14,7 +14,7 @@ import java.net.URI
 
 /** A credential-free reference to a stream exposed by a saved Xtream account. */
 object XtreamPlaybackUri {
-  const val SCHEME = "videoplayer-xtream"
+  const val SCHEME = "horizonplayer-xtream"
 
   enum class Route(
     val wireValue: String,

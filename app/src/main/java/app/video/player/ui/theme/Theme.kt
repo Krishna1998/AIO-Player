@@ -276,7 +276,7 @@ private fun ThemeTransitionContent(content: @Composable () -> Unit) {
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun VideoPlayerTheme(
+fun HorizonPlayerTheme(
   transitionState: ThemeTransitionState = rememberThemeTransitionState(),
   // The isolated :crash process registers only PreferencesModule, not domainModule.
   // It must not try to resolve GoogleFontsRepository while drawing the recovery UI.
@@ -315,7 +315,7 @@ fun VideoPlayerTheme(
             ?.fontFile(it)
             ?.let { file ->
               runCatching { FontFamily(Typeface.createFromFile(file)) }
-                .onFailure { Log.w("VideoPlayerTheme", "Could not load downloaded app font", it) }
+                .onFailure { Log.w("HorizonPlayerTheme", "Could not load downloaded app font", it) }
                 .getOrNull()
             }
         }

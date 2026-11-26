@@ -52,7 +52,7 @@
         android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/ic_launcher_black_gradient"
         android:supportsRtl="true"
-        android:theme="@style/Theme.videoplayer"
+        android:theme="@style/Theme.horizonplayer"
         android:largeHeap="true"
         android:hardwareAccelerated="true"
         android:usesCleartextTraffic="true"
@@ -120,7 +120,7 @@
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:resizeableActivity="true"
             android:supportsPictureInPicture="true"
-            android:theme="@style/Theme.videoplayer.Splash">
+            android:theme="@style/Theme.horizonplayer.Splash">
         </activity>
 
         <activity
@@ -130,7 +130,7 @@
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:resizeableActivity="true"
             android:supportsPictureInPicture="true"
-            android:theme="@style/Theme.videoplayer.PurpleSplash" />
+            android:theme="@style/Theme.horizonplayer.PurpleSplash" />
 
         <!-- Classic icon uses a separate launcher target so Android can render its matching
              system splash before any application code runs. -->
@@ -141,7 +141,7 @@
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:resizeableActivity="true"
             android:supportsPictureInPicture="true"
-            android:theme="@style/Theme.videoplayer.ClassicSplash" />
+            android:theme="@style/Theme.horizonplayer.ClassicSplash" />
 
         <activity-alias
             android:name=".PurpleLauncher"
@@ -1538,7 +1538,7 @@
         <activity
             android:name=".ui.editor.ExternalTextEditorActivity"
             android:exported="true"
-            android:theme="@style/Theme.videoplayer"
+            android:theme="@style/Theme.horizonplayer"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -1611,8 +1611,8 @@
             android:documentLaunchMode="never"
             android:resizeableActivity="true"
             android:supportsPictureInPicture="true"
-            android:theme="@style/Theme.videoplayer.Player">
-            <!-- MIME-only discovery lets external-player pickers find VideoPlayer before they
+            android:theme="@style/Theme.horizonplayer.Player">
+            <!-- MIME-only discovery lets external-player pickers find HorizonPlayer before they
                  attach the final stream URI. URI playback remains constrained below. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -1787,11 +1787,11 @@
             android:exported="false"
             android:excludeFromRecents="true"
             android:launchMode="singleTask"
-            android:theme="@style/Theme.videoplayer" />
+            android:theme="@style/Theme.horizonplayer" />
         <activity
             android:name=".presentation.crash.DebugLogsActivity"
             android:exported="false"
-            android:theme="@style/Theme.videoplayer" />
+            android:theme="@style/Theme.horizonplayer" />
         <provider
             android:name=".presentation.crash.CrashReportProvider"
             android:authorities="${applicationId}.crash-reports"
@@ -1806,7 +1806,7 @@
         <activity
             android:name=".ui.mediainfo.MediaInfoActivity"
             android:exported="true"
-            android:theme="@style/Theme.videoplayer"
+            android:theme="@style/Theme.horizonplayer"
             android:label="@string/ui_media_info" />
 
         <activity-alias

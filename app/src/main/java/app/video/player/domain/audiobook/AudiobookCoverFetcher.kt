@@ -79,7 +79,7 @@ object AudiobookCoverFetcher {
       val url = "https://itunes.apple.com/search?term=$encoded&media=audiobook&entity=audiobook&limit=15"
       val request = Request.Builder()
         .url(url)
-        .header("User-Agent", "VideoPlayer/AudiobookCoverFetcher")
+        .header("User-Agent", "HorizonPlayer/AudiobookCoverFetcher")
         .build()
 
       val response = client.newCall(request).awaitResponse()
@@ -134,7 +134,7 @@ object AudiobookCoverFetcher {
 
       val request = Request.Builder()
         .url(url)
-        .header("User-Agent", "VideoPlayer/AudiobookCoverFetcher")
+        .header("User-Agent", "HorizonPlayer/AudiobookCoverFetcher")
         .build()
 
       val response = client.newCall(request).awaitResponse()
@@ -178,7 +178,7 @@ object AudiobookCoverFetcher {
     try {
       val request = Request.Builder()
         .url(coverUrl)
-        .header("User-Agent", "VideoPlayer/AudiobookCoverFetcher")
+        .header("User-Agent", "HorizonPlayer/AudiobookCoverFetcher")
         .build()
 
       val response = client.newCall(request).awaitResponse()

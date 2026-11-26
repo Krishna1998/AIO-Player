@@ -132,10 +132,10 @@ class PlaybackProperty<T> internal constructor(
 @Suppress("TooManyFunctions")
 object PlaybackSession : MPVLib.EventObserver {
   private const val TAG = "PlaybackSession"
-  private const val SPATIAL_AUDIO_LABEL = "videoplayer-spatial"
+  private const val SPATIAL_AUDIO_LABEL = "horizonplayer-spatial"
   // Increase side/mid ratio without adding peak gain: each row's absolute weights sum to 1.
   private const val SPATIAL_AUDIO_FILTER =
-    "@videoplayer-spatial:lavfi=[pan=stereo|c0=0.85*c0-0.15*c1|c1=0.85*c1-0.15*c0]"
+    "@horizonplayer-spatial:lavfi=[pan=stereo|c0=0.85*c0-0.15*c1|c1=0.85*c1-0.15*c0]"
   private var spatialAudioObserverStarted = false
   private var appliedSpatialFilter: String? = null
   private val nativeEvents = CoroutineScope(SupervisorJob() + Dispatchers.Default.limitedParallelism(1))
@@ -1243,7 +1243,7 @@ internal fun userScriptsNeedReload(currentKey: String): Boolean {
         appliedHttpHeaderFields = nextHttpHeaders
       }
       MPVLib.setPropertyString("force-media-title", "")
-      MPVLib.setPropertyString("user-data/videoplayer/original-path", smbPath ?: resolvedItem.originalUri)
+      MPVLib.setPropertyString("user-data/horizonplayer/original-path", smbPath ?: resolvedItem.originalUri)
 
       if (!rendererOutputReady) {
         MPVLib.setPropertyString("vo", "null")

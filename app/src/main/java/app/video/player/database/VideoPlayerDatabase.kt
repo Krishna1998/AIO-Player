@@ -76,7 +76,7 @@ import app.video.player.domain.network.NetworkConnection
   exportSchema = true,
 )
 @TypeConverters(NetworkProtocolConverter::class, NetworkStreamEntryTypeConverter::class)
-abstract class VideoPlayerDatabase : RoomDatabase() {
+abstract class HorizonPlayerDatabase : RoomDatabase() {
   abstract fun videoDataDao(): PlaybackStateDao
 
   abstract fun recentlyPlayedDao(): RecentlyPlayedDao

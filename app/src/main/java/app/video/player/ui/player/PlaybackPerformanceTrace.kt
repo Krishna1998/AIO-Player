@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap
  */
 object PlaybackPerformanceTrace : MPVLib.EventObserver {
   private const val TAG = "PlaybackPerf"
-  private const val TRACE_PREFIX = "VideoPlayer:"
+  private const val TRACE_PREFIX = "HorizonPlayer:"
   private val sectionStartsNs by lazy { ConcurrentHashMap<String, Long>() }
 
   fun mark(

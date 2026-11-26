@@ -16,7 +16,7 @@ import android.util.Base64
 import android.util.Xml
 import androidx.documentfile.provider.DocumentFile
 import app.video.player.BuildConfig
-import app.video.player.database.VideoPlayerDatabase
+import app.video.player.database.HorizonPlayerDatabase
 import app.video.player.domain.network.NetworkConnection
 import app.video.player.domain.network.NetworkProtocol
 import app.video.player.preferences.preference.PreferenceKind
@@ -44,10 +44,10 @@ import java.util.Locale
 class SettingsManager(
   private val context: Context,
   private val preferenceStore: PreferenceStore,
-  private val database: VideoPlayerDatabase,
+  private val database: HorizonPlayerDatabase,
 ) {
   companion object {
-    private const val TAG_ROOT = "VideoPlayerSettings"
+    private const val TAG_ROOT = "HorizonPlayerSettings"
     private const val TAG_PREFERENCES = "preferences"
     private const val TAG_PREFERENCE = "preference"
     private const val TAG_DATABASE = "database"
@@ -76,8 +76,8 @@ class SettingsManager(
     private const val LAST_BACKUP_SIGNATURE = "last_signature"
     private const val LAST_BACKUP_TIME = "last_time"
     private const val AUTO_BACKUP_RETENTION = 7
-    private val AUTO_BACKUP_FILE_REGEX = Regex("""videoplayer_settings_[0-9]{8}_[0-9]{6}(?: \([0-9]+\))?\.xml""")
-    private val BACKUP_TIMESTAMP_REGEX = Regex("""videoplayer_settings_([0-9]{8}_[0-9]{6})""", RegexOption.IGNORE_CASE)
+    private val AUTO_BACKUP_FILE_REGEX = Regex("""horizonplayer_settings_[0-9]{8}_[0-9]{6}(?: \([0-9]+\))?\.xml""")
+    private val BACKUP_TIMESTAMP_REGEX = Regex("""horizonplayer_settings_([0-9]{8}_[0-9]{6})""", RegexOption.IGNORE_CASE)
     private const val MAX_BACKUP_BYTES = 64L * 1024 * 1024
     private const val MAX_TEXT_LENGTH = 4 * 1024 * 1024
     private const val MAX_SET_SIZE = 10_000
@@ -145,7 +145,7 @@ class SettingsManager(
           val state = context.getSharedPreferences(AUTO_BACKUP_STATE, Context.MODE_PRIVATE)
           if (signature == state.getString(LAST_BACKUP_SIGNATURE, null)) return@withContext Result.success(null)
 
-          val temporary = root.createFile("text/xml", ".videoplayer-settings-${System.currentTimeMillis()}.tmp")
+          val temporary = root.createFile("text/xml", ".horizonplayer-settings-${System.currentTimeMillis()}.tmp")
             ?: error("Unable to create backup")
           var finalized = false
           try {
@@ -191,7 +191,7 @@ class SettingsManager(
         val candidates = (root.listFiles().asSequence() + backupFolder?.listFiles().orEmpty().asSequence())
           .filter { file ->
             file.isFile && file.name?.let { name ->
-              name.startsWith("videoplayer_settings_", ignoreCase = true) &&
+              name.startsWith("horizonplayer_settings_", ignoreCase = true) &&
                 name.endsWith(".xml", ignoreCase = true)
             } == true
           }
@@ -677,7 +677,7 @@ class SettingsManager(
 
   fun getDefaultExportFilename(): String {
     val dateFormat = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ROOT)
-    return "videoplayer_settings_${dateFormat.format(Date())}.xml"
+    return "horizonplayer_settings_${dateFormat.format(Date())}.xml"
   }
 
   data class ImportStats(

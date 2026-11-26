@@ -576,7 +576,7 @@ object CodecCapabilitiesScreen : Screen {
 
     val copyReportToClipboard = {
       val sb = StringBuilder()
-      sb.appendLine("=== VideoPlayer Hardware vs Software Codec Diagnostics ===")
+      sb.appendLine("=== HorizonPlayer Hardware vs Software Codec Diagnostics ===")
       sb.appendLine("Device: ${Build.MANUFACTURER} ${Build.MODEL} (Android ${Build.VERSION.RELEASE}, API ${Build.VERSION.SDK_INT})")
       sb.appendLine("Decoders: $hwCount Hardware Accelerated, $swCount Software Fallback ($videoCount Video, $audioCount Audio)")
       sb.appendLine()

@@ -26,7 +26,7 @@ import kotlin.math.sign
 import kotlin.math.sin
 
 /**
- * VideoPlayer expressive shape scale following Material 3 Expressive guidelines.
+ * HorizonPlayer expressive shape scale following Material 3 Expressive guidelines.
  * 8-level scale from 4dp (chips) to 48dp (high-emphasis expressive containers).
  */
 val AppShapes =

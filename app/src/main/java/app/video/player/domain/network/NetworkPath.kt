@@ -96,7 +96,7 @@ fun encodeNetworkPathForUrl(path: String): String = Uri.encode(path, "/")
  * live in playlists and intents without copying passwords or short-lived loopback proxy tokens.
  */
 object NetworkPlaybackUri {
-  const val SCHEME = "videoplayer-network"
+  const val SCHEME = "horizonplayer-network"
 
   data class Reference(
     val connectionId: Long,

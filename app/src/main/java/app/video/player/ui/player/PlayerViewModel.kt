@@ -2269,21 +2269,21 @@ fun restartFromBeginning() {
   private var customButtonsScriptPaths: Map<CustomButtonScriptLanguage, String> = emptyMap()
   @Volatile
   private var customButtonsScriptVersions: Map<CustomButtonScriptLanguage, String> = emptyMap()
-  private val legacyCustomButtonsLoadedFlagProperty = "user-data/videoplayer/custombuttons_loaded"
-  private val legacyCustomButtonsVersionProperty = "user-data/videoplayer/custombuttons_version"
+  private val legacyCustomButtonsLoadedFlagProperty = "user-data/horizonplayer/custombuttons_loaded"
+  private val legacyCustomButtonsVersionProperty = "user-data/horizonplayer/custombuttons_version"
   private val customButtonScriptTargets =
     listOf(
       CustomButtonScriptTarget(
         language = CustomButtonScriptLanguage.LUA,
         fileName = "custombuttons.lua",
-        loadedFlagProperty = "user-data/videoplayer/custombuttons_lua_loaded",
-        versionProperty = "user-data/videoplayer/custombuttons_lua_version",
+        loadedFlagProperty = "user-data/horizonplayer/custombuttons_lua_loaded",
+        versionProperty = "user-data/horizonplayer/custombuttons_lua_version",
       ),
       CustomButtonScriptTarget(
         language = CustomButtonScriptLanguage.JS,
         fileName = "custombuttons.js",
-        loadedFlagProperty = "user-data/videoplayer/custombuttons_js_loaded",
-        versionProperty = "user-data/videoplayer/custombuttons_js_version",
+        loadedFlagProperty = "user-data/horizonplayer/custombuttons_js_loaded",
+        versionProperty = "user-data/horizonplayer/custombuttons_js_version",
       ),
     )
   private val customButtonScriptTargetsByLanguage =
@@ -3353,7 +3353,7 @@ fun restartFromBeginning() {
     const val AUTO_CROP_THUMBNAIL_SIZE = 640
     const val AUTO_CROP_READY_TIMEOUT_MS = 15_000L
     const val AUTO_CROP_CACHE_CAPACITY = 20
-    const val AUTO_CROP_FILTER_LABEL = "videoplayer_autocrop_detect"
+    const val AUTO_CROP_FILTER_LABEL = "horizonplayer_autocrop_detect"
     const val AUTO_CROP_DETECT_LIMIT = "24/255"
     const val AUTO_CROP_DETECT_ROUND = 2
     const val AUTO_CROP_ACTIVE_DETECT_TIMEOUT_MS = 1_600L
@@ -5757,7 +5757,7 @@ fun restartFromBeginning() {
       "seek_to" -> seekToWithText(data.toInt(), null)
       "software_keyboard" -> handleSoftwareKeyboard(data)
       // Curl bridge: dispatch the HTTP request asynchronously; response is written
-      // back to user-data/videoplayer/curl_response for the script to observe.
+      // back to user-data/horizonplayer/curl_response for the script to observe.
       "curl_request" -> scriptCurlBridge.handleRequest(data)
     }
 
@@ -6361,7 +6361,7 @@ fun restartFromBeginning() {
           retriever.setDataSource(
             localUrl,
             mapOf(
-              "User-Agent" to "Mozilla/5.0 (Android) VideoPlayer",
+              "User-Agent" to "Mozilla/5.0 (Android) HorizonPlayer",
               "Accept" to "*/*",
             ),
           )
@@ -6771,9 +6771,9 @@ fun restartFromBeginning() {
 
     // Use labeled video filter for mirroring to avoid state desync
     if (newMirrorState) {
-      PlaybackSession.command("vf", "add", "@videoplayer_hflip:hflip")
+      PlaybackSession.command("vf", "add", "@horizonplayer_hflip:hflip")
     } else {
-      PlaybackSession.command("vf", "remove", "@videoplayer_hflip")
+      PlaybackSession.command("vf", "remove", "@horizonplayer_hflip")
     }
     playerUpdate.value =
       PlayerUpdates.ShowText(
@@ -6790,9 +6790,9 @@ fun restartFromBeginning() {
 
     // Use labeled video filter for vflip to avoid state desync
     if (newState) {
-      PlaybackSession.command("vf", "add", "@videoplayer_vflip:vflip")
+      PlaybackSession.command("vf", "add", "@horizonplayer_vflip:vflip")
     } else {
-      PlaybackSession.command("vf", "remove", "@videoplayer_vflip")
+      PlaybackSession.command("vf", "remove", "@horizonplayer_vflip")
     }
 
     playerUpdate.value =

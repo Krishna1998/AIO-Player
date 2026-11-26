@@ -46,7 +46,7 @@ internal val lyricsJson =
     isLenient = true
   }
 
-internal val LYRICS_AGENT = "VideoPlayer/${BuildConfig.VERSION_NAME} (https://github.com/DARKNIGHT7473/VideoPlayer)"
+internal val LYRICS_AGENT = "HorizonPlayer/${BuildConfig.VERSION_NAME} (https://github.com/DARKNIGHT7473/HorizonPlayer)"
 
 private const val TIMEOUT_SECONDS = 6L
 

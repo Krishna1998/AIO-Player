@@ -51,7 +51,7 @@ class OnlineSubtitleOrchestrator(
     val provider =
       when (subtitle.provider) {
         SubtitleProvider.WYZIE -> wyzieProvider
-        SubtitleProvider.VIDEOPLAYER_SUBTITLE_HUB -> subtitleHubProvider
+        SubtitleProvider.HORIZONPLAYER_SUBTITLE_HUB -> subtitleHubProvider
       }
 
     return provider.download(subtitle, mediaTitle)
@@ -94,7 +94,7 @@ class OnlineSubtitleOrchestrator(
             add(
               async {
                 subtitleHubProvider.searchIncrementally(subtitleHubRequest) { results ->
-                  publish(SubtitleProvider.VIDEOPLAYER_SUBTITLE_HUB, results)
+                  publish(SubtitleProvider.HORIZONPLAYER_SUBTITLE_HUB, results)
                 }
               },
             )
@@ -122,7 +122,7 @@ class OnlineSubtitleOrchestrator(
     val providerOrder =
       mapOf(
         SubtitleProvider.WYZIE to 0,
-        SubtitleProvider.VIDEOPLAYER_SUBTITLE_HUB to 1,
+        SubtitleProvider.HORIZONPLAYER_SUBTITLE_HUB to 1,
       )
 
     return subtitles

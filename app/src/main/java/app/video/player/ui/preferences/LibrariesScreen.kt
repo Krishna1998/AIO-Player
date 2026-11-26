@@ -101,7 +101,7 @@ object LibrariesScreen : Screen {
                 fontWeight = FontWeight.Bold,
               )
               Text(
-                text = stringResource(R.string.ui_core_open_source_dependencies_used_by_videoplayer),
+                text = stringResource(R.string.ui_core_open_source_dependencies_used_by_horizonplayer),
                 style = MaterialTheme.typography.bodyLarge,
               )
               Surface(

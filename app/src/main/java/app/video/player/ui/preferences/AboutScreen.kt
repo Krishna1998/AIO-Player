@@ -552,7 +552,7 @@ object AboutScreen : Screen {
                   Modifier
                     .fillMaxWidth()
                     .clickable {
-                      SafeClipboard.copyPlainText(context, "videoplayer_device_info", deviceInfo)
+                      SafeClipboard.copyPlainText(context, "horizonplayer_device_info", deviceInfo)
                     }
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,

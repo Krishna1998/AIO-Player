@@ -2,24 +2,24 @@
 <resources>
 
     <!-- Native animated-vector splash; the animation never delays app launch. -->
-    <style name="Theme.videoplayer.Splash" parent="Theme.SplashScreen">
+    <style name="Theme.horizonplayer.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_purple_animated</item>
         <item name="windowSplashScreenAnimationDuration">420</item>
         <item name="windowSplashScreenBackground">@color/splash_background</item>
-        <item name="postSplashScreenTheme">@style/Theme.videoplayer</item>
+        <item name="postSplashScreenTheme">@style/Theme.horizonplayer</item>
     </style>
 
-    <style name="Theme.videoplayer.PurpleSplash" parent="Theme.SplashScreen">
+    <style name="Theme.horizonplayer.PurpleSplash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_purple_animated</item>
         <item name="windowSplashScreenAnimationDuration">420</item>
         <item name="windowSplashScreenBackground">@color/splash_background</item>
-        <item name="postSplashScreenTheme">@style/Theme.videoplayer</item>
+        <item name="postSplashScreenTheme">@style/Theme.horizonplayer</item>
     </style>
 
     <!-- Legacy launcher icon is preserved; both animations occupy matched safe-area bounds. -->
-    <style name="Theme.videoplayer.ClassicSplash" parent="Theme.SplashScreen">
+    <style name="Theme.horizonplayer.ClassicSplash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash_classic_inset</item>
         <item name="windowSplashScreenBackground">@color/splash_background_classic</item>
-        <item name="postSplashScreenTheme">@style/Theme.videoplayer</item>
+        <item name="postSplashScreenTheme">@style/Theme.horizonplayer</item>
     </style>
 </resources>

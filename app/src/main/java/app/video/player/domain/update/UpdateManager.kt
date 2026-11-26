@@ -72,7 +72,7 @@ class UpdateManager(
     if (selectUpdateAsset(release) == null) {
       return null
     }
-    val prefs = context.getSharedPreferences("videoplayer_prefs", Context.MODE_PRIVATE)
+    val prefs = context.getSharedPreferences("horizonplayer_prefs", Context.MODE_PRIVATE)
     val ignoredVersion =
       prefs.getString(ignoredVersionKey(effectiveChannel), null)
         ?: if (effectiveChannel == AppUpdateChannel.STABLE) prefs.getString(LEGACY_IGNORED_VERSION_KEY, null) else null
@@ -144,7 +144,7 @@ class UpdateManager(
       return
     }
 
-    val prefs = context.getSharedPreferences("videoplayer_prefs", Context.MODE_PRIVATE)
+    val prefs = context.getSharedPreferences("horizonplayer_prefs", Context.MODE_PRIVATE)
     prefs
       .edit()
       .putString(ignoredVersionKey(channel), version)

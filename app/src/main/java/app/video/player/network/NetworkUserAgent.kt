@@ -36,6 +36,6 @@ object NetworkUserAgent {
         }
     }
 
-    return "VideoPlayer/${BuildConfig.VERSION_NAME} (Android ${Build.VERSION.RELEASE}; ${Build.MANUFACTURER} ${Build.MODEL})"
+    return "HorizonPlayer/${BuildConfig.VERSION_NAME} (Android ${Build.VERSION.RELEASE}; ${Build.MANUFACTURER} ${Build.MODEL})"
   }
 }
