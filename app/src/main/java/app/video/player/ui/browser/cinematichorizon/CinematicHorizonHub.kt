@@ -3432,6 +3432,7 @@ private fun SpotlightGesturesInfoDialog(
 
   BasicAlertDialog(
     onDismissRequest = { onDismiss(showEveryTime) },
+    properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
   ) {
     Surface(
       shape = RoundedCornerShape(28.dp),
@@ -3448,9 +3449,9 @@ private fun SpotlightGesturesInfoDialog(
       ),
       tonalElevation = 6.dp,
       modifier = Modifier
-        .fillMaxWidth()
-        .widthIn(max = 420.dp)
-        .padding(horizontal = 20.dp, vertical = 24.dp),
+        .fillMaxWidth(0.92f)
+        .widthIn(max = 460.dp)
+        .padding(vertical = 24.dp),
     ) {
       Column(
         modifier = Modifier
@@ -3555,7 +3556,7 @@ private fun SpotlightGesturesInfoDialog(
             )
 
             GestureGuideItem(
-              icon = "👆⏳",
+              icon = "⏳",
               gestureName = "Long Press",
               description = "Options menu (Rename, Hide in Secure Folder, Delete)",
               accentColor = MaterialTheme.colorScheme.primary,
@@ -3605,14 +3606,14 @@ private fun SpotlightGesturesInfoDialog(
             )
 
             GestureGuideItem(
-              icon = "👈👉",
+              icon = "↔️",
               gestureName = "Horizontal Swipe",
               description = "Swipe left for next • Swipe right for previous track",
               accentColor = MaterialTheme.colorScheme.tertiary,
             )
 
             GestureGuideItem(
-              icon = "👆⏳",
+              icon = "⏳",
               gestureName = "Long Press",
               description = "Open full music player & queue screen",
               accentColor = MaterialTheme.colorScheme.tertiary,

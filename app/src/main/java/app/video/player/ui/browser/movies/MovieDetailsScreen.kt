@@ -121,6 +121,9 @@ data class MovieDetailsScreen(
     var metadata by remember { mutableStateOf<MovieMetadata?>(null) }
     var isRefreshing by remember { mutableStateOf(false) }
     var isWatched by remember { mutableStateOf(false) }
+    var hasStarted by remember { mutableStateOf(false) }
+    var seriesEpisodes by remember { mutableStateOf<List<Pair<Video, app.video.player.domain.movies.MovieClassifier.SeriesEpisodeInfo>>>(emptyList()) }
+    val playbackStateRepo = koinInject<app.video.player.domain.playbackstate.repository.PlaybackStateRepository>()
     var showEditDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -134,6 +137,20 @@ data class MovieDetailsScreen(
             listOf(resolved),
             browserPreferences.watchedThreshold.get(),
           )
+          hasStarted = (playbackStateRepo.getVideoDataByTitle(resolved.displayName)?.lastPosition ?: 0) > 0
+          val seriesInfo = app.video.player.domain.movies.MovieClassifier.extractSeriesEpisodeInfo(resolved)
+          if (seriesInfo != null) {
+            val parentDir = File(resolved.path).parentFile
+            val siblingFiles = parentDir?.listFiles()?.filter { it.isFile } ?: emptyList()
+            val siblingVideos = MediaFileRepository.getVideosFromFiles(context, siblingFiles)
+            val matched = siblingVideos.mapNotNull { v ->
+              val info = app.video.player.domain.movies.MovieClassifier.extractSeriesEpisodeInfo(v)
+              if (info != null && info.seriesKey == seriesInfo.seriesKey) v to info else null
+            }.sortedWith(compareBy({ it.second.season }, { it.second.episode }, { it.first.displayName }))
+            if (matched.size > 1) {
+              seriesEpisodes = matched
+            }
+          }
           metadata = movieMetadataRepo.getCachedMetadata(resolved)
           if (metadata == null) {
             isRefreshing = true
@@ -400,11 +417,69 @@ data class MovieDetailsScreen(
                     modifier = Modifier.size(24.dp),
                   )
                   Text(
-                    text = stringResource(R.string.ui_play_movie),
+                    text = when {
+                      isWatched -> "Already Finished · Play"
+                      hasStarted -> "Resume"
+                      else -> stringResource(R.string.ui_play_movie)
+                    },
                     style = MaterialTheme.typography.titleMedium.copy(
                       fontWeight = FontWeight.Bold,
                     ),
                   )
+                }
+              }
+
+              if (seriesEpisodes.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                  text = "Episodes (${seriesEpisodes.size})",
+                  style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                  color = MaterialTheme.colorScheme.onSurface,
+                )
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                  seriesEpisodes.forEach { (epVideo, epInfo) ->
+                    Surface(
+                      onClick = {
+                        MediaUtils.playFile(
+                          source = epVideo,
+                          context = context,
+                          launchSource = "movie_details_episode",
+                        )
+                      },
+                      shape = RoundedCornerShape(14.dp),
+                      color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                      modifier = Modifier.fillMaxWidth(),
+                    ) {
+                      Row(
+                        modifier = Modifier
+                          .fillMaxWidth()
+                          .padding(horizontal = 14.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                      ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                          Text(
+                            text = "S%02dE%02d".format(epInfo.season, epInfo.episode),
+                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.primary,
+                          )
+                          Text(
+                            text = epVideo.displayName.substringBeforeLast('.'),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                          )
+                        }
+                        Icon(
+                          imageVector = Icons.RoundedFilled.PlayArrow,
+                          contentDescription = null,
+                          tint = MaterialTheme.colorScheme.primary,
+                          modifier = Modifier.size(22.dp),
+                        )
+                      }
+                    }
+                  }
                 }
               }
             }

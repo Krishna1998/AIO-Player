@@ -324,4 +324,51 @@ object MovieClassifier {
     }
     return false
   }
+
+  data class SeriesEpisodeInfo(
+    val seriesKey: String,
+    val season: Int,
+    val episode: Int,
+  )
+
+  private val SEASON_EP_REGEX = Regex("""(?i)\bS(\d{1,2})[\s._-]*E(\d{1,4})\b""")
+  private val EP_ONLY_REGEX = Regex("""(?i)\b(?:EP?|Episode)[\s._-]*(\d{1,4})\b""")
+
+  fun extractSeriesEpisodeInfo(video: Video): SeriesEpisodeInfo? {
+    val raw = video.displayName.substringBeforeLast('.')
+    val seMatch = SEASON_EP_REGEX.find(raw)
+    if (seMatch != null) {
+      val season = seMatch.groupValues[1].toIntOrNull() ?: 1
+      val episode = seMatch.groupValues[2].toIntOrNull() ?: 0
+      val key = raw.substring(0, seMatch.range.first).trim(' ', '-', '_', '.', '[', '(').lowercase(Locale.ROOT)
+      if (key.isNotBlank()) return SeriesEpisodeInfo(key, season, episode)
+    }
+    val epMatch = EP_ONLY_REGEX.find(raw)
+    if (epMatch != null) {
+      val episode = epMatch.groupValues[1].toIntOrNull() ?: 0
+      val key = raw.substring(0, epMatch.range.first).trim(' ', '-', '_', '.', '[', '(').lowercase(Locale.ROOT)
+      if (key.isNotBlank()) return SeriesEpisodeInfo(key, 1, episode)
+    }
+    return null
+  }
+
+  fun groupSeriesForDisplay(videos: List<Video>): List<Video> {
+    val grouped = mutableMapOf<String, MutableList<Pair<Video, SeriesEpisodeInfo>>>()
+    val standalone = mutableListOf<Video>()
+    for (video in videos) {
+      val info = extractSeriesEpisodeInfo(video)
+      if (info != null) {
+        grouped.getOrPut(info.seriesKey) { mutableListOf() }.add(video to info)
+      } else {
+        standalone.add(video)
+      }
+    }
+    val result = mutableListOf<Video>()
+    result.addAll(standalone)
+    for ((_, eps) in grouped) {
+      val sorted = eps.sortedWith(compareBy({ it.second.season }, { it.second.episode }, { it.first.displayName }))
+      result.add(sorted.first().first)
+    }
+    return result
+  }
 }

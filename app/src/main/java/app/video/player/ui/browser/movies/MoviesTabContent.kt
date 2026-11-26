@@ -127,6 +127,8 @@ fun MoviesTabContent(
         (it.progressPercentage ?: 0f) > 0f && !it.isWatched
       }
       else -> movieCandidates
+    }.let { list ->
+      if (openMovieDetailsOnTap) MovieClassifier.groupSeriesForDisplay(list) else list
     }
   }
 
