@@ -1960,6 +1960,26 @@ fun AudioPlayerControls(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
           ) {
+            if (isPortrait && !isAudiobook) {
+              ReactiveIconButton(
+                onClick = {
+                  val act = context as? PlayerActivity
+                  if (act != null) {
+                    act.toggleAudioBackgroundPlayback()
+                  } else {
+                    audioPreferences.audioBackgroundPlayback.set(!backgroundPlaybackEnabled)
+                  }
+                },
+                modifier = Modifier.size(32.dp * audioButtonScale),
+              ) {
+                Icon(
+                  imageVector = Icons.RoundedFilled.Headset,
+                  contentDescription = stringResource(R.string.btn_label_background_playback),
+                  tint = if (backgroundPlaybackEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                  modifier = Modifier.size(20.dp * audioButtonScale),
+                )
+              }
+            }
             AnimatedContent(
               targetState = abLoop.isExpanded,
               transitionSpec = {
@@ -2781,8 +2801,8 @@ fun AudioPlayerControls(
         ) {
           Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-            modifier = Modifier.padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+            modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
           ) {
             Icon(
               imageVector = Icons.RoundedFilled.Speed,
@@ -2805,6 +2825,8 @@ fun AudioPlayerControls(
                 } else {
                   MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (speedConfigOwned) 0.38f else 1f)
                 },
+              maxLines = 1,
+              softWrap = false,
               modifier = Modifier.stableNumericWidth(speedText),
             )
           }
@@ -2851,11 +2873,15 @@ fun AudioPlayerControls(
             speedButton()
             if (!isAudiobook) ReactiveIconButton(
               onClick = {
-                val act = context as? PlayerActivity
-                if (act != null) {
-                  act.toggleAudioBackgroundPlayback()
+                if (isPortrait) {
+                  onOpenSheet(Sheets.SleepTimer)
                 } else {
-                  audioPreferences.audioBackgroundPlayback.set(!backgroundPlaybackEnabled)
+                  val act = context as? PlayerActivity
+                  if (act != null) {
+                    act.toggleAudioBackgroundPlayback()
+                  } else {
+                    audioPreferences.audioBackgroundPlayback.set(!backgroundPlaybackEnabled)
+                  }
                 }
               },
               modifier =
@@ -2870,9 +2896,16 @@ fun AudioPlayerControls(
                   ),
             ) {
               Icon(
-                imageVector = Icons.RoundedFilled.Headset,
-                contentDescription = stringResource(R.string.btn_label_background_playback),
-                tint = if (backgroundPlaybackEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                imageVector = if (isPortrait) Icons.RoundedFilled.Timer else Icons.RoundedFilled.Headset,
+                contentDescription =
+                  if (isPortrait) stringResource(R.string.player_sheets_sleep_timer_title)
+                  else stringResource(R.string.btn_label_background_playback),
+                tint =
+                  if (isPortrait) {
+                    if (activeSleepTimerSeconds > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                  } else {
+                    if (backgroundPlaybackEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                  },
                 modifier = Modifier.size(24.dp * audioButtonScale),
               )
             }
@@ -2901,6 +2934,29 @@ fun AudioPlayerControls(
               )
             }
           }
+        } else {
+          Spacer(modifier = Modifier.width(12.dp))
+          ReactiveIconButton(
+            onClick = { onOpenSheet(Sheets.SleepTimer) },
+            modifier =
+              Modifier
+                .audioGlassSurface(
+                  shape = CircleShape,
+                  containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f),
+                  highlightAlpha = 0.35f,
+                  elevation = 6.dp,
+                )
+                .size(48.dp * audioButtonScale),
+          ) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+              Icon(
+                imageVector = Icons.RoundedFilled.Timer,
+                contentDescription = stringResource(R.string.player_sheets_sleep_timer_title),
+                tint = if (activeSleepTimerSeconds > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.size(24.dp * audioButtonScale),
+              )
+            }
+          }
         }
       }
     }
@@ -2916,44 +2972,23 @@ fun AudioPlayerControls(
           ) { resetInactivityTimer() },
         horizontalAlignment = Alignment.CenterHorizontally,
       ) {
-        if (!isTabletPortrait && !showInPlaceLyrics) {
-          Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-            centerVisualizerView(Modifier.fillMaxSize())
-            Box(
-              modifier =
-                Modifier
-                  .fillMaxWidth()
-                  .background(
-                    Brush.verticalGradient(
-                      0f to Color.Black.copy(alpha = 0.55f),
-                      1f to Color.Transparent,
-                    ),
-                  )
-                  .then(headerContentPadding)
-                  .padding(bottom = 12.dp),
-            ) {
-              headerBar()
-            }
-          }
-        } else {
-          androidx.compose.animation.AnimatedVisibility(
-            visible = !isLyricsFullscreen,
-            enter = fadeIn(animationSpec = tween(300)) +
-              androidx.compose.animation.expandVertically(animationSpec = tween(300)),
-            exit = fadeOut(animationSpec = tween(300)) +
-              androidx.compose.animation.shrinkVertically(animationSpec = tween(300)),
+        androidx.compose.animation.AnimatedVisibility(
+          visible = !isLyricsFullscreen,
+          enter = fadeIn(animationSpec = tween(300)) +
+            androidx.compose.animation.expandVertically(animationSpec = tween(300)),
+          exit = fadeOut(animationSpec = tween(300)) +
+            androidx.compose.animation.shrinkVertically(animationSpec = tween(300)),
+        ) {
+          Column(
+            modifier = Modifier.fillMaxWidth().then(headerContentPadding),
+            horizontalAlignment = Alignment.CenterHorizontally,
           ) {
-            Column(
-              modifier = Modifier.fillMaxWidth().then(headerContentPadding),
-              horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-              headerBar()
-              if (!showInPlaceLyrics) Spacer(modifier = Modifier.height(16.dp))
-            }
+            headerBar()
+            if (!showInPlaceLyrics) Spacer(modifier = Modifier.height(16.dp))
           }
-
-          centerVisualizerView(Modifier.weight(1f).fillMaxWidth())
         }
+
+        centerVisualizerView(Modifier.weight(1f).fillMaxWidth())
 
         androidx.compose.animation.AnimatedVisibility(
           visible = !isLyricsFullscreen,
