@@ -364,11 +364,12 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
     }
   }
   val initialPageIndex = remember(mediaLibraryTabs) {
-    val activeTab = MediaLibraryTabItem.entries.firstOrNull { it.name == savedActiveTab }
+    val currentActiveTabName = browserPreferences.mediaLibraryActiveTab.get()
+    val activeTab = MediaLibraryTabItem.entries.firstOrNull { it.name == currentActiveTabName }
     val target = if (activeTab != null && activeTab in mediaLibraryTabs) {
       activeTab
     } else {
-      MediaLibraryTabItem.fromLibraryType(savedMediaType)
+      MediaLibraryTabItem.fromLibraryType(browserPreferences.mediaLibraryType.get())
     }
     val idx = mediaLibraryTabs.indexOf(target)
     if (idx >= 0) idx else 0
