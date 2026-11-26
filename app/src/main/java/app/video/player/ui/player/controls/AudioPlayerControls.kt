@@ -2603,7 +2603,7 @@ fun AudioPlayerControls(
           Modifier
             .fillMaxWidth()
             .then(if (isAudiobook) Modifier.horizontalScroll(rememberScrollState()) else Modifier),
-        horizontalArrangement = Arrangement.SpaceEvenly,
+        horizontalArrangement = Arrangement.spacedBy(18.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
       ) {
         val audioButtonScale = playerButtonsScale.coerceIn(0.7f, 1.4f)
@@ -2645,14 +2645,15 @@ fun AudioPlayerControls(
             actionHaptics.confirm()
           }
         }
+        val playPillShape = RoundedCornerShape(20.dp)
         ReactiveSurfaceButton(
           onClick = { viewModel.pauseUnpause() },
-          shape = CircleShape,
+          shape = playPillShape,
           color = MaterialTheme.colorScheme.primary,
           modifier =
             Modifier
               .tvInitialFocus(tvPlayFocusRequester)
-              .outsideShadow(CircleShape, radius = 12.dp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
+              .outsideShadow(playPillShape, radius = 12.dp, color = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f))
               .border(
                 1.5.dp,
                 Brush.verticalGradient(
@@ -2662,9 +2663,10 @@ fun AudioPlayerControls(
                     MaterialTheme.colorScheme.primary.copy(alpha = 0.30f),
                   ),
                 ),
-                CircleShape,
+                playPillShape,
               )
-              .size((if (isPortrait) 76.dp else 64.dp) * audioButtonScale),
+              .width((if (isPortrait) 92.dp else 84.dp) * audioButtonScale)
+              .height((if (isPortrait) 64.dp else 56.dp) * audioButtonScale),
           shadowElevation = 0.dp,
         ) {
           Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
