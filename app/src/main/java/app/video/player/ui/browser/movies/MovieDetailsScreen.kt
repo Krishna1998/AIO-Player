@@ -124,6 +124,7 @@ data class MovieDetailsScreen(
     var hasStarted by remember { mutableStateOf(false) }
     var lastPositionSec by remember { mutableStateOf(0) }
     var seriesEpisodes by remember { mutableStateOf<List<Pair<Video, app.video.player.domain.movies.MovieClassifier.SeriesEpisodeInfo>>>(emptyList()) }
+    var episodeProgressMap by remember { mutableStateOf<Map<String, Float>>(emptyMap()) }
     val playbackStateRepo = koinInject<app.video.player.domain.playbackstate.repository.PlaybackStateRepository>()
     var showEditDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -167,6 +168,24 @@ data class MovieDetailsScreen(
             }.sortedWith(compareBy({ it.second.season }, { it.second.episode }, { it.first.displayName }))
             if (matched.size > 1) {
               seriesEpisodes = matched
+            val threshold = browserPreferences.watchedThreshold.get()
+            episodeProgressMap = matched.associate { (epVideo, _) ->
+              val epWatched = PlaybackStateOps.areAllWatched(listOf(epVideo), threshold)
+              val progress = if (epWatched) {
+                1f
+              } else {
+                val epSaved = playbackStateRepo.getVideoDataByTitle(epVideo.displayName)
+                  ?: playbackStateRepo.getVideoDataByTitle(epVideo.title)
+                  ?: playbackStateRepo.getVideoDataByTitle(File(epVideo.path).name)
+                val epPos = epSaved?.lastPosition ?: 0
+                if (epPos > 0 && epVideo.duration > 0L) {
+                  (epPos * 1000f / epVideo.duration.toFloat()).coerceIn(0f, 1f)
+                } else {
+                  0f
+                }
+              }
+              epVideo.path to progress
+            }
             }
           }
           metadata = movieMetadataRepo.getCachedMetadata(resolved)
@@ -476,6 +495,8 @@ data class MovieDetailsScreen(
                 )
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                   seriesEpisodes.forEach { (epVideo, epInfo) ->
+                    val epProgress = episodeProgressMap[epVideo.path] ?: if (epVideo.isWatched) 1f else 0f
+                    val epIsWatched = epProgress >= 1f || epVideo.isWatched
                     Surface(
                       onClick = {
                         MediaUtils.playFile(
@@ -514,7 +535,7 @@ data class MovieDetailsScreen(
                           verticalAlignment = Alignment.CenterVertically,
                           horizontalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
-                          if (epVideo.isWatched) {
+                          if (epIsWatched) {
                             Icon(
                               imageVector = Icons.RoundedFilled.CheckCircle,
                               contentDescription = null,
@@ -530,9 +551,9 @@ data class MovieDetailsScreen(
                           )
                         }
                       }
-                      if (epVideo.isWatched) {
+                      if (epProgress > 0f) {
                         LinearProgressIndicator(
-                          progress = { 1f },
+                          progress = { epProgress },
                           modifier = Modifier
                             .fillMaxWidth()
                             .height(3.dp),
