@@ -128,8 +128,20 @@ data class MovieDetailsScreen(
     var showEditDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
 
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    var resumeRefreshTick by remember { mutableStateOf(0) }
+    androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
+      val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+        if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+          resumeRefreshTick++
+        }
+      }
+      lifecycleOwner.lifecycle.addObserver(observer)
+      onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
     // Load video item and metadata
-    LaunchedEffect(videoPath) {
+    LaunchedEffect(videoPath, resumeRefreshTick) {
       withContext(Dispatchers.IO) {
         val resolved = MediaFileRepository.getVideosFromFiles(context, listOf(File(videoPath))).firstOrNull()
         video = resolved
