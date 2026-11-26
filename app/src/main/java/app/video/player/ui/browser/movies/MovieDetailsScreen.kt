@@ -495,8 +495,8 @@ data class MovieDetailsScreen(
                 )
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                   seriesEpisodes.forEach { (epVideo, epInfo) ->
-                    val epProgress = episodeProgressMap[epVideo.path] ?: if (epVideo.isWatched) 1f else 0f
-                    val epIsWatched = epProgress >= 1f || epVideo.isWatched
+                    val epProgress = episodeProgressMap[epVideo.path] ?: 0f
+                    val epIsWatched = epProgress >= 1f
                     Surface(
                       onClick = {
                         MediaUtils.playFile(
@@ -552,7 +552,7 @@ data class MovieDetailsScreen(
                         }
                       }
                       if (epProgress > 0f) {
-                        LinearProgressIndicator(
+                        androidx.compose.material3.LinearProgressIndicator(
                           progress = { epProgress },
                           modifier = Modifier
                             .fillMaxWidth()
