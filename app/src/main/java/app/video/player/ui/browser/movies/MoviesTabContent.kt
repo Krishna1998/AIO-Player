@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Spacer
@@ -446,7 +447,7 @@ private fun MoviePosterCard(
           }
         }
 
-        val remainingMs = videoInfo.timeRemaining
+        val remainingMs = item.timeRemaining
         if (video.duration > 0L && remainingMs != null && remainingMs > 0L && remainingMs < video.duration) {
           val watchedFraction = ((video.duration - remainingMs).toFloat() / video.duration.toFloat()).coerceIn(0f, 1f)
           if (watchedFraction > 0.01f) {
@@ -454,13 +455,13 @@ private fun MoviePosterCard(
               modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .androidx.compose.foundation.layout.height(4.dp)
+                .height(4.dp)
                 .background(Color.Black.copy(alpha = 0.55f)),
             ) {
               Box(
                 modifier = Modifier
                   .fillMaxWidth(watchedFraction)
-                  .androidx.compose.foundation.layout.height(4.dp)
+                  .height(4.dp)
                   .background(MaterialTheme.colorScheme.primary),
               )
             }
