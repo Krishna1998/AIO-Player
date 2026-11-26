@@ -890,8 +890,12 @@ object AdvancedPreferencesScreen : Screen {
                       val deviceInfo = app.video.player.presentation.crash.CrashActivity.collectDeviceInfo()
                       val logcat = app.video.player.presentation.crash.CrashActivity.collectLogcat()
                       val combined = app.video.player.presentation.crash.CrashActivity.concatLogs(deviceInfo, null, logcat)
+                      val clipText = if (combined.length > 200_000) combined.takeLast(200_000) else combined
                       withContext(Dispatchers.Main) {
-                        clipboard.setText(androidx.compose.ui.text.AnnotatedString(combined))
+                        try {
+                          clipboard.setText(androidx.compose.ui.text.AnnotatedString(clipText))
+                        } catch (_: Exception) {
+                        }
                       }
                       activity?.let {
                         app.video.player.presentation.crash.CrashActivity.shareLogs(deviceInfo, null, logcat, it)
