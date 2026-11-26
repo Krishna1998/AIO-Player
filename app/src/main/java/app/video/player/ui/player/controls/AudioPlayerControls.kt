@@ -2712,13 +2712,33 @@ fun AudioPlayerControls(
             tint = if (shuffleEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             reduceMotion = AppMotion.playerReducedMotion())
         }
-        ReactiveIconButton(onClick = { viewModel.cycleRepeatMode(); actionHaptics.confirm() }, modifier = chipGlass) {
-          AnimatedIcon(when (repeatMode) {
-            RepeatMode.OFF -> Icons.RoundedFilled.Repeat
-            RepeatMode.ONE -> Icons.RoundedFilled.RepeatOne
-            RepeatMode.ALL -> Icons.RoundedFilled.RepeatOn
-          }, null, tint = if (repeatMode != RepeatMode.OFF) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-            reduceMotion = AppMotion.playerReducedMotion())
+        if (isPortrait) {
+          ReactiveIconButton(onClick = { viewModel.cycleRepeatMode(); actionHaptics.confirm() }, modifier = chipGlass) {
+            AnimatedIcon(when (repeatMode) {
+              RepeatMode.OFF -> Icons.RoundedFilled.Repeat
+              RepeatMode.ONE -> Icons.RoundedFilled.RepeatOne
+              RepeatMode.ALL -> Icons.RoundedFilled.RepeatOn
+            }, null, tint = if (repeatMode != RepeatMode.OFF) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+              reduceMotion = AppMotion.playerReducedMotion())
+          }
+        } else {
+          ReactiveIconButton(
+            onClick = {
+              val act = context as? PlayerActivity
+              if (act != null) {
+                act.toggleAudioBackgroundPlayback()
+              } else {
+                audioPreferences.audioBackgroundPlayback.set(!backgroundPlaybackEnabled)
+              }
+            },
+            modifier = chipGlass,
+          ) {
+            Icon(
+              imageVector = Icons.RoundedFilled.Headset,
+              contentDescription = stringResource(R.string.btn_label_background_playback),
+              tint = if (backgroundPlaybackEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
         }
       }
     }
@@ -2823,22 +2843,11 @@ fun AudioPlayerControls(
             playbackModeButtons()
             speedButton()
             if (!isAudiobook) ReactiveIconButton(
-              onClick = {
-                if (isPortrait) {
-                  onOpenSheet(Sheets.SleepTimer)
-                } else {
-                  val act = context as? PlayerActivity
-                  if (act != null) {
-                    act.toggleAudioBackgroundPlayback()
-                  } else {
-                    audioPreferences.audioBackgroundPlayback.set(!backgroundPlaybackEnabled)
-                  }
-                }
-              },
+              onClick = { onOpenSheet(Sheets.SleepTimer) },
               modifier =
                 Modifier
                   .then(
-                    if (isPortrait && activeSleepTimerSeconds > 0) {
+                    if (activeSleepTimerSeconds > 0) {
                       Modifier
                     } else {
                       Modifier.weight(1f)
@@ -2848,7 +2857,7 @@ fun AudioPlayerControls(
                   .audioGlassSurface(
                     shape = RoundedCornerShape(14.dp),
                     containerColor =
-                      if (isPortrait && activeSleepTimerSeconds > 0) {
+                      if (activeSleepTimerSeconds > 0) {
                         MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.70f)
                       } else {
                         MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
@@ -2857,7 +2866,7 @@ fun AudioPlayerControls(
                     elevation = 6.dp,
                   ),
             ) {
-              if (isPortrait && activeSleepTimerSeconds > 0) {
+              if (activeSleepTimerSeconds > 0) {
                 Row(
                   verticalAlignment = Alignment.CenterVertically,
                   horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
@@ -2879,16 +2888,9 @@ fun AudioPlayerControls(
                 }
               } else {
                 Icon(
-                  imageVector = if (isPortrait) Icons.RoundedFilled.Timer else Icons.RoundedFilled.Headset,
-                  contentDescription =
-                    if (isPortrait) "Sleep Timer"
-                    else stringResource(R.string.btn_label_background_playback),
-                  tint =
-                    if (isPortrait) {
-                      MaterialTheme.colorScheme.onSurfaceVariant
-                    } else {
-                      if (backgroundPlaybackEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                    },
+                  imageVector = Icons.RoundedFilled.Timer,
+                  contentDescription = "Sleep Timer",
+                  tint = MaterialTheme.colorScheme.onSurfaceVariant,
                   modifier = Modifier.size(24.dp * audioButtonScale),
                 )
               }
@@ -2921,7 +2923,7 @@ fun AudioPlayerControls(
         } else {
           Spacer(modifier = Modifier.width(12.dp))
           ReactiveIconButton(
-            onClick = { onOpenSheet(Sheets.SleepTimer) },
+            onClick = { viewModel.cycleRepeatMode(); actionHaptics.confirm() },
             modifier =
               Modifier
                 .audioGlassSurface(
@@ -2933,11 +2935,16 @@ fun AudioPlayerControls(
                 .size(48.dp * audioButtonScale),
           ) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-              Icon(
-                imageVector = Icons.RoundedFilled.Timer,
-                contentDescription = "Sleep Timer",
-                tint = if (activeSleepTimerSeconds > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+              AnimatedIcon(
+                when (repeatMode) {
+                  RepeatMode.OFF -> Icons.RoundedFilled.Repeat
+                  RepeatMode.ONE -> Icons.RoundedFilled.RepeatOne
+                  RepeatMode.ALL -> Icons.RoundedFilled.RepeatOn
+                },
+                contentDescription = null,
+                tint = if (repeatMode != RepeatMode.OFF) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(24.dp * audioButtonScale),
+                reduceMotion = AppMotion.playerReducedMotion(),
               )
             }
           }
