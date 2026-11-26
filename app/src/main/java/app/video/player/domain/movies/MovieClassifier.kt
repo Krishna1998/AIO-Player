@@ -352,21 +352,21 @@ object MovieClassifier {
     return null
   }
 
-  fun groupSeriesForDisplay(videos: List<Video>): List<Video> {
-    val grouped = mutableMapOf<String, MutableList<Pair<Video, SeriesEpisodeInfo>>>()
-    val standalone = mutableListOf<Video>()
-    for (video in videos) {
-      val info = extractSeriesEpisodeInfo(video)
+  fun <T> groupSeriesForDisplay(items: List<T>, videoSelector: (T) -> Video): List<T> {
+    val grouped = mutableMapOf<String, MutableList<Pair<T, SeriesEpisodeInfo>>>()
+    val standalone = mutableListOf<T>()
+    for (item in items) {
+      val info = extractSeriesEpisodeInfo(videoSelector(item))
       if (info != null) {
-        grouped.getOrPut(info.seriesKey) { mutableListOf() }.add(video to info)
+        grouped.getOrPut(info.seriesKey) { mutableListOf() }.add(item to info)
       } else {
-        standalone.add(video)
+        standalone.add(item)
       }
     }
-    val result = mutableListOf<Video>()
+    val result = mutableListOf<T>()
     result.addAll(standalone)
     for ((_, eps) in grouped) {
-      val sorted = eps.sortedWith(compareBy({ it.second.season }, { it.second.episode }, { it.first.displayName }))
+      val sorted = eps.sortedWith(compareBy({ it.second.season }, { it.second.episode }, { videoSelector(it.first).displayName }))
       result.add(sorted.first().first)
     }
     return result

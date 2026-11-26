@@ -128,7 +128,7 @@ fun MoviesTabContent(
       }
       else -> movieCandidates
     }.let { list ->
-      if (openMovieDetailsOnTap) MovieClassifier.groupSeriesForDisplay(list) else list
+      if (openMovieDetailsOnTap) MovieClassifier.groupSeriesForDisplay(list) { it.video } else list
     }
   }
 
