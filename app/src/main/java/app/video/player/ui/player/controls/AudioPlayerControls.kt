@@ -1466,11 +1466,6 @@ fun AudioPlayerControls(
               verticalAlignment = Alignment.CenterVertically,
               horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-              androidx.compose.foundation.Image(
-                painter = androidx.compose.ui.res.painterResource(badgeRes),
-                contentDescription = badgeLabel,
-                modifier = Modifier.size(16.dp),
-              )
               Text(
                 text = badgeLabel,
                 style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
@@ -1805,7 +1800,7 @@ fun AudioPlayerControls(
             Surface(
               modifier =
                 Modifier
-                  .aspectRatio(1f)
+                  .then(if (isFullBleedPortrait) Modifier.fillMaxSize() else Modifier.aspectRatio(1f))
                   .offset { IntOffset(currentOffset.roundToInt(), 0) }
                   .then(
                     if (isFullBleedPortrait) {
@@ -1914,7 +1909,7 @@ fun AudioPlayerControls(
     val trackMetadataView = @Composable {
       Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.Start,
+        horizontalAlignment = Alignment.CenterHorizontally,
       ) {
         val displayTitle =
           remember(audiobook?.book?.title, lastValidTitle, displayArtist) {
@@ -1927,6 +1922,7 @@ fun AudioPlayerControls(
           style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
           fontFamily = fontFamilyForText(displayTitle),
           color = MaterialTheme.colorScheme.onSurface,
+          textAlign = TextAlign.Center,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
           modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
@@ -1939,6 +1935,7 @@ fun AudioPlayerControls(
           style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
           fontFamily = fontFamilyForText(displayArtist),
           color = MaterialTheme.colorScheme.onSurfaceVariant,
+          textAlign = TextAlign.Center,
           maxLines = 1,
           overflow = TextOverflow.Ellipsis,
           modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
@@ -2902,23 +2899,44 @@ fun AudioPlayerControls(
           ) { resetInactivityTimer() },
         horizontalAlignment = Alignment.CenterHorizontally,
       ) {
-        androidx.compose.animation.AnimatedVisibility(
-          visible = !isLyricsFullscreen,
-          enter = fadeIn(animationSpec = tween(300)) +
-            androidx.compose.animation.expandVertically(animationSpec = tween(300)),
-          exit = fadeOut(animationSpec = tween(300)) +
-            androidx.compose.animation.shrinkVertically(animationSpec = tween(300)),
-        ) {
-          Column(
-            modifier = Modifier.fillMaxWidth().then(headerContentPadding),
-            horizontalAlignment = Alignment.CenterHorizontally,
-          ) {
-            headerBar()
-            if (!showInPlaceLyrics) Spacer(modifier = Modifier.height(16.dp))
+        if (!isTabletPortrait && !showInPlaceLyrics) {
+          Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+            centerVisualizerView(Modifier.fillMaxSize())
+            Box(
+              modifier =
+                Modifier
+                  .fillMaxWidth()
+                  .background(
+                    Brush.verticalGradient(
+                      0f to Color.Black.copy(alpha = 0.55f),
+                      1f to Color.Transparent,
+                    ),
+                  )
+                  .then(headerContentPadding)
+                  .padding(bottom = 12.dp),
+            ) {
+              headerBar()
+            }
           }
-        }
+        } else {
+          androidx.compose.animation.AnimatedVisibility(
+            visible = !isLyricsFullscreen,
+            enter = fadeIn(animationSpec = tween(300)) +
+              androidx.compose.animation.expandVertically(animationSpec = tween(300)),
+            exit = fadeOut(animationSpec = tween(300)) +
+              androidx.compose.animation.shrinkVertically(animationSpec = tween(300)),
+          ) {
+            Column(
+              modifier = Modifier.fillMaxWidth().then(headerContentPadding),
+              horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+              headerBar()
+              if (!showInPlaceLyrics) Spacer(modifier = Modifier.height(16.dp))
+            }
+          }
 
-        centerVisualizerView(Modifier.weight(1f).fillMaxWidth())
+          centerVisualizerView(Modifier.weight(1f).fillMaxWidth())
+        }
 
         androidx.compose.animation.AnimatedVisibility(
           visible = !isLyricsFullscreen,
