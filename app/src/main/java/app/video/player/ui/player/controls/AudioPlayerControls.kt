@@ -2631,7 +2631,7 @@ fun AudioPlayerControls(
                 ),
                 playPillShape,
               )
-              .width((if (isPortrait) 108.dp else 132.dp) * audioButtonScale)
+              .width((if (isPortrait) 124.dp else 156.dp) * audioButtonScale)
               .height((if (isPortrait) 64.dp else 56.dp) * audioButtonScale),
           shadowElevation = 0.dp,
         ) {
@@ -3086,7 +3086,7 @@ fun AudioPlayerControls(
           modifier =
             Modifier
               .align(Alignment.BottomEnd)
-              .padding(16.dp)
+              .padding(end = 72.dp, bottom = 16.dp)
               .audioGlassSurface(
                 shape = CircleShape,
                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f),
