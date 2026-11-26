@@ -1,10 +1,16 @@
 <div align="center">
 
+<img src="app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png" width="110" alt="Horizon Player Logo" />
+
 # Horizon Player
 
 **A private, offline-first Android video & Hi-Res music player powered by `mpv`, `FFmpeg`, and `libplacebo`, crafted with Material 3 Expressive Liquid Glass.**
 
 [![Release](https://img.shields.io/github/v/release/Krishna1998/Horizon-Player?style=for-the-badge&color=a855f7)](https://github.com/Krishna1998/Horizon-Player/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/Krishna1998/Horizon-Player/total?style=for-the-badge&color=ec4899)](https://github.com/Krishna1998/Horizon-Player/releases)
+[![Stars](https://img.shields.io/github/stars/Krishna1998/Horizon-Player?style=for-the-badge&color=eab308)](https://github.com/Krishna1998/Horizon-Player/stargazers)
+[![Android](https://img.shields.io/badge/Android-8.0%2B-3ddc84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/Krishna1998/Horizon-Player/releases/latest)
+[![Engine](https://img.shields.io/badge/Engine-mpv%20%2B%20FFmpeg-6366f1?style=for-the-badge)](https://mpv.io/)
 [![Website](https://img.shields.io/badge/Website-Live-38bdf8?style=for-the-badge)](https://krishna1998.github.io/Horizon-Player/)
 [![License](https://img.shields.io/badge/License-AGPL--3.0-blue?style=for-the-badge)](LICENSE)
 
