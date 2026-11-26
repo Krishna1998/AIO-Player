@@ -317,6 +317,7 @@ object SettingsSearchScreen : Screen {
                   stringResource(R.string.pref_audio),
                   stringResource(R.string.pref_video_background_playback_title),
                   stringResource(R.string.pref_advanced_notification_style),
+                  stringResource(R.string.pref_advanced_dump_logs_title),
                   stringResource(R.string.pref_advanced),
                 ).filterNotNull()
               @OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)

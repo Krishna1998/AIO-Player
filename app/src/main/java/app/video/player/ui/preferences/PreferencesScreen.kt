@@ -265,60 +265,6 @@ object PreferencesScreen : Screen {
           },
         )
       },
-      bottomBar = {
-        // Floating bottom search pill for effortless one-handed thumb reach
-        val miniPlayerClearance = LocalNavigationBarHeight.current
-        val animatedBottomPadding by animateDpAsState(
-          targetValue = 12.dp + miniPlayerClearance,
-          label = "settings_search_bar_mini_player_clearance",
-        )
-        Box(
-          modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = animatedBottomPadding)
-            .navigationBarsPadding(),
-          contentAlignment = Alignment.Center,
-        ) {
-          Surface(
-            modifier = Modifier
-              .widthIn(max = 520.dp)
-              .fillMaxWidth()
-              .height(48.dp)
-              .clip(RoundedCornerShape(24.dp))
-              .clickable { backstack.navigateTo(SettingsSearchScreen) },
-            shape = RoundedCornerShape(24.dp),
-            color = if (wallpaperActive) {
-              colorScheme.surfaceContainerHigh.copy(alpha = 0.76f)
-            } else {
-              colorScheme.surfaceContainerHigh
-            },
-            tonalElevation = 6.dp,
-            shadowElevation = 8.dp,
-            border = BorderStroke(
-              width = 1.dp,
-              color = colorScheme.outlineVariant.copy(alpha = 0.40f),
-            ),
-          ) {
-            Row(
-              modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-              Icon(
-                Icons.RoundedFilled.Search,
-                contentDescription = stringResource(R.string.generic_search),
-                tint = colorScheme.primary,
-                modifier = Modifier.size(20.dp),
-              )
-              Text(
-                text = stringResource(R.string.settings_search_hint),
-                style = MaterialTheme.typography.bodyMedium,
-                color = colorScheme.onSurfaceVariant,
-              )
-            }
-          }
-        }
-      },
     ) { padding ->
       LazyColumn(
         modifier = modifier
@@ -515,16 +461,16 @@ private fun AuroraProfileHeroCard(
       .clip(RoundedCornerShape(26.dp))
       .clickable(onClick = onClick),
     shape = RoundedCornerShape(26.dp),
-    color = colorScheme.surfaceContainerHigh.copy(alpha = 0.70f),
-    tonalElevation = 2.dp,
-    shadowElevation = 4.dp,
+    color = colorScheme.surfaceContainerLow,
+    tonalElevation = 0.dp,
+    shadowElevation = 0.dp,
     border = BorderStroke(
       width = 1.dp,
       brush = Brush.linearGradient(
         colors = listOf(
           colorScheme.primary.copy(alpha = 0.50f),
-          colorScheme.tertiary.copy(alpha = 0.30f),
-          Color.Transparent,
+          colorScheme.tertiary.copy(alpha = 0.35f),
+          colorScheme.outlineVariant.copy(alpha = 0.65f),
         ),
       ),
     ),

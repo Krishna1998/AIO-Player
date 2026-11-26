@@ -266,6 +266,7 @@ object AdvancedPreferencesScreen : Screen {
           rememberSettingsSearchList(AdvancedPreferencesScreen, MaterialTheme.colorScheme.primary)
         LazyColumn(
           state = settingsListState,
+          contentPadding = PaddingValues(bottom = app.video.player.ui.browser.navigation.LocalNavigationBarHeight.current),
           modifier =
             Modifier
               .fillMaxSize()
