@@ -446,7 +446,7 @@ private fun MoviePosterCard(
           }
         }
 
-        val remainingMs = videoWithInfo.timeRemaining
+        val remainingMs = videoInfo.timeRemaining
         if (video.duration > 0L && remainingMs != null && remainingMs > 0L && remainingMs < video.duration) {
           val watchedFraction = ((video.duration - remainingMs).toFloat() / video.duration.toFloat()).coerceIn(0f, 1f)
           if (watchedFraction > 0.01f) {
@@ -454,13 +454,13 @@ private fun MoviePosterCard(
               modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .height(4.dp)
+                .androidx.compose.foundation.layout.height(4.dp)
                 .background(Color.Black.copy(alpha = 0.55f)),
             ) {
               Box(
                 modifier = Modifier
                   .fillMaxWidth(watchedFraction)
-                  .height(4.dp)
+                  .androidx.compose.foundation.layout.height(4.dp)
                   .background(MaterialTheme.colorScheme.primary),
               )
             }
