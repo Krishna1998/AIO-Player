@@ -509,12 +509,25 @@ data class MovieDetailsScreen(
                             overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                           )
                         }
-                        Icon(
-                          imageVector = Icons.RoundedFilled.PlayArrow,
-                          contentDescription = null,
-                          tint = MaterialTheme.colorScheme.primary,
-                          modifier = Modifier.size(22.dp),
-                        )
+                        Row(
+                          verticalAlignment = Alignment.CenterVertically,
+                          horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                          if (epVideo.isWatched) {
+                            Icon(
+                              imageVector = Icons.RoundedFilled.CheckCircle,
+                              contentDescription = null,
+                              tint = Color(0xFF4CAF50),
+                              modifier = Modifier.size(20.dp),
+                            )
+                          }
+                          Icon(
+                            imageVector = Icons.RoundedFilled.PlayArrow,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(22.dp),
+                          )
+                        }
                       }
                     }
                   }
