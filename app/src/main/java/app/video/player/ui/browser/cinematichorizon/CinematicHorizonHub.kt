@@ -2087,8 +2087,16 @@ private fun HeroSpotlightBox(
         }
       }
 
+      val rawHeroTitle = if (video.title.isNotBlank()) video.title else FileTypeUtils.stripExtension(video.displayName)
+      val heroEpisodeMatch = Regex("""(?i)^(.*?\bS\d{1,2}E\d{1,2})\b""").find(rawHeroTitle)
+      val heroDisplayTitle = if (heroEpisodeMatch != null) {
+        heroEpisodeMatch.groupValues[1].replace('.', ' ').replace('_', ' ').trim()
+      } else {
+        rawHeroTitle
+      }
+
       Text(
-        text = if (video.title.isNotBlank()) video.title else FileTypeUtils.stripExtension(video.displayName),
+        text = heroDisplayTitle,
         style = MaterialTheme.typography.titleLarge.copy(
           fontWeight = FontWeight.Black,
           fontSize = 21.sp,
