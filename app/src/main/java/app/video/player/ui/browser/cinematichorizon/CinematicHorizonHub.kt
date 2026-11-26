@@ -1977,9 +1977,9 @@ private fun HeroSpotlightBox(
         .background(
           Brush.verticalGradient(
             colors = listOf(
-              Color.Black.copy(alpha = 0.25f),
-              Color.Black.copy(alpha = 0.4f),
-              Color.Black.copy(alpha = 0.92f),
+              Color.Black.copy(alpha = 0.20f),
+              Color.Black.copy(alpha = 0.62f),
+              Color.Black.copy(alpha = 0.95f),
             ),
           ),
         ),
