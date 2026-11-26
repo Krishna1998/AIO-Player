@@ -422,10 +422,12 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   LaunchedEffect(mediaType, mediaLibraryTabs, savedActiveTab) {
     if (!forceAudio) {
       val currentActiveTabName = browserPreferences.mediaLibraryActiveTab.get()
-      val keepMoviesTab =
-        currentActiveTabName == MediaLibraryTabItem.Movies.name &&
-          MediaLibraryTabItem.Movies in mediaLibraryTabs
-      val targetTab = if (keepMoviesTab) MediaLibraryTabItem.Movies else MediaLibraryTabItem.fromLibraryType(mediaType)
+      val activeTabItem = MediaLibraryTabItem.entries.firstOrNull { it.name == currentActiveTabName }
+      val targetTab = if (activeTabItem != null && activeTabItem in mediaLibraryTabs && (activeTabItem == MediaLibraryTabItem.Movies || activeTabItem == MediaLibraryTabItem.All)) {
+        activeTabItem
+      } else {
+        MediaLibraryTabItem.fromLibraryType(mediaType)
+      }
       val targetIndex = mediaLibraryTabs.indexOf(targetTab).coerceAtLeast(0)
       if (pagerState.currentPage != targetIndex && !pagerState.isScrollInProgress) {
         navigateTab(targetIndex)
