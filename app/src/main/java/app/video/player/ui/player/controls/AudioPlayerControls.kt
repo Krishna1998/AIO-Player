@@ -1802,13 +1802,15 @@ fun AudioPlayerControls(
             }
 
             // 3. Current Cover Art Card
+            val isLandscapeVignette = !isPortrait
+            val isBorderlessFade = isFullBleedPortrait || isLandscapeVignette
             Surface(
               modifier =
                 Modifier
                   .then(if (isFullBleedPortrait) Modifier.fillMaxSize() else Modifier.aspectRatio(1f))
                   .offset { IntOffset(currentOffset.roundToInt(), 0) }
                   .then(
-                    if (isFullBleedPortrait) {
+                    if (isBorderlessFade) {
                       Modifier
                     } else {
                       Modifier
@@ -1828,7 +1830,7 @@ fun AudioPlayerControls(
                     },
                   ),
               shape = coverShape,
-              color = if (isFullBleedPortrait) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant,
+              color = if (isBorderlessFade) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant,
             ) {
               Box(
                 Modifier
@@ -1846,6 +1848,23 @@ fun AudioPlayerControls(
                               Brush.verticalGradient(
                                 0f to Color.Black,
                                 0.62f to Color.Black,
+                                1f to Color.Transparent,
+                              ),
+                            blendMode = androidx.compose.ui.graphics.BlendMode.DstIn,
+                          )
+                        }
+                    } else if (isLandscapeVignette) {
+                      Modifier
+                        .graphicsLayer {
+                          compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen
+                        }
+                        .drawWithContent {
+                          drawContent()
+                          drawRect(
+                            brush =
+                              Brush.radialGradient(
+                                0f to Color.Black,
+                                0.58f to Color.Black,
                                 1f to Color.Transparent,
                               ),
                             blendMode = androidx.compose.ui.graphics.BlendMode.DstIn,
