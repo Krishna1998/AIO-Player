@@ -22,6 +22,9 @@ These notes are written in plain English and focus on what changed for real use.
   - Improved portrait dialog layout and simplified the guide to show once on initial launch.
 
 ### 🎬 Movies & Library Improvements
+- **Watch Progress Bar & Series Polish:**
+  - Added a watch progress bar to **Movies** tab poster cards and under the **Play Movie / Resume** button in **Movie Details**.
+  - Updated merged series poster badges to show `S01` instead of `S01E01` and trimmed **Continue Watching** titles cleanly after `SxxExx`.
 - **Movies Tab Navigation:**
   - Preserved the active **Movies** tab when navigating back from **Movie Details** instead of jumping to All Media or Video.
 - **Pull-to-Refresh, Lecture Filtering & Direct Play:**
