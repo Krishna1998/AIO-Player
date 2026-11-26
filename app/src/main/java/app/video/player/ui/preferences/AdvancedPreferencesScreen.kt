@@ -862,49 +862,48 @@ object AdvancedPreferencesScreen : Screen {
             val clipboard = androidx.compose.ui.platform.LocalClipboardManager.current
             val verboseLogging by preferences.verboseLogging.collectAsState()
 
-            ExpressivePreferenceGroup {
-              ExpressivePreferenceItem {
-                SwitchPreference(
-                  value = verboseLogging,
-                  onValueChange = preferences.verboseLogging::set,
-                  title = { Text(stringResource(R.string.pref_advanced_verbose_logging_title)) },
-                  summary = {
-                    Text(
-                      stringResource(R.string.pref_advanced_verbose_logging_summary),
-                      color = MaterialTheme.colorScheme.outline,
-                    )
-                  },
-                )
-              }
+            Column(
+              modifier = Modifier.fillMaxWidth(),
+              verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+              SwitchPreference(
+                value = verboseLogging,
+                onValueChange = preferences.verboseLogging::set,
+                title = { Text(stringResource(R.string.pref_advanced_verbose_logging_title)) },
+                summary = {
+                  Text(
+                    stringResource(R.string.pref_advanced_verbose_logging_summary),
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+              )
 
-              ExpressivePreferenceItem {
-                Preference(
-                  title = { Text(stringResource(R.string.pref_advanced_dump_logs_title)) },
-                  summary = {
-                    Text(
-                      stringResource(R.string.pref_advanced_dump_logs_summary),
-                      color = MaterialTheme.colorScheme.outline,
-                    )
-                  },
-                  onClick = {
-                    scope.launch(Dispatchers.IO) {
-                      val deviceInfo = app.video.player.presentation.crash.CrashActivity.collectDeviceInfo()
-                      val logcat = app.video.player.presentation.crash.CrashActivity.collectLogcat()
-                      val combined = app.video.player.presentation.crash.CrashActivity.concatLogs(deviceInfo, null, logcat)
-                      val clipText = if (combined.length > 200_000) combined.takeLast(200_000) else combined
-                      withContext(Dispatchers.Main) {
-                        try {
-                          clipboard.setText(androidx.compose.ui.text.AnnotatedString(clipText))
-                        } catch (_: Exception) {
-                        }
-                      }
-                      activity?.let {
-                        app.video.player.presentation.crash.CrashActivity.shareLogs(deviceInfo, null, logcat, it)
+              Preference(
+                title = { Text(stringResource(R.string.pref_advanced_dump_logs_title)) },
+                summary = {
+                  Text(
+                    stringResource(R.string.pref_advanced_dump_logs_summary),
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+                onClick = {
+                  scope.launch(Dispatchers.IO) {
+                    val deviceInfo = app.video.player.presentation.crash.CrashActivity.collectDeviceInfo()
+                    val logcat = app.video.player.presentation.crash.CrashActivity.collectLogcat()
+                    val combined = app.video.player.presentation.crash.CrashActivity.concatLogs(deviceInfo, null, logcat)
+                    val clipText = if (combined.length > 200_000) combined.takeLast(200_000) else combined
+                    withContext(Dispatchers.Main) {
+                      try {
+                        clipboard.setText(androidx.compose.ui.text.AnnotatedString(clipText))
+                      } catch (_: Exception) {
                       }
                     }
-                  },
-                )
-              }
+                    activity?.let {
+                      app.video.player.presentation.crash.CrashActivity.shareLogs(deviceInfo, null, logcat, it)
+                    }
+                  }
+                },
+              )
             }
           }
         }
