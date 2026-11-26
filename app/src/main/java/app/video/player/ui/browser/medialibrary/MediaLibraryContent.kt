@@ -324,7 +324,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   val movieMetadataRevision by movieMetadataRepo.metadataRevision.collectAsState()
   val isActualMovie: (Video) -> Boolean = remember(movieMetadataRepo, movieMetadataRevision, movieExcludedFolders) {
     { video ->
-      val parentPath = java.io.File(video.path).parent.orEmpty()
+      val parentPath = video.path.substringBeforeLast('/', "")
       parentPath !in movieExcludedFolders &&
         MovieClassifier.isActualMovie(video, movieMetadataRepo.getMemoryCachedMetadata(video))
     }

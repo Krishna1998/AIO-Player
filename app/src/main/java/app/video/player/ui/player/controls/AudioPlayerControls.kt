@@ -1282,7 +1282,8 @@ fun AudioPlayerControls(
                 scaleX = 1.30f
                 scaleY = 1.30f
               }
-              .blur(56.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded),
+              .graphicsLayer { compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen }
+              .blur(36.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded),
         )
         // High-contrast atmospheric scrim: dark tone in dark mode, light frosted tone in light mode
         val scrimBase = if (isDarkTheme) Color.Black else MaterialTheme.colorScheme.surface
