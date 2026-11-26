@@ -488,13 +488,14 @@ data class MovieDetailsScreen(
                       color = MaterialTheme.colorScheme.surfaceContainerHigh,
                       modifier = Modifier.fillMaxWidth(),
                     ) {
-                      Row(
-                        modifier = Modifier
-                          .fillMaxWidth()
-                          .padding(horizontal = 12.dp, vertical = 14.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                      ) {
+                      Column(modifier = Modifier.fillMaxWidth()) {
+                        Row(
+                          modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp, vertical = 14.dp),
+                          verticalAlignment = Alignment.CenterVertically,
+                          horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
                         Column(modifier = Modifier.weight(1f)) {
                           Text(
                             text = "S%02dE%02d".format(epInfo.season, epInfo.episode),
@@ -529,6 +530,17 @@ data class MovieDetailsScreen(
                           )
                         }
                       }
+                      if (epVideo.isWatched) {
+                        LinearProgressIndicator(
+                          progress = { 1f },
+                          modifier = Modifier
+                            .fillMaxWidth()
+                            .height(3.dp),
+                          color = MaterialTheme.colorScheme.primary,
+                          trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                        )
+                      }
+                    }
                     }
                   }
                 }
