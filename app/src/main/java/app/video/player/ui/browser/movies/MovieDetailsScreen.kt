@@ -122,6 +122,7 @@ data class MovieDetailsScreen(
     var isRefreshing by remember { mutableStateOf(false) }
     var isWatched by remember { mutableStateOf(false) }
     var hasStarted by remember { mutableStateOf(false) }
+    var lastPositionSec by remember { mutableStateOf(0) }
     var seriesEpisodes by remember { mutableStateOf<List<Pair<Video, app.video.player.domain.movies.MovieClassifier.SeriesEpisodeInfo>>>(emptyList()) }
     val playbackStateRepo = koinInject<app.video.player.domain.playbackstate.repository.PlaybackStateRepository>()
     var showEditDialog by remember { mutableStateOf(false) }
@@ -137,7 +138,9 @@ data class MovieDetailsScreen(
             listOf(resolved),
             browserPreferences.watchedThreshold.get(),
           )
-          hasStarted = (playbackStateRepo.getVideoDataByTitle(resolved.displayName)?.lastPosition ?: 0) > 0
+          val savedPos = playbackStateRepo.getVideoDataByTitle(resolved.displayName)?.lastPosition ?: 0
+          lastPositionSec = savedPos
+          hasStarted = savedPos > 0
           val seriesInfo = app.video.player.domain.movies.MovieClassifier.extractSeriesEpisodeInfo(resolved)
           if (seriesInfo != null) {
             val parentDir = File(resolved.path).parentFile
@@ -429,6 +432,26 @@ data class MovieDetailsScreen(
                 }
               }
 
+              if (lastPositionSec > 0 && currentVideo.duration > 0L) {
+                val watchedFraction = (lastPositionSec * 1000f / currentVideo.duration.toFloat()).coerceIn(0f, 1f)
+                if (watchedFraction > 0.01f) {
+                  Box(
+                    modifier = Modifier
+                      .fillMaxWidth()
+                      .height(4.dp)
+                      .clip(RoundedCornerShape(2.dp))
+                      .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                  ) {
+                    Box(
+                      modifier = Modifier
+                        .fillMaxWidth(watchedFraction)
+                        .height(4.dp)
+                        .background(MaterialTheme.colorScheme.primary),
+                    )
+                  }
+                }
+              }
+
               if (seriesEpisodes.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
@@ -453,7 +476,7 @@ data class MovieDetailsScreen(
                       Row(
                         modifier = Modifier
                           .fillMaxWidth()
-                          .padding(horizontal = 14.dp, vertical = 12.dp),
+                          .padding(horizontal = 12.dp, vertical = 14.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
                       ) {
