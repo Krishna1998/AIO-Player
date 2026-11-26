@@ -325,7 +325,10 @@ fun RenderPlayerButton(
           } else {
             PlaybackSession.setPropertyFloat("speed", nextSpeed)
           }
-          viewModel.playerUpdate.value = PlayerUpdates.DynamicSpeedControl(nextSpeed)
+          val speedLabel =
+            if (nextSpeed % 1f == 0f) "${nextSpeed.toInt()}x"
+            else "${nextSpeed}x"
+          viewModel.playerUpdate.value = PlayerUpdates.ShowText(speedLabel)
         }
       }
       val onOpenSpeedSheet = {
