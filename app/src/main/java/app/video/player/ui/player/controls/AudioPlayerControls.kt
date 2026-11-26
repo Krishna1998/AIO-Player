@@ -3025,6 +3025,23 @@ fun AudioPlayerControls(
         horizontalArrangement = Arrangement.spacedBy(20.dp),
         verticalAlignment = Alignment.CenterVertically,
       ) {
+        Surface(
+          modifier = Modifier
+            .weight(1f)
+            .fillMaxHeight()
+            .padding(start = controlsSidePadding)
+            .clip(RoundedCornerShape(24.dp)),
+          color = Color.Transparent,
+          shape = RoundedCornerShape(24.dp),
+        ) {
+          DualPaneSidePanel(
+            viewModel = viewModel,
+            playlist = filteredPlaylist,
+            selectedTab = 1,
+            onTabSelected = {},
+          )
+        }
+
         Column(
           modifier = Modifier
             .weight(1f)
@@ -3063,22 +3080,6 @@ fun AudioPlayerControls(
             Spacer(modifier = Modifier.height(16.dp))
             bottomActionRow()
           }
-        }
-
-        Surface(
-          modifier = Modifier
-            .weight(1f)
-            .fillMaxHeight()
-            .clip(RoundedCornerShape(24.dp)),
-          color = Color.Transparent,
-          shape = RoundedCornerShape(24.dp),
-        ) {
-          DualPaneSidePanel(
-            viewModel = viewModel,
-            playlist = filteredPlaylist,
-            selectedTab = 1,
-            onTabSelected = {},
-          )
         }
 
         Surface(
