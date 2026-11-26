@@ -147,6 +147,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.onSizeChanged
@@ -1561,7 +1563,8 @@ fun AudioPlayerControls(
             onTap = resetInactivityTimer,
           )
         } else {
-          val coverShape = RoundedCornerShape(32.dp)
+          val isFullBleedPortrait = isPortrait && !isTabletPortrait
+          val coverShape = if (isFullBleedPortrait) RoundedCornerShape(0.dp) else RoundedCornerShape(32.dp)
           val density = LocalDensity.current
           val gap = with(density) { 24.dp.toPx() }
           val stride = containerWidthPx + gap
@@ -1569,7 +1572,7 @@ fun AudioPlayerControls(
           Box(
             modifier = Modifier
               .fillMaxHeight()
-              .fillMaxWidth(if (isTabletPortrait) 0.56f else if (isPortrait) 0.92f else 1f)
+              .fillMaxWidth(if (isTabletPortrait) 0.56f else 1f)
               .pointerInput(viewModel, mediaPath, containerWidthPx, isAudiobook, audioVolumeGesture) {
                 if (containerWidthPx <= 0f) return@pointerInput
                 awaitEachGesture {
@@ -1804,23 +1807,55 @@ fun AudioPlayerControls(
                 Modifier
                   .aspectRatio(1f)
                   .offset { IntOffset(currentOffset.roundToInt(), 0) }
-                  .shadow(
-                    elevation = 24.dp,
-                    shape = coverShape,
-                    clip = false,
-                    ambientColor = Color.Black.copy(alpha = cardShadowAlpha),
-                    spotColor = Color.Black.copy(alpha = cardShadowAlpha),
-                  )
-                  .clip(coverShape)
-                  .border(
-                    1.dp,
-                    cardBorderBrush,
-                    coverShape,
+                  .then(
+                    if (isFullBleedPortrait) {
+                      Modifier
+                    } else {
+                      Modifier
+                        .shadow(
+                          elevation = 24.dp,
+                          shape = coverShape,
+                          clip = false,
+                          ambientColor = Color.Black.copy(alpha = cardShadowAlpha),
+                          spotColor = Color.Black.copy(alpha = cardShadowAlpha),
+                        )
+                        .clip(coverShape)
+                        .border(
+                          1.dp,
+                          cardBorderBrush,
+                          coverShape,
+                        )
+                    },
                   ),
               shape = coverShape,
-              color = MaterialTheme.colorScheme.surfaceVariant,
+              color = if (isFullBleedPortrait) Color.Transparent else MaterialTheme.colorScheme.surfaceVariant,
             ) {
-              Box(Modifier.fillMaxSize()) {
+              Box(
+                Modifier
+                  .fillMaxSize()
+                  .then(
+                    if (isFullBleedPortrait) {
+                      Modifier
+                        .graphicsLayer {
+                          compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen
+                        }
+                        .drawWithContent {
+                          drawContent()
+                          drawRect(
+                            brush =
+                              Brush.verticalGradient(
+                                0f to Color.Black,
+                                0.62f to Color.Black,
+                                1f to Color.Transparent,
+                              ),
+                            blendMode = androidx.compose.ui.graphics.BlendMode.DstIn,
+                          )
+                        }
+                    } else {
+                      Modifier
+                    },
+                  ),
+              ) {
                 CoverArtCardImage(
                   bitmap = activeCoverOverride ?: albumArtBitmap,
                   artworkUrl = currentArtworkUri?.takeUnless { isLocalArtworkSource(currentMediaSource) },
@@ -2797,6 +2832,7 @@ fun AudioPlayerControls(
           Row(
             modifier =
               Modifier
+                .fillMaxWidth()
                 .audioGlassSurface(
                   shape = CircleShape,
                   containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f),
@@ -2804,9 +2840,9 @@ fun AudioPlayerControls(
                   elevation = 6.dp,
                 )
                 .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+                .padding(horizontal = 12.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
           ) {
             playbackModeButtons()
             speedButton()
@@ -2912,7 +2948,7 @@ fun AudioPlayerControls(
           }
         }
       }
-    } else if (isTabletLandscape && tabletDualPaneTab == 1) {
+    } else if (isTabletLandscape) {
       Row(
         modifier = Modifier.fillMaxSize(),
         horizontalArrangement = Arrangement.spacedBy(20.dp),
@@ -2920,7 +2956,7 @@ fun AudioPlayerControls(
       ) {
         Column(
           modifier = Modifier
-            .weight(1f)
+            .weight(2f)
             .fillMaxHeight(),
           verticalArrangement = Arrangement.SpaceBetween,
           horizontalAlignment = Alignment.CenterHorizontally,
@@ -2960,7 +2996,7 @@ fun AudioPlayerControls(
 
         Surface(
           modifier = Modifier
-            .weight(1.1f)
+            .weight(1f)
             .fillMaxHeight()
             .padding(end = controlsSidePadding)
             .clip(RoundedCornerShape(24.dp)),
@@ -3000,7 +3036,26 @@ fun AudioPlayerControls(
         ) {
           headerBar()
           trackMetadataView()
-          if (!showInPlaceLyrics) currentLyricStripView()
+          if (!showInPlaceLyrics) {
+            if (isCompactLandscape) {
+              currentLyricStripView()
+            } else {
+              LandscapeLyricsQueueCard(
+                viewModel = viewModel,
+                audioPlaylistItems = filteredPlaylist,
+                currentTrackUri = activeTrackPath ?: mediaPath,
+                onOpenLyrics = {
+                  if (isTabletLandscape) {
+                    tabletDualPaneTab = 1
+                  } else {
+                    showInPlaceLyrics = true
+                  }
+                  resetInactivityTimer()
+                },
+                modifier = Modifier.fillMaxWidth().height(168.dp),
+              )
+            }
+          }
           seekbarView()
           playbackControlsRow()
           bottomActionRow()
@@ -3691,4 +3746,265 @@ private fun String.stripAudioExtension(): String {
   if (dotIndex <= 0) return this
   val ext = substring(dotIndex + 1)
   return if (ext.length in 2..5 && ext.none { it.isWhitespace() }) substring(0, dotIndex) else this
+}
+
+@Composable
+private fun LandscapeLyricsQueueCard(
+  viewModel: PlayerViewModel,
+  audioPlaylistItems: List<PlaylistItem>,
+  currentTrackUri: String?,
+  onOpenLyrics: () -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  var selectedTab by rememberSaveable { mutableIntStateOf(0) }
+  val lyricsState by viewModel.lyricsUiState.collectAsState()
+  val activeLyrics = lyricsState.lyrics
+  val syncedLines = activeLyrics?.synced
+  val activeIndex = lyricsState.activeLineIndex
+  val hasSyncedLyrics = !syncedLines.isNullOrEmpty()
+  val currentLine = syncedLines?.getOrNull(activeIndex)
+  val isInstrumentalGap =
+    hasSyncedLyrics &&
+      (currentLine == null ||
+        currentLine.line.isBlank() ||
+        currentLine.line.trim().equals("[instrumental]", ignoreCase = true) ||
+        currentLine.line.trim().equals("instrumental", ignoreCase = true))
+
+  val cardShape = RoundedCornerShape(18.dp)
+  Column(
+    modifier =
+      modifier
+        .audioGlassSurface(
+          shape = cardShape,
+          containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.40f),
+          highlightAlpha = 0.25f,
+          elevation = 3.dp,
+        )
+        .padding(horizontal = 14.dp, vertical = 10.dp),
+    verticalArrangement = Arrangement.spacedBy(8.dp),
+  ) {
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+      Row(
+        modifier =
+          Modifier
+            .clip(RoundedCornerShape(50))
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.45f))
+            .padding(2.dp),
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+      ) {
+        listOf("Lyrics", "Up Next").forEachIndexed { index, label ->
+          val isSelected = selectedTab == index
+          Box(
+            modifier =
+              Modifier
+                .clip(RoundedCornerShape(50))
+                .background(
+                  if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
+                  else Color.Transparent,
+                )
+                .clickable { selectedTab = index }
+                .padding(horizontal = 12.dp, vertical = 4.dp),
+          ) {
+            Text(
+              text = label,
+              style = MaterialTheme.typography.labelMedium,
+              fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
+              color =
+                if (isSelected) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
+        }
+      }
+
+      if (selectedTab == 0) {
+        Text(
+          text = "Expand",
+          style = MaterialTheme.typography.labelMedium,
+          color = MaterialTheme.colorScheme.primary,
+          modifier =
+            Modifier
+              .clip(RoundedCornerShape(50))
+              .clickable { onOpenLyrics() }
+              .padding(horizontal = 8.dp, vertical = 4.dp),
+        )
+      }
+    }
+
+    if (selectedTab == 0) {
+      Box(
+        modifier =
+          Modifier
+            .fillMaxSize()
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { onOpenLyrics() },
+        contentAlignment = Alignment.CenterStart,
+      ) {
+        if (lyricsState.isLoading) {
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            CircularProgressIndicator(
+              modifier = Modifier.size(16.dp),
+              strokeWidth = 2.dp,
+              color = MaterialTheme.colorScheme.primary,
+            )
+            Spacer(Modifier.width(10.dp))
+            Text(
+              text = "Loading lyrics...",
+              style = MaterialTheme.typography.bodyMedium,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+          }
+        } else if (hasSyncedLyrics) {
+          if (isInstrumentalGap) {
+            val placeholder =
+              app.video.player.ui.player.controls.components.rememberPlaceholderLine(
+                app.video.player.ui.player.controls.components.LyricsPlaceholders.LOADING,
+                app.video.player.ui.player.controls.components.PLACEHOLDER_ROTATE_MS,
+              )
+            Text(
+              text = "♪ $placeholder",
+              style = MaterialTheme.typography.titleMedium,
+              fontWeight = FontWeight.SemiBold,
+              color = MaterialTheme.colorScheme.onSurfaceVariant,
+              maxLines = 2,
+              overflow = TextOverflow.Ellipsis,
+            )
+          } else {
+            Column(
+              verticalArrangement = Arrangement.spacedBy(4.dp),
+              modifier = Modifier.fillMaxWidth(),
+            ) {
+              val prevLine = syncedLines?.getOrNull(activeIndex - 1)?.line?.takeIf { it.isNotBlank() }
+              val currLine = currentLine?.line?.takeIf { it.isNotBlank() }
+              val nextLine = syncedLines?.getOrNull(activeIndex + 1)?.line?.takeIf { it.isNotBlank() }
+
+              if (prevLine != null) {
+                Text(
+                  text = prevLine,
+                  style = MaterialTheme.typography.bodyMedium,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f),
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis,
+                )
+              }
+              if (currLine != null) {
+                Text(
+                  text = currLine,
+                  style = MaterialTheme.typography.titleMedium,
+                  fontWeight = FontWeight.Bold,
+                  color = MaterialTheme.colorScheme.onSurface,
+                  maxLines = 2,
+                  overflow = TextOverflow.Ellipsis,
+                )
+              }
+              if (nextLine != null) {
+                Text(
+                  text = nextLine,
+                  style = MaterialTheme.typography.bodyMedium,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.65f),
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis,
+                )
+              }
+            }
+          }
+        } else if (!activeLyrics?.plain.isNullOrEmpty()) {
+          Text(
+            text = activeLyrics!!.plain!!.joinToString("\n").trim(),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
+            maxLines = 4,
+            overflow = TextOverflow.Ellipsis,
+          )
+        } else {
+          Text(
+            text = "No lyrics available • Tap to search",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+          )
+        }
+      }
+    } else {
+      val currentIndex =
+        remember(audioPlaylistItems, currentTrackUri) {
+          val playingIdx = audioPlaylistItems.indexOfFirst { it.isPlaying }
+          if (playingIdx >= 0) playingIdx
+          else if (currentTrackUri != null) audioPlaylistItems.indexOfFirst { it.uri.toString() == currentTrackUri }
+          else -1
+        }
+      val upcomingItems =
+        remember(audioPlaylistItems, currentIndex) {
+          if (currentIndex >= 0 && currentIndex + 1 < audioPlaylistItems.size) {
+            audioPlaylistItems.subList(
+              currentIndex + 1,
+              minOf(currentIndex + 4, audioPlaylistItems.size),
+            )
+          } else {
+            emptyList()
+          }
+        }
+
+      if (upcomingItems.isEmpty()) {
+        Box(
+          modifier = Modifier.fillMaxSize(),
+          contentAlignment = Alignment.CenterStart,
+        ) {
+          Text(
+            text = "End of queue",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.75f),
+          )
+        }
+      } else {
+        Column(
+          modifier = Modifier.fillMaxSize(),
+          verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+          upcomingItems.forEachIndexed { offset, item ->
+            val targetIndex = currentIndex + 1 + offset
+            Row(
+              modifier =
+                Modifier
+                  .fillMaxWidth()
+                  .clip(RoundedCornerShape(10.dp))
+                  .clickable { viewModel.playPlaylistItem(targetIndex) }
+                  .padding(horizontal = 8.dp, vertical = 4.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+              Column(modifier = Modifier.weight(1f)) {
+                Text(
+                  text = item.title.stripAudioExtension(),
+                  style = MaterialTheme.typography.bodyMedium,
+                  fontWeight = FontWeight.Medium,
+                  color = MaterialTheme.colorScheme.onSurface,
+                  maxLines = 1,
+                  overflow = TextOverflow.Ellipsis,
+                )
+                if (!item.artist.isNullOrBlank()) {
+                  Text(
+                    text = item.artist!!,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                  )
+                }
+              }
+              Text(
+                text = "#${targetIndex + 1}",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                modifier = Modifier.padding(start = 8.dp),
+              )
+            }
+          }
+        }
+      }
+    }
+  }
 }
