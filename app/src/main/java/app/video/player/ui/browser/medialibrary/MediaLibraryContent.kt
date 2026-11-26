@@ -419,22 +419,6 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
       }
   }
 
-  LaunchedEffect(mediaType, mediaLibraryTabs, savedActiveTab) {
-    if (!forceAudio) {
-      val currentActiveTabName = browserPreferences.mediaLibraryActiveTab.get()
-      val activeTabItem = MediaLibraryTabItem.entries.firstOrNull { it.name == currentActiveTabName }
-      val targetTab = if (activeTabItem != null && activeTabItem in mediaLibraryTabs && (activeTabItem == MediaLibraryTabItem.Movies || activeTabItem == MediaLibraryTabItem.All)) {
-        activeTabItem
-      } else {
-        MediaLibraryTabItem.fromLibraryType(mediaType)
-      }
-      val targetIndex = mediaLibraryTabs.indexOf(targetTab).coerceAtLeast(0)
-      if (pagerState.currentPage != targetIndex && !pagerState.isScrollInProgress) {
-        navigateTab(targetIndex)
-      }
-    }
-  }
-
   val currentTab: MediaLibraryTabItem = if (forceAudio) {
     MediaLibraryTabItem.Audio
   } else {
