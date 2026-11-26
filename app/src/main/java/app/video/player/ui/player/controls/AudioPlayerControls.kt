@@ -1781,12 +1781,11 @@ fun AudioPlayerControls(
             }
 
             // 3. Current Cover Art Card
-            val isLandscapeVignette = !isPortrait
-            val isBorderlessFade = isFullBleedPortrait || isLandscapeVignette
+            val isBorderlessFade = isFullBleedPortrait || !isPortrait
             Surface(
               modifier =
                 Modifier
-                  .then(if (isFullBleedPortrait) Modifier.fillMaxSize() else Modifier.aspectRatio(1f))
+                  .aspectRatio(1f)
                   .offset { IntOffset(currentOffset.roundToInt(), 0) }
                   .then(
                     if (isBorderlessFade) {
@@ -1815,24 +1814,7 @@ fun AudioPlayerControls(
                 Modifier
                   .fillMaxSize()
                   .then(
-                    if (isFullBleedPortrait) {
-                      Modifier
-                        .graphicsLayer {
-                          compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen
-                        }
-                        .drawWithContent {
-                          drawContent()
-                          drawRect(
-                            brush =
-                              Brush.verticalGradient(
-                                0f to Color.Black,
-                                0.62f to Color.Black,
-                                1f to Color.Transparent,
-                              ),
-                            blendMode = androidx.compose.ui.graphics.BlendMode.DstIn,
-                          )
-                        }
-                    } else if (isLandscapeVignette) {
+                    if (isBorderlessFade) {
                       Modifier
                         .graphicsLayer {
                           compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen
