@@ -1452,27 +1452,6 @@ fun AudioPlayerControls(
               codecUpper == "AC3" -> "DOLBY"
               else -> codecUpper
             }
-            Row(
-              modifier =
-                Modifier
-                  .audioGlassSurface(
-                    shape = CircleShape,
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f),
-                    highlightAlpha = 0.24f,
-                    elevation = 2.dp,
-                  )
-                  .clickable { onOpenSheet(Sheets.AudioProperties) }
-                  .padding(horizontal = 8.dp, vertical = 4.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-              Text(
-                text = badgeLabel,
-                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-              )
-            }
           }
           ReactiveIconButton(
             onClick = { onOpenSheet(Sheets.AudioProperties) },
@@ -1862,9 +1841,20 @@ fun AudioPlayerControls(
                           drawContent()
                           drawRect(
                             brush =
-                              Brush.radialGradient(
-                                0f to Color.Black,
-                                0.58f to Color.Black,
+                              Brush.verticalGradient(
+                                0f to Color.Transparent,
+                                0.14f to Color.Black,
+                                0.86f to Color.Black,
+                                1f to Color.Transparent,
+                              ),
+                            blendMode = androidx.compose.ui.graphics.BlendMode.DstIn,
+                          )
+                          drawRect(
+                            brush =
+                              Brush.horizontalGradient(
+                                0f to Color.Transparent,
+                                0.14f to Color.Black,
+                                0.86f to Color.Black,
                                 1f to Color.Transparent,
                               ),
                             blendMode = androidx.compose.ui.graphics.BlendMode.DstIn,
@@ -2725,31 +2715,35 @@ fun AudioPlayerControls(
       }
     }
 
-    val playbackModeButtons = @Composable {
+    val playbackModeButtons: @Composable RowScope.() -> Unit = {
       val audioButtonScale = playerButtonsScale.coerceIn(0.7f, 1.4f)
-      val modeButtonSize = 40.dp * audioButtonScale
+      val chipShape = RoundedCornerShape(14.dp)
+      val chipHeight = 44.dp * audioButtonScale
       val chipGlass =
-        Modifier.audioGlassSurface(
-          shape = CircleShape,
-          containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f),
-          highlightAlpha = 0.35f,
-          elevation = 6.dp,
-        )
+        Modifier
+          .weight(1f)
+          .height(chipHeight)
+          .audioGlassSurface(
+            shape = chipShape,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f),
+            highlightAlpha = 0.35f,
+            elevation = 6.dp,
+          )
       if (isAudiobook) {
-        ReactiveIconButton(onClick = { onOpenSheet(Sheets.AudiobookRewind) }, modifier = chipGlass.size(modeButtonSize)) {
+        ReactiveIconButton(onClick = { onOpenSheet(Sheets.AudiobookRewind) }, modifier = chipGlass) {
           Icon(Icons.RoundedFilled.Replay, stringResource(R.string.audiobook_smart_rewind), tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
       } else {
         ReactiveIconButton(
           onClick = { viewModel.toggleShuffle(); actionHaptics.selection(!shuffleEnabled) },
           enabled = playlistModeEnabled,
-          modifier = chipGlass.size(modeButtonSize),
+          modifier = chipGlass,
         ) {
           AnimatedIcon(if (shuffleEnabled) Icons.RoundedFilled.ShuffleOn else Icons.RoundedFilled.Shuffle, null,
             tint = if (shuffleEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
             reduceMotion = AppMotion.playerReducedMotion())
         }
-        ReactiveIconButton(onClick = { viewModel.cycleRepeatMode(); actionHaptics.confirm() }, modifier = chipGlass.size(modeButtonSize)) {
+        ReactiveIconButton(onClick = { viewModel.cycleRepeatMode(); actionHaptics.confirm() }, modifier = chipGlass) {
           AnimatedIcon(when (repeatMode) {
             RepeatMode.OFF -> Icons.RoundedFilled.Repeat
             RepeatMode.ONE -> Icons.RoundedFilled.RepeatOne
@@ -2761,20 +2755,22 @@ fun AudioPlayerControls(
     }
 
     val bottomActionRow = @Composable {
-      val speedButton = @Composable {
+      val speedButton: @Composable RowScope.() -> Unit = {
+        val chipShape = RoundedCornerShape(14.dp)
         Surface(
-          shape = CircleShape,
+          shape = chipShape,
           color = Color.Transparent,
           modifier =
             Modifier
+              .weight(1f)
+              .height(44.dp * audioButtonScale)
               .audioGlassSurface(
-                shape = CircleShape,
+                shape = chipShape,
                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f),
                 highlightAlpha = 0.35f,
                 elevation = 6.dp,
               )
-              .height(36.dp * audioButtonScale)
-              .clip(CircleShape)
+              .clip(chipShape)
               .combinedClickable(
                 enabled = !speedConfigOwned,
                 onClick = {
@@ -2864,13 +2860,9 @@ fun AudioPlayerControls(
           contentAlignment = Alignment.Center,
         ) {
           Row(
-            modifier =
-              Modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
-                .padding(horizontal = 4.dp, vertical = 4.dp),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
           ) {
             playbackModeButtons()
             speedButton()
@@ -2885,13 +2877,14 @@ fun AudioPlayerControls(
               },
               modifier =
                 Modifier
+                  .weight(1f)
+                  .height(44.dp * audioButtonScale)
                   .audioGlassSurface(
-                    shape = CircleShape,
+                    shape = RoundedCornerShape(14.dp),
                     containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f),
                     highlightAlpha = 0.35f,
                     elevation = 6.dp,
-                  )
-                  .size(40.dp * audioButtonScale),
+                  ),
             ) {
               Icon(
                 imageVector = Icons.RoundedFilled.Headset,
@@ -3937,9 +3930,9 @@ private fun LandscapeLyricsQueueCard(
               verticalArrangement = Arrangement.spacedBy(4.dp),
               modifier = Modifier.fillMaxWidth(),
             ) {
-              val prevLine = syncedLines?.getOrNull(activeIndex - 1)?.line?.takeIf { it.isNotBlank() }
+              val prevLine = syncedLines.getOrNull(activeIndex - 1)?.line?.takeIf { it.isNotBlank() }
               val currLine = currentLine?.line?.takeIf { it.isNotBlank() }
-              val nextLine = syncedLines?.getOrNull(activeIndex + 1)?.line?.takeIf { it.isNotBlank() }
+              val nextLine = syncedLines.getOrNull(activeIndex + 1)?.line?.takeIf { it.isNotBlank() }
 
               if (prevLine != null) {
                 Text(
@@ -3973,7 +3966,7 @@ private fun LandscapeLyricsQueueCard(
           }
         } else if (!activeLyrics?.plain.isNullOrEmpty()) {
           Text(
-            text = activeLyrics!!.plain!!.joinToString("\n").trim(),
+            text = activeLyrics.plain.joinToString("\n").trim(),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
             maxLines = 4,
@@ -4046,7 +4039,7 @@ private fun LandscapeLyricsQueueCard(
                 )
                 if (!item.artist.isNullOrBlank()) {
                   Text(
-                    text = item.artist!!,
+                    text = item.artist,
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,

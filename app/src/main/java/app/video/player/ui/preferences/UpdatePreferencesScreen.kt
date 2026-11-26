@@ -385,7 +385,7 @@ private fun UpdateHeroStatusCard(
         text = when {
           isReady -> "Verified APK ready. Tap below to finish installation."
           isDownloading -> "${asset?.let { formatFileSize(it.size) }.orEmpty()} · Verified SHA-256 integrity"
-          hasUpdate -> "${asset?.let { formatFileSize(it.size) }.orEmpty()} · Published ${formatDate(release.publishedAt)}"
+          hasUpdate -> "${formatFileSize(asset.size)} · Published ${formatDate(release.publishedAt)}"
           isChecking -> "Querying latest release tags for arm64-v8a architecture…"
           isError -> "Could not reach update server. Check your connection."
           else -> "You are on the latest official build with all performance optimizations."

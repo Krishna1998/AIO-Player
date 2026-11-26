@@ -800,7 +800,7 @@ private fun CinematicHorizonContent(
   ) {
     // 0. Panoramic Spotlight Hero Box / Landscape Dual Hero Single Row
     if (hasDualHeroLandscape) {
-      val video = spotlightItem!!.video
+      val video = spotlightItem.video
       val isSessionPlaying = remember(currentSessionItem, video) {
         matchesPlaybackItem(video, currentSessionItem)
       }
