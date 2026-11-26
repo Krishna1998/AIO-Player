@@ -551,9 +551,9 @@ data class MovieDetailsScreen(
                           )
                         }
                       }
-                      if (epProgress > 0f) {
+                      if (epIsWatched) {
                         androidx.compose.material3.LinearProgressIndicator(
-                          progress = { epProgress },
+                          progress = { 1f },
                           modifier = Modifier
                             .fillMaxWidth()
                             .height(3.dp),
