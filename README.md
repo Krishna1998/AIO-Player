@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png" width="120" alt="Horizon Player Logo" />
+<img src="app/src/main/assets/branding/aura_aperture_icon.svg" width="120" height="120" alt="Horizon Player" /><br>
 
 # ✦ HORIZON PLAYER ✦
 
