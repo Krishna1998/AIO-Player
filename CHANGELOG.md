@@ -17,6 +17,7 @@ These notes are written in plain English and focus on what changed for real use.
   - Increased icon sizes in **Preferences** (`28dp` on bento cards, `26dp` on list rows).
 - **Preferences & Wallpaper Redesign:**
   - Updated Preferences icons to a unified frosted glass style, aligned Quick Access tiles, and removed duplicate entries and profile badges.
+  - Aligned the **Logging** section (`Verbose logging` & `Dump logs`) in **Advanced** preferences to match the full-width card layout.
   - Polished the **Wallpaper** preset cards with portrait proportions, gradient label scrims, and pill value badges.
 - **Spotlight Gestures Guide:**
   - Improved portrait dialog layout and simplified the guide to show once on initial launch.
@@ -26,7 +27,7 @@ These notes are written in plain English and focus on what changed for real use.
   - Added a watch progress bar to **Movies** tab poster cards and under the **Play Movie / Resume** button in **Movie Details**.
   - Updated merged series poster badges to show `S01` instead of `S01E01` and trimmed **Continue Watching** titles cleanly after `SxxExx`.
 - **Movies Tab Navigation:**
-  - Preserved the active **Movies** tab when navigating back from **Movie Details** instead of jumping to All Media or Video.
+  - Preserved the active **Movies** tab when navigating back from **Movie Details** and fixed tab snapping between **All Media**, **Movies**, **Videos**, and **Music**.
 - **Pull-to-Refresh, Lecture Filtering & Direct Play:**
   - Enabled pull-to-refresh in the **Movies** tab and wired **Open movie details on tap** so turning it off starts playback directly.
   - Improved `MovieClassifier` to exclude underscore-separated lecture, class, and study videos from the **Movies** tab.
