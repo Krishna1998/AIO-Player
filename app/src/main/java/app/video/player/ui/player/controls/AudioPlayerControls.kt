@@ -2900,7 +2900,7 @@ fun AudioPlayerControls(
               Icon(
                 imageVector = if (isPortrait) Icons.RoundedFilled.Timer else Icons.RoundedFilled.Headset,
                 contentDescription =
-                  if (isPortrait) stringResource(R.string.player_sheets_sleep_timer_title)
+                  if (isPortrait) "Sleep Timer"
                   else stringResource(R.string.btn_label_background_playback),
                 tint =
                   if (isPortrait) {
@@ -2953,7 +2953,7 @@ fun AudioPlayerControls(
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
               Icon(
                 imageVector = Icons.RoundedFilled.Timer,
-                contentDescription = stringResource(R.string.player_sheets_sleep_timer_title),
+                contentDescription = "Sleep Timer",
                 tint = if (activeSleepTimerSeconds > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(24.dp * audioButtonScale),
               )
