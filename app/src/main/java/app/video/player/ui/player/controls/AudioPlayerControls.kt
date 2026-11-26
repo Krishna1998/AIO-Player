@@ -2839,7 +2839,7 @@ fun AudioPlayerControls(
                 Modifier
                   .then(
                     if (isPortrait && activeSleepTimerSeconds > 0) {
-                      Modifier.wrapContentWidth()
+                      Modifier
                     } else {
                       Modifier.weight(1f)
                     },
