@@ -16,59 +16,13 @@ Powered by the raw playback power of **mpv** and a modern **Material 3 / Liquid 
 
 </div>
 
-## 🙏 Credits
-
-- **MPVEX**
-- **MPVRX**
-- **REX PLAYER**
-
----
-
 ## 📸 Screenshots
 
 | Home & Continue Watching | Music & Audio Pulsing | Movie Details |
-| :## 🙏 Credits
 
-- **MPVEX**
-- **MPVRX**
-- **REX PLAYER**
+ <img src="docs/screenshots/home_hub.jpg" width="240" alt="Home Hub" />  <img src="docs/screenshots/music_rail.jpg" width="240" alt="Music Rail" />  <img src="docs/screenshots/movie_details.jpg" width="240" alt="Movie Details" /> 
 
----: | :## 🙏 Credits
-
-- **MPVEX**
-- **MPVRX**
-- **REX PLAYER**
-
----: | :## 🙏 Credits
-
-- **MPVEX**
-- **MPVRX**
-- **REX PLAYER**
-
----: |
-| <img src="docs/screenshots/home_hub.jpg" width="240" alt="Home Hub" /> | <img src="docs/screenshots/music_rail.jpg" width="240" alt="Music Rail" /> | <img src="docs/screenshots/movie_details.jpg" width="240" alt="Movie Details" /> |
-
-| Audio Player | Synced Lyrics | Preferences |
-| :## 🙏 Credits
-
-- **MPVEX**
-- **MPVRX**
-- **REX PLAYER**
-
----: | :## 🙏 Credits
-
-- **MPVEX**
-- **MPVRX**
-- **REX PLAYER**
-
----: | :## 🙏 Credits
-
-- **MPVEX**
-- **MPVRX**
-- **REX PLAYER**
-
----: |
-| <img src="docs/screenshots/audio_player.jpg" width="240" alt="Audio Player" /> | <img src="docs/screenshots/audio_lyrics.jpg" width="240" alt="Synced Lyrics" /> | <img src="docs/screenshots/preferences.jpg" width="240" alt="Preferences" /> |
+ <img src="docs/screenshots/audio_player.jpg" width="240" alt="Audio Player" />  <img src="docs/screenshots/audio_lyrics.jpg" width="240" alt="Synced Lyrics" />  <img src="docs/screenshots/preferences.jpg" width="240" alt="Preferences" /> 
 
 ## ✨ Features
 
@@ -98,12 +52,6 @@ Powered by the raw playback power of **mpv** and a modern **Material 3 / Liquid 
 - **Zero Tracking**: No analytics, telemetry, or background monitoring.
 - **Zero Google Play Services**: Works standalone and fully offline.
 - **Small Footprint**: Fast launch speed, minimal battery consumption, and light memory usage.
-
-## 🙏 Credits
-
-- **MPVEX**
-- **MPVRX**
-- **REX PLAYER**
 
 ---
 
