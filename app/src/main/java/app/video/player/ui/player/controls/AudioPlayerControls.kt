@@ -1970,7 +1970,15 @@ fun AudioPlayerControls(
                     audioPreferences.audioBackgroundPlayback.set(!backgroundPlaybackEnabled)
                   }
                 },
-                modifier = Modifier.size(32.dp * audioButtonScale),
+                modifier =
+                  Modifier
+                    .audioGlassSurface(
+                      shape = CircleShape,
+                      containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f),
+                      highlightAlpha = 0.28f,
+                      elevation = 3.dp,
+                    )
+                    .size(40.dp * audioButtonScale),
               ) {
                 Icon(
                   imageVector = Icons.RoundedFilled.Headset,
@@ -2094,59 +2102,6 @@ fun AudioPlayerControls(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
           ) {
-            // Sleep Timer Button (left of Favorite)
-            if (activeSleepTimerSeconds > 0) {
-              Surface(
-                onClick = { onOpenSheet(if (isAudiobook) Sheets.AudiobookSleepTimer else Sheets.SleepTimer) },
-                shape = CircleShape,
-                color = Color.Transparent,
-                modifier =
-                  Modifier.audioGlassSurface(
-                    shape = CircleShape,
-                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.70f),
-                    highlightAlpha = 0.35f,
-                    elevation = 3.dp,
-                  ),
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-              ) {
-                Row(
-                  modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                  verticalAlignment = Alignment.CenterVertically,
-                  horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                  Icon(
-                    imageVector = Icons.RoundedFilled.Timer,
-                    contentDescription = stringResource(R.string.timer_title),
-                    modifier = Modifier.size(16.dp),
-                  )
-                  Text(
-                    text = DateUtils.formatElapsedTime(activeSleepTimerSeconds.toLong()),
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                  )
-                }
-              }
-            } else {
-              ReactiveIconButton(
-                onClick = { onOpenSheet(if (isAudiobook) Sheets.AudiobookSleepTimer else Sheets.SleepTimer) },
-                modifier =
-                  Modifier
-                    .audioGlassSurface(
-                      shape = CircleShape,
-                      containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.45f),
-                      highlightAlpha = 0.28f,
-                      elevation = 3.dp,
-                    )
-                    .size(40.dp * audioButtonScale),
-              ) {
-                Icon(
-                  imageVector = Icons.RoundedFilled.Timer,
-                  contentDescription = stringResource(R.string.timer_title),
-                  tint = MaterialTheme.colorScheme.onSurface,
-                  modifier = Modifier.size(22.dp * audioButtonScale),
-                )
-              }
-            }
 
             // Favorite Button (right before Add to Playlist)
             ReactiveIconButton(
@@ -2515,14 +2470,6 @@ fun AudioPlayerControls(
             }
           }
         }
-
-        Spacer(Modifier.width(6.dp))
-        Icon(
-          imageVector = Icons.RoundedFilled.ChevronRight,
-          contentDescription = null,
-          tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-          modifier = Modifier.size(18.dp),
-        )
       }
     }
 
@@ -2569,9 +2516,17 @@ fun AudioPlayerControls(
         centerContent = {
           audioFormatInfo?.let { format ->
             Surface(
-              shape = RoundedCornerShape(8.dp),
-              color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f),
-              modifier = Modifier.clickable { showAudioFormatDetails = !showAudioFormatDetails },
+              shape = CircleShape,
+              color = Color.Transparent,
+              modifier =
+                Modifier
+                  .audioGlassSurface(
+                    shape = CircleShape,
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.50f),
+                    highlightAlpha = 0.28f,
+                    elevation = 3.dp,
+                  )
+                  .clickable { onOpenSheet(Sheets.AudioProperties) },
             ) {
               Text(
                 text = when {
@@ -2607,6 +2562,15 @@ fun AudioPlayerControls(
         verticalAlignment = Alignment.CenterVertically,
       ) {
         val audioButtonScale = playerButtonsScale.coerceIn(0.7f, 1.4f)
+        val skipShape = if (!isAudiobook) RoundedCornerShape(18.dp) else CircleShape
+        val skipModifier =
+          if (!isAudiobook) {
+            Modifier
+              .width((if (isPortrait) 76.dp else 96.dp) * audioButtonScale)
+              .height((if (isPortrait) 58.dp else 56.dp) * audioButtonScale)
+          } else {
+            Modifier.size(48.dp * audioButtonScale)
+          }
         ReactiveIconButton(
           onClick = {
             if (isAudiobook) viewModel.stepPlaybackChapter(-1) else viewModel.playPrevious()
@@ -2615,12 +2579,12 @@ fun AudioPlayerControls(
           modifier =
             Modifier
               .audioGlassSurface(
-                shape = CircleShape,
+                shape = skipShape,
                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.35f),
                 highlightAlpha = 0.22f,
                 elevation = 2.dp,
               )
-              .size((if (isAudiobook) 48.dp else 56.dp) * audioButtonScale),
+              .then(skipModifier),
         ) {
           Icon(
             imageVector = Icons.RoundedFilled.SkipPrevious,
@@ -2665,7 +2629,7 @@ fun AudioPlayerControls(
                 ),
                 playPillShape,
               )
-              .width((if (isPortrait) 92.dp else 84.dp) * audioButtonScale)
+              .width((if (isPortrait) 108.dp else 132.dp) * audioButtonScale)
               .height((if (isPortrait) 64.dp else 56.dp) * audioButtonScale),
           shadowElevation = 0.dp,
         ) {
@@ -2698,12 +2662,12 @@ fun AudioPlayerControls(
           modifier =
             Modifier
               .audioGlassSurface(
-                shape = CircleShape,
+                shape = skipShape,
                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.35f),
                 highlightAlpha = 0.22f,
                 elevation = 2.dp,
               )
-              .size((if (isAudiobook) 48.dp else 56.dp) * audioButtonScale),
+              .then(skipModifier),
         ) {
           Icon(
             imageVector = Icons.RoundedFilled.SkipNext,
@@ -2801,10 +2765,9 @@ fun AudioPlayerControls(
                 onLongClick = { onOpenSheet(Sheets.PlaybackSpeed) },
               ),
         ) {
-          Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
-            modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
+          Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.fillMaxSize(),
           ) {
             Icon(
               imageVector = Icons.RoundedFilled.Speed,
@@ -2815,21 +2778,7 @@ fun AudioPlayerControls(
                 } else {
                   MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (speedConfigOwned) 0.38f else 1f)
                 },
-              modifier = Modifier.size(18.dp * audioButtonScale),
-            )
-            val speedText = String.format(java.util.Locale.US, "%.2fx", playbackSpeed ?: 1f)
-            Text(
-              text = speedText,
-              style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold).withTabularDigits(),
-              color =
-                if (kotlin.math.abs((playbackSpeed ?: 1f) - 1f) > 0.001f) {
-                  MaterialTheme.colorScheme.primary
-                } else {
-                  MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (speedConfigOwned) 0.38f else 1f)
-                },
-              maxLines = 1,
-              softWrap = false,
-              modifier = Modifier.stableNumericWidth(speedText),
+              modifier = Modifier.size(22.dp * audioButtonScale),
             )
           }
         }
@@ -2888,28 +2837,61 @@ fun AudioPlayerControls(
               },
               modifier =
                 Modifier
-                  .weight(1f)
+                  .then(
+                    if (isPortrait && activeSleepTimerSeconds > 0) {
+                      Modifier.wrapContentWidth()
+                    } else {
+                      Modifier.weight(1f)
+                    },
+                  )
                   .height(44.dp * audioButtonScale)
                   .audioGlassSurface(
                     shape = RoundedCornerShape(14.dp),
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f),
+                    containerColor =
+                      if (isPortrait && activeSleepTimerSeconds > 0) {
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.70f)
+                      } else {
+                        MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f)
+                      },
                     highlightAlpha = 0.35f,
                     elevation = 6.dp,
                   ),
             ) {
-              Icon(
-                imageVector = if (isPortrait) Icons.RoundedFilled.Timer else Icons.RoundedFilled.Headset,
-                contentDescription =
-                  if (isPortrait) "Sleep Timer"
-                  else stringResource(R.string.btn_label_background_playback),
-                tint =
-                  if (isPortrait) {
-                    if (activeSleepTimerSeconds > 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                  } else {
-                    if (backgroundPlaybackEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                  },
-                modifier = Modifier.size(24.dp * audioButtonScale),
-              )
+              if (isPortrait && activeSleepTimerSeconds > 0) {
+                Row(
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
+                  modifier = Modifier.padding(horizontal = 10.dp),
+                ) {
+                  Icon(
+                    imageVector = Icons.RoundedFilled.Timer,
+                    contentDescription = "Sleep Timer",
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.size(18.dp * audioButtonScale),
+                  )
+                  Text(
+                    text = DateUtils.formatElapsedTime(activeSleepTimerSeconds.toLong()),
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold).withTabularDigits(),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    maxLines = 1,
+                    softWrap = false,
+                  )
+                }
+              } else {
+                Icon(
+                  imageVector = if (isPortrait) Icons.RoundedFilled.Timer else Icons.RoundedFilled.Headset,
+                  contentDescription =
+                    if (isPortrait) "Sleep Timer"
+                    else stringResource(R.string.btn_label_background_playback),
+                  tint =
+                    if (isPortrait) {
+                      MaterialTheme.colorScheme.onSurfaceVariant
+                    } else {
+                      if (backgroundPlaybackEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                  modifier = Modifier.size(24.dp * audioButtonScale),
+                )
+              }
             }
           }
         }
