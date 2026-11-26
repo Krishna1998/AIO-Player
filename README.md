@@ -18,6 +18,16 @@ Powered by the raw playback power of **mpv** and a modern **Material 3 / Liquid 
 
 ---
 
+## 📸 Screenshots
+
+| Home & Continue Watching | Music & Audio Pulsing | Movie Details |
+| :---: | :---: | :---: |
+| <img src="docs/screenshots/home_hub.jpg" width="240" alt="Home Hub" /> | <img src="docs/screenshots/music_rail.jpg" width="240" alt="Music Rail" /> | <img src="docs/screenshots/movie_details.jpg" width="240" alt="Movie Details" /> |
+
+| Audio Player | Synced Lyrics | Preferences |
+| :---: | :---: | :---: |
+| <img src="docs/screenshots/audio_player.jpg" width="240" alt="Audio Player" /> | <img src="docs/screenshots/audio_lyrics.jpg" width="240" alt="Synced Lyrics" /> | <img src="docs/screenshots/preferences.jpg" width="240" alt="Preferences" /> |
+
 ## ✨ Features
 
 ### 🎬 Video Playback
