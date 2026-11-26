@@ -243,11 +243,41 @@ object PlayerControlsPreferencesScreen : Screen {
             }
 
             item {
-              val seekbarStyle by appearancePrefs.seekbarStyle.collectAsState()
+              var isAudioSeekbarTab by remember { mutableStateOf(false) }
+              val videoSeekbarStyle by appearancePrefs.seekbarStyle.collectAsState()
+              val audioSeekbarStyle by appearancePrefs.audioSeekbarStyle.collectAsState()
+              val seekbarStyle = if (isAudioSeekbarTab) audioSeekbarStyle else videoSeekbarStyle
               val seekbarOpacity by appearancePrefs.seekbarOpacity.collectAsState()
               val useWavySeekbar by playerPrefs.useWavySeekbar.collectAsState()
 
               Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                  modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+                  horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                  listOf("Video" to false, "Audio" to true).forEach { (label, isAudio) ->
+                    val selected = isAudioSeekbarTab == isAudio
+                    ExpressivePreferenceItem(
+                      selected = selected,
+                      standalone = true,
+                      modifier = Modifier.weight(1f),
+                    ) {
+                      ListItem(
+                        colors = androidx.compose.material3.ListItemDefaults.colors(
+                          containerColor = androidx.compose.ui.graphics.Color.Transparent,
+                        ),
+                        modifier = Modifier.selectable(
+                          selected = selected,
+                          role = Role.Tab,
+                          onClick = { isAudioSeekbarTab = isAudio },
+                        ),
+                        trailingContent = { RadioButton(selected = selected, onClick = null) },
+                      ) {
+                        Text(label)
+                      }
+                    }
+                  }
+                }
                 Column(
                   modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 16.dp),
                   verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -279,7 +309,13 @@ object PlayerControlsPreferencesScreen : Screen {
                         modifier = Modifier.selectable(
                           selected = isSelected,
                           role = Role.RadioButton,
-                          onClick = { appearancePrefs.seekbarStyle.set(style) },
+                          onClick = {
+                            if (isAudioSeekbarTab) {
+                              appearancePrefs.audioSeekbarStyle.set(style)
+                            } else {
+                              appearancePrefs.seekbarStyle.set(style)
+                            }
+                          },
                         ),
                       ) {
                         val styleLabel = when (style) {

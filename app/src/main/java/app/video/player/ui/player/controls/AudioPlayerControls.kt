@@ -1085,7 +1085,7 @@ fun AudioPlayerControls(
 
   val isCurrentTrackFavorite = jellyfinFavoriteOverride ?: navidromeFavoriteOverride ?: isCurrentTrackFavoriteLocal
 
-  val seekbarStyle by appearancePreferences.seekbarStyle.collectAsState()
+  val seekbarStyle by appearancePreferences.audioSeekbarStyle.collectAsState()
   val invertDuration by playerPreferences.invertDuration.collectAsState()
   val showChapterIndicators by playerPreferences.showChapterIndicators.collectAsState()
   val chapters by viewModel.playbackChapters.collectAsState()
@@ -2631,7 +2631,7 @@ fun AudioPlayerControls(
                 ),
                 playPillShape,
               )
-              .width((if (isPortrait) 124.dp else 156.dp) * audioButtonScale)
+              .width((if (isPortrait) 140.dp else 180.dp) * audioButtonScale)
               .height((if (isPortrait) 64.dp else 56.dp) * audioButtonScale),
           shadowElevation = 0.dp,
         ) {
@@ -3086,7 +3086,7 @@ fun AudioPlayerControls(
           modifier =
             Modifier
               .align(Alignment.BottomEnd)
-              .padding(end = 72.dp, bottom = 16.dp)
+              .padding(end = 16.dp, bottom = 76.dp)
               .audioGlassSurface(
                 shape = CircleShape,
                 containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.55f),
