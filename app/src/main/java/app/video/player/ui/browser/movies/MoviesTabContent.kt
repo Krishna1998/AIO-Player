@@ -306,8 +306,8 @@ private fun MoviePosterCard(
   }
   val episodeBadge = remember(parsedInfo) {
     when {
-      parsedInfo.season != null && parsedInfo.episode != null ->
-        "S${parsedInfo.season.toString().padStart(2, '0')}E${parsedInfo.episode.toString().padStart(2, '0')}"
+      parsedInfo.season != null ->
+        "S${parsedInfo.season.toString().padStart(2, '0')}"
       parsedInfo.episode != null ->
         "EP ${parsedInfo.episode.toString().padStart(2, '0')}"
       else -> null
@@ -523,8 +523,8 @@ private fun MovieListItemCard(
   }
   val episodeBadge = remember(parsedInfo) {
     when {
-      parsedInfo.season != null && parsedInfo.episode != null ->
-        "S${parsedInfo.season.toString().padStart(2, '0')}E${parsedInfo.episode.toString().padStart(2, '0')}"
+      parsedInfo.season != null ->
+        "S${parsedInfo.season.toString().padStart(2, '0')}"
       parsedInfo.episode != null ->
         "EP ${parsedInfo.episode.toString().padStart(2, '0')}"
       else -> null
