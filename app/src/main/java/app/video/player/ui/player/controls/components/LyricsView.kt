@@ -445,9 +445,9 @@ fun LyricsView(
                   targetValue =
                     when {
                       isActiveLine || state.activeLineIndex < 0 -> 0.dp
-                      distanceFromActive == 1 -> 0.6.dp
-                      distanceFromActive == 2 -> 1.0.dp
-                      else -> 0.dp
+                      distanceFromActive == 1 -> 2.dp
+                      distanceFromActive == 2 -> 3.5.dp
+                      else -> 5.dp
                     },
                   animationSpec = tween(durationMillis = 420, easing = FastOutSlowInEasing),
                   label = "LineBlur",
