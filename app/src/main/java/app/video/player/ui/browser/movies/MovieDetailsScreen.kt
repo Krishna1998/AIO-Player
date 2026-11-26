@@ -177,6 +177,7 @@ data class MovieDetailsScreen(
                 val epSaved = playbackStateRepo.getVideoDataByTitle(epVideo.displayName)
                   ?: playbackStateRepo.getVideoDataByTitle(epVideo.title)
                   ?: playbackStateRepo.getVideoDataByTitle(File(epVideo.path).name)
+                  ?: playbackStateRepo.getVideoDataByTitle(File(epVideo.path).nameWithoutExtension)
                 val epPos = epSaved?.lastPosition ?: 0
                 if (epPos > 0 && epVideo.duration > 0L) {
                   (epPos * 1000f / epVideo.duration.toFloat()).coerceIn(0f, 1f)
