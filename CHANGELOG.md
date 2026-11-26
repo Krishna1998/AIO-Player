@@ -5,6 +5,10 @@ These notes are written in plain English and focus on what changed for real use.
 ## 1.0.7
 
 ### 🎨 UI, Format Badges & Polish
+- **Audio Player Redesign & SVG Quality Badges:**
+  - Added SVG audio quality & format badges (`HI-RES`, `FLAC`/`ALAC`/`LOSSLESS`, `DOLBY`/`DD+`/`DTS`, and standard formats) to the audio player header bar.
+  - Redesigned transport controls with a wider play/pause pill, tighter previous/next buttons, centered speed chip, glass headset/codec pills, dynamic sleep timer countdown chip, and separate video/audio seekbar style.
+  - Improved tablet landscape layout with bottom-right collapse button placement above the lyrics timer.
 - **SVG Media Format Badges:**
   - Added crisp SVG format badges (resolution, video codec, audio codec, subtitles, and a bold **MP4** badge) to **Continue Watching**, **Movie Details** (larger `24dp` icons), and both **Landscape** and **Portrait** **Video Player** controls.
   - Added a **Show format badges** on/off toggle in **Preferences → Player Layout** and removed the redundant runtime text above the Continue Watching title.
@@ -18,6 +22,8 @@ These notes are written in plain English and focus on what changed for real use.
   - Improved portrait dialog layout and simplified the guide to show once on initial launch.
 
 ### 🎬 Movies & Library Improvements
+- **Movies Tab Navigation:**
+  - Preserved the active **Movies** tab when navigating back from **Movie Details** instead of jumping to All Media or Video.
 - **Pull-to-Refresh, Lecture Filtering & Direct Play:**
   - Enabled pull-to-refresh in the **Movies** tab and wired **Open movie details on tap** so turning it off starts playback directly.
   - Improved `MovieClassifier` to exclude underscore-separated lecture, class, and study videos from the **Movies** tab.
