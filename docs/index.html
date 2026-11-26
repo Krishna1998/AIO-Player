@@ -489,7 +489,7 @@
       font-size: 0.88rem;
     }
 
-    /* 14-Screen Gallery */
+    /* 15-Screen Gallery */
     .filter-bar {
       display: flex;
       flex-direction: column;
@@ -940,7 +940,7 @@
         </p>
         <div class="hero-actions">
           <a href="https://github.com/Krishna1998/Horizon-Player/releases" target="_blank" rel="noopener" class="btn btn-primary">&#11015; Download v1.0.7 APK</a>
-          <a href="#gallery" class="btn btn-glass">Explore 14 Screens</a>
+          <a href="#gallery" class="btn btn-glass">Explore 15 Screens</a>
           <a href="https://github.com/Krishna1998/Horizon-Player" target="_blank" rel="noopener" class="btn btn-glass">View Source</a>
         </div>
         <div class="hero-stats">
@@ -960,8 +960,8 @@
       </div>
 
       <div class="hero-devices">
-        <div class="hero-tablet" onclick="openLightboxBySrc('34408.png')" title="Click to zoom Tablet Split-Screen Player">
-          <img src="34408.png" alt="Horizon Player Tablet Split-Screen Lossless Audio UI" />
+        <div class="hero-tablet" onclick="openLightboxBySrc('34396.png')" title="Click to zoom Tablet Home Hub">
+          <img src="34396.png" alt="Horizon Player Tablet Home Hub with Continue Watching and Live Audio Pulsing" />
         </div>
         <div class="hero-phone" onclick="openLightboxBySrc('34377.jpg')" title="Click to zoom Phone Now Playing UI">
           <img src="34377.jpg" alt="Horizon Player Phone FLAC Lossless Now Playing" />
@@ -976,19 +976,19 @@
       <div class="section-head">
         <span class="section-tag">Large-Screen Architecture</span>
         <h2>Adaptive Tablet Experience</h2>
-        <p>Dual-pane settings, widescreen cinema playback, and split-screen audio queues engineered for tablets and foldables.</p>
+        <p>Dual-pane settings, widescreen cinema playback, live VU-meter audio pulsing, and split-screen queues engineered for tablets and foldables.</p>
       </div>
 
       <div class="tablet-tabs" id="tablet-tabs"></div>
 
       <div class="tablet-stage">
         <div class="tablet-screen-wrap" id="tablet-preview-trigger">
-          <img id="tablet-preview-img" src="34408.png" alt="Horizon Player Tablet Preview" />
+          <img id="tablet-preview-img" src="34396.png" alt="Horizon Player Tablet Preview" />
         </div>
         <div class="tablet-caption-bar">
           <div>
-            <h3 id="tablet-preview-title">Split-Screen Lossless Audio</h3>
-            <p id="tablet-preview-desc">Now Playing artwork alongside a live 132-track upcoming queue and Lyrics toggle.</p>
+            <h3 id="tablet-preview-title">Tablet Home Media Hub</h3>
+            <p id="tablet-preview-desc">Continue Watching with H.265 10-bit &amp; Dolby Digital+ 5.1 badges paired with live Audio Pulsing VU meters, Movies/Videos, and Music shelves.</p>
           </div>
           <button class="btn btn-glass" id="tablet-zoom-btn" style="padding:8px 14px;font-size:0.84rem;">Fullscreen Zoom</button>
         </div>
@@ -996,19 +996,19 @@
     </div>
   </section>
 
-  <!-- 14-Screen Phone & Tablet Gallery -->
+  <!-- 15-Screen Phone & Tablet Gallery -->
   <section id="gallery">
     <div class="container">
       <div class="section-head">
         <span class="section-tag">Inside Horizon Player</span>
-        <h2>14 Real App Screens</h2>
+        <h2>15 Real App Screens</h2>
         <p>Filter by device form factor or feature category. Click any screen to inspect in full OLED clarity.</p>
       </div>
 
       <div class="filter-bar">
         <div class="filter-row" id="device-filters">
-          <button class="pill-btn active" data-device="all">All Screens (14)</button>
-          <button class="pill-btn" data-device="tablet">Tablet UI (8)</button>
+          <button class="pill-btn active" data-device="all">All Screens (15)</button>
+          <button class="pill-btn" data-device="tablet">Tablet UI (9)</button>
           <button class="pill-btn" data-device="phone">Phone UI (6)</button>
         </div>
         <div class="filter-row" id="cat-filters">
@@ -1113,7 +1113,7 @@
         <div class="glass-card bento-card">
           <div class="bento-icon">&#127925;</div>
           <h3>FLAC Lossless &amp; Synced Lyrics</h3>
-          <p>Embedded and online real-time synced lyrics, Audio Pulsing wave seekbars, A-B loop repeat, and spatial audio controls.</p>
+          <p>Embedded and online real-time synced lyrics, Audio Pulsing wave seekbars with VU meters, A-B loop repeat, and spatial audio controls.</p>
         </div>
         <div class="glass-card bento-card">
           <div class="bento-icon">&#128274;</div>
@@ -1123,7 +1123,7 @@
         <div class="glass-card bento-card">
           <div class="bento-icon">&#127916;</div>
           <h3>Cinema Metadata &amp; Episodes</h3>
-          <p>Automatic movie posters, synopses, codec badges (H.265, 10-bit, 5.1, SRT), and multi-episode series tracking.</p>
+          <p>Automatic movie posters, synopses, codec badges (H.265, 10-bit, Dolby Digital+ 5.1, SRT), and multi-episode series tracking.</p>
         </div>
         <div class="glass-card bento-card">
           <div class="bento-icon">&#128241;</div>
@@ -1201,9 +1201,10 @@
   </div>
 
   <script>
-    // Data: All 14 Real App Screenshots
+    // Data: All 15 Real App Screenshots
     const SCREENS = [
-      // Tablet UI (8)
+      // Tablet UI (9)
+      { src: '34396.png', device: 'tablet', cat: 'hub', tabLabel: 'Home Hub', title: 'Tablet Home Media Hub', desc: 'Continue Watching with H.265 10-bit & Dolby Digital+ 5.1 badges paired with live Audio Pulsing VU meters, Movies/Videos, and Music shelves.' },
       { src: '34408.png', device: 'tablet', cat: 'audio', tabLabel: 'Split-Screen Audio', title: 'Split-Screen Lossless Audio', desc: 'Now Playing artwork alongside a live 132-track upcoming queue and Lyrics toggle.' },
       { src: '34412.png', device: 'tablet', cat: 'cinema', tabLabel: 'Cinema Player', title: 'Widescreen Cinema Playback', desc: 'Clean OLED video overlay with H.265, 10-bit, 5.1 surround, SRT badges, and gesture controls.' },
       { src: '34410.png', device: 'tablet', cat: 'cinema', tabLabel: 'Movie Details', title: 'Widescreen Movie & Episodes Hub', desc: 'Rich movie backdrop, synopsis, WEB-DL H.265 10-bit 5.1 tags, and multi-episode selector.' },
@@ -1230,7 +1231,7 @@
       { name: 'MKV / MP4 / WEB-DL', type: 'video', desc: 'Multi-track containers with chapters' },
       { name: 'FLAC', type: 'audio', desc: 'Lossless studio audio up to 384kHz / 32-bit' },
       { name: 'ALAC / WAV', type: 'audio', desc: 'Uncompressed & Apple lossless PCM audio' },
-      { name: 'Dolby 5.1 / AC3', type: 'audio', desc: 'Multi-channel surround passthrough & downmix' },
+      { name: 'Dolby Digital+ 5.1', type: 'audio', desc: 'Multi-channel surround passthrough & downmix' },
       { name: 'EAC3 / DTS', type: 'audio', desc: 'Cinema-grade spatial surround decoding' },
       { name: 'AAC / M4A', type: 'audio', desc: 'High-efficiency stereo & multichannel music' },
       { name: 'Opus / OGG', type: 'audio', desc: 'Ultra-low latency modern audio streams' },
@@ -1304,7 +1305,7 @@
     document.getElementById('tablet-preview-trigger').addEventListener('click', () => openLightboxBySrc(activeTabletSrc));
     document.getElementById('tablet-zoom-btn').addEventListener('click', () => openLightboxBySrc(activeTabletSrc));
 
-    // 14-Screen Gallery
+    // 15-Screen Gallery
     let activeDevice = 'all';
     let activeCat = 'all';
     const galleryEl = document.getElementById('gallery-grid');
