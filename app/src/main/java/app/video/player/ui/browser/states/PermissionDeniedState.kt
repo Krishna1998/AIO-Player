@@ -313,7 +313,8 @@ fun PermissionDeniedState(
         Row(
           modifier = Modifier
             .widthIn(max = 880.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .height(androidx.compose.foundation.layout.IntrinsicSize.Max),
           horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
           // Primary Storage Card
@@ -349,6 +350,7 @@ fun PermissionDeniedState(
             },
             modifier = Modifier
               .weight(1f)
+              .fillMaxHeight()
               .tvInitialFocus(primaryFocusRequester),
           )
 
@@ -367,7 +369,9 @@ fun PermissionDeniedState(
                   notificationLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
                 }
               },
-              modifier = Modifier.weight(1f),
+              modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight(),
             )
           }
         }
