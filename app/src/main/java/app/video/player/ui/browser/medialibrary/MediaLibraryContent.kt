@@ -419,11 +419,11 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
       }
   }
 
-  LaunchedEffect(mediaType, mediaLibraryTabs) {
+  LaunchedEffect(mediaType, mediaLibraryTabs, savedActiveTab) {
     if (!forceAudio) {
+      val currentActiveTabName = browserPreferences.mediaLibraryActiveTab.get()
       val keepMoviesTab =
-        savedActiveTab == MediaLibraryTabItem.Movies.name &&
-          mediaType == MediaLibraryType.Video &&
+        currentActiveTabName == MediaLibraryTabItem.Movies.name &&
           MediaLibraryTabItem.Movies in mediaLibraryTabs
       val targetTab = if (keepMoviesTab) MediaLibraryTabItem.Movies else MediaLibraryTabItem.fromLibraryType(mediaType)
       val targetIndex = mediaLibraryTabs.indexOf(targetTab).coerceAtLeast(0)
