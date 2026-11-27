@@ -1530,6 +1530,8 @@ object SearchablePreferences {
         anchorItemIndex = 5,
         SearchEntrySpec(R.string.pref_autoplay_next_audio_title, listOf("autoplay", "next", "audio", "music")),
         SearchEntrySpec(R.string.pref_audio_drc_title, listOf("audio", "dynamic range", "compression", "drc", "loudness")),
+        SearchEntrySpec(R.string.pref_audio_bit_perfect_title, listOf("audio", "bit perfect", "bit-perfect", "usb", "dac", "lossless", "exclusive")),
+        SearchEntrySpec(R.string.pref_audio_autoeq_title, listOf("audio", "autoeq", "auto eq", "eq", "equalizer", "parametric", "peq", "headphones", "iem")),
       )
 
       addSearchEntries(
