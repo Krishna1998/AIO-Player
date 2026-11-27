@@ -13,6 +13,7 @@ These notes are written in plain English and focus on what changed for real use.
 - **Movies & Details:** Replaced movie/episode progress seekbars with a top-right green watched checkmark; fixed landscape poster scaling in `MovieDetailsScreen`; removed duplicate duration pill in `CinematicHorizonHub`.
 - **Settings & MiniPlayer:** Constrained `MiniPlayer` width (`460.dp`) in landscape mode, added bottom `contentPadding` across all preference screens, wrapped `Dump logs` in a card, and added `Bit-Perfect`, `AutoEQ`, `Dump logs`, `Updates`, and `Wallpaper` to Settings Search.
 - **Animation Performance:** Deferred `pulseScale` reads to `Modifier.graphicsLayer` to eliminate 60/120fps recomposition jitter.
+- **Defaults:** Defaulted Battery Saver and Hide Navigation Bar Labels to `OFF`.
 
 ## 1.0.8
 
