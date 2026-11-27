@@ -78,18 +78,14 @@ internal fun PlaybackFormatBadgeRow(
     (if (foreground.luminance() < 0.45f) Color.White else Color.Black).copy(alpha = 0.7f)
   } else Color.Unspecified
   val context = androidx.compose.ui.platform.LocalContext.current
+  val audioPreferences: app.video.player.preferences.AudioPreferences = org.koin.compose.koinInject()
+  val bitPerfectEnabled by audioPreferences.bitPerfectAudio.collectAsState()
+  var showAudioInfoDialog by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+
   Surface(
     shape = BadgeRailShape,
     color = surfaceColor.copy(alpha = backgroundLevel.coerceIn(0.25f, 0.92f)),
-    modifier = modifier.clickable {
-      val dacName = app.video.player.audio.UsbDacMonitor.getConnectedDacName(context)
-      val message = if (dacName != null) {
-        "Connected DAC: $dacName"
-      } else {
-        "Output: Internal Speaker (No USB DAC)"
-      }
-      android.widget.Toast.makeText(context, message, android.widget.Toast.LENGTH_SHORT).show()
-    },
+    modifier = modifier.clickable { showAudioInfoDialog = true },
   ) {
     MediaFormatBadges(
       badges = badges,
@@ -98,6 +94,45 @@ internal fun PlaybackFormatBadgeRow(
       foreground = foreground,
       background = surfaceColor,
       inkEdge = inkEdge,
+    )
+  }
+
+  if (showAudioInfoDialog) {
+    val dacName = androidx.compose.runtime.remember {
+      app.video.player.audio.UsbDacMonitor.getConnectedDacName(context)
+    }
+    val probe = androidx.compose.runtime.remember {
+      app.video.player.audio.InternalDirectStream.probe(2)
+    }
+    androidx.compose.material3.AlertDialog(
+      onDismissRequest = { showAudioInfoDialog = false },
+      title = { androidx.compose.material3.Text("Audio & DAC Info") },
+      text = {
+        androidx.compose.foundation.layout.Column(
+          verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(6.dp),
+        ) {
+          androidx.compose.material3.Text(
+            "Output Device: ${dacName ?: "Internal Speaker (No USB DAC)"}",
+          )
+          androidx.compose.material3.Text(
+            "Bit-Perfect Mode: ${if (bitPerfectEnabled) "ON" else "OFF"}",
+          )
+          if (probe != null && probe.usable) {
+            androidx.compose.material3.Text(
+              "Hardware Route: ${probe.sampleRateHz} Hz • ${probe.channelCount} ch • Exclusive${if (probe.mmap) " (MMAP)" else ""}",
+            )
+          } else {
+            androidx.compose.material3.Text(
+              "Hardware Route: Standard Android Audio",
+            )
+          }
+        }
+      },
+      confirmButton = {
+        androidx.compose.material3.TextButton(onClick = { showAudioInfoDialog = false }) {
+          androidx.compose.material3.Text("Close")
+        }
+      },
     )
   }
 }
