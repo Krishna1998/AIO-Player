@@ -266,7 +266,6 @@ object AdvancedPreferencesScreen : Screen {
           rememberSettingsSearchList(AdvancedPreferencesScreen, MaterialTheme.colorScheme.primary)
         LazyColumn(
           state = settingsListState,
-          contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 96.dp),
           contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = app.video.player.ui.browser.LocalNavigationBarHeight.current),
           modifier =
             Modifier

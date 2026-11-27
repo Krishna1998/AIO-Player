@@ -313,7 +313,6 @@ object FoldersPreferencesScreen : Screen {
       ProvideExpressivePreferenceLocals {
         LazyColumn(
           state = settingsListState,
-          contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 96.dp),
           modifier = Modifier.fillMaxSize().padding(padding).then(settingsHighlight),
           contentPadding = PaddingValues(bottom = 24.dp),
         ) {

@@ -9,6 +9,8 @@
 
 package app.video.player.ui.browser.components
 
+import androidx.compose.foundation.layout.widthIn
+
 import android.app.Activity
 import android.app.ActivityOptions
 import android.content.Context
