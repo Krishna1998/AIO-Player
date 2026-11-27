@@ -72,11 +72,6 @@ fun FormatBadgeChip(
         Color(0xFFB2DFDB),
         Color(0xFF26A69A).copy(alpha = 0.5f),
       )
-      else -> Triple(
-        MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f),
-        MaterialTheme.colorScheme.onSecondaryContainer,
-        MaterialTheme.colorScheme.outlineVariant,
-      )
     }
   } else {
     Triple(

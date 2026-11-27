@@ -42,6 +42,7 @@ fun MediaInfoBottomSheet(
   onDismiss: () -> Unit,
   colorizeBadges: Boolean = true,
 ) {
+  @Suppress("DEPRECATION")
   val sheetState = rememberModalBottomSheetState(
     skipPartiallyExpanded = false,
   )
