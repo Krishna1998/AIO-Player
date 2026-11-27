@@ -10,6 +10,7 @@
 package app.video.player.ui.player.controls.components.sheets
 
 import app.video.player.preferences.preference.collectAsState
+import androidx.compose.runtime.getValue
 
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
