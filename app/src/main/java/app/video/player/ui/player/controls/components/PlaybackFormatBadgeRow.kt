@@ -2,6 +2,8 @@
 
 package app.video.player.ui.player.controls.components
 
+import androidx.compose.foundation.clickable
+
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas as AndroidCanvas
