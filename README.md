@@ -84,7 +84,11 @@
 
 ---
 
-## 📸 Screenshots
+## 📸 Interface Showcase
+
+<p align="center">
+  <em>Home Hub, Movies, Video Folders, Music Library, Appearance, Audio Player, Movie Details, Video Player & About</em>
+</p>
 
 <p align="center">
   <img src="docs/screenshots/1.jpg" width="48%" />
