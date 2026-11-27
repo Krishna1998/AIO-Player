@@ -3069,22 +3069,6 @@ fun AudioPlayerControls(
           modifier = Modifier
             .weight(1f)
             .fillMaxHeight()
-            .clip(RoundedCornerShape(24.dp)),
-          color = Color.Transparent,
-          shape = RoundedCornerShape(24.dp),
-        ) {
-          DualPaneSidePanel(
-            viewModel = viewModel,
-            playlist = filteredPlaylist,
-            selectedTab = 1,
-            onTabSelected = {},
-          )
-        }
-
-        Surface(
-          modifier = Modifier
-            .weight(1f)
-            .fillMaxHeight()
             .padding(end = controlsSidePadding)
             .clip(RoundedCornerShape(24.dp)),
           color = Color.Transparent,
@@ -3093,8 +3077,8 @@ fun AudioPlayerControls(
           DualPaneSidePanel(
             viewModel = viewModel,
             playlist = filteredPlaylist,
-            selectedTab = 0,
-            onTabSelected = {},
+            selectedTab = tabletDualPaneTab,
+            onTabSelected = { tabletDualPaneTab = it },
           )
         }
         }
