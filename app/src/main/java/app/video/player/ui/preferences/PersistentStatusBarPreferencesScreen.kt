@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
+import app.video.player.ui.preferences.settingsSearchTarget
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -126,6 +127,7 @@ object PersistentStatusBarPreferencesScreen : Screen {
           item {
             PreferenceCard {
               SwitchPreference(
+                modifier = Modifier.settingsSearchTarget(R.string.pref_persistent_status_enable),
                 value = enabled,
                 onValueChange = prefs.persistentStatusEnabled::set,
                 title = { Text(stringResource(R.string.pref_persistent_status_enable)) },
@@ -143,6 +145,7 @@ object PersistentStatusBarPreferencesScreen : Screen {
             PreferenceCard {
               ExpressivePreferenceItem {
                 ListPreference(
+                  modifier = Modifier.settingsSearchTarget(R.string.pref_persistent_status_position),
                   value = position,
                   onValueChange = prefs.persistentStatusPosition::set,
                   values = PersistentStatusPosition.entries,
@@ -199,6 +202,7 @@ object PersistentStatusBarPreferencesScreen : Screen {
               )
               PreferenceDivider()
               SwitchPreference(
+                modifier = Modifier.settingsSearchTarget(R.string.pref_persistent_status_speed),
                 value = showSpeed,
                 onValueChange = prefs.persistentStatusShowSpeed::set,
                 title = { Text(stringResource(R.string.pref_persistent_status_speed)) },
