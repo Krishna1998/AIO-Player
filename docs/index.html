@@ -1,0 +1,1844 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="violet">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Horizon Player — Quantum Media Engine (v1.0.8 RELEASE)</title>
+  <meta name="description" content="Horizon Player Quantum v1.0.8 RELEASE — Next-gen Liquid Glass OLED media player for Android phones & tablets powered by mpv HW+ Direct, Vulkan + GLES, and 384kHz/32-bit FLAC lossless audio." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #040408;
+      --bg-elevated: rgba(14, 14, 24, 0.76);
+      --glass: rgba(255, 255, 255, 0.035);
+      --glass-strong: rgba(255, 255, 255, 0.065);
+      --border: rgba(255, 255, 255, 0.09);
+      --text: #f5f5fa;
+      --muted: #9a9bb2;
+      --accent: #b983ff;
+      --accent-2: #7c3aed;
+      --accent-rgb: 185, 131, 255;
+      --accent2-rgb: 124, 58, 237;
+      --glow: rgba(185, 131, 255, 0.35);
+      --radius: 20px;
+      --font-display: 'Space Grotesk', sans-serif;
+      --font-sans: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    html[data-theme="violet"] {
+      --accent: #b983ff;
+      --accent-2: #7c3aed;
+      --accent-rgb: 185, 131, 255;
+      --accent2-rgb: 124, 58, 237;
+      --glow: rgba(185, 131, 255, 0.35);
+    }
+    html[data-theme="cyan"] {
+      --accent: #38e8ff;
+      --accent-2: #0284c7;
+      --accent-rgb: 56, 232, 255;
+      --accent2-rgb: 2, 132, 199;
+      --glow: rgba(56, 232, 255, 0.35);
+    }
+    html[data-theme="gold"] {
+      --accent: #fbbf24;
+      --accent-2: #d97706;
+      --accent-rgb: 251, 191, 36;
+      --accent2-rgb: 217, 119, 6;
+      --glow: rgba(251, 191, 36, 0.35);
+    }
+    html[data-theme="magenta"] {
+      --accent: #f472b6;
+      --accent-2: #db2777;
+      --accent-rgb: 244, 114, 182;
+      --accent2-rgb: 219, 39, 119;
+      --glow: rgba(244, 114, 182, 0.35);
+    }
+    html[data-theme="glacial"] {
+      --accent: #34d399;
+      --accent-2: #0d9488;
+      --accent-rgb: 52, 211, 153;
+      --accent2-rgb: 13, 148, 136;
+      --glow: rgba(52, 211, 153, 0.35);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; background: var(--bg); color: var(--text); font-family: var(--font-sans); }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Background Canvas & Ambient Orbs */
+    #horizon-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.55;
+    }
+    .ambient-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(110px);
+      pointer-events: none;
+      z-index: 0;
+      transition: background 0.5s ease;
+    }
+    .orb-1 {
+      width: 520px; height: 520px;
+      top: -160px; left: -120px;
+      background: radial-gradient(circle, rgba(var(--accent-rgb), 0.22), transparent 70%);
+    }
+    .orb-2 {
+      width: 480px; height: 480px;
+      bottom: -140px; right: -120px;
+      background: radial-gradient(circle, rgba(var(--accent2-rgb), 0.22), transparent 70%);
+    }
+
+    .container {
+      width: min(1200px, 92%);
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Navbar */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      background: rgba(4, 4, 8, 0.76);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 0;
+      flex-wrap: wrap;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+    }
+    .brand-icon {
+      width: 34px; height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: grid; place-items: center;
+      box-shadow: 0 0 18px var(--glow);
+      font-size: 0.9rem;
+      color: #05050a;
+    }
+    .brand-pill {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(var(--accent-rgb), 0.45);
+      color: var(--accent);
+      background: rgba(var(--accent-rgb), 0.1);
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      flex-wrap: wrap;
+    }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .theme-switcher {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: var(--glass);
+      border: 1px solid var(--border);
+    }
+    .theme-dot {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+    .theme-dot:hover { transform: scale(1.18); }
+    .theme-dot.active {
+      border-color: #fff;
+      box-shadow: 0 0 10px currentColor;
+      transform: scale(1.15);
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 11px 20px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      text-decoration: none;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: transform 0.2s, box-shadow 0.2s, background 0.2s, border-color 0.2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #06060c;
+      box-shadow: 0 8px 26px var(--glow);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 32px var(--glow);
+    }
+    .btn-glass {
+      background: var(--glass-strong);
+      color: var(--text);
+      border-color: var(--border);
+      backdrop-filter: blur(12px);
+    }
+    .btn-glass:hover {
+      border-color: rgba(var(--accent-rgb), 0.55);
+      background: rgba(var(--accent-rgb), 0.12);
+      transform: translateY(-2px);
+    }
+
+    /* Hero */
+    .hero {
+      padding: 68px 0 48px;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 44px;
+      align-items: center;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(var(--accent-rgb), 0.12);
+      border: 1px solid rgba(var(--accent-rgb), 0.35);
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: var(--accent);
+      margin-bottom: 18px;
+    }
+    .pulse-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent);
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.45); opacity: 0.45; }
+    }
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.35rem, 4.6vw, 3.85rem);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      margin-bottom: 18px;
+    }
+    .gradient-text {
+      display: inline-block;
+      color: #f8fafc;
+      background: linear-gradient(135deg, #ffffff 15%, #e9d5ff 55%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      color: var(--muted);
+      font-size: 1.04rem;
+      max-width: 540px;
+      margin-bottom: 28px;
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .hero-stats {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+    }
+    .stat-item strong {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      color: var(--text);
+    }
+    .stat-item span {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    /* ============================================================
+       ZERO-CROP, PIXEL-ALIGNED DEVICE FRAMES (Hero, Tablet, Gallery)
+       ============================================================ */
+    .hero-devices {
+      position: relative;
+      padding: 12px 24px 28px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 1400px;
+    }
+    .hero-tablet {
+      width: 100%;
+      max-width: 560px;
+      padding: 8px;
+      border-radius: 20px;
+      background: linear-gradient(145deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04));
+      border: 1px solid rgba(255,255,255,0.18);
+      box-shadow: 0 28px 65px rgba(0, 0, 0, 0.8), 0 0 38px var(--glow);
+      transform: rotateY(-8deg) rotateX(3deg);
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      cursor: pointer;
+    }
+    .hero-tablet:hover {
+      transform: rotateY(-2deg) rotateX(1deg) translateY(-4px);
+    }
+    .hero-tablet .screen-box {
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+      border: 1px solid rgba(255,255,255,0.08);
+      line-height: 0;
+    }
+    .hero-tablet img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
+    }
+
+    .hero-phone {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 158px;
+      padding: 6px;
+      border-radius: 22px;
+      background: linear-gradient(160deg, rgba(255,255,255,0.22), rgba(255,255,255,0.05));
+      border: 1px solid rgba(255,255,255,0.22);
+      box-shadow: 0 24px 55px rgba(0, 0, 0, 0.88), 0 0 28px var(--glow);
+      transform: rotateY(8deg) rotateZ(2deg);
+      transition: transform 0.4s ease;
+      cursor: pointer;
+      z-index: 4;
+    }
+    .hero-phone:hover {
+      transform: rotateY(0deg) rotateZ(0deg) translateY(-6px) scale(1.03);
+    }
+    .hero-phone .screen-box {
+      border-radius: 16px;
+      overflow: hidden;
+      background: #000;
+      border: 1px solid rgba(255,255,255,0.08);
+      line-height: 0;
+    }
+    .hero-phone img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
+    }
+
+    /* Section Headings */
+    section { padding: 68px 0; position: relative; z-index: 2; }
+    .section-head {
+      text-align: center;
+      max-width: 680px;
+      margin: 0 auto 40px;
+    }
+    .section-tag {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    .section-head h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.85rem, 3.4vw, 2.7rem);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+    .section-head p { color: var(--muted); font-size: 0.98rem; }
+
+    /* Glass Spotlight Cards */
+    .glass-card {
+      position: relative;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      overflow: hidden;
+      transition: border-color 0.25s, transform 0.25s;
+    }
+    .glass-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 50%), rgba(var(--accent-rgb), 0.14), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .glass-card:hover::before { opacity: 1; }
+    .glass-card:hover { border-color: rgba(var(--accent-rgb), 0.45); }
+
+    /* Live GitHub Release Notes Card */
+    .release-card {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 28px 32px;
+      border-color: rgba(var(--accent-rgb), 0.3);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 35px rgba(var(--accent-rgb), 0.12);
+    }
+    .release-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      padding-bottom: 18px;
+      margin-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .release-title-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .release-title-group h3 {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+    }
+    .release-date {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .release-body {
+      color: var(--text);
+      font-size: 0.94rem;
+      line-height: 1.7;
+    }
+    .release-body h4 {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      color: var(--accent);
+      margin: 16px 0 8px;
+    }
+    .release-body h4:first-child { margin-top: 0; }
+    .release-body ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .release-body li {
+      position: relative;
+      padding-left: 18px;
+      color: #d6d7e8;
+    }
+    .release-body li::before {
+      content: "▸";
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+    }
+    .release-body code {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgba(var(--accent-rgb), 0.14);
+      color: var(--accent);
+    }
+    .release-body p {
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    /* Interactive Tablet Showcase */
+    .tablet-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+    .pill-btn {
+      padding: 8px 15px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--glass);
+      color: var(--muted);
+      font-size: 0.84rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .pill-btn:hover { color: var(--text); border-color: rgba(var(--accent-rgb), 0.45); }
+    .pill-btn.active {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #06060c;
+      border-color: transparent;
+      font-weight: 600;
+      box-shadow: 0 4px 16px var(--glow);
+    }
+
+    .tablet-stage {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 12px;
+      border-radius: 24px;
+      background: linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255,255,255,0.16);
+      box-shadow: 0 32px 80px rgba(0, 0, 0, 0.82), 0 0 50px rgba(var(--accent-rgb), 0.16);
+    }
+    .tablet-screen-wrap {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+      border: 1px solid rgba(255,255,255,0.1);
+      line-height: 0;
+      cursor: zoom-in;
+    }
+    .tablet-screen-wrap img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
+      transition: opacity 0.25s ease;
+    }
+    .tablet-caption-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex-wrap: wrap;
+      padding: 16px 8px 4px;
+    }
+    .tablet-caption-bar h3 {
+      font-family: var(--font-display);
+      font-size: 1.12rem;
+    }
+    .tablet-caption-bar p {
+      color: var(--muted);
+      font-size: 0.88rem;
+      max-width: 720px;
+    }
+
+    /* 15-Screen Gallery */
+    .filter-bar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+    }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      grid-auto-flow: dense;
+      gap: 20px;
+      align-items: start;
+    }
+    .screen-card {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      cursor: pointer;
+    }
+    .screen-card.tablet-card {
+      grid-column: span 2;
+    }
+    @media (max-width: 760px) {
+      .screen-card.tablet-card { grid-column: span 1; }
+    }
+    .device-frame {
+      width: 100%;
+      padding: 8px;
+      border-radius: 18px;
+      background: linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .device-frame.phone-frame {
+      max-width: 230px;
+      margin: 0 auto;
+      padding: 7px;
+      border-radius: 23px;
+    }
+    .device-screen {
+      width: 100%;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #000;
+      border: 1px solid rgba(255,255,255,0.08);
+      line-height: 0;
+    }
+    .device-frame.phone-frame .device-screen {
+      border-radius: 16px;
+    }
+    .device-screen img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
+    }
+    .screen-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .screen-meta h4 {
+      font-family: var(--font-display);
+      font-size: 0.98rem;
+      margin-bottom: 3px;
+    }
+    .screen-meta p {
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+    .device-badge {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(var(--accent-rgb), 0.12);
+      border: 1px solid rgba(var(--accent-rgb), 0.35);
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    /* Interactive Audio Pulsing Deck */
+    .player-deck {
+      padding: 28px;
+      max-width: 920px;
+      margin: 0 auto;
+    }
+    .player-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .track-info h3 {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+    }
+    .track-info p {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .toggles-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .toggle-chip {
+      font-family: var(--font-mono);
+      font-size: 0.74rem;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--glass);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .toggle-chip.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(var(--accent-rgb), 0.14);
+      box-shadow: 0 0 14px rgba(var(--accent-rgb), 0.25);
+    }
+    #viz-canvas {
+      width: 100%;
+      height: 150px;
+      border-radius: 14px;
+      background: rgba(0, 0, 0, 0.42);
+      border: 1px solid var(--border);
+      display: block;
+      margin-bottom: 18px;
+    }
+    .seek-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 18px;
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 15px; height: 15px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--glow);
+    }
+    .controls-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .transport-btns {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .ctrl-btn {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--glass-strong);
+      color: var(--text);
+      font-size: 1rem;
+      cursor: pointer;
+      display: grid; place-items: center;
+      transition: all 0.2s;
+    }
+    .ctrl-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .ctrl-btn.play-main {
+      width: 58px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #06060c;
+      border: none;
+      box-shadow: 0 6px 20px var(--glow);
+      font-weight: 700;
+    }
+    .volume-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 170px;
+    }
+    .track-selector {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Telemetry & Bento Grid */
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 34px;
+    }
+    .telemetry-card { padding: 20px; }
+    .telemetry-label {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .telemetry-val {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .bento-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .bento-grid { grid-template-columns: 1fr; }
+      .hero-devices { padding: 8px 12px 24px 0; }
+      .hero-phone { width: 124px; }
+    }
+    .bento-card { padding: 24px; }
+    .bento-icon {
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      display: grid; place-items: center;
+      background: rgba(var(--accent-rgb), 0.14);
+      border: 1px solid rgba(var(--accent-rgb), 0.3);
+      color: var(--accent);
+      font-size: 1.2rem;
+      margin-bottom: 14px;
+    }
+    .bento-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      margin-bottom: 8px;
+    }
+    .bento-card p { color: var(--muted); font-size: 0.9rem; }
+
+    /* Codecs Matrix */
+    .codecs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+      gap: 14px;
+      margin-top: 22px;
+    }
+    .codec-card {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .codec-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .codec-name {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .codec-type {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(var(--accent-rgb), 0.12);
+      color: var(--accent);
+    }
+    .codec-desc { color: var(--muted); font-size: 0.8rem; }
+
+    /* GitHub Callout */
+    .github-box {
+      padding: 38px 28px;
+      text-align: center;
+    }
+    .clone-bar {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 22px 0 26px;
+      padding: 10px 14px;
+      border-radius: 14px;
+      background: rgba(0, 0, 0, 0.55);
+      border: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 0.84rem;
+      color: var(--accent);
+      max-width: 100%;
+    }
+    .copy-btn {
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(var(--accent-rgb), 0.45);
+      background: rgba(var(--accent-rgb), 0.14);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .copy-btn:hover { background: var(--accent); color: #05050a; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.86rem;
+      position: relative;
+      z-index: 2;
+    }
+    footer a { color: var(--accent); text-decoration: none; }
+
+    /* Adaptive Lightbox (Zero Crop) */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(4, 4, 8, 0.94);
+      backdrop-filter: blur(18px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox-inner {
+      position: relative;
+      max-width: 960px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    .lightbox-frame {
+      padding: 6px;
+      border-radius: 18px;
+      background: linear-gradient(145deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04));
+      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: 0 24px 70px rgba(0,0,0,0.88), 0 0 40px var(--glow);
+      line-height: 0;
+    }
+    .lightbox-img {
+      max-height: 76vh;
+      max-width: 88vw;
+      width: auto;
+      height: auto;
+      display: block;
+      object-fit: contain;
+      border-radius: 12px;
+      background: #000;
+    }
+    .lightbox-caption { text-align: center; }
+    .lightbox-caption h4 { font-family: var(--font-display); font-size: 1.1rem; }
+    .lightbox-caption p { color: var(--muted); font-size: 0.88rem; }
+    .lb-btn {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 46px; height: 46px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: rgba(16, 16, 26, 0.88);
+      color: #fff;
+      font-size: 1.3rem;
+      cursor: pointer;
+    }
+    .lb-prev { left: 18px; }
+    .lb-next { right: 18px; }
+    .lb-close {
+      position: fixed;
+      top: 18px; right: 20px;
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: rgba(16, 16, 26, 0.88);
+      color: #fff;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+    @media (max-width: 768px) {
+      html, body {
+        overflow-x: hidden;
+      }
+      header, .navbar, nav {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .nav-links {
+        width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 4px;
+        -webkit-overflow-scrolling: touch;
+      }
+      .hero {
+        grid-template-columns: 1fr !important;
+        text-align: center;
+        gap: 32px;
+        padding-top: 32px;
+      }
+      .hero p {
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .hero-actions {
+        justify-content: center;
+      }
+      .release-card {
+        padding: 22px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="horizon-canvas"></canvas>
+  <div class="ambient-orb orb-1"></div>
+  <div class="ambient-orb orb-2"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="container nav-inner">
+      <a href="#" class="brand">
+        <span class="brand-icon">&#9654;</span>
+        Horizon Player
+        <span class="brand-pill">v1.0.8 RELEASE</span>
+      </a>
+      <div class="nav-links">
+        <a href="#whats-new">What's New</a>
+        <a href="#tablet">Tablet UI</a>
+        <a href="#gallery">Screens</a>
+        <a href="#player">Visualizer</a>
+        <a href="#engine">Engine</a>
+        <a href="#formats">Codecs</a>
+      </div>
+      <div class="nav-right">
+        <div class="theme-switcher" title="Switch Liquid Glass Theme">
+          <button class="theme-dot active" data-set-theme="violet" style="background:#b983ff;color:#b983ff" aria-label="Quantum Violet"></button>
+          <button class="theme-dot" data-set-theme="cyan" style="background:#38e8ff;color:#38e8ff" aria-label="Cyber Prism"></button>
+          <button class="theme-dot" data-set-theme="gold" style="background:#fbbf24;color:#fbbf24" aria-label="Solar Gold"></button>
+          <button class="theme-dot" data-set-theme="magenta" style="background:#f472b6;color:#f472b6" aria-label="Cyber Magenta"></button>
+          <button class="theme-dot" data-set-theme="glacial" style="background:#34d399;color:#34d399" aria-label="Nordic Glacial"></button>
+        </div>
+        <a href="https://github.com/Krishna1998/Horizon-Player" target="_blank" rel="noopener" class="btn btn-glass" style="padding:8px 14px;font-size:0.84rem;">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="container hero-grid">
+      <div>
+        <div class="hero-badge">
+          <span class="pulse-dot"></span>
+          v1.0.8 &bull; QUANTUM RELEASE
+        </div>
+        <h1>
+          Cinema &amp; Lossless Audio,<br />
+          <span class="gradient-text">Refracted in Liquid Glass.</span>
+        </h1>
+        <p>
+          Horizon Player Quantum is a next-generation OLED media player crafted for Android smartphones and tablets—powered by <strong>mpv HW+ Direct</strong>, <strong>Vulkan + GLES</strong>, <strong>384kHz / 32-bit</strong> lossless FLAC audio, synced lyrics, and a Biometric Vault.
+        </p>
+        <div class="hero-actions">
+          <a href="https://github.com/Krishna1998/Horizon-Player/releases" target="_blank" rel="noopener" class="btn btn-primary">&#11015; Download v1.0.8 APK</a>
+          <a href="#gallery" class="btn btn-glass">Explore 15 Screens</a>
+          <a href="https://github.com/Krishna1998/Horizon-Player" target="_blank" rel="noopener" class="btn btn-glass">View Source</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <strong>mpv HW+ Direct</strong>
+            <span>Vulkan + GLES Pipeline</span>
+          </div>
+          <div class="stat-item">
+            <strong>384kHz / 32-bit</strong>
+            <span>Lossless FLAC Engine</span>
+          </div>
+          <div class="stat-item">
+            <strong>Phone &amp; Tablet</strong>
+            <span>Adaptive Liquid Glass UI</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-devices">
+        <div class="hero-tablet" onclick="openLightboxBySrc('34396.png')" title="Click to zoom Tablet Home Hub">
+          <div class="screen-box">
+            <img src="34396.png" alt="Horizon Player Tablet Home Hub with Continue Watching and Live Audio Pulsing" />
+          </div>
+        </div>
+        <div class="hero-phone" onclick="openLightboxBySrc('34377.jpg')" title="Click to zoom Phone Now Playing UI">
+          <div class="screen-box">
+            <img src="34377.jpg" alt="Horizon Player Phone FLAC Lossless Now Playing" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Live GitHub Latest Release Notes -->
+  <section id="whats-new" style="padding: 36px 0 48px;">
+    <div class="container">
+      <div class="glass-card release-card">
+        <div class="release-header">
+          <div class="release-title-group">
+            <span class="brand-pill" id="release-tag-badge">LATEST RELEASE</span>
+            <h3 id="release-name">Loading Latest Release Notes...</h3>
+            <span class="release-date" id="release-date">Syncing with GitHub</span>
+          </div>
+          <a id="release-full-link" href="https://github.com/Krishna1998/Horizon-Player/releases/latest" target="_blank" rel="noopener" class="btn btn-glass" style="padding: 7px 14px; font-size: 0.82rem;">View Full Release &rarr;</a>
+        </div>
+        <div class="release-body" id="release-body">
+          <p>Fetching latest changelog and features directly from <code>Krishna1998/Horizon-Player</code>...</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Adaptive Tablet Experience -->
+  <section id="tablet">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-tag">Large-Screen Architecture</span>
+        <h2>Adaptive Tablet Experience</h2>
+        <p>Dual-pane settings, widescreen cinema playback, live VU-meter audio pulsing, and split-screen queues engineered for tablets and foldables.</p>
+      </div>
+
+      <div class="tablet-tabs" id="tablet-tabs"></div>
+
+      <div class="tablet-stage">
+        <div class="tablet-screen-wrap" id="tablet-preview-trigger">
+          <img id="tablet-preview-img" src="34396.png" alt="Horizon Player Tablet Preview" />
+        </div>
+        <div class="tablet-caption-bar">
+          <div>
+            <h3 id="tablet-preview-title">Tablet Home Media Hub</h3>
+            <p id="tablet-preview-desc">Continue Watching with H.265 10-bit &amp; Dolby Digital+ 5.1 badges paired with live Audio Pulsing VU meters, Movies/Videos, and Music shelves.</p>
+          </div>
+          <button class="btn btn-glass" id="tablet-zoom-btn" style="padding:8px 14px;font-size:0.84rem;">Fullscreen Zoom</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15-Screen Phone & Tablet Gallery -->
+  <section id="gallery">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-tag">Inside Horizon Player</span>
+        <h2>15 Real App Screens</h2>
+        <p>Filter by device form factor or feature category. Click any screen to inspect in full OLED clarity.</p>
+      </div>
+
+      <div class="filter-bar">
+        <div class="filter-row" id="device-filters">
+          <button class="pill-btn active" data-device="all">All Screens (15)</button>
+          <button class="pill-btn" data-device="tablet">Tablet UI (9)</button>
+          <button class="pill-btn" data-device="phone">Phone UI (6)</button>
+        </div>
+        <div class="filter-row" id="cat-filters">
+          <button class="pill-btn active" data-cat="all">All Categories</button>
+          <button class="pill-btn" data-cat="hub">Media Hub</button>
+          <button class="pill-btn" data-cat="audio">Lossless Audio</button>
+          <button class="pill-btn" data-cat="cinema">Cinema</button>
+          <button class="pill-btn" data-cat="settings">Settings &amp; About</button>
+        </div>
+      </div>
+
+      <div class="gallery-grid" id="gallery-grid"></div>
+    </div>
+  </section>
+
+  <!-- Interactive Audio Pulsing Deck -->
+  <section id="player">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-tag">Live Interactive Demo</span>
+        <h2>Audio Pulsing Visualizer</h2>
+        <p>Experience Horizon Player's signature wave-reactive audio bar and real-time engine toggles right in your browser.</p>
+      </div>
+
+      <div class="glass-card player-deck">
+        <div class="player-top">
+          <div class="track-info">
+            <h3 id="deck-title">295</h3>
+            <p id="deck-artist">Sidhu Moose Wala &bull; FLAC Lossless 24-bit / 96kHz</p>
+          </div>
+          <div class="toggles-row">
+            <button class="toggle-chip active" data-toggle>FLAC Lossless</button>
+            <button class="toggle-chip active" data-toggle>mpv HW+ Direct</button>
+            <button class="toggle-chip active" data-toggle>Liquid Glass</button>
+          </div>
+        </div>
+
+        <canvas id="viz-canvas" width="860" height="150"></canvas>
+
+        <div class="seek-row">
+          <span id="time-cur">01:33</span>
+          <input type="range" id="seek-slider" min="0" max="270" value="93" />
+          <span id="time-dur">04:30</span>
+        </div>
+
+        <div class="controls-row">
+          <div class="transport-btns">
+            <button class="ctrl-btn" id="btn-prev" title="Previous">&#9198;</button>
+            <button class="ctrl-btn play-main" id="btn-play" title="Play / Pause">&#10074;&#10074;</button>
+            <button class="ctrl-btn" id="btn-next" title="Next">&#9197;</button>
+          </div>
+          <div class="volume-wrap">
+            <button class="ctrl-btn" id="btn-mute" style="width:36px;height:36px;font-size:0.9rem;" title="Mute">&#128266;</button>
+            <input type="range" id="vol-slider" min="0" max="100" value="82" />
+          </div>
+        </div>
+
+        <div class="track-selector" id="track-selector"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Core Engine Telemetry & Bento Features -->
+  <section id="engine">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-tag">Core Engine Telemetry &bull; v1.0.8 RELEASE</span>
+        <h2>Built for Zero-Compromise Playback</h2>
+        <p>Hardware-accelerated video decoding meets audiophile-grade sound processing and pure AMOLED aesthetics.</p>
+      </div>
+
+      <div class="telemetry-grid">
+        <div class="glass-card telemetry-card">
+          <div class="telemetry-label">GPU Pipeline</div>
+          <div class="telemetry-val">Vulkan + GLES</div>
+        </div>
+        <div class="glass-card telemetry-card">
+          <div class="telemetry-label">Audio Engine</div>
+          <div class="telemetry-val">384kHz / 32-bit</div>
+        </div>
+        <div class="glass-card telemetry-card">
+          <div class="telemetry-label">Codec Engine</div>
+          <div class="telemetry-val">MediaCodec Ultra</div>
+        </div>
+        <div class="glass-card telemetry-card">
+          <div class="telemetry-label">Glass Shader</div>
+          <div class="telemetry-val">Standard Blit / Liquid Glass</div>
+        </div>
+      </div>
+
+      <div class="bento-grid">
+        <div class="glass-card bento-card">
+          <div class="bento-icon">&#9889;</div>
+          <h3>mpv HW+ Direct</h3>
+          <p>Smooth 10-bit H.265 / HEVC, AV1, and 4K HDR playback with hardware-accelerated decoding and instant seeking.</p>
+        </div>
+        <div class="glass-card bento-card">
+          <div class="bento-icon">&#10024;</div>
+          <h3>Liquid Glass &amp; AMOLED Black</h3>
+          <p>Multiple curated themes—Quantum Violet, Cyber Prism, Solar Gold, Cyber Magenta, Nordic Glacial—with pure black OLED mode.</p>
+        </div>
+        <div class="glass-card bento-card">
+          <div class="bento-icon">&#127925;</div>
+          <h3>FLAC Lossless &amp; Synced Lyrics</h3>
+          <p>Embedded and online real-time synced lyrics, Audio Pulsing wave seekbars with VU meters, A-B loop repeat, and spatial audio controls.</p>
+        </div>
+        <div class="glass-card bento-card">
+          <div class="bento-icon">&#128274;</div>
+          <h3>Biometric Secure Vault</h3>
+          <p>Protect private videos and folders behind hardware biometric authentication and folder blacklists.</p>
+        </div>
+        <div class="glass-card bento-card">
+          <div class="bento-icon">&#127916;</div>
+          <h3>Cinema Metadata &amp; Episodes</h3>
+          <p>Automatic movie posters, synopses, codec badges (H.265, 10-bit, Dolby Digital+ 5.1, SRT), and multi-episode series tracking.</p>
+        </div>
+        <div class="glass-card bento-card">
+          <div class="bento-icon">&#128241;</div>
+          <h3>Adaptive Phone &amp; Tablet UI</h3>
+          <p>Seamlessly expands into split-screen queues, dual-pane preferences, and widescreen poster grids on tablets.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Supported Formats Matrix -->
+  <section id="formats">
+    <div class="container">
+      <div class="section-head">
+        <span class="section-tag">Universal Compatibility</span>
+        <h2>Supported Codecs &amp; Formats</h2>
+        <p>Play virtually any local or networked media container without transcoding.</p>
+      </div>
+
+      <div class="filter-row" id="codec-filters">
+        <button class="pill-btn active" data-codec="all">All (15)</button>
+        <button class="pill-btn" data-codec="video">Video</button>
+        <button class="pill-btn" data-codec="audio">Audio</button>
+        <button class="pill-btn" data-codec="sub">Subtitles</button>
+      </div>
+
+      <div class="codecs-grid" id="codecs-grid"></div>
+    </div>
+  </section>
+
+  <!-- GitHub Callout -->
+  <section id="github">
+    <div class="container">
+      <div class="glass-card github-box">
+        <span class="section-tag">Open Source &bull; By Krishna</span>
+        <h2 style="font-family:var(--font-display);font-size:clamp(1.7rem,3vw,2.4rem);margin-bottom:10px;">
+          Horizon Player Quantum v1.0.8 RELEASE
+        </h2>
+        <p style="color:var(--muted);max-width:580px;margin:0 auto;">
+          Star the repository, explore the source code, report issues, or grab the latest release build directly from GitHub.
+        </p>
+
+        <div class="clone-bar">
+          <code id="clone-cmd">git clone https://github.com/Krishna1998/Horizon-Player.git</code>
+          <button class="copy-btn" id="copy-clone-btn">Copy</button>
+        </div>
+
+        <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
+          <a href="https://github.com/Krishna1998/Horizon-Player" target="_blank" rel="noopener" class="btn btn-primary">View Repository</a>
+          <a href="https://github.com/Krishna1998/Horizon-Player/releases" target="_blank" rel="noopener" class="btn btn-glass">Releases (v1.0.8)</a>
+          <a href="https://github.com/Krishna1998/Horizon-Player/issues" target="_blank" rel="noopener" class="btn btn-glass">Report an Issue</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p>Crafted for <a href="https://github.com/Krishna1998/Horizon-Player" target="_blank" rel="noopener">Horizon Player Quantum (v1.0.8 RELEASE)</a> &bull; Built by Krishna</p>
+    </div>
+  </footer>
+
+  <!-- Fullscreen Adaptive Lightbox -->
+  <div class="lightbox" id="lightbox">
+    <button class="lb-close" id="lb-close" aria-label="Close">&times;</button>
+    <button class="lb-btn lb-prev" id="lb-prev" aria-label="Previous">&#8249;</button>
+    <div class="lightbox-inner">
+      <div class="lightbox-frame">
+        <img class="lightbox-img" id="lb-img" src="" alt="" />
+      </div>
+      <div class="lightbox-caption">
+        <h4 id="lb-title"></h4>
+        <p id="lb-desc"></p>
+      </div>
+    </div>
+    <button class="lb-btn lb-next" id="lb-next" aria-label="Next">&#8250;</button>
+  </div>
+
+  <script>
+    // =========================================================================
+    // SCREENSHOTS CONFIGURATION
+    // =========================================================================
+    const SCREENS = [
+      // Tablet UI (9)
+      { src: '34396.png', device: 'tablet', cat: 'hub', tabLabel: 'Home Hub', title: 'Tablet Home Media Hub', desc: 'Continue Watching with H.265 10-bit & Dolby Digital+ 5.1 badges paired with live Audio Pulsing VU meters, Movies/Videos, and Music shelves.' },
+      { src: '34408.png', device: 'tablet', cat: 'audio', tabLabel: 'Split-Screen Audio', title: 'Split-Screen Lossless Audio', desc: 'Now Playing artwork alongside a live 132-track upcoming queue and Lyrics toggle.' },
+      { src: '34412.png', device: 'tablet', cat: 'cinema', tabLabel: 'Cinema Player', title: 'Widescreen Cinema Playback', desc: 'Clean OLED video overlay with H.265, 10-bit, 5.1 surround, SRT badges, and gesture controls.' },
+      { src: '34410.png', device: 'tablet', cat: 'cinema', tabLabel: 'Movie Details', title: 'Widescreen Movie & Episodes Hub', desc: 'Rich movie backdrop, synopsis, WEB-DL H.265 10-bit 5.1 tags, and multi-episode selector.' },
+      { src: '34398.png', device: 'tablet', cat: 'hub', tabLabel: 'Movies Grid', title: 'Tablet Movies Library', desc: 'Poster grid with Unwatched/Started filters and a floating persistent mini audio bar.' },
+      { src: '34402.png', device: 'tablet', cat: 'audio', tabLabel: 'Music Grid', title: 'Music Library Grid', desc: 'High-density album art grid with Favorites, Playlists, Folders, Albums, and Artists tabs.' },
+      { src: '34400.png', device: 'tablet', cat: 'hub', tabLabel: 'Smart Folders', title: 'Smart Video Folders', desc: 'Organized folder thumbnails with media item counts and quick floating playback access.' },
+      { src: '34404.png', device: 'tablet', cat: 'settings', tabLabel: 'Appearance', title: 'Dual-Pane Appearance & Themes', desc: 'Switch between Quantum Violet, Cyber Magenta, Solar Gold, Cyber Prism, and AMOLED Black Mode.' },
+      { src: '34417.png', device: 'tablet', cat: 'settings', tabLabel: 'About Quantum', title: 'About Horizon Player v1.0.8 RELEASE', desc: 'Live Core Engine Telemetry: Vulkan + GLES, 384kHz / 32-bit, MediaCodec Ultra, and Standard Blit.' },
+
+      // Phone UI (6)
+      { src: '34376.jpg', device: 'phone', cat: 'hub', title: 'Home Media Hub', desc: 'Continue Watching hero card with codec badges, Movies/Videos carousel, and Audio Pulsing bar.' },
+      { src: '34375.jpg', device: 'phone', cat: 'audio', title: 'Music & Audio Pulsing', desc: 'Unified Music shelf with FLAC / M4A format tags and real-time pulsing mini player.' },
+      { src: '34377.jpg', device: 'phone', cat: 'audio', title: 'FLAC Lossless Now Playing', desc: 'Full-bleed album art, wave-reactive glowing seekbar, live lyric preview, and lossless controls.' },
+      { src: '34373.jpg', device: 'phone', cat: 'cinema', title: 'Cinema Movie Details', desc: 'H.265 10-bit, 5.1 audio, and SRT badges with Play Movie CTA and episode list.' },
+      { src: '34374.jpg', device: 'phone', cat: 'audio', title: 'Synced Lyrics View', desc: 'Toggle between Embedded and Online real-time highlighted lyrics with playback speed & timer.' },
+      { src: '34372.jpg', device: 'phone', cat: 'settings', title: 'Preferences & Biometric Vault', desc: 'Quick cards for Optics & Theme, mpv HW+ Direct Decoder, Custom Gestures, and Secure Folder Vault.' }
+    ];
+
+    const CODECS = [
+      { name: 'H.265 / HEVC', type: 'video', desc: '10-bit HDR hardware decoding via mpv HW+ Direct' },
+      { name: 'AV1', type: 'video', desc: 'Next-gen royalty-free high-efficiency video' },
+      { name: 'H.264 / AVC', type: 'video', desc: 'Universal 8-bit & 10-bit playback' },
+      { name: 'VP9', type: 'video', desc: 'High-bitrate WebM & HDR streams' },
+      { name: 'MKV / MP4 / WEB-DL', type: 'video', desc: 'Multi-track containers with chapters' },
+      { name: 'FLAC', type: 'audio', desc: 'Lossless studio audio up to 384kHz / 32-bit' },
+      { name: 'ALAC / WAV', type: 'audio', desc: 'Uncompressed & Apple lossless PCM audio' },
+      { name: 'Dolby Digital+ 5.1', type: 'audio', desc: 'Multi-channel surround passthrough & downmix' },
+      { name: 'EAC3 / DTS', type: 'audio', desc: 'Cinema-grade spatial surround decoding' },
+      { name: 'AAC / M4A', type: 'audio', desc: 'High-efficiency stereo & multichannel music' },
+      { name: 'Opus / OGG', type: 'audio', desc: 'Ultra-low latency modern audio streams' },
+      { name: 'SRT', type: 'sub', desc: 'External & embedded subtitles with custom fonts' },
+      { name: 'ASS / SSA', type: 'sub', desc: 'Full libass styled anime & karaoke rendering' },
+      { name: 'VTT / WebVTT', type: 'sub', desc: 'Modern timed text tracks' },
+      { name: 'LRC Lyrics', type: 'sub', desc: 'Embedded & online real-time synced song lyrics' }
+    ];
+
+    const TRACKS = [
+      { title: '295', artist: 'Sidhu Moose Wala • FLAC Lossless 24-bit / 96kHz', dur: 270 },
+      { title: 'Zulfein', artist: 'Mehul Mahesh & Dj AYnik • FLAC Lossless 384kHz / 32-bit', dur: 198 },
+      { title: 'Heeriye (feat. Arijit Singh)', artist: 'Jasleen Royal • FLAC Lossless', dur: 194 }
+    ];
+
+    // Theme Switcher
+    let currentAccentRGB = [185, 131, 255];
+    const THEME_RGB = {
+      violet: [185, 131, 255],
+      cyan: [56, 232, 255],
+      gold: [251, 191, 36],
+      magenta: [244, 114, 182],
+      glacial: [52, 211, 153]
+    };
+    document.querySelectorAll('.theme-dot').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const t = btn.dataset.setTheme;
+        document.documentElement.setAttribute('data-theme', t);
+        currentAccentRGB = THEME_RGB[t] || THEME_RGB.violet;
+        document.querySelectorAll('.theme-dot').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
+    // Mouse Spotlight on Glass Cards
+    document.addEventListener('mousemove', e => {
+      document.querySelectorAll('.glass-card').forEach(card => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+      });
+    });
+
+    // Adaptive Tablet Showcase
+    const tabletScreens = SCREENS.filter(s => s.device === 'tablet');
+    const tabletTabsEl = document.getElementById('tablet-tabs');
+    const tabletImg = document.getElementById('tablet-preview-img');
+    const tabletTitle = document.getElementById('tablet-preview-title');
+    const tabletDesc = document.getElementById('tablet-preview-desc');
+    let activeTabletSrc = tabletScreens[0].src;
+
+    tabletScreens.forEach((s, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'pill-btn' + (idx === 0 ? ' active' : '');
+      btn.textContent = s.tabLabel;
+      btn.addEventListener('click', () => {
+        tabletTabsEl.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        tabletImg.style.opacity = '0.25';
+        setTimeout(() => {
+          tabletImg.src = s.src;
+          tabletImg.alt = s.title;
+          tabletTitle.textContent = s.title;
+          tabletDesc.textContent = s.desc;
+          activeTabletSrc = s.src;
+          tabletImg.style.opacity = '1';
+        }, 160);
+      });
+      tabletTabsEl.appendChild(btn);
+    });
+    document.getElementById('tablet-preview-trigger').addEventListener('click', () => openLightboxBySrc(activeTabletSrc));
+    document.getElementById('tablet-zoom-btn').addEventListener('click', () => openLightboxBySrc(activeTabletSrc));
+
+    // 15-Screen Gallery
+    let activeDevice = 'all';
+    let activeCat = 'all';
+    const galleryEl = document.getElementById('gallery-grid');
+
+    function renderGallery() {
+      galleryEl.innerHTML = '';
+      const filtered = SCREENS.filter(s =>
+        (activeDevice === 'all' || s.device === activeDevice) &&
+        (activeCat === 'all' || s.cat === activeCat)
+      );
+      filtered.forEach(s => {
+        const card = document.createElement('div');
+        card.className = 'glass-card screen-card' + (s.device === 'tablet' ? ' tablet-card' : '');
+        card.innerHTML = `
+          <div class="device-frame ${s.device === 'tablet' ? 'tablet-frame' : 'phone-frame'}">
+            <div class="device-screen">
+              <img src="${s.src}" alt="${s.title}" loading="lazy" />
+            </div>
+          </div>
+          <div class="screen-meta">
+            <div>
+              <h4>${s.title}</h4>
+              <p>${s.desc}</p>
+            </div>
+            <span class="device-badge">${s.device === 'tablet' ? 'Tablet UI' : 'Phone UI'}</span>
+          </div>
+        `;
+        card.addEventListener('click', () => openLightboxBySrc(s.src));
+        galleryEl.appendChild(card);
+      });
+    }
+    renderGallery();
+
+    document.querySelectorAll('#device-filters .pill-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#device-filters .pill-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeDevice = btn.dataset.device;
+        renderGallery();
+      });
+    });
+    document.querySelectorAll('#cat-filters .pill-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#cat-filters .pill-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeCat = btn.dataset.cat;
+        renderGallery();
+      });
+    });
+
+    // Adaptive Lightbox
+    const lb = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lb-img');
+    const lbTitle = document.getElementById('lb-title');
+    const lbDesc = document.getElementById('lb-desc');
+    let lbIndex = 0;
+
+    function showLightbox(index) {
+      lbIndex = (index + SCREENS.length) % SCREENS.length;
+      const item = SCREENS[lbIndex];
+      lbImg.src = item.src;
+      lbImg.alt = item.title;
+      lbTitle.textContent = item.title + (item.device === 'tablet' ? ' (Tablet UI)' : ' (Phone UI)');
+      lbDesc.textContent = item.desc;
+      lb.classList.add('open');
+    }
+    window.openLightboxBySrc = function(src) {
+      const idx = SCREENS.findIndex(s => s.src === src);
+      showLightbox(idx >= 0 ? idx : 0);
+    };
+    document.getElementById('lb-close').addEventListener('click', () => lb.classList.remove('open'));
+    document.getElementById('lb-prev').addEventListener('click', () => showLightbox(lbIndex - 1));
+    document.getElementById('lb-next').addEventListener('click', () => showLightbox(lbIndex + 1));
+    lb.addEventListener('click', e => { if (e.target === lb) lb.classList.remove('open'); });
+    document.addEventListener('keydown', e => {
+      if (!lb.classList.contains('open')) return;
+      if (e.key === 'Escape') lb.classList.remove('open');
+      if (e.key === 'ArrowLeft') showLightbox(lbIndex - 1);
+      if (e.key === 'ArrowRight') showLightbox(lbIndex + 1);
+    });
+
+    // Codecs Matrix
+    const codecsEl = document.getElementById('codecs-grid');
+    function renderCodecs(filter = 'all') {
+      codecsEl.innerHTML = '';
+      CODECS.filter(c => filter === 'all' || c.type === filter).forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'glass-card codec-card';
+        div.innerHTML = `
+          <div class="codec-top">
+            <span class="codec-name">${c.name}</span>
+            <span class="codec-type">${c.type.toUpperCase()}</span>
+          </div>
+          <p class="codec-desc">${c.desc}</p>
+        `;
+        codecsEl.appendChild(div);
+      });
+    }
+    renderCodecs();
+    document.querySelectorAll('#codec-filters .pill-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#codec-filters .pill-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderCodecs(btn.dataset.codec);
+      });
+    });
+
+    // Copy Git Clone
+    document.getElementById('copy-clone-btn').addEventListener('click', function() {
+      const txt = document.getElementById('clone-cmd').textContent;
+      navigator.clipboard.writeText(txt).then(() => {
+        this.textContent = 'Copied!';
+        setTimeout(() => { this.textContent = 'Copy'; }, 1800);
+      });
+    });
+
+    // Interactive Audio Pulsing Deck
+    let trackIdx = 0;
+    let isPlaying = true;
+    let currentTime = 93;
+    let volume = 82;
+    let isMuted = false;
+
+    const deckTitle = document.getElementById('deck-title');
+    const deckArtist = document.getElementById('deck-artist');
+    const seekSlider = document.getElementById('seek-slider');
+    const timeCur = document.getElementById('time-cur');
+    const timeDur = document.getElementById('time-dur');
+    const btnPlay = document.getElementById('btn-play');
+    const volSlider = document.getElementById('vol-slider');
+    const btnMute = document.getElementById('btn-mute');
+    const trackSel = document.getElementById('track-selector');
+
+    function fmtTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    }
+
+    function loadTrack(idx) {
+      trackIdx = (idx + TRACKS.length) % TRACKS.length;
+      const t = TRACKS[trackIdx];
+      deckTitle.textContent = t.title;
+      deckArtist.textContent = t.artist;
+      seekSlider.max = t.dur;
+      currentTime = Math.min(currentTime, t.dur - 1);
+      timeDur.textContent = fmtTime(t.dur);
+      trackSel.querySelectorAll('.pill-btn').forEach((b, i) => b.classList.toggle('active', i === trackIdx));
+    }
+
+    TRACKS.forEach((t, i) => {
+      const b = document.createElement('button');
+      b.className = 'pill-btn' + (i === 0 ? ' active' : '');
+      b.textContent = t.title;
+      b.addEventListener('click', () => { currentTime = 0; loadTrack(i); });
+      trackSel.appendChild(b);
+    });
+    loadTrack(0);
+
+    btnPlay.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      btnPlay.innerHTML = isPlaying ? '&#10074;&#10074;' : '&#9654;';
+    });
+    document.getElementById('btn-prev').addEventListener('click', () => { currentTime = 0; loadTrack(trackIdx - 1); });
+    document.getElementById('btn-next').addEventListener('click', () => { currentTime = 0; loadTrack(trackIdx + 1); });
+    seekSlider.addEventListener('input', e => { currentTime = Number(e.target.value); timeCur.textContent = fmtTime(currentTime); });
+    volSlider.addEventListener('input', e => { volume = Number(e.target.value); isMuted = volume === 0; btnMute.innerHTML = isMuted ? '&#128263;' : '&#128266;'; });
+    btnMute.addEventListener('click', () => { isMuted = !isMuted; btnMute.innerHTML = isMuted ? '&#128263;' : '&#128266;'; });
+    document.querySelectorAll('[data-toggle]').forEach(btn => btn.addEventListener('click', () => btn.classList.toggle('active')));
+
+    setInterval(() => {
+      if (isPlaying) {
+        currentTime += 0.25;
+        if (currentTime >= TRACKS[trackIdx].dur) { currentTime = 0; loadTrack(trackIdx + 1); }
+        seekSlider.value = Math.floor(currentTime);
+        timeCur.textContent = fmtTime(currentTime);
+      }
+    }, 250);
+
+    // Audio Pulsing Visualizer Canvas
+    const vizCanvas = document.getElementById('viz-canvas');
+    const vCtx = vizCanvas.getContext('2d');
+    let phase = 0;
+
+    function drawViz() {
+      const w = vizCanvas.width;
+      const h = vizCanvas.height;
+      vCtx.clearRect(0, 0, w, h);
+
+      const [r, g, b] = currentAccentRGB;
+      const ampScale = isPlaying && !isMuted ? (volume / 100) : 0.08;
+      phase += isPlaying ? 0.055 : 0.01;
+
+      const bars = 48;
+      const barW = w / bars;
+      for (let i = 0; i < bars; i++) {
+        const n = Math.sin(phase * 1.4 + i * 0.35) * 0.5 + 0.5;
+        const m = Math.cos(phase * 0.9 - i * 0.22) * 0.5 + 0.5;
+        const bh = (12 + n * m * 86) * ampScale;
+        vCtx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.24)`;
+        vCtx.fillRect(i * barW + 3, h - bh, barW - 6, bh);
+      }
+
+      for (let layer = 0; layer < 2; layer++) {
+        vCtx.beginPath();
+        for (let x = 0; x <= w; x += 4) {
+          const y = h / 2
+            + Math.sin(x * 0.018 + phase + layer * 1.2) * 26 * ampScale
+            + Math.cos(x * 0.036 - phase * 1.3) * 14 * ampScale;
+          if (x === 0) vCtx.moveTo(x, y); else vCtx.lineTo(x, y);
+        }
+        vCtx.strokeStyle = layer === 0 ? `rgba(${r}, ${g}, ${b}, 0.95)` : `rgba(255, 255, 255, 0.55)`;
+        vCtx.lineWidth = layer === 0 ? 3 : 1.5;
+        vCtx.shadowBlur = 14;
+        vCtx.shadowColor = `rgba(${r}, ${g}, ${b}, 0.85)`;
+        vCtx.stroke();
+      }
+      vCtx.shadowBlur = 0;
+      requestAnimationFrame(drawViz);
+    }
+    drawViz();
+
+    // Perspective Horizon Grid Background Canvas
+    const hCanvas = document.getElementById('horizon-canvas');
+    const hCtx = hCanvas.getContext('2d');
+    let gridOffset = 0;
+
+    function resizeGrid() {
+      hCanvas.width = window.innerWidth;
+      hCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeGrid);
+    resizeGrid();
+
+    function drawHorizon() {
+      const w = hCanvas.width;
+      const h = hCanvas.height;
+      hCtx.clearRect(0, 0, w, h);
+
+      const [r, g, b] = currentAccentRGB;
+      const horizonY = h * 0.58;
+      gridOffset = (gridOffset + 0.45) % 40;
+
+      hCtx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.14)`;
+      hCtx.lineWidth = 1;
+
+      for (let i = -14; i <= 14; i++) {
+        hCtx.beginPath();
+        hCtx.moveTo(w / 2 + i * 32, horizonY);
+        hCtx.lineTo(w / 2 + i * 190, h);
+        hCtx.stroke();
+      }
+
+      for (let y = 0; y < h - horizonY; y += 26) {
+        const py = horizonY + Math.pow((y + gridOffset) / (h - horizonY), 1.65) * (h - horizonY);
+        hCtx.beginPath();
+        hCtx.moveTo(0, py);
+        hCtx.lineTo(w, py);
+        hCtx.stroke();
+      }
+
+      const grad = hCtx.createLinearGradient(0, horizonY, w, horizonY);
+      grad.addColorStop(0, 'transparent');
+      grad.addColorStop(0.5, `rgba(${r}, ${g}, ${b}, 0.45)`);
+      grad.addColorStop(1, 'transparent');
+      hCtx.strokeStyle = grad;
+      hCtx.beginPath();
+      hCtx.moveTo(0, horizonY);
+      hCtx.lineTo(w, horizonY);
+      hCtx.stroke();
+
+      requestAnimationFrame(drawHorizon);
+    }
+    drawHorizon();
+  </script>
+
+  <!-- Dynamic GitHub Latest Release & Changelog Parser -->
+  <script>
+    (function () {
+      function parseReleaseMarkdown(md) {
+        if (!md) return '<p>No detailed release notes provided for this build.</p>';
+        const esc = md
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+        const lines = esc.split(/\r?\n/);
+        let html = '';
+        let inList = false;
+
+        lines.forEach(line => {
+          const trimmed = line.trim();
+          if (!trimmed) {
+            if (inList) { html += '</ul>'; inList = false; }
+            return;
+          }
+          // Headings (### or ##)
+          if (/^#{1,4}\s+/.test(trimmed)) {
+            if (inList) { html += '</ul>'; inList = false; }
+            const title = trimmed.replace(/^#{1,4}\s+/, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html += `<h4>${title}</h4>`;
+          }
+          // Bullet points (- or *)
+          else if (/^[-*+]\s+/.test(trimmed)) {
+            if (!inList) { html += '<ul>'; inList = true; }
+            const item = trimmed
+              .replace(/^[-*+]\s+/, '')
+              .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+              .replace(/`([^`]+)`/g, '<code>$1</code>');
+            html += `<li>${item}</li>`;
+          }
+          // Regular paragraph
+          else {
+            if (inList) { html += '</ul>'; inList = false; }
+            const para = trimmed
+              .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+              .replace(/`([^`]+)`/g, '<code>$1</code>');
+            html += `<p>${para}</p>`;
+          }
+        });
+        if (inList) html += '</ul>';
+        return html;
+      }
+
+      fetch('https://api.github.com/repos/Krishna1998/Horizon-Player/releases/latest')
+        .then(r => r.ok ? r.json() : null)
+        .then(rel => {
+          if (!rel || !rel.tag_name) return;
+          const ver = rel.tag_name.startsWith('v') ? rel.tag_name : 'v' + rel.tag_name;
+          const apk = (rel.assets || []).find(a => a.name && a.name.endsWith('.apk'));
+          const dlUrl = apk ? apk.browser_download_url : rel.html_url;
+
+          // Update version strings across the page
+          document.title = document.title.replace(/v1\.0\.8/g, ver);
+          document.querySelectorAll('.brand-pill, .hero-badge, .btn-primary, .btn-glass, .section-tag, h2, h4, footer').forEach(el => {
+            if (el.innerHTML && el.innerHTML.indexOf('v1.0.8') !== -1) {
+              el.innerHTML = el.innerHTML.replace(/v1\.0\.8/g, ver);
+            }
+          });
+
+          // Update primary APK download link
+          const primaryBtn = document.querySelector('.btn-primary[href*="releases"]');
+          if (primaryBtn && dlUrl) primaryBtn.href = dlUrl;
+
+          // Populate What's New card
+          const tagBadge = document.getElementById('release-tag-badge');
+          const relName = document.getElementById('release-name');
+          const relDate = document.getElementById('release-date');
+          const relBody = document.getElementById('release-body');
+          const relLink = document.getElementById('release-full-link');
+
+          if (tagBadge) tagBadge.textContent = ver + ' • LATEST';
+          if (relName) relName.textContent = rel.name || ('Horizon Player ' + ver);
+          if (relDate && rel.published_at) {
+            const d = new Date(rel.published_at);
+            relDate.textContent = 'Released ' + d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+          }
+          if (relLink && rel.html_url) relLink.href = rel.html_url;
+          if (relBody) relBody.innerHTML = parseReleaseMarkdown(rel.body);
+        })
+        .catch(() => {
+          const relName = document.getElementById('release-name');
+          const relBody = document.getElementById('release-body');
+          if (relName) relName.textContent = 'Horizon Player v1.0.8 RELEASE';
+          if (relBody) relBody.innerHTML = '<p>Unable to reach GitHub API right now. Visit the <a href="https://github.com/Krishna1998/Horizon-Player/releases" target="_blank" style="color:var(--accent);">Releases page</a> to view the full changelog.</p>';
+        });
+    })();
+  </script>
+</body>
+</html>
