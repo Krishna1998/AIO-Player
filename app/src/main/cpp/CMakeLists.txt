@@ -40,6 +40,7 @@ target_compile_options(
     $<$<CONFIG:Debug>:-O2>
     -Wall
     -Wextra
+    -Wno-unused-parameter
 )
 
 target_link_libraries(
