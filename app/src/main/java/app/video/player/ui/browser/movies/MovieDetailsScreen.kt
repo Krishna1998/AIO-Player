@@ -246,12 +246,18 @@ data class MovieDetailsScreen(
                 .fillMaxWidth()
                 .height(310.dp),
             ) {
+              val isLandscape = androidx.compose.ui.platform.LocalConfiguration.current.orientation ==
+                android.content.res.Configuration.ORIENTATION_LANDSCAPE
               val backdropUrl = currentMeta?.backdropUrl ?: currentMeta?.posterUrl
               if (!backdropUrl.isNullOrBlank()) {
                 RemoteImage(
                   url = backdropUrl,
                   contentDescription = currentMeta?.title ?: currentVideo.displayName,
-                  contentScale = ContentScale.Crop,
+                  contentScale = if (isLandscape && currentMeta?.backdropUrl.isNullOrBlank()) {
+                    ContentScale.Fit
+                  } else {
+                    ContentScale.Crop
+                  },
                   maxDimensionPx = 2048,
                   modifier = Modifier.fillMaxSize(),
                 )
