@@ -494,11 +494,32 @@ object AudioPreferencesScreen : Screen {
               SwitchPreference(
                 modifier = Modifier.settingsSearchTarget(R.string.pref_audio_bit_perfect_title),
                 value = bitPerfectAudio,
-                onValueChange = { preferences.bitPerfectAudio.set(it) },
+                onValueChange = { enabled ->
+                  preferences.bitPerfectAudio.set(enabled)
+                  if (enabled) preferences.autoEqEnabled.set(false)
+                },
                 title = { Text(stringResource(R.string.pref_audio_bit_perfect_title)) },
                 summary = {
                   Text(
                     "Bypass Android audio resampling for exclusive lossless playback on supported USB DACs",
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+              )
+
+              PreferenceDivider()
+              val autoEqEnabled by preferences.autoEqEnabled.collectAsState()
+              SwitchPreference(
+                modifier = Modifier.settingsSearchTarget(R.string.pref_audio_autoeq_title),
+                value = autoEqEnabled,
+                onValueChange = { enabled ->
+                  preferences.autoEqEnabled.set(enabled)
+                  if (enabled) preferences.bitPerfectAudio.set(false)
+                },
+                title = { Text(stringResource(R.string.pref_audio_autoeq_title)) },
+                summary = {
+                  Text(
+                    "15-band parametric EQ for headphone/IEM tuning (disables Bit-Perfect mode when active)",
                     color = MaterialTheme.colorScheme.outline,
                   )
                 },
