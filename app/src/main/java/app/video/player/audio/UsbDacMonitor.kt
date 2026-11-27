@@ -62,4 +62,14 @@ class UsbDacMonitor(
 
   private fun AudioDeviceInfo.isUsbDacSink(): Boolean =
     isSink && (type == AudioDeviceInfo.TYPE_USB_DEVICE || type == AudioDeviceInfo.TYPE_USB_HEADSET)
+
+  companion object {
+    fun getConnectedDacName(context: Context): String? {
+      val manager = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager ?: return null
+      val dac = manager.getDevices(AudioManager.GET_DEVICES_OUTPUTS).firstOrNull {
+        it.isSink && (it.type == AudioDeviceInfo.TYPE_USB_DEVICE || it.type == AudioDeviceInfo.TYPE_USB_HEADSET)
+      } ?: return null
+      return dac.productName?.toString()?.takeIf { it.isNotBlank() } ?: "USB DAC"
+    }
+  }
 }

@@ -75,10 +75,19 @@ internal fun PlaybackFormatBadgeRow(
   val inkEdge = if (liquidGlassActive() || backgroundLevel < 0.45f) {
     (if (foreground.luminance() < 0.45f) Color.White else Color.Black).copy(alpha = 0.7f)
   } else Color.Unspecified
+  val context = androidx.compose.ui.platform.LocalContext.current
   Surface(
     shape = BadgeRailShape,
     color = surfaceColor.copy(alpha = backgroundLevel.coerceIn(0.25f, 0.92f)),
-    modifier = modifier,
+    modifier = modifier.clickable {
+      val dacName = app.video.player.audio.UsbDacMonitor.getConnectedDacName(context)
+      val message = if (dacName != null) {
+        "Connected DAC: $dacName"
+      } else {
+        "Output: Internal Speaker (No USB DAC)"
+      }
+      android.widget.Toast.makeText(context, message, android.widget.Toast.LENGTH_SHORT).show()
+    },
   ) {
     MediaFormatBadges(
       badges = badges,
