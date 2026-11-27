@@ -43,7 +43,7 @@ plugins {
 android {
   namespace = "app.video.player"
   compileSdk = 37
-  ndkVersion = "27.3.13750724"
+  ndkVersion = "28.0.13004108"
 
   defaultConfig {
     buildConfigField("boolean", "MEASURE_CONFIGURED", "false")
