@@ -9,6 +9,8 @@
 
 package app.video.player.ui.preferences
 
+import androidx.compose.foundation.layout.height
+
 import app.video.player.ui.theme.wallpaperAwareBackgroundColor
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
@@ -589,7 +591,7 @@ object AudioPreferencesScreen : Screen {
                           singleLine = true,
                           modifier = Modifier.fillMaxWidth(),
                         )
-                        androidx.compose.foundation.layout.Spacer(modifier = Modifier.androidx.compose.foundation.layout.height(8.dp))
+                        androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(8.dp))
                         when {
                           isLoading -> Text("Loading AutoEQ catalog...")
                           errorMsg != null -> Text("Error: $errorMsg")
