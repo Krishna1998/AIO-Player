@@ -42,6 +42,22 @@
 | :---: | :---: | :---: |
 | <img src="docs/screenshots/audio_lyrics.jpg" width="240" alt="Synced Lyrics" /> | <img src="docs/screenshots/movie_details.jpg" width="240" alt="Movie Details" /> | <img src="docs/screenshots/preferences.jpg" width="240" alt="Preferences" /> |
 
+<p align="center">
+  <em>Tablet Interface - Home Hub, Movies, Video Folders, Music Library, Appearance, Audio Player, Movie Details, Video Player & About</em>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/1.jpg" width="48%" />
+  <img src="docs/screenshots/2.jpg" width="48%" />
+  <img src="docs/screenshots/3.jpg" width="48%" />
+  <img src="docs/screenshots/4.jpg" width="48%" />
+  <img src="docs/screenshots/5.jpg" width="48%" />
+  <img src="docs/screenshots/6.jpg" width="48%" />
+  <img src="docs/screenshots/7.jpg" width="48%" />
+  <img src="docs/screenshots/8.jpg" width="48%" />
+  <img src="docs/screenshots/9.jpg" width="48%" />
+</p>
+
 ---
 
 ## ✨ Highlights
@@ -81,23 +97,3 @@
 
 </div>
 
-
----
-
-## 📸 Interface Showcase
-
-<p align="center">
-  <em>Home Hub, Movies, Video Folders, Music Library, Appearance, Audio Player, Movie Details, Video Player & About</em>
-</p>
-
-<p align="center">
-  <img src="docs/screenshots/1.jpg" width="48%" />
-  <img src="docs/screenshots/2.jpg" width="48%" />
-  <img src="docs/screenshots/3.jpg" width="48%" />
-  <img src="docs/screenshots/4.jpg" width="48%" />
-  <img src="docs/screenshots/5.jpg" width="48%" />
-  <img src="docs/screenshots/6.jpg" width="48%" />
-  <img src="docs/screenshots/7.jpg" width="48%" />
-  <img src="docs/screenshots/8.jpg" width="48%" />
-  <img src="docs/screenshots/9.jpg" width="48%" />
-</p>
