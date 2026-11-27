@@ -128,6 +128,20 @@ internal fun PlaybackFormatBadgeRow(
               "Hardware Route: Standard Android Audio",
             )
           }
+          androidx.compose.material3.HorizontalDivider()
+          androidx.compose.material3.Text(
+            "Signal Path",
+            style = MaterialTheme.typography.titleSmall,
+          )
+          androidx.compose.material3.Text(
+            "1. Source: Local Lossless Decoder",
+          )
+          androidx.compose.material3.Text(
+            "2. Processing: ${if (bitPerfectEnabled) "Bypassed (Bit-Perfect)" else "Android Mixer / DSP"}",
+          )
+          androidx.compose.material3.Text(
+            "3. Output: ${dacName ?: "Internal Speaker"}${if (probe != null && probe.usable) " • Exclusive${if (probe.mmap) " MMAP" else ""}" else ""}",
+          )
         }
       },
       confirmButton = {
