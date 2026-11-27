@@ -168,7 +168,6 @@ object SearchablePreferences {
       add(
         SearchablePreference(
           titleRes = R.string.pref_anim_speed_title,
-          summaryRes = R.string.pref_anim_speed_normal,
           keywords = listOf("animation", "speed", "transition", "motion", "fast", "slow", "appearance"),
           category = "Appearance",
           screen = AppearancePreferencesScreen,
@@ -1379,7 +1378,7 @@ object SearchablePreferences {
         SearchEntrySpec(R.string.pref_dual_horizon_section_order_title, listOf("dual", "horizon", "order", "reorder", "drag", "video", "audio pulsing", "music")),
         SearchEntrySpec(R.string.pref_library_sub_tabs_order_title, listOf("dual", "horizon", "library", "tabs", "order", "reorder", "drag", "all media", "video", "music")),
         SearchEntrySpec(R.string.pref_library_show_music_tab_title, listOf("library", "music", "tab", "hide", "show")),
-        SearchEntrySpec(R.string.pref_nav_profile_title, listOf("profile", "you", "library", "tab", "navigation")),
+        // Show profile tab removed from search
         SearchEntrySpec(R.string.navbar_glow_title, listOf("glass", "glow", "navbar", "rim", "highlight", "liquid glass")),
         SearchEntrySpec(
           R.string.pref_hide_navigation_bar_labels_title,
@@ -1532,6 +1531,8 @@ object SearchablePreferences {
         SearchEntrySpec(R.string.pref_audio_drc_title, listOf("audio", "dynamic range", "compression", "drc", "loudness")),
         SearchEntrySpec(R.string.pref_audio_bit_perfect_title, listOf("audio", "bit perfect", "bit-perfect", "usb", "dac", "lossless", "exclusive")),
         SearchEntrySpec(R.string.pref_audio_autoeq_title, listOf("audio", "autoeq", "auto eq", "eq", "equalizer", "parametric", "peq", "headphones", "iem")),
+        SearchEntrySpec(R.string.pref_advanced_dump_logs_title, listOf("dump", "logs", "debug", "logcat", "crash", "advanced")),
+        SearchEntrySpec(R.string.pref_section_updates, listOf("update", "updates", "version", "check", "download", "install")),
       )
 
       addSearchEntries(
