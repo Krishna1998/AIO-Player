@@ -182,6 +182,50 @@ fun AudioPropertiesSheet(
               }
             }
           }
+          val dacContext = androidx.compose.ui.platform.LocalContext.current
+          val audioPrefs: app.video.player.preferences.AudioPreferences = org.koin.compose.koinInject()
+          val bitPerfectEnabled by audioPrefs.bitPerfectAudio.collectAsState()
+          val dacName = androidx.compose.runtime.remember {
+            app.video.player.audio.UsbDacMonitor.getConnectedDacName(dacContext)
+          }
+          val probe = androidx.compose.runtime.remember {
+            app.video.player.audio.InternalDirectStream.probe(2)
+          }
+          val signalPathText = buildString {
+            appendLine("1. Source: Local Lossless Decoder")
+            appendLine("2. Processing: ${if (bitPerfectEnabled) "Bypassed (Bit-Perfect)" else "Android Mixer / DSP"}")
+            append("3. Output: ${dacName ?: "Internal Speaker"}${if (probe != null && probe.usable) " • Exclusive${if (probe.mmap) " MMAP" else ""}" else ""}")
+          }
+          val extraProps = listOf(
+            "Output Device" to (dacName ?: "Internal Speaker (No USB DAC)"),
+            "Bit-Perfect Mode" to if (bitPerfectEnabled) "ON" else "OFF",
+            "Signal Path" to signalPathText,
+          )
+          extraProps.forEach { (label, value) ->
+            Surface(
+              modifier = Modifier.fillMaxWidth(),
+              shape = MaterialTheme.shapes.medium,
+              color = playerSheetSelectionColor(false),
+            ) {
+              Column(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+              ) {
+                Text(
+                  text = label,
+                  style = MaterialTheme.typography.labelMedium,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  fontWeight = FontWeight.SemiBold,
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                  text = value,
+                  style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                  fontFamily = fontFamilyForText(value),
+                  color = MaterialTheme.colorScheme.onSurface,
+                )
+              }
+            }
+          }
         }
       }
     }
