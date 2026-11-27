@@ -24,6 +24,8 @@ add_library(
     SHARED
     DirectOutputBridge.cpp
     DirectOutputStream.cpp
+    ParametricEq.cpp
+    ParametricEqBridge.cpp
 )
 
 target_include_directories(
