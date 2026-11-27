@@ -537,7 +537,7 @@ object AudioPreferencesScreen : Screen {
                     "Crinacle IEF Neutral 2023",
                   )
                 }
-                Preference(
+                me.zhanghai.compose.preference.Preference(
                   title = { Text("AutoEQ Target Curve") },
                   summary = {
                     Text(
@@ -550,7 +550,7 @@ object AudioPreferencesScreen : Screen {
 
                 val autoEqModel by preferences.autoEqModel.collectAsState()
                 var showModelDialog by remember { mutableStateOf(false) }
-                Preference(
+                me.zhanghai.compose.preference.Preference(
                   title = { Text("Choose Headphones / IEM") },
                   summary = {
                     Text(
@@ -589,7 +589,7 @@ object AudioPreferencesScreen : Screen {
                           singleLine = true,
                           modifier = Modifier.fillMaxWidth(),
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        androidx.compose.foundation.layout.Spacer(modifier = Modifier.androidx.compose.foundation.layout.height(8.dp))
                         when {
                           isLoading -> Text("Loading AutoEQ catalog...")
                           errorMsg != null -> Text("Error: $errorMsg")
