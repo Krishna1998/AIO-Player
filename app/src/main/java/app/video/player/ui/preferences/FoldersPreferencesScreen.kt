@@ -314,7 +314,7 @@ object FoldersPreferencesScreen : Screen {
         LazyColumn(
           state = settingsListState,
           modifier = Modifier.fillMaxSize().padding(padding).then(settingsHighlight),
-          contentPadding = PaddingValues(bottom = 24.dp),
+          contentPadding = PaddingValues(bottom = 96.dp),
         ) {
           item(key = "media-settings") {
             Column {
