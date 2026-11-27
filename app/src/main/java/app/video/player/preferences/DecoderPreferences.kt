@@ -62,6 +62,6 @@ class DecoderPreferences(
   val anime4kDeblur = preferenceStore.getBoolean("anime4k_deblur", false)
 
   // Battery Saver Mode
-  val batterySaver = preferenceStore.getBoolean("battery_saver_mode", true)
+  val batterySaver = preferenceStore.getBoolean("battery_saver_mode", false)
   val autoBatterySaver = preferenceStore.getBoolean("auto_battery_saver_on_low_battery", true)
 }

@@ -97,7 +97,7 @@ class AppearancePreferences(
   val liquidGlassHighlightWidth = preferenceStore.getFloat("liquid_glass_highlight_width", 1f)
   val liquidGlassHighlightBlur = preferenceStore.getFloat("liquid_glass_highlight_blur", 1f)
   val navigationBarGlow = preferenceStore.getBoolean("navigation_bar_glow", true)
-  val hideNavigationBarLabels = preferenceStore.getBoolean("hide_navigation_bar_labels", true)
+  val hideNavigationBarLabels = preferenceStore.getBoolean("hide_navigation_bar_labels", false)
   val shrinkNavigationBarOnScroll = preferenceStore.getBoolean("shrink_navigation_bar_on_scroll", false)
   val progressiveNavigationBlur = preferenceStore.getBoolean("progressive_navigation_blur", !DevicePerformance.isLowEnd)
   val useSystemFont = preferenceStore.getBoolean("use_system_font", true)
