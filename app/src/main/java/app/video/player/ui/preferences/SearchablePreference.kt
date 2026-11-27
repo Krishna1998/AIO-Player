@@ -1533,6 +1533,7 @@ object SearchablePreferences {
         SearchEntrySpec(R.string.pref_audio_autoeq_title, listOf("audio", "autoeq", "auto eq", "eq", "equalizer", "parametric", "peq", "headphones", "iem")),
         SearchEntrySpec(R.string.pref_advanced_dump_logs_title, listOf("dump", "logs", "debug", "logcat", "crash", "advanced")),
         SearchEntrySpec(R.string.pref_section_updates, listOf("update", "updates", "version", "check", "download", "install")),
+        SearchEntrySpec(R.string.pref_wallpaper_title, listOf("wallpaper", "background", "theme", "appearance", "image")),
       )
 
       addSearchEntries(
