@@ -69,7 +69,7 @@ android {
     externalNativeBuild {
       cmake {
         abiFilters += activeAbis
-        arguments += "-DANDROID_STL=c++_shared"
+        arguments += "-DANDROID_STL=c++_static"
       }
     }
   }
@@ -168,7 +168,6 @@ android {
     viewBinding = true
     buildConfig = true
     resValues = true
-    prefab = true
   }
 
   packaging {
@@ -267,7 +266,6 @@ baselineProfile {
 }
 
 dependencies {
-  implementation("com.google.oboe:oboe:1.10.0")
   baselineProfile(project(":baselineprofile"))
   androidTestImplementation(libs.androidx.test.runner)
   androidTestImplementation(libs.androidx.test.ext.junit)

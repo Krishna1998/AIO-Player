@@ -10,7 +10,14 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_link_options("-Wl,-z,max-page-size=16384")
 
-find_package(oboe REQUIRED CONFIG)
+include(FetchContent)
+FetchContent_Declare(
+    oboe
+    GIT_REPOSITORY https://github.com/google/oboe.git
+    GIT_TAG 1.10.0
+    GIT_SHALLOW TRUE
+)
+FetchContent_MakeAvailable(oboe)
 
 add_library(
     horizonplayer_audio
@@ -36,7 +43,7 @@ target_compile_options(
 target_link_libraries(
     horizonplayer_audio
     PRIVATE
-    oboe::oboe
+    oboe
     android
     log
 )
