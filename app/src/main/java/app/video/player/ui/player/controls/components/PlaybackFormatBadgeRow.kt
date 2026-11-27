@@ -3,6 +3,8 @@
 package app.video.player.ui.player.controls.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.runtime.setValue
+import app.video.player.preferences.preference.collectAsState
 
 import android.content.Context
 import android.graphics.Bitmap
