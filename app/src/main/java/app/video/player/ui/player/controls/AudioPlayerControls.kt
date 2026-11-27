@@ -3027,7 +3027,7 @@ fun AudioPlayerControls(
       ) {
         Column(
           modifier = Modifier
-            .weight(2f)
+            .weight(1f)
             .fillMaxHeight(),
           verticalArrangement = Arrangement.SpaceBetween,
           horizontalAlignment = Alignment.CenterHorizontally,
