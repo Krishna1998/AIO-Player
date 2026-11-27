@@ -525,6 +525,59 @@ object AudioPreferencesScreen : Screen {
                 },
               )
 
+              if (autoEqEnabled) {
+                val autoEqTarget by preferences.autoEqTarget.collectAsState()
+                var showTargetDialog by remember { mutableStateOf(false) }
+                val targets = remember {
+                  listOf(
+                    "AutoEQ Default (Lab Target)",
+                    "Harman Over-Ear 2018",
+                    "Harman In-Ear 2019",
+                    "Diffuse Field (IEF Neutral)",
+                    "Crinacle IEF Neutral 2023",
+                  )
+                }
+                Preference(
+                  title = { Text("AutoEQ Target Curve") },
+                  summary = {
+                    Text(
+                      autoEqTarget,
+                      color = MaterialTheme.colorScheme.outline,
+                    )
+                  },
+                  onClick = { showTargetDialog = true },
+                )
+                if (showTargetDialog) {
+                  androidx.compose.material3.AlertDialog(
+                    onDismissRequest = { showTargetDialog = false },
+                    title = { Text("Select AutoEQ Target") },
+                    text = {
+                      Column {
+                        targets.forEach { target ->
+                          androidx.compose.material3.TextButton(
+                            onClick = {
+                              preferences.autoEqTarget.set(target)
+                              showTargetDialog = false
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                          ) {
+                            Text(
+                              text = if (target == autoEqTarget) "✓ $target" else target,
+                              modifier = Modifier.fillMaxWidth(),
+                            )
+                          }
+                        }
+                      }
+                    },
+                    confirmButton = {
+                      androidx.compose.material3.TextButton(onClick = { showTargetDialog = false }) {
+                        Text("Close")
+                      }
+                    },
+                  )
+                }
+              }
+
               PreferenceDivider()
               val ignoreAudioFocus by preferences.ignoreAudioFocus.collectAsState()
               SwitchPreference(
