@@ -9,6 +9,8 @@
 
 package app.video.player.ui.browser.cinematichorizon
 
+import androidx.compose.ui.graphics.graphicsLayer
+
 import android.content.Intent
 import app.video.player.ui.mediainfo.overviewBadges
 import android.content.res.Configuration
