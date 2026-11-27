@@ -42,6 +42,7 @@ plugins {
 
 android {
   namespace = "app.video.player"
+  ndkVersion = "29.0.13113456"
   compileSdk = 37
   ndkVersion = "28.0.13004108"
 
