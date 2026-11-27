@@ -117,6 +117,7 @@ class AppearancePreferences(
   val hideScrollbar = preferenceStore.getBoolean("hide_scrollbar", true)
   val seekbarStyle = preferenceStore.getEnum("seekbar_style", SeekbarStyle.CyberLaser)
   val audioSeekbarStyle = preferenceStore.getEnum("audio_seekbar_style", SeekbarStyle.CyberLaser)
+  val showContinueWatchingBadges = preferenceStore.getBoolean("show_continue_watching_badges", true)
   val volumeAndBrightnessHudStyle =
     preferenceStore.getEnum("volume_and_brightness_hud_style", VolumeAndBrightnessHudStyle.DynamicIsland)
   val portraitSeekbarPlacement =

@@ -2033,6 +2033,9 @@ private fun HeroSpotlightBox(
         }
       }
       if (formatBadges.isNotEmpty()) {
+      val appearancePreferences: app.video.player.preferences.AppearancePreferences = org.koin.compose.koinInject()
+      val showContinueWatchingBadges by appearancePreferences.showContinueWatchingBadges.collectAsState()
+      if (showContinueWatchingBadges) {
         app.video.player.ui.player.controls.components.MediaFormatBadges(
           badges = formatBadges,
           logoHeight = 14.dp,
