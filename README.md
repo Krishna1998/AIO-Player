@@ -26,7 +26,7 @@
 | :--- | :--- | :--- |
 | **Video Engine** | `mpv 0.42.0` + `FFmpeg 9.1` | `HW+ Direct` decoding, 10-bit HDR, portrait & landscape PiP |
 | **Renderer** | `libplacebo 7.401.0` | High-precision tone-mapping, custom shaders & color accuracy |
-| **Audio Engine** | Hi-Res & Lossless Pipeline | `FLAC`, `ALAC`, `WAV`, `OPUS`, `AAC`, `AC3`, `DTS` + 10-band EQ |
+| **Audio Engine** | Hi-Res & Lossless Pipeline | `FLAC`, `ALAC`, `WAV`, `OPUS`, `AAC`, `AC3`, `DTS` + Bit-Perfect USB DAC & 15-band AutoEQ |
 | **Interface** | `Material 3 Expressive` | Frosted **Liquid Glass**, OLED dark theme, dynamic ambient glow |
 | **Security** | `Biometric Vault` | Hardware-backed Secure Folder lock, 100% offline & zero telemetry |
 

@@ -2,6 +2,18 @@
 
 These notes are written in plain English and focus on what changed for real use.
 
+## 1.0.9
+
+### 🎧 Bit-Perfect USB DAC & AutoEQ
+- **Bit-Perfect USB DAC Output:** Added native C++ exclusive AAudio/MMAP output (`horizonplayer_audio` with Oboe) to bypass Android AudioFlinger resampling for local lossless playback, with automatic USB DAC detection (`UsbDacMonitor`).
+- **Audio & DAC Info + Signal Path:** Added Output Device, Bit-Perfect Mode, and Signal Path details to the Audio information sheet (`AudioPropertiesSheet`) and codec badge tap dialog.
+- **AutoEQ (15-Band Parametric EQ):** Added native 15-band `ParametricEq` C++ engine, target curve selector, and searchable online headphone/IEM model picker in Audio Settings.
+
+### 🎨 UI, Search & Performance
+- **Movies & Details:** Replaced movie/episode progress seekbars with a top-right green watched checkmark; fixed landscape poster scaling in `MovieDetailsScreen`; removed duplicate duration pill in `CinematicHorizonHub`.
+- **Settings & MiniPlayer:** Constrained `MiniPlayer` width (`460.dp`) in landscape mode, added bottom `contentPadding` across all preference screens, wrapped `Dump logs` in a card, and added `Bit-Perfect`, `AutoEQ`, `Dump logs`, `Updates`, and `Wallpaper` to Settings Search.
+- **Animation Performance:** Deferred `pulseScale` reads to `Modifier.graphicsLayer` to eliminate 60/120fps recomposition jitter.
+
 ## 1.0.8
 
 ### 🎨 UI, Audio Player & Format Badges
