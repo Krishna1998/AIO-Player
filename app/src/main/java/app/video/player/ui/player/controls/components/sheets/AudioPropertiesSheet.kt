@@ -9,6 +9,8 @@
 
 package app.video.player.ui.player.controls.components.sheets
 
+import app.video.player.preferences.preference.collectAsState
+
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
