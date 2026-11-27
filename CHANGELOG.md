@@ -2,6 +2,19 @@
 
 These notes are written in plain English and focus on what changed for real use.
 
+## 1.0.8
+
+### 🎨 UI, Audio Player & Format Badges
+- **3-Column Tablet Landscape Audio Player:**
+  - Updated tablet landscape layout to `1/3` Audio Player, `1/3` Lyrics, and `1/3` Playlist side-by-side.
+- **Squircle Liquid Glass UI:**
+  - Updated video player and Liquid Glass buttons to a unified squircle/rounded-square (`RoundedCornerShape(22)` / `14.dp`) design.
+- **SVG Format Badges & Episode Progress:**
+  - Added format badges to portrait and landscape video player top controls, full `MediaInfoOps` badge probing on Continue Watching, larger `24dp` badges on Movie Details, and a bold **MP4** SVG badge.
+  - Synced episode progress bars and watched checkmarks with `PlaybackStateRepository` in **Movie Details**.
+- **Onboarding & IzzyOnDroid Readiness:**
+  - Aligned onboarding permission cards to equal height, updated launcher icons to **Aura Aperture**, and added Fastlane metadata & screenshots.
+
 ## 1.0.7
 
 ### 🎨 UI, Format Badges & Polish
