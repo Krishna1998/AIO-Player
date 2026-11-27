@@ -1625,5 +1625,25 @@
     }
     drawHorizon();
   </script>
+  <script>
+    (function () {
+      fetch('https://api.github.com/repos/Krishna1998/Horizon-Player/releases/latest')
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (rel) {
+          if (!rel || !rel.tag_name) return;
+          var ver = rel.tag_name.startsWith('v') ? rel.tag_name : 'v' + rel.tag_name;
+          var apk = (rel.assets || []).find(function (a) { return a.name && a.name.endsWith('.apk'); });
+          var dlUrl = apk ? apk.browser_download_url : rel.html_url;
+          document.querySelectorAll('.brand-pill, .hero-badge, .btn-primary, .btn-glass, footer').forEach(function (el) {
+            if (el.innerHTML && el.innerHTML.indexOf('v1.0.8') !== -1) {
+              el.innerHTML = el.innerHTML.replace(/v1\.0\.8/g, ver);
+            }
+          });
+          var primaryBtn = document.querySelector('.btn-primary[href*="releases"]');
+          if (primaryBtn && dlUrl) primaryBtn.href = dlUrl;
+        })
+        .catch(function () {});
+    })();
+  </script>
 </body>
 </html>
