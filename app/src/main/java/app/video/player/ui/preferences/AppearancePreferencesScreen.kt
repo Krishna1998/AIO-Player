@@ -274,6 +274,7 @@ object AppearancePreferencesScreen : Screen {
           rememberSettingsSearchList(AppearancePreferencesScreen, MaterialTheme.colorScheme.primary)
         LazyColumn(
           state = settingsListState,
+          contentPadding = androidx.compose.foundation.layout.PaddingValues(bottom = 96.dp),
           modifier =
             Modifier
               .fillMaxSize()
