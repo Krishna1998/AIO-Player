@@ -80,3 +80,20 @@
 **Horizon Player** • Licensed under **AGPL-3.0**
 
 </div>
+
+
+---
+
+## 📸 Screenshots
+
+<p align="center">
+  <img src="docs/screenshots/1.jpg" width="48%" />
+  <img src="docs/screenshots/2.jpg" width="48%" />
+  <img src="docs/screenshots/3.jpg" width="48%" />
+  <img src="docs/screenshots/4.jpg" width="48%" />
+  <img src="docs/screenshots/5.jpg" width="48%" />
+  <img src="docs/screenshots/6.jpg" width="48%" />
+  <img src="docs/screenshots/7.jpg" width="48%" />
+  <img src="docs/screenshots/8.jpg" width="48%" />
+  <img src="docs/screenshots/9.jpg" width="48%" />
+</p>
