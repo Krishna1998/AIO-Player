@@ -262,7 +262,13 @@ fun MiniPlayer(modifier: Modifier = Modifier) {
           targetOffsetY = { it / 2 },
         ) + fadeOut(animationSpec = tween(200, easing = FastOutLinearInEasing))
     },
-    modifier = modifier,
+    modifier = if (androidx.compose.ui.platform.LocalConfiguration.current.orientation ==
+      android.content.res.Configuration.ORIENTATION_LANDSCAPE
+    ) {
+      modifier.widthIn(max = 460.dp)
+    } else {
+      modifier
+    },
   ) {
     MiniPlayerContent(
       context = context,
