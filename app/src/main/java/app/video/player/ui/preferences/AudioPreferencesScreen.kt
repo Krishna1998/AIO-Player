@@ -547,6 +547,84 @@ object AudioPreferencesScreen : Screen {
                   },
                   onClick = { showTargetDialog = true },
                 )
+
+                val autoEqModel by preferences.autoEqModel.collectAsState()
+                var showModelDialog by remember { mutableStateOf(false) }
+                Preference(
+                  title = { Text("Choose Headphones / IEM") },
+                  summary = {
+                    Text(
+                      autoEqModel,
+                      color = MaterialTheme.colorScheme.outline,
+                    )
+                  },
+                  onClick = { showModelDialog = true },
+                )
+                if (showModelDialog) {
+                  var query by remember { mutableStateOf("") }
+                  var models by remember { mutableStateOf<List<app.video.player.audio.autoeq.AutoEqHeadphone>>(emptyList()) }
+                  var isLoading by remember { mutableStateOf(true) }
+                  var errorMsg by remember { mutableStateOf<String?>(null) }
+                  androidx.compose.runtime.LaunchedEffect(Unit) {
+                    isLoading = true
+                    errorMsg = null
+                    app.video.player.audio.autoeq.AutoEqRepository.fetchModels()
+                      .onSuccess { models = it }
+                      .onFailure { errorMsg = it.message ?: "Failed to load AutoEQ list" }
+                    isLoading = false
+                  }
+                  val filtered = remember(query, models) {
+                    if (query.isBlank()) models.take(100)
+                    else models.filter { it.name.contains(query, ignoreCase = true) }.take(100)
+                  }
+                  androidx.compose.material3.AlertDialog(
+                    onDismissRequest = { showModelDialog = false },
+                    title = { Text("Choose Headphones / IEM") },
+                    text = {
+                      Column(modifier = Modifier.fillMaxWidth()) {
+                        androidx.compose.material3.OutlinedTextField(
+                          value = query,
+                          onValueChange = { query = it },
+                          placeholder = { Text("Search model (e.g. Bose, Moondrop, Sony)...") },
+                          singleLine = true,
+                          modifier = Modifier.fillMaxWidth(),
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        when {
+                          isLoading -> Text("Loading AutoEQ catalog...")
+                          errorMsg != null -> Text("Error: $errorMsg")
+                          filtered.isEmpty() -> Text("No matching models found.")
+                          else -> {
+                            androidx.compose.foundation.lazy.LazyColumn(
+                              modifier = Modifier.height(280.dp).fillMaxWidth(),
+                            ) {
+                              items(filtered.size) { index ->
+                                val item = filtered[index]
+                                androidx.compose.material3.TextButton(
+                                  onClick = {
+                                    preferences.autoEqModel.set("${item.name} (${item.source})")
+                                    showModelDialog = false
+                                  },
+                                  modifier = Modifier.fillMaxWidth(),
+                                ) {
+                                  Text(
+                                    text = "${item.name} (${item.source})",
+                                    modifier = Modifier.fillMaxWidth(),
+                                  )
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    confirmButton = {
+                      androidx.compose.material3.TextButton(onClick = { showModelDialog = false }) {
+                        Text("Close")
+                      }
+                    },
+                  )
+                }
                 if (showTargetDialog) {
                   androidx.compose.material3.AlertDialog(
                     onDismissRequest = { showTargetDialog = false },

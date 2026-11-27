@@ -50,6 +50,7 @@ class AudioPreferences(
   val bitPerfectAudio = preferenceStore.getBoolean("audio_bit_perfect_enabled", false)
   val autoEqEnabled = preferenceStore.getBoolean("audio_autoeq_enabled", false)
   val autoEqTarget = preferenceStore.getString("audio_autoeq_target", "AutoEQ Default (Lab Target)")
+  val autoEqModel = preferenceStore.getString("audio_autoeq_model", "None")
   val equalizerEnabled = preferenceStore.getBoolean("audio_equalizer_enabled", false)
   val equalizerMode = preferenceStore.getString("audio_equalizer_mode", "DYNAMIC")
   val equalizerBands =
