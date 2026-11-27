@@ -1,1 +1,1 @@
-A powerful media player built on mpv with an improved user interface
+High-performance video & music player powered by mpv with Liquid Glass UI.
