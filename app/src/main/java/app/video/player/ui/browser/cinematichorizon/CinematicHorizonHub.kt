@@ -1583,7 +1583,7 @@ private fun BentoHorizonVideoCard(
         Surface(
           modifier = Modifier
             .padding(7.dp)
-            .align(Alignment.TopStart),
+            .align(Alignment.BottomEnd),
           shape = RoundedCornerShape(6.dp),
           color = Color.Black.copy(alpha = 0.72f),
           border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)),
@@ -1596,25 +1596,6 @@ private fun BentoHorizonVideoCard(
             ),
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-          )
-        }
-
-        // Bottom-right duration pill
-        Surface(
-          modifier = Modifier
-            .padding(7.dp)
-            .align(Alignment.BottomEnd),
-          shape = RoundedCornerShape(6.dp),
-          color = Color.Black.copy(alpha = 0.75f),
-        ) {
-          Text(
-            text = video.durationFormatted,
-            style = MaterialTheme.typography.labelSmall.copy(
-              fontSize = 9.5.sp,
-              fontWeight = FontWeight.Medium,
-            ),
-            color = Color.White,
-            modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.5.dp),
           )
         }
 
