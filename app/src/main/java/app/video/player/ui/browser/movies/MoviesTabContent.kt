@@ -424,6 +424,24 @@ private fun MoviePosterCard(
               .align(Alignment.TopEnd)
               .padding(6.dp),
           )
+        } else if (item.isWatched) {
+          Surface(
+            shape = androidx.compose.foundation.shape.CircleShape,
+            color = Color(0xFF2E7D32),
+            modifier = Modifier
+              .align(Alignment.TopEnd)
+              .padding(6.dp)
+              .size(22.dp),
+          ) {
+            Box(contentAlignment = Alignment.Center) {
+              Icon(
+                imageVector = Icons.RoundedFilled.Check,
+                contentDescription = "Watched",
+                tint = Color.White,
+                modifier = Modifier.size(14.dp),
+              )
+            }
+          }
         }
 
         // Duration Tag at the bottom of the poster
@@ -447,26 +465,7 @@ private fun MoviePosterCard(
           }
         }
 
-        val remainingMs = item.timeRemaining
-        if (video.duration > 0L && remainingMs != null && remainingMs > 0L && remainingMs < video.duration) {
-          val watchedFraction = ((video.duration - remainingMs).toFloat() / video.duration.toFloat()).coerceIn(0f, 1f)
-          if (watchedFraction > 0.01f) {
-            Box(
-              modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
-                .height(4.dp)
-                .background(Color.Black.copy(alpha = 0.55f)),
-            ) {
-              Box(
-                modifier = Modifier
-                  .fillMaxWidth(watchedFraction)
-                  .height(4.dp)
-                  .background(MaterialTheme.colorScheme.primary),
-              )
-            }
-          }
-        }
+        // Progress bar removed in favor of top-right green tick when watched.
       }
 
       // Title below poster
