@@ -2252,7 +2252,7 @@ private fun HeroSpotlightCard(
 
 
   val infiniteTransition = rememberInfiniteTransition(label = "bentoPulse")
-  val pulseScale by infiniteTransition.animateFloat(
+  val pulseScaleState = infiniteTransition.animateFloat(
     initialValue = 0.85f,
     targetValue = 1.25f,
     animationSpec = infiniteRepeatable(
@@ -2477,7 +2477,7 @@ private fun HeroSpotlightCard(
             totalFormatted = totalFormatted,
             remainingSec = remainingSec,
             remainingFormatted = remainingFormatted,
-            pulseScale = pulseScale,
+            pulseScale = { pulseScaleState.value },
             wave1Color = wave1Color,
             wave2Color = wave2Color,
             wave3Color = wave3Color,
@@ -2568,7 +2568,11 @@ private fun HeroSpotlightCard(
                   Box(
                     modifier = Modifier
                       .size(7.dp)
-                      .scale(pulseScale)
+                      .graphicsLayer {
+                        val s = pulseScaleState.value
+                        scaleX = s
+                        scaleY = s
+                      }
                       .clip(CircleShape)
                       .background(if (isAudio) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary),
                   )
@@ -2777,7 +2781,7 @@ private fun LandscapeAudioPulsingConcept3(
   totalFormatted: String,
   remainingSec: Long,
   remainingFormatted: String,
-  pulseScale: Float,
+  pulseScale: () -> Float,
   wave1Color: Color,
   wave2Color: Color,
   wave3Color: Color,
@@ -3089,7 +3093,11 @@ private fun LandscapeAudioPulsingConcept3(
               Box(
                 modifier = Modifier
                   .size(7.dp)
-                  .scale(pulseScale)
+                  .graphicsLayer {
+                    val s = pulseScale()
+                    scaleX = s
+                    scaleY = s
+                  }
                   .clip(CircleShape)
                   .background(MaterialTheme.colorScheme.tertiary),
               )
