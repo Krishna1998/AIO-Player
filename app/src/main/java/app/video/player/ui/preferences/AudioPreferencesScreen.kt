@@ -490,6 +490,20 @@ object AudioPreferencesScreen : Screen {
               )
 
               PreferenceDivider()
+              val bitPerfectAudio by preferences.bitPerfectAudio.collectAsState()
+              SwitchPreference(
+                value = bitPerfectAudio,
+                onValueChange = { preferences.bitPerfectAudio.set(it) },
+                title = { Text("Bit-Perfect USB DAC Output") },
+                summary = {
+                  Text(
+                    "Bypass Android audio resampling for exclusive lossless playback on supported USB DACs",
+                    color = MaterialTheme.colorScheme.outline,
+                  )
+                },
+              )
+
+              PreferenceDivider()
               val ignoreAudioFocus by preferences.ignoreAudioFocus.collectAsState()
               SwitchPreference(
                 modifier = Modifier.settingsSearchTarget(R.string.pref_ignore_audio_focus_title),

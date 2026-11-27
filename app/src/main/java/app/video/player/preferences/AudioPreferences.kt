@@ -47,6 +47,7 @@ class AudioPreferences(
   val spatialAudio = preferenceStore.getBoolean("audio_spatial_audio", false)
   val spatialAudioMode = preferenceStore.getEnum("audio_spatial_audio_mode", SpatialAudioMode.StereoWidening)
   val drcEnabled = preferenceStore.getBoolean("audio_drc_enabled", false)
+  val bitPerfectAudio = preferenceStore.getBoolean("audio_bit_perfect_enabled", false)
   val equalizerEnabled = preferenceStore.getBoolean("audio_equalizer_enabled", false)
   val equalizerMode = preferenceStore.getString("audio_equalizer_mode", "DYNAMIC")
   val equalizerBands =

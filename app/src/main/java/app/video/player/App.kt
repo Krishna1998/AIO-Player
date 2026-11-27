@@ -219,6 +219,7 @@ class App :
     if (!BuildConfig.MPV_SUPPORTS_VULKAN) {
       getKoin().get<DecoderPreferences>().useVulkan.set(false)
     }
+    app.video.player.audio.UsbDacMonitor(this, getKoin().get()).start()
     registerActivityLifecycleCallbacks(this)
     if (BuildConfig.ENABLE_UPDATE_FEATURE) {
       applicationScope.launch(Dispatchers.IO) {
