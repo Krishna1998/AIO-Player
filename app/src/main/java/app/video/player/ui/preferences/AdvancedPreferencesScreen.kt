@@ -878,7 +878,7 @@ object AdvancedPreferencesScreen : Screen {
                 },
               )
 
-              Surface(
+              androidx.compose.material3.Surface(
                 shape = MaterialTheme.shapes.medium,
                 color = MaterialTheme.colorScheme.surfaceContainer,
                 modifier = Modifier.fillMaxWidth(),
