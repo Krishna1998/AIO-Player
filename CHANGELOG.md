@@ -2,6 +2,20 @@
 
 These notes are written in plain English and focus on what changed for real use.
 
+## 1.1.0
+
+### ✨ Animations & Smoothness
+- **Smooth Entrances & Transitions:** Added a 260ms fade-in when entering `MovieDetailsScreen`, a 250ms root fade-in in `PlayerActivity` to prevent first-frame blink, and a non-bouncy spring entrance for `MiniPlayer`.
+- **List, Card & Dialog Motion:** Added spring fade-in/fade-out to `mediaItemMotion()` for list items, unified `MusicLibraryContent` card press feedback with `AppMotion.Spatial` springs, and added upward lift to `appDialogEnter` plus a new `appScreenEnter` helper.
+
+### 🐛 Fixes & Polish
+- **MiniPlayer on Streaming Tab:** Fixed `MiniPlayer` staying hidden when switching from the All Media tab to the Streaming tab (`isHomeTabActive` tracking in `NavigationBarState`).
+- **Hero Card & Settings:** Removed the top status pill and `CONTINUE WATCHING` text from the Continue Watching hero card; matched Logging section horizontal padding and connected card shape to Data & Cache.
+
+### ⚡ Performance & Releases
+- **Runtime & Build Optimizations:** Expanded `baseline-prof.txt` hot paths, stripped `Log.i`/`Log.w` in release builds, disabled Jetifier, and enabled PNG crunching.
+- **Multi-ABI Release APKs:** Updated release workflow to build all 5 ABI splits (`universal`, `arm64-v8a`, `armeabi-v7a`, `x86`, `x86_64`).
+
 ## 1.0.9
 
 ### 🎧 Bit-Perfect USB DAC & AutoEQ
