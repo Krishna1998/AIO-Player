@@ -461,7 +461,7 @@ private fun MiniPlayerContent(
       MaterialTheme.colorScheme.primary.copy(alpha = if (isPlaying) 0.7f else 0.25f),
     ),
     modifier = Modifier
-      .size(NavigationBarState.miniPlayerHeight)
+      .size(NavigationBarState.miniPlayerHeight + 8.dp)
       .clip(androidx.compose.foundation.shape.CircleShape)
       .clickable { launchPlayer() },
   ) {

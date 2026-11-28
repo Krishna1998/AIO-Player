@@ -805,14 +805,14 @@ open class MainActivity : AppCompatActivity() {
                 .windowInsetsPadding(
                   safeInsets.only(WindowInsetsSides.End + WindowInsetsSides.Bottom),
                 )
-                .padding(end = endSpacing, bottom = spacing)
+                .padding(end = endSpacing + 8.dp, bottom = spacing)
                 .offset(y = -miniPlayerLift)
             }
 
           val discShape = androidx.compose.foundation.shape.CircleShape
           Box(
             modifier = miniPlayerModifier
-              .height(NavigationBarState.miniPlayerHeight)
+              .height(NavigationBarState.miniPlayerHeight + 8.dp)
               .playerSheetMiniPlacement(
                 discShape,
                 androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.96f),
