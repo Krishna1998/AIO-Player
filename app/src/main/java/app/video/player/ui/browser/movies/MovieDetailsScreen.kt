@@ -94,6 +94,7 @@ import app.video.player.utils.media.MediaUtils
 import app.video.player.utils.media.PlaybackStateOps
 import app.video.player.utils.permission.PermissionUtils
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -143,61 +144,99 @@ data class MovieDetailsScreen(
       onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    // Load video item and metadata
-    LaunchedEffect(videoPath, resumeRefreshTick) {
+    // Load video item and metadata (initial load)
+    LaunchedEffect(videoPath) {
       withContext(Dispatchers.IO) {
         val resolved = MediaFileRepository.getVideosFromFiles(context, listOf(File(videoPath))).firstOrNull()
         video = resolved
         if (resolved != null) {
-          isWatched = PlaybackStateOps.areAllWatched(
-            listOf(resolved),
-            browserPreferences.watchedThreshold.get(),
-          )
-          val savedData = playbackStateRepo.getVideoDataByTitle(resolved.displayName)
-            ?: playbackStateRepo.getVideoDataByTitle(resolved.title)
-            ?: playbackStateRepo.getVideoDataByTitle(File(resolved.path).name)
-          val savedPos = savedData?.lastPosition ?: 0
-          lastPositionSec = savedPos
-          hasStarted = savedPos > 0
-          val seriesInfo = app.video.player.domain.movies.MovieClassifier.extractSeriesEpisodeInfo(resolved)
-          if (seriesInfo != null) {
-            val parentDir = File(resolved.path).parentFile
-            val siblingFiles = parentDir?.listFiles()?.filter { it.isFile } ?: emptyList()
-            val siblingVideos = MediaFileRepository.getVideosFromFiles(context, siblingFiles)
-            val matched = siblingVideos.mapNotNull { v ->
-              val info = app.video.player.domain.movies.MovieClassifier.extractSeriesEpisodeInfo(v)
-              if (info != null && info.seriesKey == seriesInfo.seriesKey) v to info else null
-            }.sortedWith(compareBy({ it.second.season }, { it.second.episode }, { it.first.displayName }))
-            if (matched.size > 1) {
-              seriesEpisodes = matched
-            val threshold = browserPreferences.watchedThreshold.get()
-            episodeProgressMap = matched.associate { (epVideo, _) ->
-              val epWatched = PlaybackStateOps.areAllWatched(listOf(epVideo), threshold)
-              val progress = if (epWatched) {
-                1f
-              } else {
-                val epSaved = playbackStateRepo.getVideoDataByTitle(epVideo.displayName)
-                  ?: playbackStateRepo.getVideoDataByTitle(epVideo.title)
-                  ?: playbackStateRepo.getVideoDataByTitle(File(epVideo.path).name)
-                  ?: playbackStateRepo.getVideoDataByTitle(File(epVideo.path).nameWithoutExtension)
-                val epPos = epSaved?.lastPosition ?: 0
-                if (epPos > 0 && epVideo.duration > 0L) {
-                  (epPos * 1000f / epVideo.duration.toFloat()).coerceIn(0f, 1f)
-                } else {
-                  0f
+          // 1. Show cached metadata immediately without waiting for series/playback queries
+          val cached = movieMetadataRepo.getCachedMetadata(resolved)
+          if (cached != null) {
+            metadata = cached
+          }
+
+          // 2. Fetch missing metadata, playback state, and series episodes in parallel
+          kotlinx.coroutines.coroutineScope {
+            val metaJob = if (cached == null) {
+              async {
+                isRefreshing = true
+                metadata = movieMetadataRepo.getOrFetchMetadata(resolved)
+                isRefreshing = false
+              }
+            } else null
+
+            val playbackJob = async {
+              isWatched = PlaybackStateOps.areAllWatched(
+                listOf(resolved),
+                browserPreferences.watchedThreshold.get(),
+              )
+              val savedData = playbackStateRepo.getVideoDataByTitle(resolved.displayName)
+                ?: playbackStateRepo.getVideoDataByTitle(resolved.title)
+                ?: playbackStateRepo.getVideoDataByTitle(File(resolved.path).name)
+              val savedPos = savedData?.lastPosition ?: 0
+              lastPositionSec = savedPos
+              hasStarted = savedPos > 0
+            }
+
+            val seriesJob = async {
+              val seriesInfo = app.video.player.domain.movies.MovieClassifier.extractSeriesEpisodeInfo(resolved)
+              if (seriesInfo != null) {
+                val parentDir = File(resolved.path).parentFile
+                val siblingFiles = parentDir?.listFiles()?.filter { it.isFile } ?: emptyList()
+                val siblingVideos = MediaFileRepository.getVideosFromFiles(context, siblingFiles)
+                val matched = siblingVideos.mapNotNull { v ->
+                  val info = app.video.player.domain.movies.MovieClassifier.extractSeriesEpisodeInfo(v)
+                  if (info != null && info.seriesKey == seriesInfo.seriesKey) v to info else null
+                }.sortedWith(compareBy({ it.second.season }, { it.second.episode }, { it.first.displayName }))
+                if (matched.size > 1) {
+                  seriesEpisodes = matched
+                  val threshold = browserPreferences.watchedThreshold.get()
+                  episodeProgressMap = matched.associate { (epVideo, _) ->
+                    val epWatched = PlaybackStateOps.areAllWatched(listOf(epVideo), threshold)
+                    val progress = if (epWatched) {
+                      1f
+                    } else {
+                      val epSaved = playbackStateRepo.getVideoDataByTitle(epVideo.displayName)
+                        ?: playbackStateRepo.getVideoDataByTitle(epVideo.title)
+                        ?: playbackStateRepo.getVideoDataByTitle(File(epVideo.path).name)
+                        ?: playbackStateRepo.getVideoDataByTitle(File(epVideo.path).nameWithoutExtension)
+                      val epPos = epSaved?.lastPosition ?: 0
+                      if (epPos > 0 && epVideo.duration > 0L) {
+                        (epPos * 1000f / epVideo.duration.toFloat()).coerceIn(0f, 1f)
+                      } else {
+                        0f
+                      }
+                    }
+                    epVideo.path to progress
+                  }
                 }
               }
-              epVideo.path to progress
             }
-            }
-          }
-          metadata = movieMetadataRepo.getCachedMetadata(resolved)
-          if (metadata == null) {
-            isRefreshing = true
-            metadata = movieMetadataRepo.getOrFetchMetadata(resolved)
-            isRefreshing = false
+
+            metaJob?.await()
+            playbackJob.await()
+            seriesJob.await()
           }
         }
+      }
+    }
+
+    // Lightweight playback-only refresh on resume
+    LaunchedEffect(resumeRefreshTick) {
+      if (resumeRefreshTick == 0) return@LaunchedEffect
+      val resolved = video ?: return@LaunchedEffect
+      withContext(Dispatchers.IO) {
+        isWatched = PlaybackStateOps.areAllWatched(
+          listOf(resolved),
+          browserPreferences.watchedThreshold.get(),
+        )
+        val savedData = playbackStateRepo.getVideoDataByTitle(resolved.displayName)
+          ?: playbackStateRepo.getVideoDataByTitle(resolved.title)
+          ?: playbackStateRepo.getVideoDataByTitle(File(resolved.path).name)
+        val savedPos = savedData?.lastPosition ?: 0
+        lastPositionSec = savedPos
+        hasStarted = savedPos > 0
       }
     }
 
