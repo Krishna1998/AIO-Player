@@ -210,7 +210,11 @@ android {
 androidComponents {
   val abiCodes =
     mutableMapOf(
-      "arm64-v8a" to 2,
+      "universal"   to 0,
+      "armeabi-v7a" to 1,
+      "arm64-v8a"   to 2,
+      "x86"         to 3,
+      "x86_64"      to 4,
     )
 
   onVariants { variant ->
@@ -253,6 +257,10 @@ kotlin {
 
 composeCompiler {
   includeSourceInformation = false
+  // Enable strong skipping so Compose skips recomposition when
+  // unstable params haven't changed in value (reduces recompositions).
+  enableIntrinsicRemember = true
+  enableNonSkippingGroupOptimization = true
 }
 
 room {
