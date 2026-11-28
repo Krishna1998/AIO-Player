@@ -1376,7 +1376,18 @@ class PlayerActivity :
       if (isDestroyed || isFinishing) return
       binding.controls.setContent {
         HorizonPlayerTheme {
-          Box(modifier = Modifier.fillMaxSize()) {
+          var playerEntered by remember { mutableStateOf(false) }
+          LaunchedEffect(Unit) { playerEntered = true }
+          val enterAlpha = animateFloatAsState(
+            targetValue = if (playerEntered) 1f else 0f,
+            animationSpec = tween(250, easing = FastOutSlowInEasing),
+            label = "playerRootFadeIn",
+          )
+          Box(
+            modifier = Modifier
+              .fillMaxSize()
+              .graphicsLayer { alpha = enterAlpha.value },
+          ) {
             if (playerControlsReady) {
               PlayerControls(
                 viewModel = viewModel,
