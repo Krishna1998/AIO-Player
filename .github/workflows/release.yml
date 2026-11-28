@@ -106,7 +106,7 @@ jobs:
             name: Standard
             gradle: Standard
             dir: standard
-            abis: arm64-v8a
+            abis: universal arm64-v8a armeabi-v7a x86 x86_64
             asset: ''
             package: apk
     env:
@@ -137,7 +137,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ./gradlew "assemble${GRADLE_FLAVOR}Release" -PtargetAbi=arm64-v8a,armeabi-v7a,x86,x86_64 --stacktrace --no-daemon --max-workers=2
+          ./gradlew "assemble${GRADLE_FLAVOR}Release" --stacktrace --no-daemon --max-workers=2
 
       - name: Sign and stage release APKs
         shell: bash
@@ -201,8 +201,6 @@ jobs:
             base="app-${APK_DIR}-${abi}-release"
             sign_apk "$out_dir" "$base" "${APK_DIR} ${abi} release"
             cp "$out_dir/$base.apk" "release-assets/HorizonPlayer-${ASSET_NAME:-$abi}-${VERSION_TAG}.apk"
-            # Backward-compatible copy for older clients (e.g. v1.0.3 and earlier) looking for HorizonPlayer-* prefix
-            cp "$out_dir/$base.apk" "release-assets/HorizonPlayer-${ASSET_NAME:-$abi}-${VERSION_TAG}.apk"
           done
 
       - name: Upload R8 diagnostics
@@ -250,7 +248,7 @@ jobs:
         run: |
           set -euo pipefail
           : > checksums.txt
-          variants=(arm64-v8a)
+          variants=(universal arm64-v8a armeabi-v7a x86 x86_64)
           for variant in "${variants[@]}"; do
             asset="release-assets/HorizonPlayer-${variant}-${VERSION_TAG}.apk"
             if [[ ! -f "$asset" ]]; then
@@ -288,7 +286,11 @@ jobs:
           variant_guide = """
           ### APK variants
 
-          - **arm64-v8a** (`HorizonPlayer-arm64-v8a-<version>.apk`): Built for 64-bit ARM Android devices.
+          - **universal** (`HorizonPlayer-universal-<version>.apk`): Works on all devices. Recommended if unsure.
+          - **arm64-v8a** (`HorizonPlayer-arm64-v8a-<version>.apk`): 64-bit ARM — most modern Android phones.
+          - **armeabi-v7a** (`HorizonPlayer-armeabi-v7a-<version>.apk`): 32-bit ARM — older/budget devices.
+          - **x86** (`HorizonPlayer-x86-<version>.apk`): 32-bit x86 — emulators or x86 tablets.
+          - **x86_64** (`HorizonPlayer-x86_64-<version>.apk`): 64-bit x86 — emulators or x86_64 devices.
           """.strip()
           Path('release-notes.md').write_text(
               latest + '\n\n---\n' + variant_guide + '\n\n### SHA-256 checksums\n\n```text\n',
