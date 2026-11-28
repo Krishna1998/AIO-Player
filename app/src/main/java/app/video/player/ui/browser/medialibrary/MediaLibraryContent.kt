@@ -1247,6 +1247,10 @@ fun MediaLibraryContent(
                   modifier = Modifier.fillMaxSize(),
                 )
               } else if (pageType == MediaLibraryTabItem.Video && !isSearching) {
+                val videoPagerState = rememberPagerState(initialPage = videoSubTab) { 2 }
+                LaunchedEffect(videoPagerState.currentPage) {
+                  videoSubTab = videoPagerState.currentPage
+                }
                 Column(modifier = Modifier.fillMaxSize()) {
                   Row(
                     modifier = Modifier
@@ -1256,8 +1260,11 @@ fun MediaLibraryContent(
                     verticalAlignment = Alignment.CenterVertically,
                   ) {
                     androidx.compose.material3.FilterChip(
-                      selected = videoSubTab == 0,
-                      onClick = { videoSubTab = 0 },
+                      selected = videoPagerState.currentPage == 0,
+                      onClick = {
+                        videoSubTab = 0
+                        coroutineScope.launch { videoPagerState.animateScrollToPage(0) }
+                      },
                       label = { Text("Folders") },
                       leadingIcon = {
                         app.video.player.ui.icons.Icon(
@@ -1272,8 +1279,11 @@ fun MediaLibraryContent(
                       ),
                     )
                     androidx.compose.material3.FilterChip(
-                      selected = videoSubTab == 1,
-                      onClick = { videoSubTab = 1 },
+                      selected = videoPagerState.currentPage == 1,
+                      onClick = {
+                        videoSubTab = 1
+                        coroutineScope.launch { videoPagerState.animateScrollToPage(1) }
+                      },
                       label = { Text("All Videos (${pageVideosWithInfo.size})") },
                       leadingIcon = {
                         app.video.player.ui.icons.Icon(
@@ -1288,8 +1298,11 @@ fun MediaLibraryContent(
                       ),
                     )
                   }
-                  Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                    if (videoSubTab == 0) {
+                  HorizontalPager(
+                    state = videoPagerState,
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                  ) { subPage ->
+                    if (subPage == 0) {
                       app.video.player.ui.browser.folderlist.FolderListScreen.MediaStoreFolderListContent(
                         audioOnly = false,
                         videoOnly = true,
