@@ -267,13 +267,7 @@ fun MiniPlayer(modifier: Modifier = Modifier) {
           targetOffsetY = { it / 2 },
         ) + fadeOut(animationSpec = tween(200, easing = FastOutLinearInEasing))
     },
-    modifier = if (androidx.compose.ui.platform.LocalConfiguration.current.orientation ==
-      android.content.res.Configuration.ORIENTATION_LANDSCAPE
-    ) {
-      modifier.widthIn(max = 460.dp)
-    } else {
-      modifier
-    },
+    modifier = modifier,
   ) {
     MiniPlayerContent(
       context = context,
@@ -445,6 +439,75 @@ private fun MiniPlayerContent(
   }
 
   val miniPlayerShape = rememberMiniPlayerShape()
+  val discRotation = remember { androidx.compose.animation.core.Animatable(0f) }
+  LaunchedEffect(isPlaying) {
+    if (isPlaying) {
+      while (true) {
+        val start = discRotation.value % 360f
+        discRotation.snapTo(start)
+        discRotation.animateTo(
+          targetValue = start + 360f,
+          animationSpec = tween(durationMillis = 8000, easing = androidx.compose.animation.core.LinearEasing),
+        )
+      }
+    }
+  }
+  androidx.compose.material3.Surface(
+    shape = androidx.compose.foundation.shape.CircleShape,
+    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+    shadowElevation = 6.dp,
+    border = androidx.compose.foundation.BorderStroke(
+      1.5.dp,
+      MaterialTheme.colorScheme.primary.copy(alpha = if (isPlaying) 0.7f else 0.25f),
+    ),
+    modifier = Modifier
+      .size(NavigationBarState.miniPlayerHeight)
+      .clip(androidx.compose.foundation.shape.CircleShape)
+      .clickable { launchPlayer() },
+  ) {
+    Box(
+      modifier = Modifier.fillMaxSize(),
+      contentAlignment = Alignment.Center,
+    ) {
+      Box(
+        modifier = Modifier
+          .fillMaxSize()
+          .graphicsLayer { rotationZ = discRotation.value },
+        contentAlignment = Alignment.Center,
+      ) {
+        if (artwork?.bitmap != null) {
+          androidx.compose.foundation.Image(
+            bitmap = artwork.bitmap.asImageBitmap(),
+            contentDescription = title,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(),
+          )
+        } else {
+          Icon(
+            imageVector = Icons.RoundedFilled.Audiotrack,
+            contentDescription = title,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(28.dp),
+          )
+        }
+      }
+      Box(
+        modifier = Modifier
+          .size(18.dp)
+          .clip(androidx.compose.foundation.shape.CircleShape)
+          .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.85f)),
+        contentAlignment = Alignment.Center,
+      ) {
+        Icon(
+          imageVector = if (isPlaying) Icons.RoundedFilled.Pause else Icons.RoundedFilled.PlayArrow,
+          contentDescription = null,
+          tint = MaterialTheme.colorScheme.onSurface,
+          modifier = Modifier.size(12.dp),
+        )
+      }
+    }
+  }
+  return
 
   /**
    * Throws the card off the screen edge in [direction], keeping the release velocity and tilt.

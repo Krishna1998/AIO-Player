@@ -801,21 +801,20 @@ open class MainActivity : AppCompatActivity() {
                 .offset(y = -miniPlayerLift)
             } else {
               Modifier
-                .align(if (isDualPane) Alignment.BottomEnd else Alignment.BottomStart)
-                .fillMaxWidth(if (isDualPane) 0.6f else 1f)
+                .align(Alignment.BottomEnd)
                 .windowInsetsPadding(
-                  if (isDualPane) safeInsets.only(WindowInsetsSides.End + WindowInsetsSides.Bottom)
-                  else safeInsets.only(WindowInsetsSides.Bottom),
+                  safeInsets.only(WindowInsetsSides.End + WindowInsetsSides.Bottom),
                 )
-                .padding(start = startSpacing, end = endSpacing, bottom = spacing)
+                .padding(end = endSpacing, bottom = spacing)
                 .offset(y = -miniPlayerLift)
             }
 
+          val discShape = androidx.compose.foundation.shape.CircleShape
           Box(
             modifier = miniPlayerModifier
               .height(NavigationBarState.miniPlayerHeight)
               .playerSheetMiniPlacement(
-                miniPlayerShape,
+                discShape,
                 androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.96f),
               ),
           )
@@ -824,7 +823,7 @@ open class MainActivity : AppCompatActivity() {
             enabled = liquidGlassEnabled,
           ) {
             MiniPlayer(
-              modifier = miniPlayerModifier.inAppMusicSheetMiniSource(musicSheet, miniPlayerShape),
+              modifier = miniPlayerModifier.inAppMusicSheetMiniSource(musicSheet, discShape),
             )
           }
           PlayerSheetTransitionOverlay(PlayerSheetDestination.MINI, Modifier.matchParentSize())
