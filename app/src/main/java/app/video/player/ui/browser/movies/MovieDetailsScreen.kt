@@ -515,11 +515,20 @@ data class MovieDetailsScreen(
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
                   )
+                  val firstEp = seriesEpisodes.firstOrNull()
+                  val playLabel = if (firstEp != null) {
+                    val (epVid, epInf) = firstEp
+                    "Play S%02dE%02d: %s".format(epInf.season, epInf.episode, epVid.displayName.substringBeforeLast('.'))
+                  } else {
+                    "Play"
+                  }
                   Text(
-                    text = "Play",
+                    text = playLabel,
                     style = MaterialTheme.typography.titleMedium.copy(
                       fontWeight = FontWeight.Bold,
                     ),
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                   )
                 }
               }
@@ -547,11 +556,11 @@ data class MovieDetailsScreen(
               if (seriesEpisodes.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                  text = "Episodes (${seriesEpisodes.size})",
+                  text = "Episodes",
                   style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                   color = MaterialTheme.colorScheme.onSurface,
                 )
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                   seriesEpisodes.forEach { (epVideo, epInfo) ->
                     val epProgress = episodeProgressMap[epVideo.path] ?: 0f
                     val epIsWatched = epProgress >= 1f
@@ -563,63 +572,114 @@ data class MovieDetailsScreen(
                           launchSource = "movie_details_episode",
                         )
                       },
-                      shape = RoundedCornerShape(14.dp),
-                      color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                      shape = RoundedCornerShape(16.dp),
+                      color = MaterialTheme.colorScheme.surfaceContainerLow,
                       modifier = Modifier.fillMaxWidth(),
                     ) {
                       Column(modifier = Modifier.fillMaxWidth()) {
                         Row(
                           modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 14.dp),
+                            .padding(12.dp),
                           verticalAlignment = Alignment.CenterVertically,
-                          horizontalArrangement = Arrangement.SpaceBetween,
+                          horizontalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                          Text(
-                            text = "S%02dE%02d".format(epInfo.season, epInfo.episode),
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = MaterialTheme.colorScheme.primary,
-                          )
-                          Text(
-                            text = epVideo.displayName.substringBeforeLast('.'),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            maxLines = 1,
-                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                          )
-                        }
-                        Row(
-                          verticalAlignment = Alignment.CenterVertically,
-                          horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
+                          // 16:9 Thumbnail with centered Play icon
+                          Box(
+                            modifier = Modifier
+                              .width(96.dp)
+                              .height(54.dp)
+                              .clip(RoundedCornerShape(10.dp))
+                              .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                            contentAlignment = Alignment.Center,
+                          ) {
+                            Box(
+                              modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.Black.copy(alpha = 0.25f)),
+                              contentAlignment = Alignment.Center,
+                            ) {
+                              Icon(
+                                imageVector = Icons.RoundedFilled.PlayArrow,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(24.dp),
+                              )
+                            }
+                          }
+
+                          // Episode code, title, duration & size
+                          Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                          ) {
+                            Row(
+                              verticalAlignment = Alignment.CenterVertically,
+                              horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            ) {
+                              Text(
+                                text = "S%02dE%02d".format(epInfo.season, epInfo.episode),
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                              )
+                              Text(
+                                text = epVideo.displayName.substringBeforeLast('.'),
+                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                              )
+                            }
+                            val metaLine = buildList {
+                              epVideo.durationFormatted.takeIf { it.isNotBlank() && it != "0s" }?.let { add(it) }
+                              epVideo.sizeFormatted.takeIf { it.isNotBlank() }?.let { add(it) }
+                            }.joinToString(" • ")
+                            if (metaLine.isNotEmpty()) {
+                              Text(
+                                text = metaLine,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                              )
+                            }
+                          }
+
                           if (epIsWatched) {
                             Icon(
                               imageVector = Icons.RoundedFilled.CheckCircle,
                               contentDescription = null,
                               tint = Color(0xFF4CAF50),
+                              modifier = Modifier.size(18.dp),
+                            )
+                          }
+                          IconButton(
+                            onClick = {
+                              coroutineScope.launch {
+                                PermissionUtils.StorageOps.deleteVideos(context, listOf(epVideo))
+                                seriesEpisodes = seriesEpisodes.filterNot { it.first.path == epVideo.path }
+                              }
+                            },
+                            modifier = Modifier.size(36.dp),
+                          ) {
+                            Icon(
+                              imageVector = Icons.RoundedFilled.Delete,
+                              contentDescription = stringResource(R.string.delete),
+                              tint = MaterialTheme.colorScheme.onSurfaceVariant,
                               modifier = Modifier.size(20.dp),
                             )
                           }
-                          Icon(
-                            imageVector = Icons.RoundedFilled.PlayArrow,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(22.dp),
+                        }
+                        if (epProgress > 0f) {
+                          androidx.compose.material3.LinearProgressIndicator(
+                            progress = { epProgress },
+                            modifier = Modifier
+                              .fillMaxWidth()
+                              .height(3.dp),
+                            color = MaterialTheme.colorScheme.primary,
+                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
                           )
                         }
                       }
-                      if (epProgress > 0f) {
-                        androidx.compose.material3.LinearProgressIndicator(
-                          progress = { epProgress },
-                          modifier = Modifier
-                            .fillMaxWidth()
-                            .height(3.dp),
-                          color = MaterialTheme.colorScheme.primary,
-                          trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                        )
-                      }
-                    }
                     }
                   }
                 }
