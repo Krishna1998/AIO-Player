@@ -1625,10 +1625,10 @@ object AppearancePreferencesScreen : Screen {
             val tabItems = ordered.map { id ->
               when (id) {
                 "HOME" -> ReorderableTabItem(id, stringResource(R.string.pref_nav_home_title), stringResource(R.string.pref_nav_home_summary), true, required = true)
-                "MOVIES" -> ReorderableTabItem(id, stringResource(R.string.ui_movies), stringResource(R.string.ui_movies), true, required = true, titleRes = R.string.ui_movies)
-                "VIDEOS" -> ReorderableTabItem(id, stringResource(R.string.ui_videos), stringResource(R.string.ui_videos), true, required = true, titleRes = R.string.ui_videos)
-                "MUSIC" -> ReorderableTabItem(id, stringResource(R.string.ui_music), stringResource(R.string.ui_music), true, required = true, titleRes = R.string.ui_music)
-                else -> ReorderableTabItem(id, stringResource(R.string.pref_nav_network_title), stringResource(R.string.pref_nav_network_summary), true, required = true, titleRes = R.string.pref_nav_network_title)
+                "MOVIES" -> ReorderableTabItem(id, stringResource(R.string.ui_movies), stringResource(R.string.ui_movies), true, required = false, titleRes = R.string.ui_movies)
+                "VIDEOS" -> ReorderableTabItem(id, stringResource(R.string.ui_videos), stringResource(R.string.ui_videos), true, required = false, titleRes = R.string.ui_videos)
+                "MUSIC" -> ReorderableTabItem(id, stringResource(R.string.ui_music), stringResource(R.string.ui_music), true, required = false, titleRes = R.string.ui_music)
+                else -> ReorderableTabItem(id, stringResource(R.string.pref_nav_network_title), stringResource(R.string.pref_nav_network_summary), true, required = false, titleRes = R.string.pref_nav_network_title)
               }
             }
             ExpressivePreferenceGroup {
