@@ -302,7 +302,7 @@ private fun NormalTopBar(
   val showProfileTab by preferences.showProfileTab.collectAsState()
   val showNetworkTab by preferences.showNetworkTab.collectAsState()
   val isOnlyHomeFilesTab = !showProfileTab && !showNetworkTab
-  val showTopBarSearch = !isMainTabPage || isOnlyHomeFilesTab
+  val showTopBarSearch = true
   val profileName by preferences.profileName.collectAsState()
   val profileImagePath by preferences.profileImagePath.collectAsState()
   val profileAvatar = rememberProfileAvatar(profileImagePath)

@@ -968,43 +968,6 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
                       labelFraction = labelFraction,
                       modifier = Modifier.weight(1f, fill = false),
                     )
-
-                    val glowEnabled by appearancePreferences.navigationBarGlow.collectAsState()
-                    val glowStrength by animateFloatAsState(
-                      targetValue = if (glowEnabled) 1f else 0f,
-                      animationSpec = if (navStyle == NavigationAnimStyle.None) snap() else tween(420, easing = NavigationBarEasing),
-                      label = "search_glow",
-                    )
-
-                    FloatingSearchButton(
-                      onClick = {
-                        when (selectedTab) {
-                          MainTab.HOME,
-                          MainTab.MOVIES,
-                          MainTab.VIDEOS -> NavigationBarState.triggerHomeSearch()
-                          MainTab.NETWORK -> {
-                            onTabSelected(MainTab.HOME)
-                            coroutineScope.launch {
-                              delay(50L)
-                              NavigationBarState.triggerHomeSearch()
-                            }
-                          }
-                          MainTab.MUSIC -> NavigationBarState.triggerMusicSearch()
-                          MainTab.PROFILE -> {
-                            onTabSelected(MainTab.HOME)
-                            coroutineScope.launch {
-                              delay(50L)
-                              NavigationBarState.triggerHomeSearch()
-                            }
-                          }
-                        }
-                      },
-                      hazeBackdrop = navigationBackdrop,
-                      kyantBackdrop = liquidNavigationBackdrop,
-                      liquidGlassEnabled = liquidGlassEnabled,
-                      glowStrength = glowStrength,
-                      size = searchButtonSize,
-                    )
                   }
                 }
               }
