@@ -708,6 +708,13 @@ class PlayerActivity :
     }
     enableEdgeToEdge()
     super.onCreate(savedInstanceState)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+      overrideActivityTransition(OVERRIDE_TRANSITION_OPEN, android.R.anim.fade_in, android.R.anim.fade_out)
+      overrideActivityTransition(OVERRIDE_TRANSITION_CLOSE, android.R.anim.fade_in, android.R.anim.fade_out)
+    } else {
+      @Suppress("DEPRECATION")
+      overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+    }
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R && !isKnownAudioLaunch(intent)) {
       applyLegacySystemBars(showStatus = false, showNavigation = false, isAudio = false)
     }
