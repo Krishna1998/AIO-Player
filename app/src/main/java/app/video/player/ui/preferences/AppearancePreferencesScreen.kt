@@ -1708,7 +1708,6 @@ object AppearancePreferencesScreen : Screen {
                     )
                   },
                 )
-                PreferenceDivider()
                 val hideNavigationBarLabels by preferences.hideNavigationBarLabels.collectAsState()
                 SwitchPreference(
                   modifier = Modifier.settingsSearchTarget(R.string.pref_hide_navigation_bar_labels_title),
