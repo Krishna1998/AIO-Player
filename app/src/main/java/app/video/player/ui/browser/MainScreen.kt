@@ -1138,7 +1138,7 @@ internal fun ExpressivePillNavigationBar(
                 modifier = Modifier.fillMaxHeight(),
               ) {
                 MainTabIcon(tab, contentColor, null, iconSize)
-                if (effectiveLabelFraction > 0f) {
+                if (effectiveLabelFraction > 0f && active) {
                   Spacer(Modifier.height(2.dp * effectiveLabelFraction))
                   Box(
                     modifier = Modifier
