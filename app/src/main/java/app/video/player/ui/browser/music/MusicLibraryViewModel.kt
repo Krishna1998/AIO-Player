@@ -53,9 +53,10 @@ class MusicLibraryViewModel : ViewModel(), KoinComponent {
     audioPreferences.musicTabOrder.changes(),
     audioPreferences.enabledMusicTabs.changes(),
   ) { orderList, enabledSet ->
-    val tabMap = MusicTab.entries.associateBy { it.name }
+    val tabMap = MusicTab.entries.associateBy { it.name } + ("ALL_MUSIC" to MusicTab.SONGS)
+    val normalizedEnabled = enabledSet.map { if (it == "ALL_MUSIC") MusicTab.SONGS.name else it }.toSet()
     val orderedTabs = (orderList.mapNotNull { tabMap[it] } + (MusicTab.entries - orderList.mapNotNull { tabMap[it] }.toSet())).distinct()
-    val filtered = orderedTabs.filter { it.name in enabledSet }
+    val filtered = orderedTabs.filter { it.name in normalizedEnabled }
     if (filtered.isEmpty()) listOf(MusicTab.SONGS) else filtered
   }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MusicTab.entries.toList())
 
