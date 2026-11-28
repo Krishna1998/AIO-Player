@@ -286,12 +286,7 @@ data class MovieDetailsScreen(
           .padding(bottom = paddingValues.calculateBottomPadding()),
       ) {
         if (currentVideo == null) {
-          Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
-          ) {
-            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-          }
+          Box(modifier = Modifier.fillMaxSize())
         } else {
           val scrollState = rememberScrollState()
 
