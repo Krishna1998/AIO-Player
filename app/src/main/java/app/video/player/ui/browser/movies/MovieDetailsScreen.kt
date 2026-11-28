@@ -277,17 +277,7 @@ data class MovieDetailsScreen(
       label = "refreshSpinAngle",
     )
 
-    var entered by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { entered = true }
-    val enterAlpha = androidx.compose.animation.core.animateFloatAsState(
-      targetValue = if (entered) 1f else 0f,
-      animationSpec = androidx.compose.animation.core.tween(260, easing = androidx.compose.animation.core.FastOutSlowInEasing),
-      label = "movieDetailsAlpha",
-    )
     Scaffold(
-      modifier = Modifier.graphicsLayer {
-        alpha = enterAlpha.value
-      },
       containerColor = MaterialTheme.colorScheme.background,
     ) { paddingValues ->
       Box(
