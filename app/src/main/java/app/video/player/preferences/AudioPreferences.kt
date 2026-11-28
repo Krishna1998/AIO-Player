@@ -74,7 +74,7 @@ class AudioPreferences(
   val wavyVisualizerMode = preferenceStore.getEnum("wavy_visualizer_mode", WavyVisualizerMode.OneSide)
   val enabledMusicTabs = preferenceStore.getStringSet(
     "enabled_music_tabs",
-    setOf("ALL_MUSIC", "FAVORITES", "PLAYLISTS", "FOLDERS", "ALBUMS", "ARTISTS"),
+    setOf("SONGS", "FAVORITES", "PLAYLISTS", "FOLDERS", "ALBUMS", "ARTISTS"),
   )
   val musicTabOrder = preferenceStore.getObject(
     key = "music_tab_order",

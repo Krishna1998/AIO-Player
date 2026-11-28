@@ -902,8 +902,6 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
                 val centerFraction = animateFloatAsState(
                   targetValue = when {
                     isDualPaneFolderSelected && selectedTab == MainTab.HOME -> 0.2f
-                    NavigationBarState.isMiniPlayerDocked -> 0.5f
-                    isMiniPlayerVisible && NavigationBarState.canPlaceMiniPlayerBesideNavigation(maxWidth) -> 0f
                     else -> 0.5f
                   },
                   animationSpec = if (navStyle == NavigationAnimStyle.None) snap() else tween(duration, easing = FastOutSlowInEasing),
