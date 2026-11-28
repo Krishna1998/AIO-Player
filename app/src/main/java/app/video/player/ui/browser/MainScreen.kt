@@ -382,6 +382,9 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
 
     val targetPage = pagerState.targetPage.coerceIn(0, (visibleTabs.size - 1).coerceAtLeast(0))
     val selectedTab = visibleTabs.getOrNull(targetPage) ?: visibleTabs.firstOrNull() ?: MainTab.HOME
+    SideEffect {
+      NavigationBarState.isHomeTabActive = (selectedTab == MainTab.HOME)
+    }
 
     LaunchedEffect(persistentSelectedTab) {
       if (persistentSelectedTab == MainTab.MUSIC) {

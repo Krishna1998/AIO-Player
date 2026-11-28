@@ -52,6 +52,7 @@ object NavigationBarState {
   // browser layout can adapt when the mini player is on screen).
   var isMiniPlayerVisible: Boolean by mutableStateOf(false)
   var isAllMediaTabActive: Boolean by mutableStateOf(false)
+  var isHomeTabActive: Boolean by mutableStateOf(true)
 
   var allMediaTabRequestId: Long by mutableStateOf(0L)
     private set
