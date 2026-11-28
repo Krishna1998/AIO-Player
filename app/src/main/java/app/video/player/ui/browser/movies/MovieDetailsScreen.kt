@@ -9,6 +9,8 @@
 
 package app.video.player.ui.browser.movies
 
+import androidx.compose.ui.graphics.graphicsLayer
+
 import android.content.Context
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -225,7 +227,7 @@ data class MovieDetailsScreen(
       label = "movieDetailsAlpha",
     )
     Scaffold(
-      modifier = androidx.compose.ui.graphics.graphicsLayer {
+      modifier = Modifier.graphicsLayer {
         alpha = enterAlpha.value
       },
       containerColor = MaterialTheme.colorScheme.background,
