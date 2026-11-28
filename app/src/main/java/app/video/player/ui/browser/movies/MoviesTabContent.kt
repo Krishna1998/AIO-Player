@@ -465,24 +465,26 @@ private fun MoviePosterCard(
           }
         }
 
-        val remainingMs = item.timeRemaining
-        if (video.duration > 0L && remainingMs != null && remainingMs > 0L && remainingMs < video.duration) {
-          val watchedFraction = ((video.duration - remainingMs).toFloat() / video.duration.toFloat()).coerceIn(0f, 1f)
-          if (watchedFraction > 0.01f) {
+        val rawProgress = item.progressPercentage
+        val watchedFraction = when {
+          rawProgress != null && rawProgress > 1f -> (rawProgress / 100f).coerceIn(0f, 1f)
+          rawProgress != null -> rawProgress.coerceIn(0f, 1f)
+          else -> 0f
+        }
+        if (watchedFraction > 0.01f) {
+          Box(
+            modifier = Modifier
+              .align(Alignment.BottomCenter)
+              .fillMaxWidth()
+              .height(4.dp)
+              .background(Color.Black.copy(alpha = 0.55f)),
+          ) {
             Box(
               modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .fillMaxWidth()
+                .fillMaxWidth(watchedFraction)
                 .height(4.dp)
-                .background(Color.Black.copy(alpha = 0.55f)),
-            ) {
-              Box(
-                modifier = Modifier
-                  .fillMaxWidth(watchedFraction)
-                  .height(4.dp)
-                  .background(MaterialTheme.colorScheme.primary),
-              )
-            }
+                .background(MaterialTheme.colorScheme.primary),
+            )
           }
         }
       }
