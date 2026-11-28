@@ -147,7 +147,7 @@ class AppearancePreferences(
       listOf("HOME") + parsed.filterNot { it == "HOME" } + defaults.drop(1).filterNot { it in parsed }
     },
   )
-  val showQuickPlayFab = preferenceStore.getBoolean("show_quick_play_fab", true)
+  val showQuickPlayFab = preferenceStore.getBoolean("show_quick_play_fab", false)
   val quickPlayFabDirect = preferenceStore.getBoolean("quick_play_fab_direct", false)
 
   // Background animation (see ui/background)
