@@ -17,6 +17,11 @@ import app.video.player.utils.media.MediaInfoParser
 import app.video.player.utils.storage.VideoScanUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -58,6 +63,19 @@ class MovieMetadataRepository(
   },
 ) {
   private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+  private val fetchSemaphore = Semaphore(6)
+
+  suspend fun prefetchMetadata(videos: List<Video>) = withContext(Dispatchers.IO) {
+    coroutineScope {
+      videos.map { video ->
+        async {
+          fetchSemaphore.withPermit {
+            runCatching { getOrFetchMetadata(video) }
+          }
+        }
+      }.awaitAll()
+    }
+  }
   private val cacheDir = File(context.filesDir, "movie_metadata").apply { mkdirs() }
   private val memoryCache = ConcurrentHashMap<String, MovieMetadata>()
   private val _metadataRevision = MutableStateFlow(0)
