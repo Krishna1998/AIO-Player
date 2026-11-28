@@ -1298,7 +1298,7 @@ fun MediaLibraryContent(
                       ),
                     )
                   }
-                  HorizontalPager(
+                  androidx.compose.foundation.pager.HorizontalPager(
                     state = videoPagerState,
                     modifier = Modifier.weight(1f).fillMaxWidth(),
                   ) { subPage ->
