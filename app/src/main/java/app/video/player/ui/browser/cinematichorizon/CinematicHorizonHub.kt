@@ -1993,14 +1993,16 @@ private fun HeroSpotlightBox(
                 .background(Color(0xFF00E5FF), CircleShape),
             )
           }
-          Text(
-            text = if (isCurrentlyInSession && !video.isAudio) "NOW PLAYING IN PIP" else (if (video.isAudio) "SONIC HORIZON" else "CONTINUE WATCHING"),
-            style = MaterialTheme.typography.labelSmall.copy(
-              fontWeight = FontWeight.ExtraBold,
-              letterSpacing = 1.2.sp,
-            ),
-            color = Color.White,
-          )
+          if (isCurrentlyInSession || video.isAudio) {
+            Text(
+              text = if (isCurrentlyInSession && !video.isAudio) "NOW PLAYING IN PIP" else "SONIC HORIZON",
+              style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = 1.2.sp,
+              ),
+              color = Color.White,
+            )
+          }
         }
       }
     }
