@@ -139,10 +139,10 @@ class AppearancePreferences(
   /** Persistent visual order of bottom navigation tabs. Home remains the root destination. */
   val bottomNavigationOrder = preferenceStore.getObject(
     key = "bottom_navigation_tab_order",
-    defaultValue = listOf("HOME", "NETWORK"),
+    defaultValue = listOf("HOME", "MOVIES", "VIDEOS", "MUSIC", "NETWORK"),
     serializer = { order -> order.joinToString(",") },
     deserializer = { stored ->
-      val defaults = listOf("HOME", "NETWORK")
+      val defaults = listOf("HOME", "MOVIES", "VIDEOS", "MUSIC", "NETWORK")
       val parsed = stored.split(",").map(String::trim).filter { it in defaults }.distinct()
       listOf("HOME") + parsed.filterNot { it == "HOME" } + defaults.drop(1).filterNot { it in parsed }
     },
