@@ -189,8 +189,10 @@ import app.video.player.ui.tv.tryRequestFocus
 object MainScreen : Screen, TvEdgeToEdgeScreen {
   internal enum class MainTab {
     HOME,
-    NETWORK,
+    MOVIES,
+    VIDEOS,
     MUSIC,
+    NETWORK,
     PROFILE,
   }
 
@@ -631,7 +633,9 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
             ) { page ->
               val tab = visibleTabs.getOrNull(page) ?: return@NavigationPager
               when (tab) {
-                MainTab.HOME -> FolderListScreen.Content()
+                MainTab.HOME -> FolderListScreen.Content(forcedTab = app.video.player.ui.browser.medialibrary.MediaLibraryTabItem.All)
+                MainTab.MOVIES -> FolderListScreen.Content(forcedTab = app.video.player.ui.browser.medialibrary.MediaLibraryTabItem.Movies)
+                MainTab.VIDEOS -> FolderListScreen.Content(forcedTab = app.video.player.ui.browser.medialibrary.MediaLibraryTabItem.Video)
                 MainTab.NETWORK -> NetworkStreamingScreen.Content(networkStreamingViewModel)
                 MainTab.MUSIC -> {
                   if (musicSourceProvider == MusicSourceProvider.JELLYFIN) {
@@ -975,7 +979,9 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
                     FloatingSearchButton(
                       onClick = {
                         when (selectedTab) {
-                          MainTab.HOME -> NavigationBarState.triggerHomeSearch()
+                          MainTab.HOME,
+                          MainTab.MOVIES,
+                          MainTab.VIDEOS -> NavigationBarState.triggerHomeSearch()
                           MainTab.NETWORK -> {
                             onTabSelected(MainTab.HOME)
                             coroutineScope.launch {
@@ -1135,6 +1141,8 @@ internal fun ExpressivePillNavigationBar(
             val label = labels[index]
             val baseColor = when (tab) {
               MainScreen.MainTab.HOME -> primaryColor
+              MainScreen.MainTab.MOVIES -> primaryColor
+              MainScreen.MainTab.VIDEOS -> primaryColor
               MainScreen.MainTab.NETWORK -> secondaryColor
               MainScreen.MainTab.MUSIC -> tertiaryColor
               MainScreen.MainTab.PROFILE -> primaryColor
@@ -1372,6 +1380,8 @@ internal fun ExpressivePillNavigationBar(
 internal fun mainNavigationLabel(tab: MainScreen.MainTab): String =
   stringResource(when (tab) {
     MainScreen.MainTab.HOME -> R.string.ui_home
+    MainScreen.MainTab.MOVIES -> R.string.ui_movies
+    MainScreen.MainTab.VIDEOS -> R.string.ui_videos
     MainScreen.MainTab.NETWORK -> R.string.ui_network
     MainScreen.MainTab.MUSIC -> R.string.ui_music
     MainScreen.MainTab.PROFILE -> R.string.ui_profile
@@ -1394,6 +1404,8 @@ internal fun MainTabIcon(
   }
   val icon = when (tab) {
     MainScreen.MainTab.HOME -> Icons.RoundedFilled.Home
+    MainScreen.MainTab.MOVIES -> Icons.RoundedFilled.Movie
+    MainScreen.MainTab.VIDEOS -> Icons.RoundedFilled.VideoLibrary
     MainScreen.MainTab.NETWORK -> Icons.RoundedFilled.CloudDownload
     MainScreen.MainTab.MUSIC -> Icons.RoundedFilled.Audiotrack
     MainScreen.MainTab.PROFILE -> Icons.RoundedFilled.AccountCircle
@@ -1424,7 +1436,10 @@ internal fun mainNavigationTabs(
 ): List<MainScreen.MainTab> {
   val available = buildList {
     add(MainScreen.MainTab.HOME)
-    add(MainScreen.MainTab.NETWORK)
+    add(MainScreen.MainTab.MOVIES)
+    add(MainScreen.MainTab.VIDEOS)
+    add(MainScreen.MainTab.MUSIC)
+    if (showNetwork) add(MainScreen.MainTab.NETWORK)
     if (showProfile) add(MainScreen.MainTab.PROFILE)
   }
   val byName = available.associateBy { it.name }

@@ -185,7 +185,12 @@ enum class MediaLibraryTabItem {
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalPermissionsApi::class)
 @Composable
-fun MediaLibraryContent(forceAudio: Boolean = false) {
+fun MediaLibraryContent(
+  forceAudio: Boolean = false,
+  forcedTab: MediaLibraryTabItem? = null,
+) {
+  val effectiveForcedTab = forcedTab ?: if (forceAudio) MediaLibraryTabItem.Audio else null
+  val isLockedTab = effectiveForcedTab != null
   val context = LocalContext.current
   val coroutineScope = rememberCoroutineScope()
   val backstack = LocalBackStack.current
@@ -239,7 +244,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   // Permissions
   val permissionState =
     PermissionUtils.handleStoragePermission(
-      audioOnly = forceAudio,
+      audioOnly = effectiveForcedTab == MediaLibraryTabItem.Audio,
       onPermissionGranted = { viewModel.refresh() },
     )
 
@@ -284,7 +289,8 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
     cinematicShowHeroSpotlight || dualHorizonShowVideoRail || dualHorizonShowAudioPulsing || dualHorizonShowMusicRail
   val savedMediaType by browserPreferences.mediaLibraryType.collectAsState()
   val savedActiveTab by browserPreferences.mediaLibraryActiveTab.collectAsState()
-  val mediaType = if (forceAudio) MediaLibraryType.Audio else if (includeAudioBrowser || browserPreferences.folderViewMode.get() == app.video.player.preferences.FolderViewMode.DualHorizon) savedMediaType else MediaLibraryType.Video
+  val mediaType = effectiveForcedTab?.toLibraryType()
+    ?: if (includeAudioBrowser || browserPreferences.folderViewMode.get() == app.video.player.preferences.FolderViewMode.DualHorizon) savedMediaType else MediaLibraryType.Video
   val musicCoverArtSize by browserPreferences.musicCoverArtSize.collectAsState()
   val enabledMusicTabs by audioPreferences.enabledMusicTabs.collectAsState()
   val musicTabOrder by audioPreferences.musicTabOrder.collectAsState()
@@ -345,9 +351,9 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
     }
   }
   val mediaLibrarySubTabsOrder by browserPreferences.mediaLibrarySubTabsOrder.collectAsState()
-  val mediaLibraryTabs = remember(forceAudio, libraryShowMusicTab, libraryShowMoviesTab, isAnyDualHorizonSectionEnabled, mediaLibrarySubTabsOrder) {
-    if (forceAudio) {
-      listOf(MediaLibraryTabItem.Audio)
+  val mediaLibraryTabs = remember(effectiveForcedTab, libraryShowMusicTab, libraryShowMoviesTab, isAnyDualHorizonSectionEnabled, mediaLibrarySubTabsOrder) {
+    if (effectiveForcedTab != null) {
+      listOf(effectiveForcedTab)
     } else {
       val defaults = listOf("ALL", "MOVIES", "VIDEO", "AUDIO")
       val orderedIds = (mediaLibrarySubTabsOrder.filter { it in defaults } + defaults).distinct()
@@ -419,11 +425,8 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
       }
   }
 
-  val currentTab: MediaLibraryTabItem = if (forceAudio) {
-    MediaLibraryTabItem.Audio
-  } else {
-    mediaLibraryTabs.getOrNull(pagerState.currentPage) ?: MediaLibraryTabItem.fromLibraryType(savedMediaType)
-  }
+  val currentTab: MediaLibraryTabItem = effectiveForcedTab
+    ?: (mediaLibraryTabs.getOrNull(pagerState.currentPage) ?: MediaLibraryTabItem.fromLibraryType(savedMediaType))
 
   DisposableEffect(currentTab, dualHorizonShowAudioPulsing) {
     // When Audio Pulsing is enabled in Dual Horizon, suppress the mini-player
@@ -507,7 +510,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
   }
 
   val isRefreshing = remember { mutableStateOf(false) }
-  val sortDialogOpen = rememberBrowserSortDialogOpen(useHomeState = !forceAudio)
+  val sortDialogOpen = rememberBrowserSortDialogOpen(useHomeState = !isLockedTab)
   val deleteDialogOpen = rememberSaveable { mutableStateOf(false) }
   val renameDialogOpen = rememberSaveable { mutableStateOf(false) }
   val addToPlaylistDialogOpen = rememberSaveable { mutableStateOf(false) }
@@ -1018,7 +1021,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
                 .fillMaxSize()
                 .padding(padding),
           ) {
-          if (!forceAudio) {
+          if (!isLockedTab) {
             val tabRowScrollState = rememberScrollState()
             LaunchedEffect(pagerState.currentPage, mediaLibraryTabs.size) {
               if (tabRowScrollState.maxValue > 0 && mediaLibraryTabs.size > 1) {
@@ -1795,7 +1798,7 @@ fun MediaLibraryContent(forceAudio: Boolean = false) {
           onSortTypeChange = { browserPreferences.videoSortType.set(it) },
           onSortOrderChange = { browserPreferences.videoSortOrder.set(it) },
           isFolderView = false,
-          enableViewModeOptions = !forceAudio && !isAllMediaTab && !isMoviesTab && !isAudioTab,
+          enableViewModeOptions = !isLockedTab && !isAllMediaTab && !isMoviesTab && !isAudioTab,
           enableLayoutModeOptions = !isAllMediaTab,
           enableManualGridOptions = !isMoviesTab,
           enableFieldOptions = !isAllMediaTab && !isMoviesTab,

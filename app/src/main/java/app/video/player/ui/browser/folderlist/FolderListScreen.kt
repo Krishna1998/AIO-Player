@@ -177,6 +177,12 @@ object FolderListScreen : Screen {
   @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
   @Composable
   override fun Content() {
+    Content(forcedTab = null)
+  }
+
+  @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
+  @Composable
+  fun Content(forcedTab: app.video.player.ui.browser.medialibrary.MediaLibraryTabItem?) {
     val browserPreferences = koinInject<BrowserPreferences>()
     val folderViewMode by browserPreferences.folderViewMode.collectAsState()
 
@@ -185,7 +191,7 @@ object FolderListScreen : Screen {
         FolderViewMode.FileManager -> FileSystemBrowserRootScreen.Content()
         FolderViewMode.AlbumView -> MediaStoreFolderListContent()
         FolderViewMode.MediaLibrary,
-        FolderViewMode.DualHorizon -> MediaLibraryContent()
+        FolderViewMode.DualHorizon -> MediaLibraryContent(forcedTab = forcedTab)
       }
     }
   }
