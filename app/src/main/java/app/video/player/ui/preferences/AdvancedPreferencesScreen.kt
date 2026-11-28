@@ -863,7 +863,7 @@ object AdvancedPreferencesScreen : Screen {
             val verboseLogging by preferences.verboseLogging.collectAsState()
 
             Column(
-              modifier = Modifier.fillMaxWidth(),
+              modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
               verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
               SwitchPreference(
@@ -879,7 +879,12 @@ object AdvancedPreferencesScreen : Screen {
               )
 
               androidx.compose.material3.Surface(
-                shape = MaterialTheme.shapes.medium,
+                shape = androidx.compose.foundation.shape.RoundedCornerShape(
+                  topStart = 4.dp,
+                  topEnd = 4.dp,
+                  bottomStart = 20.dp,
+                  bottomEnd = 20.dp,
+                ),
                 color = MaterialTheme.colorScheme.surfaceContainerLow,
                 modifier = Modifier.fillMaxWidth(),
               ) {
