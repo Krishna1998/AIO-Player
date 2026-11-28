@@ -452,6 +452,9 @@ private fun MiniPlayerContent(
       }
     }
   }
+  var dragOffsetX by remember { mutableFloatStateOf(0f) }
+  var dragOffsetY by remember { mutableFloatStateOf(0f) }
+
   androidx.compose.material3.Surface(
     shape = androidx.compose.foundation.shape.CircleShape,
     color = MaterialTheme.colorScheme.surfaceContainerHigh,
@@ -461,8 +464,30 @@ private fun MiniPlayerContent(
       MaterialTheme.colorScheme.primary.copy(alpha = if (isPlaying) 0.7f else 0.25f),
     ),
     modifier = Modifier
+      .offset { IntOffset(dragOffsetX.roundToInt(), dragOffsetY.roundToInt()) }
       .size(NavigationBarState.miniPlayerHeight + 8.dp)
       .clip(androidx.compose.foundation.shape.CircleShape)
+      .pointerInput(Unit) {
+        detectDragGestures(
+          onDragEnd = {
+            if (kotlin.math.abs(dragOffsetX) > 90f || dragOffsetY > 90f) {
+              onDismiss()
+            } else {
+              dragOffsetX = 0f
+              dragOffsetY = 0f
+            }
+          },
+          onDragCancel = {
+            dragOffsetX = 0f
+            dragOffsetY = 0f
+          },
+          onDrag = { change, dragAmount ->
+            change.consume()
+            dragOffsetX += dragAmount.x
+            dragOffsetY = (dragOffsetY + dragAmount.y).coerceAtLeast(0f)
+          },
+        )
+      }
       .clickable { launchPlayer() },
   ) {
     Box(
