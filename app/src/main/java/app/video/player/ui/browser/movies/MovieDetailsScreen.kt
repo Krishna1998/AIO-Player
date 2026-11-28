@@ -12,12 +12,14 @@ package app.video.player.ui.browser.movies
 import androidx.compose.ui.graphics.graphicsLayer
 
 import android.content.Context
+import android.graphics.Bitmap
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -66,8 +68,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -78,11 +82,14 @@ import app.video.player.domain.media.model.Video
 import app.video.player.domain.movies.MovieClassifier
 import app.video.player.domain.movies.MovieMetadata
 import app.video.player.domain.movies.MovieMetadataRepository
+import app.video.player.domain.thumbnail.ThumbnailRepository
 import app.video.player.ui.mediainfo.overviewBadges
 import app.video.player.preferences.BrowserPreferences
 import app.video.player.presentation.Screen
 import app.video.player.presentation.components.RemoteImage
 import app.video.player.repository.MediaFileRepository
+import app.video.player.repository.wyzie.WyzieEpisode
+import app.video.player.repository.wyzie.WyzieSearchRepository
 import app.video.player.ui.browser.dialogs.DeleteConfirmationDialog
 import app.video.player.ui.components.AppToast as Toast
 import app.video.player.ui.icons.Icon
@@ -119,6 +126,8 @@ data class MovieDetailsScreen(
     val coroutineScope = rememberCoroutineScope()
     val movieMetadataRepo = koinInject<MovieMetadataRepository>()
     val browserPreferences = koinInject<BrowserPreferences>()
+    val wyzieSearchRepository = koinInject<WyzieSearchRepository>()
+    val thumbnailRepository = koinInject<ThumbnailRepository>()
 
     var video by remember { mutableStateOf<Video?>(null) }
     var metadata by remember { mutableStateOf<MovieMetadata?>(null) }
@@ -131,6 +140,9 @@ data class MovieDetailsScreen(
     val playbackStateRepo = koinInject<app.video.player.domain.playbackstate.repository.PlaybackStateRepository>()
     var showEditDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+
+    // TMDB episode metadata (name, overview, still)
+    var tmdbEpisodeMap by remember { mutableStateOf<Map<Int, WyzieEpisode>>(emptyMap()) }
 
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
     var resumeRefreshTick by remember { mutableStateOf(0) }
@@ -219,6 +231,27 @@ data class MovieDetailsScreen(
             seriesJob.await()
           }
         }
+      }
+    }
+
+    // Fetch TMDB episode metadata when we have tmdbId + series episodes
+    LaunchedEffect(metadata?.tmdbId, seriesEpisodes) {
+      val tmdbId = metadata?.tmdbId ?: return@LaunchedEffect
+      if (seriesEpisodes.isEmpty()) return@LaunchedEffect
+
+      withContext(Dispatchers.IO) {
+        val seasons = seriesEpisodes.map { it.second.season }.distinct()
+        val allEpisodes = mutableMapOf<Int, WyzieEpisode>()
+        for (season in seasons) {
+          runCatching {
+            val episodes = wyzieSearchRepository.getSeasonEpisodes(tmdbId, season).getOrNull()
+            episodes?.forEach { ep ->
+              // Key by episode_number for matching
+              allEpisodes[season * 1000 + ep.episode_number] = ep
+            }
+          }
+        }
+        tmdbEpisodeMap = allEpisodes
       }
     }
 
@@ -368,7 +401,50 @@ data class MovieDetailsScreen(
                 .padding(bottom = 36.dp),
               verticalArrangement = Arrangement.spacedBy(14.dp),
             ) {
-              // Metadata Badges Row: [ Year ] [ Duration ] [ Resolution ] [ Movie toggle ]
+              // Season/Episode count chips (mpvium style)
+              if (seriesEpisodes.isNotEmpty()) {
+                val seasonCount = seriesEpisodes.map { it.second.season }.distinct().size
+                val episodeCount = seriesEpisodes.size
+                Row(
+                  horizontalArrangement = Arrangement.spacedBy(8.dp),
+                  verticalAlignment = Alignment.CenterVertically,
+                ) {
+                  MovieMetaBadge(
+                    text = "$seasonCount Season${if (seasonCount != 1) "s" else ""} • $episodeCount Episode${if (episodeCount != 1) "s" else ""}",
+                  )
+                  val year = currentMeta?.releaseYear?.takeIf { it.isNotBlank() }
+                  if (year != null) {
+                    MovieMetaBadge(text = year)
+                  }
+                }
+              } else {
+                // Single movie: show metadata badges row
+                Row(
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalScroll(rememberScrollState()),
+                  horizontalArrangement = Arrangement.spacedBy(8.dp),
+                  verticalAlignment = Alignment.CenterVertically,
+                ) {
+                  val year = currentMeta?.releaseYear?.takeIf { it.isNotBlank() }
+                  if (year != null) {
+                    MovieMetaBadge(text = year)
+                  }
+
+                  val duration = currentMeta?.durationFormatted?.takeIf { it.isNotBlank() }
+                    ?: currentVideo.durationFormatted.takeIf { it.isNotBlank() }
+                  if (duration != null) {
+                    MovieMetaBadge(text = duration)
+                  }
+
+                  val resolution = currentMeta?.resolution?.takeIf { it.isNotBlank() }
+                  if (resolution != null) {
+                    MovieMetaBadge(text = resolution)
+                  }
+                }
+              }
+
+              // Movie/series mark toggle
               val isClassifiedAsMovie = remember(currentVideo, currentMeta) {
                 MovieClassifier.isActualMovie(currentVideo, currentMeta)
               }
@@ -379,22 +455,10 @@ data class MovieDetailsScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
               ) {
-                val year = currentMeta?.releaseYear?.takeIf { it.isNotBlank() }
-                if (year != null) {
-                  MovieMetaBadge(text = year)
+                if (seriesEpisodes.isEmpty()) {
+                  // Show duration/resolution for series in a separate row is not needed
+                  // but show Movie toggle for single movie
                 }
-
-                val duration = currentMeta?.durationFormatted?.takeIf { it.isNotBlank() }
-                  ?: currentVideo.durationFormatted.takeIf { it.isNotBlank() }
-                if (duration != null) {
-                  MovieMetaBadge(text = duration)
-                }
-
-                val resolution = currentMeta?.resolution?.takeIf { it.isNotBlank() }
-                if (resolution != null) {
-                  MovieMetaBadge(text = resolution)
-                }
-
                 Surface(
                   shape = RoundedCornerShape(8.dp),
                   color = if (isClassifiedAsMovie) {
@@ -534,15 +598,18 @@ data class MovieDetailsScreen(
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
                   )
-                  val activeEpisode = seriesEpisodes.lastOrNull { (ep, _) ->
+                  val playActiveEpisode = seriesEpisodes.lastOrNull { (ep, _) ->
                     val p = episodeProgressMap[ep.path] ?: 0f
                     p > 0f && p < 1f
                   } ?: seriesEpisodes.firstOrNull { (ep, _) ->
                     (episodeProgressMap[ep.path] ?: 0f) < 1f
                   } ?: seriesEpisodes.firstOrNull()
-                  val playLabel = if (activeEpisode != null) {
-                    val (epVid, epInf) = activeEpisode
-                    "Play S%02dE%02d: %s".format(epInf.season, epInf.episode, epVid.displayName.substringBeforeLast('.'))
+                  val playLabel = if (playActiveEpisode != null) {
+                    val (_, epInf) = playActiveEpisode
+                    val tmdbEp = tmdbEpisodeMap[epInf.season * 1000 + epInf.episode]
+                    val epName = tmdbEp?.name?.takeIf { it.isNotBlank() }
+                      ?: playActiveEpisode.first.displayName.substringBeforeLast('.')
+                    "Play S%02dE%02d: %s".format(epInf.season, epInf.episode, epName)
                   } else {
                     "Play"
                   }
@@ -587,6 +654,7 @@ data class MovieDetailsScreen(
                 }
               }
 
+              // Episodes list (mpvium style with thumbnails, descriptions)
               if (seriesEpisodes.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
@@ -598,6 +666,15 @@ data class MovieDetailsScreen(
                   seriesEpisodes.forEach { (epVideo, epInfo) ->
                     val epProgress = episodeProgressMap[epVideo.path] ?: 0f
                     val epIsWatched = epProgress >= 1f
+                    val tmdbEp = tmdbEpisodeMap[epInfo.season * 1000 + epInfo.episode]
+                    val epTitle = tmdbEp?.name?.takeIf { it.isNotBlank() }
+                      ?: epVideo.displayName.substringBeforeLast('.')
+                    val epOverview = tmdbEp?.overview?.takeIf { it.isNotBlank() }
+                    val epStillUrl = tmdbEp?.still_path?.let { path ->
+                      if (path.startsWith("http")) path
+                      else "https://image.tmdb.org/t/p/w300$path"
+                    }
+
                     Surface(
                       onClick = {
                         MediaUtils.playFile(
@@ -615,34 +692,17 @@ data class MovieDetailsScreen(
                           modifier = Modifier
                             .fillMaxWidth()
                             .padding(12.dp),
-                          verticalAlignment = Alignment.CenterVertically,
+                          verticalAlignment = Alignment.Top,
                           horizontalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
                           // 16:9 Thumbnail with centered Play icon
-                          Box(
-                            modifier = Modifier
-                              .width(96.dp)
-                              .height(54.dp)
-                              .clip(RoundedCornerShape(10.dp))
-                              .background(MaterialTheme.colorScheme.surfaceContainerHighest),
-                            contentAlignment = Alignment.Center,
-                          ) {
-                            Box(
-                              modifier = Modifier
-                                .fillMaxSize()
-                                .background(Color.Black.copy(alpha = 0.25f)),
-                              contentAlignment = Alignment.Center,
-                            ) {
-                              Icon(
-                                imageVector = Icons.RoundedFilled.PlayArrow,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(24.dp),
-                              )
-                            }
-                          }
+                          EpisodeThumbnail(
+                            epVideo = epVideo,
+                            epStillUrl = epStillUrl,
+                            thumbnailRepository = thumbnailRepository,
+                          )
 
-                          // Episode code, title, duration & size
+                          // Episode code, title, duration & size, overview
                           Column(
                             modifier = Modifier.weight(1f),
                             verticalArrangement = Arrangement.spacedBy(2.dp),
@@ -657,7 +717,7 @@ data class MovieDetailsScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                               )
                               Text(
-                                text = epVideo.displayName.substringBeforeLast('.'),
+                                text = epTitle,
                                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
                                 color = MaterialTheme.colorScheme.onSurface,
                                 maxLines = 1,
@@ -676,16 +736,22 @@ data class MovieDetailsScreen(
                                 maxLines = 1,
                               )
                             }
+                            // Episode overview/description from TMDB
+                            if (epOverview != null) {
+                              Text(
+                                text = epOverview,
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                  lineHeight = 18.sp,
+                                ),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                                maxLines = 3,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(top = 4.dp),
+                              )
+                            }
                           }
 
-                          if (epIsWatched) {
-                            Icon(
-                              imageVector = Icons.RoundedFilled.CheckCircle,
-                              contentDescription = null,
-                              tint = Color(0xFF4CAF50),
-                              modifier = Modifier.size(18.dp),
-                            )
-                          }
+                          // Delete button
                           IconButton(
                             onClick = {
                               coroutineScope.launch {
@@ -756,6 +822,23 @@ data class MovieDetailsScreen(
                     val fresh = movieMetadataRepo.getOrFetchMetadata(currentVideo, forceRefresh = true)
                     metadata = fresh
                     isRefreshing = false
+                    // Also refresh TMDB episodes
+                    val tmdbId = fresh.tmdbId
+                    if (tmdbId != null && seriesEpisodes.isNotEmpty()) {
+                      withContext(Dispatchers.IO) {
+                        val seasons = seriesEpisodes.map { it.second.season }.distinct()
+                        val allEpisodes = mutableMapOf<Int, WyzieEpisode>()
+                        for (season in seasons) {
+                          runCatching {
+                            val episodes = wyzieSearchRepository.getSeasonEpisodes(tmdbId, season).getOrNull()
+                            episodes?.forEach { ep ->
+                              allEpisodes[season * 1000 + ep.episode_number] = ep
+                            }
+                          }
+                        }
+                        tmdbEpisodeMap = allEpisodes
+                      }
+                    }
                     Toast.makeText(context, context.getString(R.string.movie_details_refresh), Toast.LENGTH_SHORT).show()
                   }
                 },
@@ -870,6 +953,80 @@ data class MovieDetailsScreen(
   }
 }
 
+/**
+ * Episode thumbnail composable - shows TMDB still image, falls back to local video thumbnail,
+ * and shows a centered play icon overlay.
+ */
+@Composable
+private fun EpisodeThumbnail(
+  epVideo: Video,
+  epStillUrl: String?,
+  thumbnailRepository: ThumbnailRepository,
+  modifier: Modifier = Modifier,
+) {
+  val density = LocalDensity.current
+  val thumbWidthPx = remember(density) { with(density) { 96.dp.roundToPx() } }
+  val thumbHeightPx = remember(density) { with(density) { 54.dp.roundToPx() } }
+
+  // Load local thumbnail as fallback
+  var localThumbnail by remember(epVideo.path) {
+    mutableStateOf<Bitmap?>(thumbnailRepository.peekThumbnailFromMemory(epVideo, thumbWidthPx, thumbHeightPx))
+  }
+  LaunchedEffect(epVideo.path, epStillUrl) {
+    if (epStillUrl.isNullOrBlank() && localThumbnail == null) {
+      val loaded = withContext(Dispatchers.IO) {
+        thumbnailRepository.getThumbnail(epVideo, thumbWidthPx, thumbHeightPx)
+      }
+      if (loaded != null) {
+        localThumbnail = loaded
+      }
+    }
+  }
+
+  Box(
+    modifier = modifier
+      .width(96.dp)
+      .height(54.dp)
+      .clip(RoundedCornerShape(10.dp))
+      .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+    contentAlignment = Alignment.Center,
+  ) {
+    // Show TMDB still image if available
+    if (!epStillUrl.isNullOrBlank()) {
+      RemoteImage(
+        url = epStillUrl,
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        maxDimensionPx = 300,
+        modifier = Modifier.fillMaxSize(),
+      )
+    } else if (localThumbnail != null) {
+      // Fall back to local video thumbnail
+      Image(
+        bitmap = localThumbnail!!.asImageBitmap(),
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = Modifier.fillMaxSize(),
+      )
+    }
+
+    // Play icon overlay
+    Box(
+      modifier = Modifier
+        .fillMaxSize()
+        .background(Color.Black.copy(alpha = 0.25f)),
+      contentAlignment = Alignment.Center,
+    ) {
+      Icon(
+        imageVector = Icons.RoundedFilled.PlayArrow,
+        contentDescription = null,
+        tint = Color.White,
+        modifier = Modifier.size(24.dp),
+      )
+    }
+  }
+}
+
 @Composable
 private fun MovieMetaBadge(
   text: String,
@@ -964,4 +1121,3 @@ private fun EditMovieDialog(
     }
   }
 }
-
