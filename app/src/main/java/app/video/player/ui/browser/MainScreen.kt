@@ -336,6 +336,7 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
       )
     }
     var tabNavigationJob by remember { mutableStateOf<Job?>(null) }
+    var activeAnimationTargetTab by remember { mutableStateOf<MainTab?>(null) }
     val tabContentAlpha = remember { Animatable(1f) }
     var isDirectTabJumpInProgress by remember { mutableStateOf(false) }
 
@@ -410,12 +411,14 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
           pagerState.settledPage == targetIndex &&
           !pagerState.isScrollInProgress &&
           pagerState.currentPageOffsetFraction == 0f
-      if (targetIndex >= 0 && !isAlreadySettled) {
+      val isAlreadyNavigatingHere = tabNavigationJob?.isActive == true && activeAnimationTargetTab == tab
+      if (targetIndex >= 0 && !isAlreadySettled && !isAlreadyNavigatingHere) {
         // Bottom-nav taps are destination changes, not a request to visibly traverse every
         // intermediate tab. Keep the native pager animation for adjacent destinations, but
         // fade through long jumps so heavyweight Music/Network pages are never animated across.
         val previousJob = tabNavigationJob
         previousJob?.cancel()
+        activeAnimationTargetTab = tab
         tabNavigationJob =
           coroutineScope.launch {
             previousJob?.join()
@@ -465,8 +468,10 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
               } finally {
                 tabContentAlpha.snapTo(1f)
                 isDirectTabJumpInProgress = false
+                if (activeAnimationTargetTab == tab) activeAnimationTargetTab = null
               }
             }
+            if (activeAnimationTargetTab == tab) activeAnimationTargetTab = null
           }
       }
     }
@@ -1069,9 +1074,15 @@ internal fun ExpressivePillNavigationBar(
     bottomEnd = outsideCorner,
     bottomStart = outsideCorner,
   )
+  var hasInitializedSelection by remember(motion) { mutableStateOf(false) }
   LaunchedEffect(selectedTab) { NavigationBarState.expandNavLabels() }
   LaunchedEffect(selectedIndex, motion, reducedMotion) {
-    if (reducedMotion) motion.snapTo(visualIndex(selectedIndex)) else motion.select(visualIndex(selectedIndex))
+    if (!hasInitializedSelection || reducedMotion) {
+      hasInitializedSelection = true
+      motion.snapTo(visualIndex(selectedIndex))
+    } else {
+      motion.select(visualIndex(selectedIndex))
+    }
   }
   LaunchedEffect(motion.running, reducedMotion) {
     if (!motion.running || reducedMotion) return@LaunchedEffect
@@ -1137,8 +1148,9 @@ internal fun ExpressivePillNavigationBar(
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier.fillMaxHeight(),
               ) {
+                val isTabSelected = index == selectedIndex
                 MainTabIcon(tab, contentColor, null, iconSize)
-                if (effectiveLabelFraction > 0f && active) {
+                if (effectiveLabelFraction > 0f && isTabSelected) {
                   Spacer(Modifier.height(2.dp * effectiveLabelFraction))
                   Box(
                     modifier = Modifier
@@ -1150,7 +1162,7 @@ internal fun ExpressivePillNavigationBar(
                   ) {
                     Text(
                       text = label,
-                      style = if (active) activeLabelStyle else labelStyle,
+                      style = if (isTabSelected) activeLabelStyle else labelStyle,
                       color = contentColor,
                       maxLines = 1,
                       softWrap = false,
@@ -1204,9 +1216,11 @@ internal fun ExpressivePillNavigationBar(
                 if (!change.pressed) {
                   val target = motion.finish()
                   finished = true
-                  val targetTab = visibleTabs[if (isRtl) visibleTabs.lastIndex - target else target]
-                  if (targetTab != currentSelectedTab) navigationHaptics.selection(true)
-                  currentOnTabSelected(targetTab)
+                  if (claimed) {
+                    val targetTab = visibleTabs[if (isRtl) visibleTabs.lastIndex - target else target]
+                    if (targetTab != currentSelectedTab) navigationHaptics.selection(true)
+                    currentOnTabSelected(targetTab)
+                  }
                   change.consume()
                   break
                 }

@@ -8,7 +8,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
@@ -82,6 +85,8 @@ internal fun Modifier.navigationAccentMask(brush: Brush): Modifier =
 @Composable
 private fun RefractedNavigationGlass(surfaceColor: Color, glowStrength: Float, modifier: Modifier, backing: Modifier) {
   val shader = remember { RuntimeShader(NavigationGlassShader) }
+  var cachedEffect by remember { mutableStateOf<androidx.compose.ui.graphics.RenderEffect?>(null) }
+  var lastKey by remember { mutableStateOf("") }
   Box(modifier
     .layout { measurable, constraints ->
       val outset = 24.dp.roundToPx()
@@ -91,12 +96,17 @@ private fun RefractedNavigationGlass(surfaceColor: Color, glowStrength: Float, m
       }
     }
     .graphicsLayer {
-      shader.setFloatUniform("resolution", size.width, size.height)
-      shader.setFloatUniform("density", density)
-      shader.setFloatUniform("outset", 24.dp.roundToPx().toFloat())
-      shader.setFloatUniform("glowStrength", glowStrength)
-      shader.setFloatUniform("surfaceTint", surfaceColor.red, surfaceColor.green, surfaceColor.blue)
-      renderEffect = RenderEffect.createRuntimeShaderEffect(shader, "backdrop").asComposeRenderEffect()
+      val key = "${size.width}:${size.height}:$density:$glowStrength:${surfaceColor.value}"
+      if (cachedEffect == null || lastKey != key) {
+        lastKey = key
+        shader.setFloatUniform("resolution", size.width, size.height)
+        shader.setFloatUniform("density", density)
+        shader.setFloatUniform("outset", 24.dp.roundToPx().toFloat())
+        shader.setFloatUniform("glowStrength", glowStrength)
+        shader.setFloatUniform("surfaceTint", surfaceColor.red, surfaceColor.green, surfaceColor.blue)
+        cachedEffect = RenderEffect.createRuntimeShaderEffect(shader, "backdrop").asComposeRenderEffect()
+      }
+      renderEffect = cachedEffect
     }
     .then(backing))
 }

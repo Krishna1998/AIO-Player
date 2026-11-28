@@ -93,8 +93,13 @@ internal class NavigationJellyMotion(initialIndex: Int, private val tabCount: In
   }
 
   fun select(index: Int) {
+    val clamped = index.coerceIn(0, maxIndex).toDouble()
+    if (!dragging && abs(clamped - position.value) < 0.001 && !running) {
+      target = clamped
+      return
+    }
     dragging = false
-    target = index.coerceIn(0, maxIndex).toDouble()
+    target = clamped
     releasePending = true
     pressTarget = 0.0
     shapeTarget = 1.0
@@ -149,7 +154,21 @@ internal class NavigationJellyMotion(initialIndex: Int, private val tabCount: In
   }
 
   fun advance(seconds: Double) {
-    val delta = seconds.coerceIn(0.0, 0.064)
+    // Sub-step large initial/hitch deltas so spring integration stays smooth and stable
+    val clamped = seconds.coerceIn(0.0, 0.05)
+    val subSteps = if (clamped > 0.012) 2 else 1
+    val stepDelta = clamped / subSteps
+    repeat(subSteps) {
+      stepAdvance(stepDelta)
+    }
+    publish()
+    running = dragging || releasePending || !position.isAtRest(target) || !velocity.isAtRest(0.0) ||
+      !press.isAtRest(0.0) || !scaleX.isAtRest(1.0) || !scaleY.isAtRest(1.0) ||
+      !panel.isAtRest(0.0) || !trackY.isAtRest(0.0) || !trackX.isAtRest(1.0) ||
+      !trackPress.isAtRest(1.0) || !glow.isAtRest(0.0)
+  }
+
+  private fun stepAdvance(delta: Double) {
     position.advance(target, delta)
     velocity.advance(if (dragging && maxIndex > 0) position.velocity / maxIndex else 0.0, delta)
     if (!dragging) panel.advance(0.0, delta)
@@ -168,11 +187,6 @@ internal class NavigationJellyMotion(initialIndex: Int, private val tabCount: In
       trackX.advance(1.0, delta)
       if (trackX.isAtRest(1.0)) originX = width / 2
     }
-    publish()
-    running = dragging || releasePending || !position.isAtRest(target) || !velocity.isAtRest(0.0) ||
-      !press.isAtRest(0.0) || !scaleX.isAtRest(1.0) || !scaleY.isAtRest(1.0) ||
-      !panel.isAtRest(0.0) || !trackY.isAtRest(0.0) || !trackX.isAtRest(1.0) ||
-      !trackPress.isAtRest(1.0) || !glow.isAtRest(0.0)
   }
 
   private fun indexAt(positionX: Double): Int = floor((positionX - 4) / tabWidth).toInt().coerceIn(0, maxIndex)
