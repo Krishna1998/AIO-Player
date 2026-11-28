@@ -2281,7 +2281,9 @@ private fun HeroSpotlightCard(
           // Allow parent to scroll vertically naturally
         }
         BentoCardGesture.Tap -> {
-          if (!isAudio) {
+          if (isAudio) {
+            onPlayPauseState()
+          } else {
             onClickState()
           }
         }
