@@ -58,6 +58,7 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -1376,11 +1377,14 @@ class PlayerActivity :
       if (isDestroyed || isFinishing) return
       binding.controls.setContent {
         HorizonPlayerTheme {
-          var playerEntered by remember { mutableStateOf(false) }
+          var playerEntered by androidx.compose.runtime.remember { mutableStateOf(false) }
           LaunchedEffect(Unit) { playerEntered = true }
-          val enterAlpha = animateFloatAsState(
+          val enterAlpha = androidx.compose.animation.core.animateFloatAsState(
             targetValue = if (playerEntered) 1f else 0f,
-            animationSpec = tween(250, easing = FastOutSlowInEasing),
+            animationSpec = androidx.compose.animation.core.tween(
+              250,
+              easing = androidx.compose.animation.core.FastOutSlowInEasing,
+            ),
             label = "playerRootFadeIn",
           )
           Box(
