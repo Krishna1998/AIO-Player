@@ -35,10 +35,10 @@ internal fun ProvideExpressivePreferenceLocals(
   ProvidePreferenceLocals(
     theme =
       preferenceTheme(
-        categoryPadding = PaddingValues(start = 24.dp, top = 22.dp, end = 24.dp, bottom = 10.dp),
+        categoryPadding = PaddingValues(start = 16.dp, top = 22.dp, end = 16.dp, bottom = 10.dp),
         categoryColor = colors.primary,
         categoryTextStyle = typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-        padding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+        padding = PaddingValues(horizontal = 12.dp, vertical = 14.dp),
         horizontalSpacing = horizontalSpacing,
         verticalSpacing = 4.dp,
         iconContainerMinWidth = 52.dp,
