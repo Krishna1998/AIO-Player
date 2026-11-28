@@ -519,9 +519,14 @@ data class MovieDetailsScreen(
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
                   )
-                  val firstEp = seriesEpisodes.firstOrNull()
-                  val playLabel = if (firstEp != null) {
-                    val (epVid, epInf) = firstEp
+                  val activeEpisode = seriesEpisodes.lastOrNull { (ep, _) ->
+                    val p = episodeProgressMap[ep.path] ?: 0f
+                    p > 0f && p < 1f
+                  } ?: seriesEpisodes.firstOrNull { (ep, _) ->
+                    (episodeProgressMap[ep.path] ?: 0f) < 1f
+                  } ?: seriesEpisodes.firstOrNull()
+                  val playLabel = if (activeEpisode != null) {
+                    val (epVid, epInf) = activeEpisode
                     "Play S%02dE%02d: %s".format(epInf.season, epInf.episode, epVid.displayName.substringBeforeLast('.'))
                   } else {
                     "Play"
@@ -537,23 +542,33 @@ data class MovieDetailsScreen(
                 }
               }
 
-              if (lastPositionSec > 0 && currentVideo.duration > 0L) {
-                val watchedFraction = (lastPositionSec * 1000f / currentVideo.duration.toFloat()).coerceIn(0f, 1f)
-                if (watchedFraction > 0.01f) {
+              val activeEpisodeForProgress = seriesEpisodes.lastOrNull { (ep, _) ->
+                val p = episodeProgressMap[ep.path] ?: 0f
+                p > 0f && p < 1f
+              } ?: seriesEpisodes.firstOrNull { (ep, _) ->
+                (episodeProgressMap[ep.path] ?: 0f) < 1f
+              } ?: seriesEpisodes.firstOrNull()
+              val watchedFraction = if (activeEpisodeForProgress != null) {
+                (episodeProgressMap[activeEpisodeForProgress.first.path] ?: 0f).coerceIn(0f, 1f)
+              } else if (lastPositionSec > 0 && currentVideo.duration > 0L) {
+                (lastPositionSec * 1000f / currentVideo.duration.toFloat()).coerceIn(0f, 1f)
+              } else {
+                0f
+              }
+              if (watchedFraction > 0.01f) {
+                Box(
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                ) {
                   Box(
                     modifier = Modifier
-                      .fillMaxWidth()
+                      .fillMaxWidth(watchedFraction)
                       .height(4.dp)
-                      .clip(RoundedCornerShape(2.dp))
-                      .background(MaterialTheme.colorScheme.surfaceContainerHighest),
-                  ) {
-                    Box(
-                      modifier = Modifier
-                        .fillMaxWidth(watchedFraction)
-                        .height(4.dp)
-                        .background(MaterialTheme.colorScheme.primary),
-                    )
-                  }
+                      .background(MaterialTheme.colorScheme.primary),
+                  )
                 }
               }
 
