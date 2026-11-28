@@ -251,9 +251,12 @@ fun MiniPlayer(modifier: Modifier = Modifier) {
       EnterTransition.None
     } else {
       slideInVertically(
-        animationSpec = tween(320, easing = FastOutSlowInEasing),
-        initialOffsetY = { it / 2 },
-      ) + fadeIn(animationSpec = tween(240))
+        animationSpec = androidx.compose.animation.core.spring(
+          dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy,
+          stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow,
+        ),
+        initialOffsetY = { it / 3 },
+      ) + fadeIn(animationSpec = tween(260, easing = FastOutSlowInEasing))
     },
     exit = when {
       expansionHoldId != null || sheetMotion != null || exitAfterToss -> ExitTransition.None
