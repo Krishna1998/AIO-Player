@@ -461,11 +461,7 @@ data class MovieDetailsScreen(
                     modifier = Modifier.size(24.dp),
                   )
                   Text(
-                    text = when {
-                      isWatched -> "Already Finished · Play"
-                      hasStarted -> "Resume"
-                      else -> stringResource(R.string.ui_play_movie)
-                    },
+                    text = "Play",
                     style = MaterialTheme.typography.titleMedium.copy(
                       fontWeight = FontWeight.Bold,
                     ),
