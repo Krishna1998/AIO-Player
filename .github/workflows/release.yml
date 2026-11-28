@@ -137,7 +137,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ./gradlew "assemble${GRADLE_FLAVOR}Release" --stacktrace --no-daemon --max-workers=2
+          ./gradlew "assemble${GRADLE_FLAVOR}Release" -PtargetAbi=arm64-v8a,armeabi-v7a,x86,x86_64 --stacktrace --no-daemon --max-workers=2
 
       - name: Sign and stage release APKs
         shell: bash
