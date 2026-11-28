@@ -17,17 +17,17 @@ import app.video.player.utils.media.MediaInfoParser
 import app.video.player.utils.storage.VideoScanUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.sync.withPermit
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
@@ -51,6 +51,11 @@ data class MovieMetadata(
   val tmdbId: Int? = null,
   val sourcePath: String? = null,
   val isMovieOverride: Boolean? = null,
+  val mediaType: String? = null,
+  val imdbId: String? = null,
+  val episodeTitles: Map<String, String> = emptyMap(),
+  val episodeStills: Map<String, String> = emptyMap(),
+  val episodeOverviews: Map<String, String> = emptyMap(),
 )
 
 class MovieMetadataRepository(
@@ -76,6 +81,7 @@ class MovieMetadataRepository(
       }.awaitAll()
     }
   }
+
   private val cacheDir = File(context.filesDir, "movie_metadata").apply { mkdirs() }
   private val memoryCache = ConcurrentHashMap<String, MovieMetadata>()
   private val _metadataRevision = MutableStateFlow(0)
@@ -112,6 +118,9 @@ class MovieMetadataRepository(
       MessageDigest.getInstance("SHA-256")
         .digest(input.toByteArray())
         .joinToString("") { "%02x".format(it) }
+
+    fun episodeKey(season: Int, episode: Int): String =
+      "S${season.toString().padStart(2, '0')}E${episode.toString().padStart(2, '0')}"
   }
 
   private fun cacheFileForPath(path: String): File =
@@ -139,15 +148,36 @@ class MovieMetadataRepository(
     return null
   }
 
-  suspend fun getOrFetchMetadata(video: Video, forceRefresh: Boolean = false): MovieMetadata =
+  suspend fun getOrFetchMetadata(
+    video: Video,
+    forceRefresh: Boolean = false,
+    seasonsToEnrich: List<Int> = emptyList(),
+  ): MovieMetadata =
     withContext(Dispatchers.IO) {
       val pathKey = video.path.ifBlank { video.uri.toString() }
       val existing = getCachedMetadata(video)
-      if (!forceRefresh && existing != null) {
+      val parsed = MediaInfoParser.parse(video.displayName.ifBlank { video.title })
+      val seriesInfo = MovieClassifier.extractSeriesEpisodeInfo(video)
+      val isSeries = seriesInfo != null || parsed.type == "tv" || parsed.season != null || parsed.episode != null
+
+      // If cached entry was matched as movie (or unknown pre-migration) for a series episode, re-resolve as "tv"
+      val needsSeriesUpgrade = isSeries && existing != null &&
+        existing.mediaType != "tv"
+
+      if (!forceRefresh && existing != null && !needsSeriesUpgrade) {
+        if (isSeries) {
+          val targetSeasons = (seasonsToEnrich + listOfNotNull(seriesInfo?.season ?: parsed.season)).distinct()
+          val hasMissingEpisodeData = targetSeasons.any { s ->
+            existing.episodeTitles.keys.none { it.startsWith("S${s.toString().padStart(2, '0')}E") } &&
+              existing.episodeOverviews.keys.none { it.startsWith("S${s.toString().padStart(2, '0')}E") }
+          }
+          if (hasMissingEpisodeData && existing.tmdbId != null) {
+            return@withContext enrichSeriesEpisodes(video, existing, targetSeasons, forceRefresh = false)
+          }
+        }
         return@withContext existing
       }
 
-      val parsed = MediaInfoParser.parse(video.displayName.ifBlank { video.title })
       val cleanTitle = parsed.title.trim().ifBlank {
         MediaInfoParser.parse(video.title).title.trim().ifBlank {
           val name = video.displayName.substringBeforeLast('.')
@@ -180,10 +210,12 @@ class MovieMetadataRepository(
         resolution = resolution,
         sourcePath = pathKey,
         isMovieOverride = existing?.isMovieOverride,
+        mediaType = if (isSeries) "tv" else "movie",
       )
 
       try {
-        val matchResult = wyzieSearchRepository.findBestMediaMatch(cleanTitle, year)
+        val expectedType = if (isSeries) "tv" else "movie"
+        val matchResult = wyzieSearchRepository.findBestMediaMatch(cleanTitle, year, expectedMediaType = expectedType)
         val tmdb = matchResult.getOrNull()
         if (tmdb != null) {
           val posterUrl = formatImageUrl(tmdb.poster, isBackdrop = false)
@@ -194,30 +226,98 @@ class MovieMetadataRepository(
             synopsis = tmdb.overview?.takeIf { it.isNotBlank() },
             posterUrl = posterUrl,
             backdropUrl = backdropUrl,
+            voteAverage = tmdb.voteAverage?.toDouble(),
             tmdbId = tmdb.id,
+            mediaType = tmdb.mediaType,
+            imdbId = tmdb.imdbId,
           )
         }
       } catch (e: Exception) {
         Log.w(TAG, "Failed to fetch online movie metadata for $cleanTitle: ${e.message}")
       }
 
-      memoryCache[pathKey] = movieMeta
-      runCatching {
-        cacheFileForPath(pathKey).writeText(json.encodeToString(movieMeta))
+      if (isSeries && movieMeta.tmdbId != null) {
+        val targetSeasons = (seasonsToEnrich + listOfNotNull(seriesInfo?.season ?: parsed.season)).distinct()
+        movieMeta = fetchEpisodeDetailsInto(movieMeta, targetSeasons)
       }
-      _metadataRevision.update { it + 1 }
 
+      persistMetadata(pathKey, movieMeta)
       movieMeta
     }
+
+  suspend fun enrichSeriesEpisodes(
+    video: Video,
+    metadata: MovieMetadata,
+    seasons: List<Int>,
+    forceRefresh: Boolean = false,
+  ): MovieMetadata = withContext(Dispatchers.IO) {
+    val pathKey = video.path.ifBlank { video.uri.toString() }
+    val missingSeasons = if (forceRefresh) {
+      seasons.distinct()
+    } else {
+      seasons.distinct().filter { s ->
+        val prefix = "S${s.toString().padStart(2, '0')}E"
+        metadata.episodeTitles.keys.none { it.startsWith(prefix) } &&
+          metadata.episodeOverviews.keys.none { it.startsWith(prefix) }
+      }
+    }
+    if (missingSeasons.isEmpty() || metadata.tmdbId == null) {
+      return@withContext metadata
+    }
+    val enriched = fetchEpisodeDetailsInto(metadata, missingSeasons)
+    persistMetadata(pathKey, enriched)
+    enriched
+  }
+
+  private suspend fun fetchEpisodeDetailsInto(
+    base: MovieMetadata,
+    seasons: List<Int>,
+  ): MovieMetadata {
+    val tmdbId = base.tmdbId ?: return base
+    val epTitles = base.episodeTitles.toMutableMap()
+    val epStills = base.episodeStills.toMutableMap()
+    val epOverviews = base.episodeOverviews.toMutableMap()
+
+    for (seasonNum in seasons.distinct()) {
+      runCatching {
+        val episodes = wyzieSearchRepository.getSeasonEpisodes(
+          id = tmdbId,
+          season = seasonNum,
+          imdbId = base.imdbId,
+          seriesTitle = base.title,
+          seriesYear = base.releaseYear,
+        ).getOrNull().orEmpty()
+
+        for (ep in episodes) {
+          val key = episodeKey(seasonNum, ep.episode_number)
+          ep.name?.takeIf { it.isNotBlank() }?.let { epTitles[key] = it }
+          ep.still_path?.takeIf { it.isNotBlank() }?.let { path ->
+            formatStillUrl(path)?.let { epStills[key] = it }
+          }
+          ep.overview?.takeIf { it.isNotBlank() }?.let { epOverviews[key] = it }
+        }
+      }
+    }
+
+    return base.copy(
+      episodeTitles = epTitles,
+      episodeStills = epStills,
+      episodeOverviews = epOverviews,
+    )
+  }
+
+  private fun persistMetadata(pathKey: String, meta: MovieMetadata) {
+    memoryCache[pathKey] = meta
+    runCatching {
+      cacheFileForPath(pathKey).writeText(json.encodeToString(meta))
+    }
+    _metadataRevision.update { it + 1 }
+  }
 
   suspend fun saveCustomMetadata(video: Video, updated: MovieMetadata) = withContext(Dispatchers.IO) {
     val pathKey = video.path.ifBlank { video.uri.toString() }
     val enriched = if (updated.sourcePath.isNullOrBlank()) updated.copy(sourcePath = pathKey) else updated
-    memoryCache[pathKey] = enriched
-    runCatching {
-      cacheFileForPath(pathKey).writeText(json.encodeToString(enriched))
-    }
-    _metadataRevision.update { it + 1 }
+    persistMetadata(pathKey, enriched)
   }
 
   suspend fun setMovieOverride(video: Video, isMovie: Boolean) = withContext(Dispatchers.IO) {
@@ -230,11 +330,7 @@ class MovieMetadataRepository(
       sourcePath = pathKey,
     )
     val updated = base.copy(sourcePath = pathKey, isMovieOverride = isMovie)
-    memoryCache[pathKey] = updated
-    runCatching {
-      cacheFileForPath(pathKey).writeText(json.encodeToString(updated))
-    }
-    _metadataRevision.update { it + 1 }
+    persistMetadata(pathKey, updated)
   }
 
   private fun formatImageUrl(path: String?, isBackdrop: Boolean): String? {
@@ -252,5 +348,14 @@ class MovieMetadataRepository(
       }
     }
   }
-}
 
+  private fun formatStillUrl(path: String?): String? {
+    if (path.isNullOrBlank()) return null
+    val trimmed = path.trim()
+    return when {
+      trimmed.startsWith("http://", ignoreCase = true) || trimmed.startsWith("https://", ignoreCase = true) -> trimmed
+      trimmed.startsWith("/") -> "https://image.tmdb.org/t/p/w500$trimmed"
+      else -> "https://image.tmdb.org/t/p/w500/$trimmed"
+    }
+  }
+}
