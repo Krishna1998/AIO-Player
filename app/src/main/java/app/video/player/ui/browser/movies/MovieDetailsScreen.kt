@@ -222,21 +222,40 @@ data class MovieDetailsScreen(
       }
     }
 
-    // Lightweight playback-only refresh on resume
+    // Lightweight playback-only refresh on resume (including episode progress)
     LaunchedEffect(resumeRefreshTick) {
       if (resumeRefreshTick == 0) return@LaunchedEffect
       val resolved = video ?: return@LaunchedEffect
       withContext(Dispatchers.IO) {
-        isWatched = PlaybackStateOps.areAllWatched(
-          listOf(resolved),
-          browserPreferences.watchedThreshold.get(),
-        )
+        val threshold = browserPreferences.watchedThreshold.get()
+        isWatched = PlaybackStateOps.areAllWatched(listOf(resolved), threshold)
         val savedData = playbackStateRepo.getVideoDataByTitle(resolved.displayName)
           ?: playbackStateRepo.getVideoDataByTitle(resolved.title)
           ?: playbackStateRepo.getVideoDataByTitle(File(resolved.path).name)
         val savedPos = savedData?.lastPosition ?: 0
         lastPositionSec = savedPos
         hasStarted = savedPos > 0
+
+        if (seriesEpisodes.isNotEmpty()) {
+          episodeProgressMap = seriesEpisodes.associate { (epVideo, _) ->
+            val epWatched = PlaybackStateOps.areAllWatched(listOf(epVideo), threshold)
+            val progress = if (epWatched) {
+              1f
+            } else {
+              val epSaved = playbackStateRepo.getVideoDataByTitle(epVideo.displayName)
+                ?: playbackStateRepo.getVideoDataByTitle(epVideo.title)
+                ?: playbackStateRepo.getVideoDataByTitle(File(epVideo.path).name)
+                ?: playbackStateRepo.getVideoDataByTitle(File(epVideo.path).nameWithoutExtension)
+              val epPos = epSaved?.lastPosition ?: 0
+              if (epPos > 0 && epVideo.duration > 0L) {
+                (epPos * 1000f / epVideo.duration.toFloat()).coerceIn(0f, 1f)
+              } else {
+                0f
+              }
+            }
+            epVideo.path to progress
+          }
+        }
       }
     }
 
