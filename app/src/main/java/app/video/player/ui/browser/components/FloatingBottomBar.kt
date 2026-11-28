@@ -9,6 +9,9 @@
 
 package app.video.player.ui.browser.components
 
+import androidx.compose.foundation.border
+import androidx.compose.ui.draw.shadow
+
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
@@ -293,9 +296,15 @@ fun BrowserBottomBar(
           Row(
             modifier =
               Modifier
-                .androidx.compose.foundation.border(
+                .shadow(
+                  elevation = 12.dp,
+                  shape = androidx.compose.foundation.shape.CircleShape,
+                  ambientColor = MaterialTheme.colorScheme.primary,
+                  spotColor = MaterialTheme.colorScheme.primary,
+                )
+                .border(
                   1.dp,
-                  MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
+                  MaterialTheme.colorScheme.primary.copy(alpha = 0.55f),
                   androidx.compose.foundation.shape.CircleShape,
                 )
                 .onSizeChanged { size ->
