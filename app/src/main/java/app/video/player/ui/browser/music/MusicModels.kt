@@ -11,7 +11,7 @@ import app.video.player.R
 
 @Immutable
 enum class MusicTab(@StringRes val titleRes: Int) {
-  SONGS(R.string.ui_songs),
+  SONGS(R.string.pref_music_subtab_all_songs),
   ALBUMS(R.string.ui_albums),
   ARTISTS(R.string.ui_artists),
   PLAYLISTS(R.string.ui_playlists),
