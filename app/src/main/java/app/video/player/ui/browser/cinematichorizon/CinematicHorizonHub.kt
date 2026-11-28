@@ -2273,7 +2273,7 @@ private fun HeroSpotlightCard(
           if (abs(diff.y) > touchSlop && abs(diff.y) > abs(diff.x)) {
             return@withTimeoutOrNull BentoCardGesture.VerticalScroll
           }
-          if (isAudio && abs(diff.x) > touchSlop) {
+          if (!isAudio && abs(diff.x) > touchSlop) {
             initialDeltaX = diff.x
             return@withTimeoutOrNull BentoCardGesture.Drag
           }
@@ -2286,16 +2286,14 @@ private fun HeroSpotlightCard(
           // Allow parent to scroll vertically naturally
         }
         BentoCardGesture.Tap -> {
-          if (isAudio) {
-            onPlayPauseState()
-          } else {
-            onClickState()
-          }
+          onClickState()
         }
         null -> {
           // Long press triggered
-          haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-          onLongClickState()
+          if (!isAudio) {
+            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+            onLongClickState()
+          }
           while (true) {
             val event = awaitPointerEvent()
             val change = event.changes.firstOrNull { it.id == pointerId } ?: break

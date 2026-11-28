@@ -434,7 +434,7 @@ fun MediaLibraryContent(
     // When Audio Pulsing is turned off, allow the mini-player to show in all media.
     val hasAudioPulsingSpotlight = dualHorizonShowAudioPulsing
 
-    NavigationBarState.isAllMediaTabActive = (currentTab == MediaLibraryTabItem.All && hasAudioPulsingSpotlight)
+    NavigationBarState.isAllMediaTabActive = false
     onDispose {
       NavigationBarState.isAllMediaTabActive = false
     }
