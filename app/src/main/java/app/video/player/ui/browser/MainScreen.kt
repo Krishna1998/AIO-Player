@@ -271,12 +271,14 @@ object MainScreen : Screen, TvEdgeToEdgeScreen {
     val isMiniPlayerVisible = NavigationBarState.isMiniPlayerVisible
 
     val bottomNavigationOrder by appearancePreferences.bottomNavigationOrder.collectAsState()
+    val enabledBottomNavTabs by appearancePreferences.enabledBottomNavTabs.collectAsState()
     val visibleTabs =
-      remember(showProfileTab, showNetworkTab, bottomNavigationOrder) {
+      remember(showProfileTab, showNetworkTab, bottomNavigationOrder, enabledBottomNavTabs) {
         mainNavigationTabs(
           showProfile = showProfileTab,
           showNetwork = showNetworkTab,
           order = bottomNavigationOrder,
+          enabledTabs = enabledBottomNavTabs,
         )
       }
     val navigationTabs = visibleTabs.takeIf { it.size > 1 }.orEmpty()
@@ -1394,13 +1396,14 @@ internal fun mainNavigationTabs(
   showProfile: Boolean,
   showNetwork: Boolean = true,
   order: List<String> = emptyList(),
+  enabledTabs: Set<String> = setOf("HOME", "MOVIES", "VIDEOS", "MUSIC", "NETWORK"),
 ): List<MainScreen.MainTab> {
   val available = buildList {
     add(MainScreen.MainTab.HOME)
-    add(MainScreen.MainTab.MOVIES)
-    add(MainScreen.MainTab.VIDEOS)
-    add(MainScreen.MainTab.MUSIC)
-    if (showNetwork) add(MainScreen.MainTab.NETWORK)
+    if ("MOVIES" in enabledTabs) add(MainScreen.MainTab.MOVIES)
+    if ("VIDEOS" in enabledTabs) add(MainScreen.MainTab.VIDEOS)
+    if ("MUSIC" in enabledTabs) add(MainScreen.MainTab.MUSIC)
+    if (showNetwork && "NETWORK" in enabledTabs) add(MainScreen.MainTab.NETWORK)
     if (showProfile) add(MainScreen.MainTab.PROFILE)
   }
   val byName = available.associateBy { it.name }

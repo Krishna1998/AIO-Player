@@ -1551,6 +1551,7 @@ object AppearancePreferencesScreen : Screen {
 
           item {
             val savedOrder by preferences.bottomNavigationOrder.collectAsState()
+            val enabledTabs by preferences.enabledBottomNavTabs.collectAsState()
             val names = listOf("HOME", "MOVIES", "VIDEOS", "MUSIC", "NETWORK")
             val ordered =
               listOf("HOME") +
@@ -1558,18 +1559,24 @@ object AppearancePreferencesScreen : Screen {
                   .distinct()
                   .filterNot { it == "HOME" }
             val tabItems = ordered.map { id ->
+              val isEnabled = id == "HOME" || id in enabledTabs
               when (id) {
                 "HOME" -> ReorderableTabItem(id, stringResource(R.string.pref_nav_home_title), stringResource(R.string.pref_nav_home_summary), true, required = true)
-                "MOVIES" -> ReorderableTabItem(id, stringResource(R.string.ui_movies), stringResource(R.string.ui_movies), true, required = false, titleRes = R.string.ui_movies)
-                "VIDEOS" -> ReorderableTabItem(id, stringResource(R.string.ui_videos), stringResource(R.string.ui_videos), true, required = false, titleRes = R.string.ui_videos)
-                "MUSIC" -> ReorderableTabItem(id, stringResource(R.string.ui_music), stringResource(R.string.ui_music), true, required = false, titleRes = R.string.ui_music)
-                else -> ReorderableTabItem(id, stringResource(R.string.pref_nav_network_title), stringResource(R.string.pref_nav_network_summary), true, required = false, titleRes = R.string.pref_nav_network_title)
+                "MOVIES" -> ReorderableTabItem(id, stringResource(R.string.ui_movies), stringResource(R.string.ui_movies), isEnabled, required = false, titleRes = R.string.ui_movies)
+                "VIDEOS" -> ReorderableTabItem(id, stringResource(R.string.ui_videos), stringResource(R.string.ui_videos), isEnabled, required = false, titleRes = R.string.ui_videos)
+                "MUSIC" -> ReorderableTabItem(id, stringResource(R.string.ui_music), stringResource(R.string.ui_music), isEnabled, required = false, titleRes = R.string.ui_music)
+                else -> ReorderableTabItem(id, stringResource(R.string.pref_nav_network_title), stringResource(R.string.pref_nav_network_summary), isEnabled, required = false, titleRes = R.string.pref_nav_network_title)
               }
             }
             ExpressivePreferenceGroup {
               ReorderableTabPreferences(
                 tabs = tabItems,
-                onEnabledChange = { _, _ -> },
+                onEnabledChange = { id, enabled ->
+                  if (id != "HOME") {
+                    val next = if (enabled) enabledTabs + id else enabledTabs - id
+                    preferences.enabledBottomNavTabs.set(next + "HOME")
+                  }
+                },
                 onMove = { id, destination ->
                   if (id != "HOME") {
                     val current = ordered.toMutableList()

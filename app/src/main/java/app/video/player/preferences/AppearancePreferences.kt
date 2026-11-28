@@ -148,6 +148,10 @@ class AppearancePreferences(
     },
   )
   val showQuickPlayFab = preferenceStore.getBoolean("show_quick_play_fab", false)
+  val enabledBottomNavTabs = preferenceStore.getStringSet(
+    "enabled_bottom_nav_tabs",
+    setOf("HOME", "MOVIES", "VIDEOS", "MUSIC", "NETWORK"),
+  )
   val quickPlayFabDirect = preferenceStore.getBoolean("quick_play_fab_direct", false)
 
   // Background animation (see ui/background)
