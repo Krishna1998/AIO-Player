@@ -662,6 +662,16 @@ fun MusicLibraryContent(
               MusicTab.FAVORITES -> Icons.RoundedFilled.Favorite
             }
             val pillShape = RoundedCornerShape(14.dp)
+            val pillContainerColor by androidx.compose.animation.animateColorAsState(
+              targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.5f),
+              animationSpec = app.video.player.ui.theme.AppMotion.Effect.Color,
+              label = "music_tab_pill_bg",
+            )
+            val pillContentColor by androidx.compose.animation.animateColorAsState(
+              targetValue = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+              animationSpec = app.video.player.ui.theme.AppMotion.Effect.Color,
+              label = "music_tab_pill_fg",
+            )
             Surface(
               modifier = Modifier
                 .clip(pillShape)
@@ -670,11 +680,7 @@ fun MusicLibraryContent(
                   musicViewModel.setTab(tab)
                 },
               shape = pillShape,
-              color = if (isSelected) {
-                MaterialTheme.colorScheme.primary
-              } else {
-                MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.5f)
-              },
+              color = pillContainerColor,
               border = if (!isSelected) {
                 BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.35f))
               } else null,
@@ -689,13 +695,13 @@ fun MusicLibraryContent(
                   imageVector = tabIcon,
                   contentDescription = null,
                   modifier = Modifier.size(16.dp),
-                  tint = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                  tint = pillContentColor,
                 )
                 Text(
                   text = stringResource(tab.titleRes),
                   style = MaterialTheme.typography.labelLarge,
                   fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                  color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                  color = pillContentColor,
                   maxLines = 1,
                   softWrap = false,
                 )
@@ -712,7 +718,7 @@ fun MusicLibraryContent(
                       text = count.toString(),
                       style = MaterialTheme.typography.labelSmall,
                       fontWeight = FontWeight.Bold,
-                      color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                      color = pillContentColor,
                       modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp),
                     )
                   }

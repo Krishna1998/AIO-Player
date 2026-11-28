@@ -39,6 +39,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -453,8 +455,16 @@ private fun MiniPlayerContent(
       }
     }
   }
-  var dragOffsetX by remember { mutableFloatStateOf(0f) }
-  var dragOffsetY by remember { mutableFloatStateOf(0f) }
+  val dragOffsetX = remember { androidx.compose.animation.core.Animatable(0f) }
+  val dragOffsetY = remember { androidx.compose.animation.core.Animatable(0f) }
+  val discDismissAlpha = remember { androidx.compose.animation.core.Animatable(1f) }
+  var isDiscDismissing by remember { mutableStateOf(false) }
+  LaunchedEffect(itemId) {
+    isDiscDismissing = false
+    dragOffsetX.snapTo(0f)
+    dragOffsetY.snapTo(0f)
+    discDismissAlpha.snapTo(1f)
+  }
 
   androidx.compose.material3.Surface(
     shape = androidx.compose.foundation.shape.CircleShape,
@@ -466,33 +476,61 @@ private fun MiniPlayerContent(
     ),
     modifier = Modifier
       .graphicsLayer {
-        translationX = dragOffsetX
-        translationY = dragOffsetY
+        translationX = dragOffsetX.value
+        translationY = dragOffsetY.value
+        alpha = discDismissAlpha.value
       }
       .size(NavigationBarState.miniPlayerHeight + 8.dp)
       .clip(androidx.compose.foundation.shape.CircleShape)
+      .pointerInput(musicSheet) {
+        awaitEachGesture {
+          awaitFirstDown(requireUnconsumed = false)
+          musicSheet?.prewarm()
+        }
+      }
       .pointerInput(Unit) {
         detectDragGestures(
           onDragEnd = {
-            if (kotlin.math.abs(dragOffsetX) > 90f || dragOffsetY > 90f) {
-              onDismiss()
+            if (isDiscDismissing) return@detectDragGestures
+            val dx = dragOffsetX.value
+            val dy = dragOffsetY.value
+            if (kotlin.math.abs(dx) > 90f || dy > 90f) {
+              isDiscDismissing = true
+              actionHaptics.confirm()
+              coroutineScope.launch {
+                val targetX = if (kotlin.math.abs(dx) >= dy) dx + kotlin.math.sign(dx.takeIf { it != 0f } ?: 1f) * 260f else dx * 1.4f
+                val targetY = if (dy > kotlin.math.abs(dx)) dy + 260f else dy
+                launch { dragOffsetX.animateTo(targetX, tween(180, easing = FastOutLinearInEasing)) }
+                launch { dragOffsetY.animateTo(targetY, tween(180, easing = FastOutLinearInEasing)) }
+                discDismissAlpha.animateTo(0f, tween(160))
+                currentOnDismiss()
+              }
             } else {
-              dragOffsetX = 0f
-              dragOffsetY = 0f
+              coroutineScope.launch {
+                launch { dragOffsetX.animateTo(0f, DismissSettleSpring) }
+                dragOffsetY.animateTo(0f, DismissSettleSpring)
+              }
             }
           },
           onDragCancel = {
-            dragOffsetX = 0f
-            dragOffsetY = 0f
+            if (!isDiscDismissing) {
+              coroutineScope.launch {
+                launch { dragOffsetX.animateTo(0f, DismissSettleSpring) }
+                dragOffsetY.animateTo(0f, DismissSettleSpring)
+              }
+            }
           },
           onDrag = { change, dragAmount ->
+            if (isDiscDismissing) return@detectDragGestures
             change.consume()
-            dragOffsetX += dragAmount.x
-            dragOffsetY = (dragOffsetY + dragAmount.y).coerceAtLeast(0f)
+            coroutineScope.launch {
+              dragOffsetX.snapTo(dragOffsetX.value + dragAmount.x)
+              dragOffsetY.snapTo((dragOffsetY.value + dragAmount.y).coerceAtLeast(0f))
+            }
           },
         )
       }
-      .clickable { launchPlayer() },
+      .clickable(enabled = !isDiscDismissing) { launchPlayer() },
   ) {
     Box(
       modifier = Modifier.fillMaxSize(),
@@ -527,11 +565,12 @@ private fun MiniPlayerContent(
           .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.85f)),
         contentAlignment = Alignment.Center,
       ) {
-        Icon(
+        AnimatedIcon(
           imageVector = if (isPlaying) Icons.RoundedFilled.Pause else Icons.RoundedFilled.PlayArrow,
           contentDescription = null,
           tint = MaterialTheme.colorScheme.onSurface,
           modifier = Modifier.size(12.dp),
+          reduceMotion = reduceMotion,
         )
       }
     }

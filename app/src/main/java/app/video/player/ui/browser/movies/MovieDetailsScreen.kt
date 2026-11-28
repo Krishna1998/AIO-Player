@@ -10,7 +10,12 @@
 package app.video.player.ui.browser.movies
 
 import android.graphics.Bitmap
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -672,113 +677,122 @@ data class MovieDetailsScreen(
                   )
                 }
 
-                val seasonEpisodes = episodesBySeason[selectedSeason].orEmpty()
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                  seasonEpisodes.forEach { (epVideo, epInfo) ->
-                    val status = episodeStatusMap[epVideo.path]
-                    val epProgress = status?.progress ?: 0f
-                    val epIsWatched = status?.isWatched == true
-                    val epKey = MovieMetadataRepository.episodeKey(epInfo.season, epInfo.episode)
-                    val epTitle = currentMeta?.episodeTitles?.get(epKey)?.takeIf { it.isNotBlank() }
-                      ?: epVideo.displayName.substringBeforeLast('.')
-                    val epOverview = currentMeta?.episodeOverviews?.get(epKey)?.takeIf { it.isNotBlank() }
-                    val epStillUrl = currentMeta?.episodeStills?.get(epKey)
+                AnimatedContent(
+                  targetState = selectedSeason,
+                  transitionSpec = {
+                    (fadeIn(tween(200)) + slideInVertically(tween(200)) { it / 16 }) togetherWith
+                      fadeOut(tween(140))
+                  },
+                  label = "season_episodes_transition",
+                ) { activeSeason ->
+                  val seasonEpisodes = episodesBySeason[activeSeason].orEmpty()
+                  Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    seasonEpisodes.forEach { (epVideo, epInfo) ->
+                      val status = episodeStatusMap[epVideo.path]
+                      val epProgress = status?.progress ?: 0f
+                      val epIsWatched = status?.isWatched == true
+                      val epKey = MovieMetadataRepository.episodeKey(epInfo.season, epInfo.episode)
+                      val epTitle = currentMeta?.episodeTitles?.get(epKey)?.takeIf { it.isNotBlank() }
+                        ?: epVideo.displayName.substringBeforeLast('.')
+                      val epOverview = currentMeta?.episodeOverviews?.get(epKey)?.takeIf { it.isNotBlank() }
+                      val epStillUrl = currentMeta?.episodeStills?.get(epKey)
 
-                    Card(
-                      onClick = {
-                        MediaUtils.playFile(
-                          source = epVideo,
-                          context = context,
-                          launchSource = "movie_details_episode",
-                        )
-                      },
-                      shape = RoundedCornerShape(16.dp),
-                      colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                      ),
-                      modifier = Modifier.fillMaxWidth(),
-                    ) {
-                      Column(modifier = Modifier.fillMaxWidth()) {
-                        Row(
-                          modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(10.dp),
-                          verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                          EpisodeThumbnail(
-                            epVideo = epVideo,
-                            epStillUrl = epStillUrl,
-                            epProgress = epProgress,
-                            epIsWatched = epIsWatched,
-                            thumbnailRepository = thumbnailRepository,
+                      Card(
+                        onClick = {
+                          MediaUtils.playFile(
+                            source = epVideo,
+                            context = context,
+                            launchSource = "movie_details_episode",
                           )
-
-                          Spacer(modifier = Modifier.width(12.dp))
-
-                          Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.Center,
+                        },
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(
+                          containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                      ) {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                          Row(
+                            modifier = Modifier
+                              .fillMaxWidth()
+                              .padding(10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
                           ) {
-                            Row(
-                              verticalAlignment = Alignment.CenterVertically,
-                              horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            ) {
-                              Text(
-                                text = "S%02dE%02d".format(epInfo.season, epInfo.episode),
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                color = MaterialTheme.colorScheme.primary,
-                              )
-                              Text(
-                                text = epTitle,
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                                color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                              )
-                            }
-
-                            Spacer(modifier = Modifier.height(2.dp))
-
-                            val metaLine = buildList {
-                              epVideo.durationFormatted.takeIf { it.isNotBlank() && it != "0s" }?.let { add(it) }
-                              epVideo.sizeFormatted.takeIf { it.isNotBlank() }?.let { add(it) }
-                            }.joinToString(" • ")
-                            if (metaLine.isNotEmpty()) {
-                              Text(
-                                text = metaLine,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                maxLines = 1,
-                              )
-                            }
-
-                            if (epOverview != null) {
-                              Spacer(modifier = Modifier.height(3.dp))
-                              Text(
-                                text = epOverview,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
-                                maxLines = 3,
-                                overflow = TextOverflow.Ellipsis,
-                              )
-                            }
-                          }
-
-                          IconButton(
-                            onClick = {
-                              coroutineScope.launch {
-                                PermissionUtils.StorageOps.deleteVideos(context, listOf(epVideo))
-                                seriesEpisodes = seriesEpisodes.filterNot { it.first.path == epVideo.path }
-                              }
-                            },
-                            modifier = Modifier.size(36.dp),
-                          ) {
-                            Icon(
-                              imageVector = Icons.RoundedFilled.Delete,
-                              contentDescription = stringResource(R.string.delete),
-                              tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                              modifier = Modifier.size(20.dp),
+                            EpisodeThumbnail(
+                              epVideo = epVideo,
+                              epStillUrl = epStillUrl,
+                              epProgress = epProgress,
+                              epIsWatched = epIsWatched,
+                              thumbnailRepository = thumbnailRepository,
                             )
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Column(
+                              modifier = Modifier.weight(1f),
+                              verticalArrangement = Arrangement.Center,
+                            ) {
+                              Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                              ) {
+                                Text(
+                                  text = "S%02dE%02d".format(epInfo.season, epInfo.episode),
+                                  style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+                                  color = MaterialTheme.colorScheme.primary,
+                                )
+                                Text(
+                                  text = epTitle,
+                                  style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                                  color = MaterialTheme.colorScheme.onSurface,
+                                  maxLines = 1,
+                                  overflow = TextOverflow.Ellipsis,
+                                )
+                              }
+
+                              Spacer(modifier = Modifier.height(2.dp))
+
+                              val metaLine = buildList {
+                                epVideo.durationFormatted.takeIf { it.isNotBlank() && it != "0s" }?.let { add(it) }
+                                epVideo.sizeFormatted.takeIf { it.isNotBlank() }?.let { add(it) }
+                              }.joinToString(" • ")
+                              if (metaLine.isNotEmpty()) {
+                                Text(
+                                  text = metaLine,
+                                  style = MaterialTheme.typography.labelSmall,
+                                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                  maxLines = 1,
+                                )
+                              }
+
+                              if (epOverview != null) {
+                                Spacer(modifier = Modifier.height(3.dp))
+                                Text(
+                                  text = epOverview,
+                                  style = MaterialTheme.typography.bodySmall,
+                                  color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                                  maxLines = 3,
+                                  overflow = TextOverflow.Ellipsis,
+                                )
+                              }
+                            }
+
+                            IconButton(
+                              onClick = {
+                                coroutineScope.launch {
+                                  PermissionUtils.StorageOps.deleteVideos(context, listOf(epVideo))
+                                  seriesEpisodes = seriesEpisodes.filterNot { it.first.path == epVideo.path }
+                                }
+                              },
+                              modifier = Modifier.size(36.dp),
+                            ) {
+                              Icon(
+                                imageVector = Icons.RoundedFilled.Delete,
+                                contentDescription = stringResource(R.string.delete),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                modifier = Modifier.size(20.dp),
+                              )
+                            }
                           }
                         }
                       }

@@ -75,7 +75,14 @@ import app.video.player.preferences.preference.collectAsState
 import app.video.player.presentation.components.RemoteImage
 import app.video.player.ui.browser.cards.SelectionIndicator
 import app.video.player.ui.browser.cards.animatedSelectionColor
+import app.video.player.ui.browser.components.mediaItemMotion
 import app.video.player.ui.browser.selection.SelectionManager
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import app.video.player.ui.theme.AppMotion
 import app.video.player.ui.browser.states.EmptyState
 import app.video.player.ui.browser.videolist.VideoWithPlaybackInfo
 import app.video.player.ui.icons.Icon
@@ -172,96 +179,111 @@ fun MoviesTabContent(
     )
 
     val refreshState = isRefreshing ?: remember { mutableStateOf(false) }
+    val reduceMotion = AppMotion.shouldReduceMotion()
     PullRefreshBox(
       isRefreshing = refreshState,
       onRefresh = { onRefresh?.invoke() },
       modifier = Modifier.fillMaxSize(),
     ) {
-      // Movie Posters Grid / List or Empty State
-      if (filteredMovies.isEmpty()) {
-      val (emptyTitleRes, emptyMessageRes) = when (selectedFilterIndex) {
-        1 -> R.string.movies_unwatched_empty_title to R.string.movies_unwatched_empty_message
-        2 -> R.string.movies_started_empty_title to R.string.movies_started_empty_message
-        else -> R.string.movies_empty_title to R.string.movies_empty_message
-      }
-      Box(
+      AnimatedContent(
+        targetState = Triple(filteredMovies.isEmpty(), layoutMode, selectedFilterIndex),
+        transitionSpec = {
+          if (reduceMotion) {
+            androidx.compose.animation.EnterTransition.None togetherWith androidx.compose.animation.ExitTransition.None
+          } else {
+            fadeIn(tween(180)) togetherWith fadeOut(tween(140))
+          }
+        },
+        label = "movies_tab_mode",
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-      ) {
-        EmptyState(
-          icon = Icons.RoundedFilled.Movie,
-          title = stringResource(emptyTitleRes),
-          message = stringResource(emptyMessageRes),
-        )
-      }
-    } else if (layoutMode == MediaLayoutMode.LIST) {
-      LazyColumn(
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier.fillMaxSize(),
-      ) {
-        items(
-          items = filteredMovies,
-          key = { it.video.path },
-        ) { item ->
-          val isSelected = selectionManager?.isSelected(item.video) == true
-          MovieListItemCard(
-            item = item,
-            movieMetadataRepo = movieMetadataRepo,
-            isSelected = isSelected,
-            onClick = {
-              if (selectionManager?.isInSelectionMode == true) {
-                selectionManager.toggleFromUser(item.video)
-              } else if (openMovieDetailsOnTap || onPlayMedia == null) {
-                onOpenMovieDetails(item.video)
-              } else {
-                onPlayMedia(item.video)
-              }
-            },
-            onPlayClick = {
-              if (selectionManager?.isInSelectionMode == true) {
-                selectionManager.toggleFromUser(item.video)
-              } else if (onPlayMedia != null) {
-                onPlayMedia(item.video)
-              } else {
-                onOpenMovieDetails(item.video)
-              }
-            },
-            onLongClick = { selectionManager?.handleLongClick(item.video) },
-          )
+      ) { (isEmpty, mode, filterIdx) ->
+        if (isEmpty) {
+          val (emptyTitleRes, emptyMessageRes) = when (filterIdx) {
+            1 -> R.string.movies_unwatched_empty_title to R.string.movies_unwatched_empty_message
+            2 -> R.string.movies_started_empty_title to R.string.movies_started_empty_message
+            else -> R.string.movies_empty_title to R.string.movies_empty_message
+          }
+          Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+          ) {
+            EmptyState(
+              icon = Icons.RoundedFilled.Movie,
+              title = stringResource(emptyTitleRes),
+              message = stringResource(emptyMessageRes),
+            )
+          }
+        } else if (mode == MediaLayoutMode.LIST) {
+          LazyColumn(
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxSize(),
+          ) {
+            items(
+              items = filteredMovies,
+              key = { it.video.path },
+            ) { item ->
+              val isSelected = selectionManager?.isSelected(item.video) == true
+              MovieListItemCard(
+                item = item,
+                movieMetadataRepo = movieMetadataRepo,
+                isSelected = isSelected,
+                onClick = {
+                  if (selectionManager?.isInSelectionMode == true) {
+                    selectionManager.toggleFromUser(item.video)
+                  } else if (openMovieDetailsOnTap || onPlayMedia == null) {
+                    onOpenMovieDetails(item.video)
+                  } else {
+                    onPlayMedia(item.video)
+                  }
+                },
+                onPlayClick = {
+                  if (selectionManager?.isInSelectionMode == true) {
+                    selectionManager.toggleFromUser(item.video)
+                  } else if (onPlayMedia != null) {
+                    onPlayMedia(item.video)
+                  } else {
+                    onOpenMovieDetails(item.video)
+                  }
+                },
+                onLongClick = { selectionManager?.handleLongClick(item.video) },
+                modifier = mediaItemMotion(),
+              )
+            }
+          }
+        } else {
+          LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = moviePosterSize.dp),
+            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+            modifier = Modifier.fillMaxSize(),
+          ) {
+            items(
+              items = filteredMovies,
+              key = { it.video.path },
+            ) { item ->
+              val isSelected = selectionManager?.isSelected(item.video) == true
+              MoviePosterCard(
+                item = item,
+                movieMetadataRepo = movieMetadataRepo,
+                isSelected = isSelected,
+                onClick = {
+                  if (selectionManager?.isInSelectionMode == true) {
+                    selectionManager.toggleFromUser(item.video)
+                  } else if (openMovieDetailsOnTap || onPlayMedia == null) {
+                    onOpenMovieDetails(item.video)
+                  } else {
+                    onPlayMedia(item.video)
+                  }
+                },
+                onLongClick = { selectionManager?.handleLongClick(item.video) },
+                modifier = mediaItemMotion(),
+              )
+            }
+          }
         }
       }
-    } else {
-      LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = moviePosterSize.dp),
-        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalArrangement = Arrangement.spacedBy(14.dp),
-        modifier = Modifier.fillMaxSize(),
-      ) {
-        items(
-          items = filteredMovies,
-          key = { it.video.path },
-        ) { item ->
-          val isSelected = selectionManager?.isSelected(item.video) == true
-          MoviePosterCard(
-            item = item,
-            movieMetadataRepo = movieMetadataRepo,
-            isSelected = isSelected,
-            onClick = {
-              if (selectionManager?.isInSelectionMode == true) {
-                selectionManager.toggleFromUser(item.video)
-              } else if (openMovieDetailsOnTap || onPlayMedia == null) {
-                onOpenMovieDetails(item.video)
-              } else {
-                onPlayMedia(item.video)
-              }
-            },
-            onLongClick = { selectionManager?.handleLongClick(item.video) },
-          )
-        }
-      }
-    }
     }
   }
 }

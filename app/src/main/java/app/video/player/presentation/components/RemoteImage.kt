@@ -81,6 +81,16 @@ fun RemoteImage(
   }
 
   val imageBitmap = remember(bitmap) { bitmap?.asImageBitmap() }
+  val wasInitiallyInMemory = remember(url, maxDimensionPx) { imageBitmap != null }
+  val animatedAlpha by androidx.compose.animation.core.animateFloatAsState(
+    targetValue = if (imageBitmap != null) alpha else 0f,
+    animationSpec = if (wasInitiallyInMemory) {
+      androidx.compose.animation.core.snap()
+    } else {
+      androidx.compose.animation.core.tween(durationMillis = 180)
+    },
+    label = "remote_image_fade",
+  )
   if (imageBitmap != null) {
     Image(
       bitmap = imageBitmap,
@@ -88,7 +98,7 @@ fun RemoteImage(
       modifier = modifier,
       contentScale = contentScale,
       alignment = alignment,
-      alpha = alpha,
+      alpha = animatedAlpha,
       colorFilter = colorFilter,
     )
   }

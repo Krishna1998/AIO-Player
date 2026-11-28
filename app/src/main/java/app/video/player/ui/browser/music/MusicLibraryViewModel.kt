@@ -403,7 +403,7 @@ class MusicLibraryViewModel : ViewModel(), KoinComponent {
       putExtra("is_audio", true)
       putExtra("title", song.title)
     }
-    context.startActivity(intent)
+    MediaUtils.startPlayerActivity(context, intent, isAudio = true)
   }
 
   fun playAllSongs(context: Context, songsToPlay: List<MusicSong>, shuffle: Boolean = false) {
@@ -451,7 +451,7 @@ class MusicLibraryViewModel : ViewModel(), KoinComponent {
       putExtra("is_audio", true)
       putExtra("title", firstSong.title)
     }
-    context.startActivity(intent)
+    MediaUtils.startPlayerActivity(context, intent, isAudio = true)
   }
 
   fun createPlaylist(name: String) {

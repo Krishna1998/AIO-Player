@@ -391,7 +391,22 @@ object MediaUtils {
       "OPEN_REQUEST",
       "source=${launchSource ?: (if (videoSource != null) "library" else "direct")} kind=${if (videoSource != null) "video" else (playbackUri.scheme ?: "path")}",
     )
-    context.startActivity(intent)
+    startPlayerActivity(context, intent, isAudio = isAudioMedia)
+  }
+
+  fun startPlayerActivity(
+    context: Context,
+    intent: Intent,
+    isAudio: Boolean,
+  ) {
+    val enterAnim = if (isAudio) app.video.player.R.anim.slide_in_up else android.R.anim.fade_in
+    val exitAnim = if (isAudio) 0 else android.R.anim.fade_out
+    val options = android.app.ActivityOptions.makeCustomAnimation(context, enterAnim, exitAnim).toBundle()
+    context.startActivity(intent, options)
+    if (context is android.app.Activity && android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+      @Suppress("DEPRECATION")
+      context.overridePendingTransition(enterAnim, exitAnim)
+    }
   }
 
   private fun playbackIdentity(video: Video): String =

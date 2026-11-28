@@ -17,6 +17,7 @@ import app.video.player.ui.utils.NavigationBackHandler as BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -1472,8 +1473,17 @@ fun MediaLibraryContent(
                       }
                     }
                   }
-                  Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                    when (currentAudioSubTab) {
+                  androidx.compose.animation.AnimatedContent(
+                    targetState = currentAudioSubTab,
+                    transitionSpec = {
+                      (androidx.compose.animation.fadeIn(androidx.compose.animation.core.tween(180)) +
+                        androidx.compose.animation.slideInHorizontally(androidx.compose.animation.core.tween(200)) { it / 16 }) togetherWith
+                        androidx.compose.animation.fadeOut(androidx.compose.animation.core.tween(140))
+                    },
+                    label = "audio_subtab_transition",
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                  ) { activeAudioTab ->
+                    when (activeAudioTab) {
                       "ALL_MUSIC" -> {
                         VideoListContent(
                           folderId = "media_library_audio",

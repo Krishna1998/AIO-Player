@@ -210,6 +210,12 @@ class InAppMusicSheetState internal constructor(
     return true
   }
 
+  /** Prewarms and keeps the sheet ready while audio is playing in the browser. */
+  fun prewarmPersistent() {
+    if (!isAvailable) return
+    requestContent()
+  }
+
   /** Starts composing the full player ahead of a likely expansion, e.g. a finger on the mini player. */
   fun prewarm() {
     if (!isAvailable) return
@@ -506,7 +512,16 @@ fun InAppMusicPlayerSheet(
 
   // Another screen took the session over, or playback ended: nothing is left to show.
   LaunchedEffect(canShow) {
-    if (!canShow) state.dismiss()
+    if (!canShow) {
+      state.dismiss()
+    } else if (!state.isContentReady) {
+      // Pre-compose the sheet shortly after the audio session becomes active so the
+      // very first tap on the mini player expands immediately on frame 1 without hitching.
+      delay(350L)
+      if (state.isAvailable && !state.isContentReady) {
+        state.prewarmPersistent()
+      }
+    }
   }
   LaunchedEffect(canShow, state.isContentRequested) {
     if (!canShow && !state.isContentRequested) store.release()

@@ -285,6 +285,18 @@ private object AudioPresentationMetadataCache {
     artworkUri: String?,
   ): String = "$pathOrUri\u0000${artworkUri.orEmpty()}"
 
+  fun peek(
+    pathOrUri: String,
+    artworkUri: String?,
+    generator: app.video.player.preferences.ThumbnailGenerator,
+    revision: Long,
+    title: String? = null,
+    artist: String? = null,
+  ): AudioPresentationMetadata? {
+    val key = "${cacheKey(pathOrUri, artworkUri)}|$title|$artist|$generator|$revision"
+    return synchronized(cache) { cache.get(key) }
+  }
+
   suspend fun resolve(
     context: android.content.Context,
     pathOrUri: String,
@@ -464,7 +476,10 @@ private fun rememberAudioPresentationMetadata(
   val generator by koinInject<BrowserPreferences>().thumbnailGenerator.collectAsState()
   AudioPresentationMetadataCache.invalidate(revision)
   var metadata by remember(pathOrUri, artworkUri, title, artist, generator, revision) {
-    mutableStateOf<AudioPresentationMetadata?>(null)
+    mutableStateOf(
+      if (pathOrUri.isNullOrBlank()) null
+      else AudioPresentationMetadataCache.peek(pathOrUri, artworkUri, generator, revision, title, artist),
+    )
   }
   LaunchedEffect(pathOrUri, artworkUri, title, artist, generator, revision) {
     metadata = if (pathOrUri.isNullOrBlank()) null else {
@@ -1270,6 +1285,7 @@ fun AudioPlayerControls(
   ) {
     // 1. Full-Screen Ambient Blurred Canvas (Option B: Dual-Layer Ambient Canvas)
     if (immersiveArtworkEnabled && ambientImageBitmap != null) {
+      val blurReady = inAppSheet == null || inAppSheet.isSettledOpen
       Box(modifier = Modifier.fillMaxSize()) {
         Image(
           bitmap = ambientImageBitmap,
@@ -1282,8 +1298,15 @@ fun AudioPlayerControls(
                 scaleX = 1.30f
                 scaleY = 1.30f
               }
-              .graphicsLayer { compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen }
-              .blur(36.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded),
+              .then(
+                if (blurReady) {
+                  Modifier
+                    .graphicsLayer { compositingStrategy = androidx.compose.ui.graphics.CompositingStrategy.Offscreen }
+                    .blur(36.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
+                } else {
+                  Modifier
+                },
+              ),
         )
         // High-contrast atmospheric scrim: dark tone in dark mode, light frosted tone in light mode
         val scrimBase = if (isDarkTheme) Color.Black else MaterialTheme.colorScheme.surface
@@ -1495,16 +1518,17 @@ fun AudioPlayerControls(
       if (idx > 0) filteredPlaylist[idx - 1] else null
     }
 
+    val allowAdjacentPreload = inAppSheet == null || inAppSheet.isSettledOpen
     val nextCoverBitmap =
       rememberAudioAlbumArt(
-        pathOrUri = nextItem?.let { it.path.ifBlank { it.uri.toString() } },
+        pathOrUri = if (allowAdjacentPreload) nextItem?.let { it.path.ifBlank { it.uri.toString() } } else null,
         artworkUri = nextItem?.tvgLogo,
         title = nextItem?.title,
         artist = nextItem?.artist,
       )
     val prevCoverBitmap =
       rememberAudioAlbumArt(
-        pathOrUri = prevItem?.let { it.path.ifBlank { it.uri.toString() } },
+        pathOrUri = if (allowAdjacentPreload) prevItem?.let { it.path.ifBlank { it.uri.toString() } } else null,
         artworkUri = prevItem?.tvgLogo,
         title = prevItem?.title,
         artist = prevItem?.artist,
