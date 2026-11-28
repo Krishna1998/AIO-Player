@@ -257,12 +257,6 @@ kotlin {
 
 composeCompiler {
   includeSourceInformation = false
-  // Enable strong skipping so Compose skips recomposition when
-  // unstable params haven't changed in value (reduces recompositions).
-  featureFlags = setOf(
-    androidx.compose.compiler.plugins.kotlin.ComposeFeatureFlag.IntrinsicRemember,
-    androidx.compose.compiler.plugins.kotlin.ComposeFeatureFlag.OptimizeNonSkippingGroups,
-  )
 }
 
 room {
