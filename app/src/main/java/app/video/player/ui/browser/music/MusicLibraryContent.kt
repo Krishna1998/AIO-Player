@@ -1931,9 +1931,21 @@ private fun SongGridCard(
     selected = isSelected,
     unselectedColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = if (isPlaying) 0.35f else 0f),
   )
+  val interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+  val isPressed by interactionSource.collectIsPressedAsState()
+  val pressScale = androidx.compose.animation.core.animateFloatAsState(
+    targetValue = if (isPressed) 0.96f else 1f,
+    animationSpec = androidx.compose.animation.core.tween(120),
+    label = "songCardPressScale",
+  )
   Card(
     modifier = modifier
       .fillMaxWidth()
+      .graphicsLayer {
+        val s = pressScale.value
+        scaleX = s
+        scaleY = s
+      }
       .clip(selectedShape)
       .tvFocusHighlight(selectedShape, focusedScale = 1.03f)
       .tvContextMenu(onLongClick)
@@ -2199,9 +2211,21 @@ private fun AlbumGridCard(
     grid = true,
     neighbors = selectionNeighbors,
   )
+  val interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+  val isPressed by interactionSource.collectIsPressedAsState()
+  val pressScale = androidx.compose.animation.core.animateFloatAsState(
+    targetValue = if (isPressed) 0.96f else 1f,
+    animationSpec = androidx.compose.animation.core.tween(120),
+    label = "songCardPressScale",
+  )
   Card(
     modifier = modifier
       .fillMaxWidth()
+      .graphicsLayer {
+        val s = pressScale.value
+        scaleX = s
+        scaleY = s
+      }
       .clip(selectedShape)
       .tvFocusHighlight(selectedShape, focusedScale = 1.03f)
       .tvContextMenu(onLongClick)
@@ -2461,9 +2485,21 @@ private fun ArtistGridCard(
     grid = true,
     neighbors = selectionNeighbors,
   )
+  val interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+  val isPressed by interactionSource.collectIsPressedAsState()
+  val pressScale = androidx.compose.animation.core.animateFloatAsState(
+    targetValue = if (isPressed) 0.96f else 1f,
+    animationSpec = androidx.compose.animation.core.tween(120),
+    label = "songCardPressScale",
+  )
   Card(
     modifier = modifier
       .fillMaxWidth()
+      .graphicsLayer {
+        val s = pressScale.value
+        scaleX = s
+        scaleY = s
+      }
       .clip(selectedShape)
       .tvFocusHighlight(selectedShape, focusedScale = 1.03f)
       .tvContextMenu(onLongClick)
