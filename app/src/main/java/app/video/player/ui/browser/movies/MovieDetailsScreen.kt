@@ -226,6 +226,7 @@ data class MovieDetailsScreen(
     LaunchedEffect(resumeRefreshTick) {
       if (resumeRefreshTick == 0) return@LaunchedEffect
       val resolved = video ?: return@LaunchedEffect
+      kotlinx.coroutines.delay(350)
       withContext(Dispatchers.IO) {
         val threshold = browserPreferences.watchedThreshold.get()
         isWatched = PlaybackStateOps.areAllWatched(listOf(resolved), threshold)
@@ -493,10 +494,16 @@ data class MovieDetailsScreen(
               Spacer(modifier = Modifier.height(12.dp))
 
               // Full-width Prominent Play Movie Button
+              val activeEpisode = seriesEpisodes.lastOrNull { (ep, _) ->
+                val p = episodeProgressMap[ep.path] ?: 0f
+                p > 0f && p < 1f
+              } ?: seriesEpisodes.firstOrNull { (ep, _) ->
+                (episodeProgressMap[ep.path] ?: 0f) < 1f
+              } ?: seriesEpisodes.firstOrNull()
               Button(
                 onClick = {
                   MediaUtils.playFile(
-                    source = currentVideo,
+                    source = activeEpisode?.first ?: currentVideo,
                     context = context,
                     launchSource = "movie_details",
                   )
