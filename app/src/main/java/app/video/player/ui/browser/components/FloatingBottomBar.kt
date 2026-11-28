@@ -164,8 +164,8 @@ fun BrowserBottomBar(
         androidx.compose.animation.slideInVertically(
           animationSpec =
             androidx.compose.animation.core.spring(
-              dampingRatio = AppMotion.Spatial.ExpressiveDp.dampingRatio,
-              stiffness = AppMotion.Spatial.ExpressiveDp.stiffness,
+              dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy,
+              stiffness = androidx.compose.animation.core.Spring.StiffnessMedium,
             ),
           initialOffsetY = { entranceOffset },
         ) + fadeIn(androidx.compose.animation.core.tween(180))
