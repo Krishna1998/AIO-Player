@@ -291,14 +291,20 @@ data class MovieDetailsScreen(
               .fillMaxSize()
               .verticalScroll(scrollState),
           ) {
-            // Backdrop Header
+            // Backdrop Header (mpvium-style responsive height & natural bottom-edge blend)
+            val configuration = androidx.compose.ui.platform.LocalConfiguration.current
+            val isTablet = configuration.smallestScreenWidthDp >= 600
+            val isLandscape = configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+            val headerHeight = when {
+              isTablet && isLandscape -> 240.dp
+              isTablet -> 280.dp
+              else -> 320.dp
+            }
             Box(
               modifier = Modifier
                 .fillMaxWidth()
-                .height(310.dp),
+                .height(headerHeight),
             ) {
-              val isLandscape = androidx.compose.ui.platform.LocalConfiguration.current.orientation ==
-                android.content.res.Configuration.ORIENTATION_LANDSCAPE
               val backdropUrl = currentMeta?.backdropUrl ?: currentMeta?.posterUrl
               if (!backdropUrl.isNullOrBlank()) {
                 RemoteImage(
@@ -328,18 +334,16 @@ data class MovieDetailsScreen(
                 }
               }
 
-              // Gradient fade down
+              // Natural edge blend at the bottom edge only: top ~65% stays vibrant
               Box(
                 modifier = Modifier
                   .fillMaxSize()
                   .background(
                     Brush.verticalGradient(
-                      colors = listOf(
-                        Color.Black.copy(alpha = 0.65f),
-                        Color.Transparent,
-                        MaterialTheme.colorScheme.background.copy(alpha = 0.75f),
-                        MaterialTheme.colorScheme.background,
-                      ),
+                      0.0f to Color.Transparent,
+                      0.65f to Color.Transparent,
+                      0.88f to MaterialTheme.colorScheme.background.copy(alpha = 0.70f),
+                      1.0f to MaterialTheme.colorScheme.background,
                     ),
                   ),
               )
