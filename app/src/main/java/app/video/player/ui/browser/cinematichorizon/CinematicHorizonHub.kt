@@ -2281,14 +2281,14 @@ private fun HeroSpotlightCard(
           // Allow parent to scroll vertically naturally
         }
         BentoCardGesture.Tap -> {
-          onClickState()
+          if (!isAudio) {
+            onClickState()
+          }
         }
         null -> {
           // Long press triggered
-          haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-          if (isAudio) {
-            onPlayPauseState()
-          } else {
+          if (!isAudio) {
+            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
             onLongClickState()
           }
           while (true) {
