@@ -2290,8 +2290,10 @@ private fun HeroSpotlightCard(
         }
         null -> {
           // Long press triggered
-          if (!isAudio) {
-            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+          haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+          if (isAudio) {
+            onPlayPauseState()
+          } else {
             onLongClickState()
           }
           while (true) {
