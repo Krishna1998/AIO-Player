@@ -170,6 +170,7 @@ import app.video.player.ui.browser.components.fastScrollGlyph
 import app.video.player.ui.icons.Icon
 import app.video.player.ui.icons.Icons
 import app.video.player.ui.theme.AppShapeScale
+import app.video.player.ui.theme.appPressFeedback
 import app.video.player.ui.player.controls.components.tvContextMenu
 import app.video.player.ui.player.controls.components.tvFocusHighlight
 import app.video.player.ui.utils.LocalBackStack
@@ -1938,7 +1939,7 @@ private fun SongGridCard(
   val isPressed by interactionSource.collectIsPressedAsState()
   val pressScale = androidx.compose.animation.core.animateFloatAsState(
     targetValue = if (isPressed) 0.96f else 1f,
-    animationSpec = androidx.compose.animation.core.tween(120),
+    animationSpec = if (isPressed) AppMotion.Spatial.Press else AppMotion.Spatial.Release,
     label = "songCardPressScale",
   )
   Card(
@@ -1957,8 +1958,7 @@ private fun SongGridCard(
     shape = selectedShape,
     border = if (!isSelected) BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = if (isPlaying) 0.5f else 0.25f)) else null,
     colors = CardDefaults.cardColors(
-      containerColor = selectionColor
-    )
+      containerColor = selectionColor    )
   ) {
     Column(
       modifier = Modifier
@@ -2218,7 +2218,7 @@ private fun AlbumGridCard(
   val isPressed by interactionSource.collectIsPressedAsState()
   val pressScale = androidx.compose.animation.core.animateFloatAsState(
     targetValue = if (isPressed) 0.96f else 1f,
-    animationSpec = androidx.compose.animation.core.tween(120),
+    animationSpec = if (isPressed) AppMotion.Spatial.Press else AppMotion.Spatial.Release,
     label = "songCardPressScale",
   )
   Card(
@@ -2492,7 +2492,7 @@ private fun ArtistGridCard(
   val isPressed by interactionSource.collectIsPressedAsState()
   val pressScale = androidx.compose.animation.core.animateFloatAsState(
     targetValue = if (isPressed) 0.96f else 1f,
-    animationSpec = androidx.compose.animation.core.tween(120),
+    animationSpec = if (isPressed) AppMotion.Spatial.Press else AppMotion.Spatial.Release,
     label = "songCardPressScale",
   )
   Card(

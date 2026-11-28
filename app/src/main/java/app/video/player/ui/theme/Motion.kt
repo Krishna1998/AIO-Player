@@ -193,5 +193,29 @@ fun Modifier.appDialogEnter(
     alpha = progress.value
     scaleX = 0.94f + 0.06f * progress.value
     scaleY = scaleX
+    translationY = (1f - progress.value) * 24f
+  }
+}
+
+/**
+ * Screen-level enter animation for screens that are not managed by NavDisplay
+ * (e.g., full-screen detail composables shown conditionally). Fades + slides
+ * up 32 px with the standard expressive spring so the motion feels native.
+ */
+@Composable
+fun Modifier.appScreenEnter(
+  reduceMotion: Boolean = AppMotion.shouldReduceMotion(),
+): Modifier {
+  if (reduceMotion) return this
+  val progress = remember { Animatable(0f) }
+  LaunchedEffect(Unit) {
+    progress.animateTo(
+      1f,
+      spring(dampingRatio = 0.82f, stiffness = 320f),
+    )
+  }
+  return graphicsLayer {
+    alpha = progress.value.coerceIn(0f, 1f)
+    translationY = (1f - progress.value) * 32f
   }
 }
