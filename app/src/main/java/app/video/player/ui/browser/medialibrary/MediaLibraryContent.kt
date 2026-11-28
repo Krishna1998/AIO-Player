@@ -1021,7 +1021,7 @@ fun MediaLibraryContent(
                 .fillMaxSize()
                 .padding(padding),
           ) {
-          if (!isLockedTab) {
+          if (forcedTab == null) {
             val tabRowScrollState = rememberScrollState()
             LaunchedEffect(pagerState.currentPage, mediaLibraryTabs.size) {
               if (tabRowScrollState.maxValue > 0 && mediaLibraryTabs.size > 1) {
