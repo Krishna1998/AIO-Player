@@ -40,6 +40,7 @@ import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -464,7 +465,10 @@ private fun MiniPlayerContent(
       MaterialTheme.colorScheme.primary.copy(alpha = if (isPlaying) 0.7f else 0.25f),
     ),
     modifier = Modifier
-      .offset { IntOffset(dragOffsetX.roundToInt(), dragOffsetY.roundToInt()) }
+      .graphicsLayer {
+        translationX = dragOffsetX
+        translationY = dragOffsetY
+      }
       .size(NavigationBarState.miniPlayerHeight + 8.dp)
       .clip(androidx.compose.foundation.shape.CircleShape)
       .pointerInput(Unit) {
