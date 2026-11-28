@@ -1534,6 +1534,7 @@ object SearchablePreferences {
         SearchEntrySpec(R.string.pref_advanced_dump_logs_title, listOf("dump", "logs", "debug", "logcat", "crash", "advanced")),
         SearchEntrySpec(R.string.pref_section_updates, listOf("update", "updates", "version", "check", "download", "install")),
         SearchEntrySpec(R.string.pref_wallpaper_title, listOf("wallpaper", "background", "theme", "appearance", "image")),
+        SearchEntrySpec(R.string.pref_continue_watching_badges_title, listOf("continue watching", "badges", "svg", "resolution", "codec", "appearance")),
       )
 
       addSearchEntries(

@@ -1377,6 +1377,7 @@
   <string name="pref_audio_bit_perfect_title">Bit-Perfect USB DAC Output</string>
   <string name="pref_audio_autoeq_title">AutoEQ (15-Band Parametric EQ)</string>
   <string name="pref_wallpaper_title">Wallpaper</string>
+  <string name="pref_continue_watching_badges_title">Continue Watching Format Badges</string>
   <string name="audio_info_loading">Loading audio information...</string>
   <string name="audio_info_unavailable">Audio information is not available until the current track has loaded.</string>
   <string name="audio_info_track_title">Title</string>

@@ -1695,6 +1695,20 @@ object AppearancePreferencesScreen : Screen {
                   groupIndex = 2,
                   groupSize = 6,
                 )
+                val showContinueWatchingBadges by preferences.showContinueWatchingBadges.collectAsState()
+                SwitchPreference(
+                  modifier = Modifier.settingsSearchTarget(R.string.pref_continue_watching_badges_title),
+                  value = showContinueWatchingBadges,
+                  onValueChange = preferences.showContinueWatchingBadges::set,
+                  title = { Text(stringResource(R.string.pref_continue_watching_badges_title)) },
+                  summary = {
+                    Text(
+                      "Show resolution, codec, and audio SVG badges above the title in Continue Watching",
+                      color = MaterialTheme.colorScheme.outline,
+                    )
+                  },
+                )
+                PreferenceDivider()
                 val hideNavigationBarLabels by preferences.hideNavigationBarLabels.collectAsState()
                 SwitchPreference(
                   modifier = Modifier.settingsSearchTarget(R.string.pref_hide_navigation_bar_labels_title),
