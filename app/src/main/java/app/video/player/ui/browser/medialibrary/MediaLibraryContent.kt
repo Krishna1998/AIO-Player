@@ -816,10 +816,11 @@ fun MediaLibraryContent(
       } else {
         BrowserTopBar(
           title =
-            if (forceAudio) {
-              androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_music)
-            } else {
-              androidx.compose.ui.res.stringResource(app.video.player.R.string.app_name)
+            when (effectiveForcedTab) {
+              MediaLibraryTabItem.Audio -> androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_music)
+              MediaLibraryTabItem.Movies -> androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_movies)
+              MediaLibraryTabItem.Video -> androidx.compose.ui.res.stringResource(app.video.player.R.string.ui_videos)
+              else -> androidx.compose.ui.res.stringResource(app.video.player.R.string.app_name)
             },
           isInSelectionMode = selectionManager.isInSelectionMode,
           selectedCount = selectionManager.selectedCount,
