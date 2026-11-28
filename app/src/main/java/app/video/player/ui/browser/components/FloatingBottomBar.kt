@@ -293,6 +293,11 @@ fun BrowserBottomBar(
           Row(
             modifier =
               Modifier
+                .androidx.compose.foundation.border(
+                  1.dp,
+                  MaterialTheme.colorScheme.primary.copy(alpha = 0.35f),
+                  androidx.compose.foundation.shape.CircleShape,
+                )
                 .onSizeChanged { size ->
                   if (isSelectionMode) {
                     NavigationBarState.selectionBarHeight = with(density) { size.height.toDp() }
