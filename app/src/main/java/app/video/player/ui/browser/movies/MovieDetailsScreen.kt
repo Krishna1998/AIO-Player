@@ -558,7 +558,16 @@ data class MovieDetailsScreen(
                           )
                         }
                       }
-                      // Episode progress bar removed (watched status is shown by the green tick).
+                      if (epProgress > 0f) {
+                        androidx.compose.material3.LinearProgressIndicator(
+                          progress = { epProgress },
+                          modifier = Modifier
+                            .fillMaxWidth()
+                            .height(3.dp),
+                          color = MaterialTheme.colorScheme.primary,
+                          trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                        )
+                      }
                     }
                     }
                   }
