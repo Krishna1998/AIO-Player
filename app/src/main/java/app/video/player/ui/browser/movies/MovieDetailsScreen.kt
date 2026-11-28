@@ -506,6 +506,8 @@ data class MovieDetailsScreen(
               } ?: seriesEpisodes.firstOrNull { (ep, _) ->
                 (episodeProgressMap[ep.path] ?: 0f) < 1f
               } ?: seriesEpisodes.firstOrNull()
+              val allEpisodesWatched = seriesEpisodes.isNotEmpty() &&
+                seriesEpisodes.all { (ep, _) -> (episodeProgressMap[ep.path] ?: 0f) >= 1f }
               Button(
                 onClick = {
                   MediaUtils.playFile(
@@ -516,8 +518,8 @@ data class MovieDetailsScreen(
                 },
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                  containerColor = MaterialTheme.colorScheme.primary,
-                  contentColor = MaterialTheme.colorScheme.onPrimary,
+                  containerColor = if (allEpisodesWatched) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary,
+                  contentColor = if (allEpisodesWatched) Color.White else MaterialTheme.colorScheme.onPrimary,
                 ),
                 modifier = Modifier
                   .fillMaxWidth()

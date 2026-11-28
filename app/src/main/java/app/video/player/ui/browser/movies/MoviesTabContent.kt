@@ -426,28 +426,6 @@ private fun MoviePosterCard(
           }
         }
 
-        val rawProgress = item.progressPercentage
-        val watchedFraction = when {
-          rawProgress != null && rawProgress > 1f -> (rawProgress / 100f).coerceIn(0f, 1f)
-          rawProgress != null -> rawProgress.coerceIn(0f, 1f)
-          else -> 0f
-        }
-        if (watchedFraction > 0.01f) {
-          Box(
-            modifier = Modifier
-              .align(Alignment.BottomCenter)
-              .fillMaxWidth()
-              .height(4.dp)
-              .background(Color.Black.copy(alpha = 0.55f)),
-          ) {
-            Box(
-              modifier = Modifier
-                .fillMaxWidth(watchedFraction)
-                .height(4.dp)
-                .background(MaterialTheme.colorScheme.primary),
-            )
-          }
-        }
       }
 
       // Title below poster
