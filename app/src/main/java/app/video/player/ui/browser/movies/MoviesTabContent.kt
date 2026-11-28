@@ -136,45 +136,6 @@ fun MoviesTabContent(
   Column(
     modifier = modifier.fillMaxSize(),
   ) {
-    // Filter Chips Row: [ All ] [ Unwatched ] [ Started ]
-    Row(
-      modifier = Modifier
-        .fillMaxWidth()
-        .padding(horizontal = 16.dp, vertical = 4.dp),
-      horizontalArrangement = Arrangement.spacedBy(8.dp),
-      verticalAlignment = Alignment.CenterVertically,
-    ) {
-      FilterChip(
-        selected = selectedFilterIndex == 0,
-        onClick = { selectedFilterIndex = 0 },
-        label = { Text(stringResource(R.string.ui_filter_all)) },
-        colors = FilterChipDefaults.filterChipColors(
-          selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-          selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        ),
-      )
-
-      FilterChip(
-        selected = selectedFilterIndex == 1,
-        onClick = { selectedFilterIndex = 1 },
-        label = { Text(stringResource(R.string.ui_filter_unwatched)) },
-        colors = FilterChipDefaults.filterChipColors(
-          selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-          selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        ),
-      )
-
-      FilterChip(
-        selected = selectedFilterIndex == 2,
-        onClick = { selectedFilterIndex = 2 },
-        label = { Text(stringResource(R.string.ui_filter_started)) },
-        colors = FilterChipDefaults.filterChipColors(
-          selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-          selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        ),
-      )
-    }
-
     // Subtitle: "X titles"
     Text(
       text = "${filteredMovies.size} titles",
