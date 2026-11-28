@@ -1976,35 +1976,7 @@ private fun HeroSpotlightBox(
       horizontalArrangement = Arrangement.SpaceBetween,
       verticalAlignment = Alignment.CenterVertically,
     ) {
-      Surface(
-        shape = CircleShape,
-        color = Color.Black.copy(alpha = 0.5f),
-        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.2f)),
-      ) {
-        Row(
-          modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-          if (isCurrentlyInSession) {
-            Box(
-              modifier = Modifier
-                .size(6.dp)
-                .background(Color(0xFF00E5FF), CircleShape),
-            )
-          }
-          if (isCurrentlyInSession || video.isAudio) {
-            Text(
-              text = if (isCurrentlyInSession && !video.isAudio) "NOW PLAYING IN PIP" else "SONIC HORIZON",
-              style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.ExtraBold,
-                letterSpacing = 1.2.sp,
-              ),
-              color = Color.White,
-            )
-          }
-        }
-      }
+      // Top status pill removed; only movie title, badges, and seekbar are shown.
     }
 
     // Bottom Hero Info & Seekbar (Concept 1: Premier Cinema with Smart Media Badges & Depth Typography)
