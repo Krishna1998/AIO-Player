@@ -721,12 +721,7 @@ private fun CinematicHorizonContent(
       onOpenGestureHint = { showGestureInfoPopup = true },
       onClick = {
         if (heroToDisplay.video.isAudio) {
-          if (isCurrentlyInSession) {
-            val currentPaused = isPaused ?: false
-            PlaybackSession.setPropertyBoolean("pause", !currentPaused)
-          } else {
-            playAudioInBackground(heroToDisplay.video, audioResumePos.takeIf { it > 0.0 })
-          }
+          onPlayMedia(heroToDisplay.video, audioResumePos.takeIf { it > 0.0 }, sortedAudioByTitle.map { it.video })
         } else {
           onPlayMedia(heroToDisplay.video, audioResumePos.takeIf { it > 0.0 }, videoItems.map { it.video })
         }
