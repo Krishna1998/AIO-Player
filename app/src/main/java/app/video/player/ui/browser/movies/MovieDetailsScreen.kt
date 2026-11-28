@@ -308,7 +308,8 @@ data class MovieDetailsScreen(
             Box(
               modifier = Modifier
                 .fillMaxWidth()
-                .height(headerHeight),
+                .height(headerHeight)
+                .background(MaterialTheme.colorScheme.surfaceContainer),
             ) {
               val backdropUrl = currentMeta?.backdropUrl ?: currentMeta?.posterUrl
               if (!backdropUrl.isNullOrBlank()) {
