@@ -352,7 +352,11 @@ object MovieClassifier {
     return null
   }
 
-  fun <T> groupSeriesForDisplay(items: List<T>, videoSelector: (T) -> Video): List<T> {
+  fun <T> groupSeriesForDisplay(
+    items: List<T>,
+    videoSelector: (T) -> Video,
+    mergeGroup: (representative: T, groupItems: List<T>) -> T = { rep, _ -> rep },
+  ): List<T> {
     val grouped = mutableMapOf<String, MutableList<Pair<T, SeriesEpisodeInfo>>>()
     val standalone = mutableListOf<T>()
     for (item in items) {
@@ -367,7 +371,8 @@ object MovieClassifier {
     result.addAll(standalone)
     for ((_, eps) in grouped) {
       val sorted = eps.sortedWith(compareBy({ it.second.season }, { it.second.episode }, { videoSelector(it.first).displayName }))
-      result.add(sorted.first().first)
+      val groupItems = sorted.map { it.first }
+      result.add(mergeGroup(groupItems.first(), groupItems))
     }
     return result
   }

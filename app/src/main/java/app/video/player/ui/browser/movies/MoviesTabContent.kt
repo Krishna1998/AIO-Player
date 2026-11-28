@@ -119,17 +119,41 @@ fun MoviesTabContent(
     }
   }
 
-  val filteredMovies = remember(movieCandidates, selectedFilterIndex) {
+  val groupedMovies = remember(movieCandidates, openMovieDetailsOnTap) {
+    if (openMovieDetailsOnTap) {
+      MovieClassifier.groupSeriesForDisplay(
+        items = movieCandidates,
+        videoSelector = { it.video },
+        mergeGroup = { rep, eps ->
+          val allWatched = eps.isNotEmpty() && eps.all { it.isWatched }
+          val anyStarted = eps.any { (it.progressPercentage ?: 0f) > 0f || it.isWatched }
+          val combinedProgress = if (allWatched) {
+            1f
+          } else if (anyStarted) {
+            eps.count { it.isWatched }.toFloat() / eps.size.toFloat()
+          } else {
+            0f
+          }
+          rep.copy(
+            isWatched = allWatched,
+            progressPercentage = if (anyStarted) combinedProgress.coerceAtLeast(0.01f) else null,
+          )
+        },
+      )
+    } else {
+      movieCandidates
+    }
+  }
+
+  val filteredMovies = remember(groupedMovies, selectedFilterIndex) {
     when (selectedFilterIndex) {
-      1 -> movieCandidates.filter {
+      1 -> groupedMovies.filter {
         (it.progressPercentage == null || it.progressPercentage == 0f) && !it.isWatched
       }
-      2 -> movieCandidates.filter {
+      2 -> groupedMovies.filter {
         (it.progressPercentage ?: 0f) > 0f && !it.isWatched
       }
-      else -> movieCandidates
-    }.let { list ->
-      if (openMovieDetailsOnTap) MovieClassifier.groupSeriesForDisplay(list) { it.video } else list
+      else -> groupedMovies
     }
   }
 
